@@ -1,0 +1,757 @@
+---
+title: "Outliers"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Un outlier es una observación que se aleja claramente del patrón general de los datos.
+
+Puede ser:
+
+- Un error.
+- Una unidad incorrecta.
+- Un valor clínicamente extremo pero real.
+- Un caso raro.
+- Una observación de otra población.
+- Una señal importante.
+
+Detectar un outlier no significa que deba eliminarse.
+:::
+
+## ¿Qué es un outlier?
+
+Un outlier es una observación con un valor muy diferente al resto.
+
+Puede aparecer en:
+
+- Una sola variable.
+- Una combinación de variables.
+- Un momento temporal específico.
+- Un paciente concreto.
+- Un centro o dispositivo determinado.
+
+::: {.callout-note}
+## Idea clave
+
+Un valor extremo puede ser estadísticamente raro y clínicamente válido al mismo tiempo.
+:::
+
+## ¿Por qué importan?
+
+Los outliers pueden afectar a:
+
+- La media.
+- La desviación estándar.
+- La correlación.
+- La regresión lineal.
+- PCA.
+- K-means.
+- KNN.
+- SVM.
+- Escalado.
+- Imputación.
+- Redes neuronales.
+
+También pueden revelar:
+
+- Errores de registro.
+- Fallos de integración.
+- Unidades mezcladas.
+- Casos clínicos graves.
+- Subpoblaciones.
+- Cambios en protocolos.
+
+## Tipos de outliers
+
+### Outlier univariante
+
+Es extremo en una variable.
+
+Ejemplo:
+
+- Una frecuencia cardíaca de 400 lpm.
+
+### Outlier multivariante
+
+Puede no ser extremo en ninguna variable aislada, pero sí en su combinación.
+
+Ejemplo:
+
+- Peso y altura plausibles por separado, pero incompatibles entre sí.
+
+### Outlier contextual
+
+Es extraño solo dentro de un contexto.
+
+Ejemplo:
+
+- Una presión arterial normal en un adulto, pero anómala en un recién nacido.
+
+### Outlier temporal
+
+Es extraño respecto a la trayectoria previa del paciente.
+
+Ejemplo:
+
+- Un aumento brusco de troponina respecto a visitas anteriores.
+
+## Primer paso: revisar reglas clínicas
+
+Antes de utilizar métodos estadísticos, define valores imposibles o inverosímiles.
+
+```python
+clinical_rules = {
+    "heart_rate": {
+        "min": 20,
+        "max": 300
+    },
+    "temperature": {
+        "min": 30,
+        "max": 45
+    },
+    "oxygen_saturation": {
+        "min": 0,
+        "max": 100
+    }
+}
+```
+
+## Detectar valores fuera de rango
+
+```python
+invalid_heart_rate = df.loc[
+    (df["heart_rate"] < 20)
+    | (df["heart_rate"] > 300)
+]
+
+display(invalid_heart_rate)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+Empieza por límites clínicos o físicos antes que por reglas puramente estadísticas.
+:::
+
+## Explorar distribuciones
+
+### Histograma
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 5))
+
+df["troponin"].plot(
+    kind="hist",
+    bins=30
+)
+
+plt.xlabel("Troponina")
+plt.title("Distribución de troponina")
+
+plt.show()
+```
+
+### Boxplot
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 4))
+
+plt.boxplot(
+    df["troponin"].dropna(),
+    vert=False
+)
+
+plt.xlabel("Troponina")
+plt.title("Boxplot de troponina")
+
+plt.show()
+```
+
+### Estadísticos descriptivos
+
+```python
+display(
+    df["troponin"].describe()
+)
+```
+
+## Método del rango intercuartílico
+
+El rango intercuartílico se define como:
+
+$$
+IQR = Q_3 - Q_1
+$$
+
+Una regla habitual marca como posibles outliers los valores:
+
+$$
+x < Q_1 - 1.5 \cdot IQR
+$$
+
+o:
+
+$$
+x > Q_3 + 1.5 \cdot IQR
+$$
+
+## Código con IQR
+
+```python
+q1 = df["troponin"].quantile(0.25)
+
+q3 = df["troponin"].quantile(0.75)
+
+iqr = q3 - q1
+
+lower_bound = q1 - 1.5 * iqr
+
+upper_bound = q3 + 1.5 * iqr
+
+outliers_iqr = df.loc[
+    (df["troponin"] < lower_bound)
+    | (df["troponin"] > upper_bound)
+]
+
+display(outliers_iqr)
+```
+
+::: {.callout-warning}
+## Importante
+
+La regla de 1.5 × IQR detecta valores estadísticamente extremos, no necesariamente errores.
+:::
+
+## Z-score
+
+El z-score indica cuántas desviaciones estándar se aleja un valor de la media.
+
+$$
+z = \frac{x - \mu}{\sigma}
+$$
+
+```python
+from scipy.stats import zscore
+
+df["troponin_zscore"] = zscore(
+    df["troponin"],
+    nan_policy="omit"
+)
+
+outliers_zscore = df.loc[
+    df["troponin_zscore"].abs() > 3
+]
+
+display(outliers_zscore)
+```
+
+Limitaciones:
+
+- Es sensible a la media.
+- Es sensible a la desviación estándar.
+- Funciona peor en distribuciones asimétricas.
+- Puede ser inadecuado con colas largas.
+
+## Z-score robusto
+
+Puede utilizarse la mediana y la desviación absoluta mediana.
+
+```python
+import numpy as np
+
+values = df["troponin"]
+
+median = values.median()
+
+mad = np.median(
+    np.abs(
+        values.dropna() - median
+    )
+)
+
+df["modified_zscore"] = (
+    0.6745
+    * (values - median)
+    / mad
+)
+
+outliers_robust = df.loc[
+    df["modified_zscore"].abs() > 3.5
+]
+
+display(outliers_robust)
+```
+
+## Outliers multivariantes
+
+### Isolation Forest
+
+```python
+from sklearn.ensemble import IsolationForest
+
+features = [
+    "age",
+    "weight",
+    "troponin",
+    "heart_rate"
+]
+
+X_outlier = df[features].dropna()
+
+detector = IsolationForest(
+    contamination=0.01,
+    random_state=42
+)
+
+labels = detector.fit_predict(
+    X_outlier
+)
+
+X_outlier = X_outlier.assign(
+    outlier_flag=labels
+)
+
+multivariate_outliers = X_outlier.loc[
+    X_outlier["outlier_flag"] == -1
+]
+
+display(multivariate_outliers)
+```
+
+### Local Outlier Factor
+
+```python
+from sklearn.neighbors import LocalOutlierFactor
+
+detector = LocalOutlierFactor(
+    n_neighbors=20,
+    contamination=0.01
+)
+
+labels = detector.fit_predict(
+    X_outlier[features]
+)
+
+X_outlier["lof_outlier"] = labels
+
+display(
+    X_outlier.loc[
+        X_outlier["lof_outlier"] == -1
+    ]
+)
+```
+
+::: {.callout-caution}
+## Precaución
+
+Los métodos automáticos no conocen el significado clínico de las variables.
+
+Deben utilizarse como herramientas de revisión, no como reglas de eliminación automática.
+:::
+
+## Outliers y escalado
+
+`StandardScaler` puede verse muy afectado por valores extremos.
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(
+    X_train
+)
+```
+
+Una alternativa más robusta es:
+
+```python
+from sklearn.preprocessing import RobustScaler
+
+scaler = RobustScaler()
+
+X_scaled = scaler.fit_transform(
+    X_train
+)
+```
+
+## Outliers y transformaciones
+
+### Transformación logarítmica
+
+Puede ser útil en variables positivas y muy sesgadas.
+
+```python
+import numpy as np
+
+df["troponin_log"] = np.log1p(
+    df["troponin"]
+)
+```
+
+### Winsorización
+
+Limita los valores extremos a percentiles definidos.
+
+```python
+lower_limit = df["troponin"].quantile(
+    0.01
+)
+
+upper_limit = df["troponin"].quantile(
+    0.99
+)
+
+df["troponin_winsorized"] = (
+    df["troponin"]
+    .clip(
+        lower=lower_limit,
+        upper=upper_limit
+    )
+)
+```
+
+::: {.callout-warning}
+## Riesgo
+
+Winsorizar cambia los datos originales.
+
+Debe documentarse y justificarse.
+:::
+
+## Eliminar observaciones
+
+Puede ser razonable cuando el valor es claramente imposible.
+
+```python
+df_clean = df.loc[
+    df["heart_rate"].between(
+        20,
+        300
+    )
+].copy()
+```
+
+No debería eliminarse un caso únicamente porque sea raro.
+
+## Marcar en lugar de eliminar
+
+A veces conviene crear una variable indicadora.
+
+```python
+df["troponin_outlier"] = (
+    (
+        df["troponin"] < lower_bound
+    )
+    | (
+        df["troponin"] > upper_bound
+    )
+).astype(int)
+```
+
+Esto permite:
+
+- Mantener la observación.
+- Analizar el impacto.
+- Revisar los casos.
+- Utilizar la rareza como información.
+
+## Comparar estrategias
+
+```python
+strategies = {
+    "original": df["troponin"],
+    "log": np.log1p(
+        df["troponin"]
+    ),
+    "winsorized": df["troponin"].clip(
+        lower=lower_limit,
+        upper=upper_limit
+    )
+}
+```
+
+Después puede compararse:
+
+- Distribución.
+- Correlación.
+- Rendimiento del modelo.
+- Estabilidad.
+- Interpretabilidad clínica.
+
+## Evitar data leakage
+
+Los umbrales derivados de los datos deben calcularse solo con train.
+
+## Ejemplo incorrecto
+
+```python
+lower_limit = X["troponin"].quantile(
+    0.01
+)
+
+upper_limit = X["troponin"].quantile(
+    0.99
+)
+
+X["troponin"] = X["troponin"].clip(
+    lower=lower_limit,
+    upper=upper_limit
+)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+## Ejemplo correcto
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+lower_limit = X_train["troponin"].quantile(
+    0.01
+)
+
+upper_limit = X_train["troponin"].quantile(
+    0.99
+)
+
+X_train["troponin"] = (
+    X_train["troponin"]
+    .clip(
+        lower=lower_limit,
+        upper=upper_limit
+    )
+)
+
+X_test["troponin"] = (
+    X_test["troponin"]
+    .clip(
+        lower=lower_limit,
+        upper=upper_limit
+    )
+)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+Si un umbral se aprende de la distribución, debe calcularse con train y reutilizarse en validation y test.
+:::
+
+## Outliers en datos longitudinales
+
+En datos repetidos por paciente, puede ser útil comparar cada valor con la trayectoria individual.
+
+```python
+df = df.sort_values(
+    [
+        "patient_id",
+        "measurement_date"
+    ]
+)
+
+df["previous_value"] = (
+    df.groupby("patient_id")["troponin"]
+    .shift(1)
+)
+
+df["absolute_change"] = (
+    df["troponin"]
+    - df["previous_value"]
+).abs()
+```
+
+También puede calcularse:
+
+- Cambio porcentual.
+- Diferencia respecto al baseline.
+- Velocidad de cambio.
+- Desviación respecto a la mediana individual.
+
+## Valores imposibles vs valores improbables
+
+### Imposible
+
+- Saturación de oxígeno de 150 %.
+- Temperatura corporal de 90 °C.
+- Peso negativo.
+- Fecha de prueba anterior al nacimiento.
+
+### Improbable pero posible
+
+- Troponina muy elevada.
+- Presión arterial extrema.
+- FEVI muy reducida.
+- Frecuencia cardíaca muy alta.
+
+::: {.callout-note}
+## Aplicación clínica
+
+Los valores extremos reales suelen ser precisamente los casos más importantes.
+
+Eliminar automáticamente puede borrar pacientes graves o eventos raros.
+:::
+
+## Diferencias por centro
+
+Un valor extremo puede deberse a:
+
+- Unidades diferentes.
+- Equipos distintos.
+- Límites de detección.
+- Redondeo.
+- Métodos analíticos.
+- Protocolos de registro.
+
+```python
+display(
+    df.groupby("center")["troponin"]
+    .describe()
+)
+```
+
+## Unidades mezcladas
+
+Antes de buscar outliers, revisa:
+
+- mg/dL frente a mmol/L.
+- ng/L frente a ng/mL.
+- kg frente a g.
+- cm frente a m.
+- Porcentajes frente a proporciones.
+
+Un error de unidad puede producir valores extremos muy convincentes.
+
+## Outliers en variables categóricas
+
+También existen categorías raras.
+
+```python
+category_counts = (
+    df["diagnosis"]
+    .value_counts(
+        dropna=False
+    )
+)
+
+display(category_counts)
+```
+
+Una categoría poco frecuente no debe eliminarse automáticamente.
+
+Puede representar:
+
+- Una enfermedad rara.
+- Un nuevo tratamiento.
+- Un error de codificación.
+- Una categoría demasiado específica.
+
+## Outliers y modelos
+
+### Modelos sensibles
+
+- Regresión lineal.
+- KNN.
+- K-means.
+- PCA.
+- SVM.
+- Redes neuronales.
+
+### Modelos más robustos
+
+- Árboles de decisión.
+- Random forest.
+- Métodos con pérdidas robustas.
+- Algunos modelos basados en rangos.
+
+Ningún modelo sustituye la revisión de calidad.
+
+## Estrategias posibles
+
+| Estrategia | Cuándo puede servir | Riesgo |
+|---|---|---|
+| Corregir | Error conocido | Requiere fuente fiable |
+| Eliminar | Valor imposible | Pérdida de muestra |
+| Winsorizar | Extremos dominantes | Modifica datos |
+| Transformar | Distribución sesgada | Cambia interpretación |
+| RobustScaler | Escalado con extremos | No elimina errores |
+| Indicador | Rareza informativa | Añade complejidad |
+| Mantener | Caso válido | Puede afectar algunos modelos |
+
+## Flujo recomendado
+
+1. Revisar unidades.
+2. Definir límites clínicos.
+3. Explorar distribuciones.
+4. Identificar valores extremos.
+5. Revisar registros originales.
+6. Diferenciar error de caso real.
+7. Elegir una estrategia.
+8. Calcular umbrales con train.
+9. Evaluar el impacto.
+10. Documentar cada decisión.
+
+## Errores frecuentes
+
+- Eliminar automáticamente todo lo que queda fuera de 1.5 × IQR.
+- Confundir rareza con error.
+- Calcular umbrales con todo el dataset.
+- No revisar unidades.
+- Ignorar diferencias por centro.
+- Usar z-score en distribuciones muy asimétricas.
+- Aplicar winsorización sin documentarla.
+- Eliminar pacientes graves por ser extremos.
+- No revisar cambios longitudinales.
+- Confiar únicamente en métodos automáticos.
+
+## Checklist para proyectos
+
+- [ ] He revisado las unidades.
+- [ ] He definido límites clínicos.
+- [ ] He explorado las distribuciones.
+- [ ] He diferenciado valores imposibles y raros.
+- [ ] He revisado los registros originales.
+- [ ] He comprobado diferencias por centro.
+- [ ] He considerado outliers multivariantes.
+- [ ] He considerado trayectorias longitudinales.
+- [ ] Los umbrales se calculan solo con train.
+- [ ] He evaluado el impacto de la estrategia.
+- [ ] No he eliminado casos automáticamente.
+- [ ] He documentado las decisiones.
+
+## Recursos
+
+### Documentación
+
+- `IsolationForest` de scikit-learn.
+- `LocalOutlierFactor` de scikit-learn.
+- `RobustScaler` de scikit-learn.
+- Métodos robustos de scipy.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus propios ejemplos, límites clínicos y decisiones habituales.
