@@ -1,0 +1,1233 @@
+---
+title: "Regularización"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+La regularización penaliza modelos excesivamente complejos.
+
+Sus objetivos principales son:
+
+- Reducir overfitting.
+- Estabilizar coeficientes.
+- Controlar la complejidad.
+- Mejorar generalización.
+- Seleccionar variables en algunos casos.
+
+Los métodos principales son:
+
+- Ridge: penalización L2.
+- Lasso: penalización L1.
+- Elastic Net: combinación de L1 y L2.
+:::
+
+## ¿Qué es la regularización?
+
+Un modelo intenta minimizar una función de pérdida.
+
+Sin regularización:
+
+$$
+\text{Objetivo}
+=
+\text{Pérdida}
+$$
+
+Con regularización:
+
+$$
+\text{Objetivo}
+=
+\text{Pérdida}
++
+\lambda
+\cdot
+\text{Penalización}
+$$
+
+donde:
+
+- La pérdida mide el error del modelo.
+- La penalización controla la complejidad.
+- $\lambda$ regula la intensidad de la penalización.
+
+::: {.callout-note}
+## Idea clave
+
+La regularización acepta un poco más de sesgo a cambio de reducir la varianza.
+:::
+
+## Bias-variance trade-off
+
+Un modelo muy flexible puede:
+
+- Ajustar muy bien train.
+- Capturar ruido.
+- Funcionar peor en datos nuevos.
+
+Un modelo demasiado penalizado puede:
+
+- Ser demasiado simple.
+- No capturar relaciones importantes.
+- Presentar underfitting.
+
+El objetivo es encontrar un equilibrio.
+
+## ¿Qué se penaliza?
+
+En modelos lineales se penaliza el tamaño de los coeficientes.
+
+Un modelo lineal puede escribirse como:
+
+$$
+\hat{y}
+=
+\beta_0
++
+\beta_1x_1
++
+\beta_2x_2
++
+\cdots
++
+\beta_px_p
+$$
+
+La regularización actúa sobre:
+
+$$
+\beta_1,\beta_2,\ldots,\beta_p
+$$
+
+Normalmente, el intercepto no se penaliza de la misma manera.
+
+## Ridge: regularización L2
+
+Ridge añade la suma de los coeficientes al cuadrado:
+
+$$
+\lambda
+\sum_{j=1}^{p}
+\beta_j^2
+$$
+
+El objetivo de regresión Ridge es:
+
+$$
+\sum_{i=1}^{n}
+(y_i-\hat{y}_i)^2
++
+\lambda
+\sum_{j=1}^{p}
+\beta_j^2
+$$
+
+## Efecto de Ridge
+
+Ridge:
+
+- Reduce la magnitud de los coeficientes.
+- Mantiene normalmente todas las variables.
+- Mejora estabilidad.
+- Funciona bien con variables correlacionadas.
+- Reduce varianza.
+
+::: {.callout-important}
+## Regla práctica
+
+Ridge reduce coeficientes, pero normalmente no los lleva exactamente a cero.
+:::
+
+## Ridge en scikit-learn
+
+```python
+from sklearn.linear_model import Ridge
+
+model = Ridge(
+    alpha=1.0
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+## Parámetro alpha
+
+En Ridge:
+
+- `alpha = 0` implica ausencia de penalización.
+- `alpha` mayor implica más regularización.
+- `alpha` demasiado grande puede causar underfitting.
+
+```python
+model = Ridge(
+    alpha=10.0
+)
+```
+
+## RidgeCV
+
+```python
+from sklearn.linear_model import RidgeCV
+
+model = RidgeCV(
+    alphas=[
+        0.001,
+        0.01,
+        0.1,
+        1,
+        10,
+        100
+    ],
+    cv=5,
+    scoring="neg_mean_absolute_error"
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+
+print(
+    model.alpha_
+)
+```
+
+## Lasso: regularización L1
+
+Lasso añade la suma de los valores absolutos de los coeficientes:
+
+$$
+\lambda
+\sum_{j=1}^{p}
+|\beta_j|
+$$
+
+El objetivo es:
+
+$$
+\sum_{i=1}^{n}
+(y_i-\hat{y}_i)^2
++
+\lambda
+\sum_{j=1}^{p}
+|\beta_j|
+$$
+
+## Efecto de Lasso
+
+Lasso puede:
+
+- Reducir coeficientes.
+- Llevar algunos coeficientes exactamente a cero.
+- Realizar selección de variables.
+- Crear modelos sparse.
+- Mejorar interpretabilidad.
+
+```python
+from sklearn.linear_model import Lasso
+
+model = Lasso(
+    alpha=0.01,
+    max_iter=10000,
+    random_state=42
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+## Variables seleccionadas por Lasso
+
+```python
+import pandas as pd
+
+coefficients = pd.DataFrame(
+    {
+        "feature": feature_names,
+        "coefficient": model.coef_
+    }
+)
+
+selected_features = (
+    coefficients.loc[
+        coefficients["coefficient"] != 0,
+        "feature"
+    ]
+    .tolist()
+)
+
+print(
+    selected_features
+)
+```
+
+## LassoCV
+
+```python
+from sklearn.linear_model import LassoCV
+
+model = LassoCV(
+    alphas=None,
+    cv=5,
+    max_iter=10000,
+    random_state=42,
+    n_jobs=-1
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+
+print(
+    model.alpha_
+)
+```
+
+## Limitación de Lasso con variables correlacionadas
+
+Cuando varias variables aportan información similar, Lasso puede:
+
+- Elegir una.
+- Eliminar las demás.
+- Cambiar de variable entre folds.
+- Producir una selección inestable.
+
+Ejemplo:
+
+```text
+Peso
+Superficie corporal
+IMC
+```
+
+::: {.callout-caution}
+## Precaución
+
+Que Lasso deje una variable en cero no significa que sea clínicamente irrelevante.
+:::
+
+## Elastic Net
+
+Elastic Net combina L1 y L2.
+
+$$
+\lambda
+\left[
+\rho
+\sum_{j=1}^{p}
+|\beta_j|
++
+(1-\rho)
+\sum_{j=1}^{p}
+\beta_j^2
+\right]
+$$
+
+En scikit-learn, $\rho$ se controla mediante `l1_ratio`.
+
+## Interpretación de l1_ratio
+
+- `l1_ratio = 1`: comportamiento Lasso.
+- `l1_ratio = 0`: comportamiento Ridge.
+- Valor intermedio: combinación.
+
+```python
+from sklearn.linear_model import ElasticNet
+
+model = ElasticNet(
+    alpha=0.01,
+    l1_ratio=0.5,
+    max_iter=10000,
+    random_state=42
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+## ElasticNetCV
+
+```python
+from sklearn.linear_model import ElasticNetCV
+
+model = ElasticNetCV(
+    l1_ratio=[
+        0.1,
+        0.3,
+        0.5,
+        0.7,
+        0.9,
+        1.0
+    ],
+    cv=5,
+    max_iter=10000,
+    random_state=42,
+    n_jobs=-1
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+
+print(
+    model.alpha_
+)
+
+print(
+    model.l1_ratio_
+)
+```
+
+## Cuándo puede ser útil Elastic Net
+
+- Muchas variables.
+- Variables correlacionadas.
+- Deseo de selección.
+- Lasso demasiado inestable.
+- Necesidad de equilibrio entre sparsity y estabilidad.
+
+::: {.callout-note}
+## Idea práctica
+
+Elastic Net suele ser una opción razonable cuando hay grupos de predictores correlacionados.
+:::
+
+## Comparación general
+
+| Método | Penalización | Coeficientes a cero | Variables correlacionadas |
+|---|---|---:|---|
+| Ridge | L2 | Normalmente no | Las conserva y estabiliza |
+| Lasso | L1 | Sí | Puede escoger una arbitrariamente |
+| Elastic Net | L1 + L2 | Sí | Puede conservar grupos mejor |
+
+## Importancia del escalado
+
+La penalización depende de la magnitud de los coeficientes.
+
+Si las variables tienen escalas muy diferentes:
+
+- La penalización no actúa de forma comparable.
+- Los coeficientes pueden resultar engañosos.
+- La selección puede depender de las unidades.
+
+Por eso suele utilizarse:
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Lasso
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            Lasso(
+                alpha=0.01,
+                max_iter=10000
+            )
+        )
+    ]
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+Escala dentro del pipeline para evitar data leakage.
+:::
+
+## Pipeline con imputación
+
+```python
+from sklearn.impute import SimpleImputer
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            Ridge(
+                alpha=1.0
+            )
+        )
+    ]
+)
+```
+
+## Pipeline con variables mixtas
+
+```python
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+
+numeric_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        )
+    ]
+)
+
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="most_frequent"
+            )
+        ),
+        (
+            "encoder",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            )
+        )
+    ]
+)
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ]
+)
+```
+
+## Pipeline completo de regresión
+
+```python
+model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "regressor",
+            ElasticNet(
+                alpha=0.01,
+                l1_ratio=0.5,
+                max_iter=10000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Regularización en regresión logística
+
+La regresión logística también puede utilizar:
+
+- L2.
+- L1.
+- Elastic Net.
+
+## Regresión logística con L2
+
+```python
+from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression(
+    penalty="l2",
+    C=1.0,
+    solver="lbfgs",
+    max_iter=1000,
+    random_state=42
+)
+```
+
+## Regresión logística con L1
+
+```python
+model = LogisticRegression(
+    penalty="l1",
+    C=1.0,
+    solver="liblinear",
+    max_iter=1000,
+    random_state=42
+)
+```
+
+También puede utilizarse `solver="saga"`.
+
+## Regresión logística con Elastic Net
+
+```python
+model = LogisticRegression(
+    penalty="elasticnet",
+    solver="saga",
+    l1_ratio=0.5,
+    C=1.0,
+    max_iter=5000,
+    random_state=42
+)
+```
+
+## Diferencia entre alpha y C
+
+En modelos como Ridge, Lasso y Elastic Net:
+
+```text
+alpha mayor
+→ mayor regularización
+```
+
+En `LogisticRegression`:
+
+```text
+C menor
+→ mayor regularización
+```
+
+`C` representa aproximadamente la inversa de la fuerza de regularización.
+
+::: {.callout-warning}
+## Error frecuente
+
+No interpretes `C` como si fuera `alpha`: funcionan en direcciones opuestas.
+:::
+
+## Compatibilidad entre penalty y solver
+
+En regresión logística, no todos los solvers aceptan todas las penalizaciones.
+
+Ejemplos habituales:
+
+| Penalización | Solver compatible habitual |
+|---|---|
+| L2 | `lbfgs`, `liblinear`, `saga` |
+| L1 | `liblinear`, `saga` |
+| Elastic Net | `saga` |
+
+Conviene comprobar la documentación de la versión instalada.
+
+## Ajustar C y penalización
+
+```python
+from sklearn.model_selection import GridSearchCV
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                solver="saga",
+                max_iter=5000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+param_grid = [
+    {
+        "classifier__penalty": [
+            "l1",
+            "l2"
+        ],
+        "classifier__C": [
+            0.001,
+            0.01,
+            0.1,
+            1,
+            10,
+            100
+        ]
+    },
+    {
+        "classifier__penalty": [
+            "elasticnet"
+        ],
+        "classifier__C": [
+            0.001,
+            0.01,
+            0.1,
+            1,
+            10
+        ],
+        "classifier__l1_ratio": [
+            0.1,
+            0.5,
+            0.9
+        ]
+    }
+]
+
+search = GridSearchCV(
+    estimator=pipeline,
+    param_grid=param_grid,
+    cv=5,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+search.fit(
+    X_train,
+    y_train
+)
+```
+
+## Ver mejores parámetros
+
+```python
+print(
+    search.best_params_
+)
+
+print(
+    search.best_score_
+)
+```
+
+## Escala logarítmica de hiperparámetros
+
+Suele probarse una escala logarítmica.
+
+```python
+import numpy as np
+
+alpha_values = np.logspace(
+    -4,
+    2,
+    20
+)
+
+c_values = np.logspace(
+    -4,
+    4,
+    20
+)
+```
+
+## Regularization path
+
+Una regularization path muestra cómo cambian los coeficientes al variar la penalización.
+
+```python
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import Lasso
+
+alphas = np.logspace(
+    -4,
+    1,
+    50
+)
+
+coefficient_paths = []
+
+for alpha in alphas:
+
+    model = Lasso(
+        alpha=alpha,
+        max_iter=10000
+    )
+
+    model.fit(
+        X_train_scaled,
+        y_train
+    )
+
+    coefficient_paths.append(
+        model.coef_
+    )
+
+coefficient_paths = np.array(
+    coefficient_paths
+)
+```
+
+## Visualizar coefficient paths
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(9, 6))
+
+for index, feature in enumerate(
+    feature_names
+):
+
+    plt.plot(
+        alphas,
+        coefficient_paths[:, index],
+        label=feature
+    )
+
+plt.xscale("log")
+plt.xlabel("Alpha")
+plt.ylabel("Coeficiente")
+plt.title("Regularization path")
+
+plt.show()
+```
+
+## Interpretación de la ruta
+
+A medida que aumenta `alpha`:
+
+- Los coeficientes se reducen.
+- Algunos llegan a cero con Lasso.
+- El modelo se vuelve más simple.
+- Puede aumentar el sesgo.
+
+## Validación cruzada
+
+```python
+from sklearn.model_selection import cross_validate
+from sklearn.model_selection import KFold
+
+cv = KFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+scores = cross_validate(
+    estimator=model,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring={
+        "mae": "neg_mean_absolute_error",
+        "r2": "r2"
+    },
+    return_train_score=True
+)
+```
+
+## Revisar train y validation
+
+```python
+import pandas as pd
+
+results = pd.DataFrame(
+    {
+        "train_mae": -scores[
+            "train_mae"
+        ],
+        "validation_mae": -scores[
+            "test_mae"
+        ],
+        "train_r2": scores[
+            "train_r2"
+        ],
+        "validation_r2": scores[
+            "test_r2"
+        ]
+    }
+)
+
+display(
+    results
+)
+```
+
+## Regularización insuficiente
+
+Señales:
+
+- Train muy superior a validation.
+- Coeficientes grandes.
+- Modelo inestable.
+- Mucha sensibilidad al split.
+- Demasiadas variables activas.
+
+## Regularización excesiva
+
+Señales:
+
+- Rendimiento bajo en train.
+- Rendimiento bajo en validation.
+- Coeficientes demasiado pequeños.
+- Demasiadas variables eliminadas.
+- Underfitting.
+
+## Selección de variables con Lasso
+
+La selección debe evaluarse dentro de cada fold.
+
+```python
+from sklearn.feature_selection import SelectFromModel
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "selector",
+            SelectFromModel(
+                estimator=LogisticRegression(
+                    penalty="l1",
+                    solver="saga",
+                    C=0.1,
+                    max_iter=5000,
+                    random_state=42
+                )
+            )
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                penalty="l2",
+                C=1.0,
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Estabilidad de coeficientes
+
+Conviene revisar cómo cambian los coeficientes entre folds.
+
+```python
+from sklearn.base import clone
+
+coefficient_tables = []
+
+for fold, (
+    train_index,
+    validation_index
+) in enumerate(
+    cv.split(
+        X,
+        y
+    ),
+    start=1
+):
+
+    fitted_model = clone(
+        pipeline
+    )
+
+    fitted_model.fit(
+        X.iloc[train_index],
+        y.iloc[train_index]
+    )
+
+    classifier = (
+        fitted_model
+        .named_steps["classifier"]
+    )
+
+    fold_coefficients = pd.DataFrame(
+        {
+            "fold": fold,
+            "coefficient": classifier.coef_[0]
+        }
+    )
+
+    coefficient_tables.append(
+        fold_coefficients
+    )
+```
+
+## Signos inestables
+
+Si un coeficiente cambia repetidamente de signo, puede indicar:
+
+- Multicolinealidad.
+- Muestra pequeña.
+- Señal débil.
+- Variables redundantes.
+- Modelo inestable.
+
+## Interpretación de coeficientes estandarizados
+
+Tras `StandardScaler`, un coeficiente corresponde aproximadamente al cambio asociado a una desviación estándar del predictor.
+
+Esto facilita comparar magnitudes, pero puede ser menos intuitivo clínicamente.
+
+## Volver a unidades clínicas
+
+Para explicar resultados puede ser preferible expresar efectos por:
+
+- 1 año.
+- 5 kg.
+- 10 mmHg.
+- 1 unidad clínica relevante.
+- Un incremento del 10 %.
+
+## One-hot encoding y penalización
+
+Las categorías one-hot también reciben penalización.
+
+Una variable categórica puede generar varios coeficientes:
+
+```text
+center_Barcelona
+center_Helsinki
+center_Coimbra
+```
+
+Lasso puede llevar algunas categorías a cero y mantener otras.
+
+Eso debe interpretarse con cuidado.
+
+## Variables correlacionadas
+
+### Ridge
+
+Tiende a repartir el peso entre variables correlacionadas.
+
+### Lasso
+
+Puede seleccionar una y eliminar otras.
+
+### Elastic Net
+
+Puede mantener grupos de variables correlacionadas con mayor estabilidad.
+
+## Regularización y número de eventos
+
+En clasificación con pocos eventos y muchas variables, la regularización puede ser especialmente útil.
+
+Sin embargo, no elimina la necesidad de:
+
+- Validación correcta.
+- Reducción de leakage.
+- Intervalos de confianza.
+- Evaluación externa.
+- Tamaño muestral adecuado.
+
+## Regularización y causalidad
+
+::: {.callout-warning}
+## Importante
+
+Un coeficiente regularizado no debe interpretarse automáticamente como efecto causal.
+:::
+
+La regularización optimiza predicción, no identificación causal.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+La penalización puede eliminar variables clínicamente relevantes si su señal es débil, redundante o poco frecuente.
+:::
+
+Antes de excluirlas definitivamente, revisa:
+
+- Disponibilidad.
+- Coste.
+- Relevancia clínica.
+- Estabilidad.
+- Correlación.
+- Validez externa.
+
+## Comparar modelos
+
+Conviene comparar:
+
+```text
+Modelo sin regularización
+Modelo Ridge
+Modelo Lasso
+Modelo Elastic Net
+```
+
+Utilizando:
+
+- Mismos folds.
+- Mismo pipeline.
+- Misma métrica.
+- Mismo conjunto de variables inicial.
+- Mismo test final.
+
+## Ejemplo de comparación
+
+```python
+models = {
+    "ridge": Ridge(
+        alpha=1.0
+    ),
+    "lasso": Lasso(
+        alpha=0.01,
+        max_iter=10000
+    ),
+    "elastic_net": ElasticNet(
+        alpha=0.01,
+        l1_ratio=0.5,
+        max_iter=10000
+    )
+}
+```
+
+```python
+from sklearn.model_selection import cross_val_score
+
+results = {}
+
+for name, estimator in models.items():
+
+    pipeline = Pipeline(
+        steps=[
+            (
+                "scaler",
+                StandardScaler()
+            ),
+            (
+                "model",
+                estimator
+            )
+        ]
+    )
+
+    scores = cross_val_score(
+        pipeline,
+        X,
+        y,
+        cv=cv,
+        scoring="neg_mean_absolute_error"
+    )
+
+    results[name] = -scores
+```
+
+## Nested cross-validation
+
+Cuando se ajustan `alpha`, `C` o `l1_ratio`, nested cross-validation proporciona una estimación menos optimista.
+
+```text
+Outer CV:
+    evaluación
+
+Inner CV:
+    selección de alpha, C y l1_ratio
+```
+
+## Guardar el pipeline
+
+```python
+import joblib
+
+joblib.dump(
+    search.best_estimator_,
+    "regularized_model.joblib"
+)
+```
+
+## Errores frecuentes
+
+- No escalar variables.
+- Ajustar el escalador con todo el dataset.
+- Confundir `alpha` y `C`.
+- Elegir penalización usando test.
+- Interpretar coeficiente cero como irrelevancia clínica.
+- No revisar correlaciones.
+- Comparar coeficientes en escalas distintas.
+- No aumentar `max_iter` cuando no converge.
+- Utilizar un solver incompatible.
+- Reportar solo el mejor score.
+- Ignorar estabilidad entre folds.
+- Interpretar coeficientes como efectos causales.
+
+## Flujo recomendado
+
+1. Revisar unidades y escalas.
+2. Crear pipeline de preprocesamiento.
+3. Elegir Ridge, Lasso o Elastic Net.
+4. Definir una rejilla logarítmica.
+5. Ajustar hiperparámetros con validation.
+6. Comparar train y validation.
+7. Revisar coeficientes.
+8. Revisar estabilidad entre folds.
+9. Comparar con modelo no regularizado.
+10. Evaluar una vez en test.
+11. Interpretar en contexto clínico.
+12. Guardar el pipeline completo.
+
+## Checklist para proyectos
+
+- [ ] He escalado las variables cuando corresponde.
+- [ ] El escalado está dentro del pipeline.
+- [ ] He elegido una penalización adecuada.
+- [ ] Entiendo la diferencia entre L1 y L2.
+- [ ] No confundo `alpha` con `C`.
+- [ ] He ajustado hiperparámetros con validation.
+- [ ] He utilizado un solver compatible.
+- [ ] He revisado convergencia.
+- [ ] He comparado con un modelo sin regularización.
+- [ ] He revisado estabilidad.
+- [ ] He revisado variables correlacionadas.
+- [ ] No interpreto selección como causalidad.
+- [ ] He evaluado en test una sola vez.
+- [ ] He guardado el pipeline completo.
+- [ ] He documentado los parámetros finales.
+
+## Recursos
+
+### Documentación
+
+- `Ridge`.
+- `RidgeCV`.
+- `Lasso`.
+- `LassoCV`.
+- `ElasticNet`.
+- `ElasticNetCV`.
+- `LogisticRegression`.
+- `SelectFromModel`.
+- Regularization paths.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus rejillas de hiperparámetros, coeficientes y comparaciones habituales.
