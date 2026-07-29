@@ -1,0 +1,1136 @@
+---
+title: "Métricas de regresión"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Las métricas de regresión evalúan cuánto se alejan las predicciones de los valores reales.
+
+Las más habituales son:
+
+- MAE.
+- MSE.
+- RMSE.
+- $R^2$.
+- Mediana del error absoluto.
+- MAPE.
+
+Cada una penaliza los errores de forma distinta y responde a una pregunta diferente.
+:::
+
+## ¿Qué evalúa un modelo de regresión?
+
+Un modelo de regresión predice una variable numérica continua.
+
+Ejemplos:
+
+- Días de ingreso.
+- Edad.
+- Presión arterial.
+- Fracción de eyección.
+- Coste hospitalario.
+- Tiempo hasta un evento.
+- Valor de un biomarcador.
+
+La predicción puede escribirse como:
+
+$$
+\hat{y}_i
+$$
+
+y el valor real como:
+
+$$
+y_i
+$$
+
+El error individual es:
+
+$$
+e_i = y_i - \hat{y}_i
+$$
+
+::: {.callout-note}
+## Idea clave
+
+Una métrica resume los errores, pero no muestra por sí sola cómo se distribuyen ni en qué pacientes ocurren.
+:::
+
+## Error absoluto
+
+El error absoluto de una observación es:
+
+$$
+|y_i - \hat{y}_i|
+$$
+
+Ejemplo:
+
+```text
+Valor real: 10 días
+Predicción: 7 días
+Error absoluto: 3 días
+```
+
+No importa si el modelo se queda por encima o por debajo.
+
+## MAE
+
+MAE significa mean absolute error.
+
+$$
+MAE =
+\frac{1}{n}
+\sum_{i=1}^{n}
+|y_i - \hat{y}_i|
+$$
+
+```python
+from sklearn.metrics import mean_absolute_error
+
+mae = mean_absolute_error(
+    y_test,
+    y_pred
+)
+
+print(
+    f"MAE: {mae:.3f}"
+)
+```
+
+## Interpretación
+
+Si el MAE es 2.5 días:
+
+```text
+En promedio, las predicciones se alejan 2.5 días del valor real.
+```
+
+Ventajas:
+
+- Fácil de interpretar.
+- Mantiene las unidades originales.
+- Menos sensible a outliers que MSE y RMSE.
+
+Limitaciones:
+
+- Trata todos los errores de forma lineal.
+- No distingue sobreestimación y subestimación.
+- Puede ocultar errores extremos.
+
+## MSE
+
+MSE significa mean squared error.
+
+$$
+MSE =
+\frac{1}{n}
+\sum_{i=1}^{n}
+(y_i - \hat{y}_i)^2
+$$
+
+```python
+from sklearn.metrics import mean_squared_error
+
+mse = mean_squared_error(
+    y_test,
+    y_pred
+)
+
+print(
+    f"MSE: {mse:.3f}"
+)
+```
+
+## Interpretación
+
+MSE eleva los errores al cuadrado.
+
+Esto significa que los errores grandes tienen mucho más peso.
+
+Ejemplo:
+
+```text
+Error de 2 → 4
+Error de 5 → 25
+Error de 10 → 100
+```
+
+::: {.callout-warning}
+## Importante
+
+MSE no está en las mismas unidades que el target.
+
+Si el target se mide en días, MSE se expresa en días cuadrados.
+:::
+
+## RMSE
+
+RMSE es la raíz cuadrada del MSE.
+
+$$
+RMSE =
+\sqrt{
+\frac{1}{n}
+\sum_{i=1}^{n}
+(y_i - \hat{y}_i)^2
+}
+$$
+
+```python
+from sklearn.metrics import root_mean_squared_error
+
+rmse = root_mean_squared_error(
+    y_test,
+    y_pred
+)
+
+print(
+    f"RMSE: {rmse:.3f}"
+)
+```
+
+En versiones anteriores también puede calcularse así:
+
+```python
+from sklearn.metrics import mean_squared_error
+
+rmse = mean_squared_error(
+    y_test,
+    y_pred,
+    squared=False
+)
+```
+
+## Interpretación
+
+RMSE vuelve a estar en las unidades originales.
+
+Si RMSE es 4 días, los errores grandes están teniendo un peso importante.
+
+## MAE frente a RMSE
+
+| Métrica | Penalización | Sensibilidad a outliers | Unidades |
+|---|---|---|---|
+| MAE | Lineal | Menor | Originales |
+| RMSE | Cuadrática | Mayor | Originales |
+| MSE | Cuadrática | Mayor | Al cuadrado |
+
+::: {.callout-important}
+## Regla práctica
+
+Si RMSE es mucho mayor que MAE, probablemente existen algunos errores grandes.
+:::
+
+## Mediana del error absoluto
+
+La mediana del error absoluto es más robusta frente a outliers.
+
+```python
+from sklearn.metrics import median_absolute_error
+
+median_ae = median_absolute_error(
+    y_test,
+    y_pred
+)
+
+print(
+    f"Median AE: "
+    f"{median_ae:.3f}"
+)
+```
+
+Puede ser útil cuando:
+
+- La distribución de errores es asimétrica.
+- Existen casos extremos.
+- Se quiere describir el error típico.
+
+## $R^2$
+
+$R^2$ mide qué proporción de la variabilidad del target explica el modelo respecto a predecir siempre la media.
+
+$$
+R^2 =
+1 -
+\frac{
+\sum (y_i - \hat{y}_i)^2
+}{
+\sum (y_i - \bar{y})^2
+}
+$$
+
+```python
+from sklearn.metrics import r2_score
+
+r2 = r2_score(
+    y_test,
+    y_pred
+)
+
+print(
+    f"R²: {r2:.3f}"
+)
+```
+
+## Interpretación de $R^2$
+
+Valores habituales:
+
+- $R^2 = 1$: ajuste perfecto.
+- $R^2 = 0$: similar a predecir la media.
+- $R^2 < 0$: peor que predecir la media.
+
+::: {.callout-caution}
+## Precaución
+
+Un $R^2$ alto no garantiza errores clínicamente pequeños.
+
+Puede haber buen ajuste relativo y errores absolutos poco aceptables.
+:::
+
+## $R^2$ ajustado
+
+El $R^2$ ajustado penaliza la inclusión de variables adicionales.
+
+$$
+R^2_{adj}
+=
+1 -
+(1-R^2)
+\frac{n-1}{n-p-1}
+$$
+
+donde:
+
+- $n$ es el número de observaciones.
+- $p$ es el número de predictores.
+
+```python
+n = len(y_test)
+
+p = X_test.shape[1]
+
+adjusted_r2 = (
+    1
+    - (1 - r2)
+    * (n - 1)
+    / (n - p - 1)
+)
+
+print(
+    f"Adjusted R²: "
+    f"{adjusted_r2:.3f}"
+)
+```
+
+Es especialmente relevante en modelos lineales explicativos.
+
+## MAPE
+
+MAPE significa mean absolute percentage error.
+
+$$
+MAPE =
+\frac{100}{n}
+\sum_{i=1}^{n}
+\left|
+\frac{y_i-\hat{y}_i}{y_i}
+\right|
+$$
+
+```python
+from sklearn.metrics import mean_absolute_percentage_error
+
+mape = mean_absolute_percentage_error(
+    y_test,
+    y_pred
+)
+
+print(
+    f"MAPE: {mape:.3f}"
+)
+```
+
+## Limitaciones de MAPE
+
+MAPE presenta problemas cuando:
+
+- Hay valores reales iguales a 0.
+- Hay valores muy cercanos a 0.
+- El target puede ser negativo.
+- Se comparan poblaciones con escalas diferentes.
+
+::: {.callout-warning}
+## Importante
+
+MAPE puede volverse inestable o engañoso cuando el target contiene ceros o valores muy pequeños.
+:::
+
+## SMAPE
+
+SMAPE intenta reducir algunos problemas de MAPE.
+
+$$
+SMAPE =
+\frac{100}{n}
+\sum_{i=1}^{n}
+\frac{
+|y_i - \hat{y}_i|
+}{
+\left(
+|y_i| + |\hat{y}_i|
+\right)/2
+}
+$$
+
+```python
+import numpy as np
+
+smape = (
+    100
+    * np.mean(
+        2
+        * np.abs(
+            y_test - y_pred
+        )
+        / (
+            np.abs(y_test)
+            + np.abs(y_pred)
+        )
+    )
+)
+```
+
+También requiere cautela cuando ambos valores están cerca de 0.
+
+## Error medio
+
+El error medio conserva el signo.
+
+$$
+ME =
+\frac{1}{n}
+\sum_{i=1}^{n}
+(y_i - \hat{y}_i)
+$$
+
+```python
+mean_error = (
+    y_test - y_pred
+).mean()
+
+print(
+    f"Mean error: "
+    f"{mean_error:.3f}"
+)
+```
+
+Interpretación:
+
+- Positivo: el modelo tiende a infraestimar.
+- Negativo: el modelo tiende a sobreestimar.
+- Cercano a 0: no implica ausencia de errores.
+
+## Residuos
+
+Los residuos son:
+
+$$
+e_i = y_i - \hat{y}_i
+$$
+
+```python
+residuals = (
+    y_test - y_pred
+)
+```
+
+Analizarlos ayuda a detectar:
+
+- Sesgo.
+- No linealidad.
+- Heterocedasticidad.
+- Outliers.
+- Subgrupos mal representados.
+- Cambios temporales.
+
+## Gráfico de valores reales y predichos
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(7, 6))
+
+plt.scatter(
+    y_test,
+    y_pred
+)
+
+minimum = min(
+    y_test.min(),
+    y_pred.min()
+)
+
+maximum = max(
+    y_test.max(),
+    y_pred.max()
+)
+
+plt.plot(
+    [minimum, maximum],
+    [minimum, maximum],
+    linestyle="--"
+)
+
+plt.xlabel("Valor real")
+plt.ylabel("Valor predicho")
+plt.title("Valores reales vs predichos")
+
+plt.show()
+```
+
+Los puntos cercanos a la diagonal indican predicciones más precisas.
+
+## Gráfico de residuos
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 5))
+
+plt.scatter(
+    y_pred,
+    residuals
+)
+
+plt.axhline(
+    0,
+    linestyle="--"
+)
+
+plt.xlabel("Valor predicho")
+plt.ylabel("Residuo")
+plt.title("Residuos vs predicciones")
+
+plt.show()
+```
+
+Un patrón aleatorio alrededor de 0 es deseable.
+
+## Señales problemáticas en residuos
+
+### Forma curva
+
+Puede indicar una relación no lineal no capturada.
+
+### Forma de embudo
+
+Puede indicar heterocedasticidad.
+
+### Desplazamiento respecto a 0
+
+Puede indicar sesgo sistemático.
+
+### Puntos muy alejados
+
+Pueden indicar outliers o pacientes mal predichos.
+
+## Heterocedasticidad
+
+La heterocedasticidad aparece cuando la variabilidad de los errores cambia según el nivel de la predicción.
+
+Ejemplo:
+
+- Errores pequeños en estancias cortas.
+- Errores grandes en estancias largas.
+
+Puede afectar especialmente a:
+
+- Inferencia en regresión lineal.
+- Intervalos de confianza.
+- Interpretación de coeficientes.
+
+::: {.callout-note}
+## Aplicación clínica
+
+En duración de estancia, suele ser frecuente que los pacientes con ingresos largos tengan errores mucho mayores.
+:::
+
+## Distribución de residuos
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 5))
+
+plt.hist(
+    residuals,
+    bins=30
+)
+
+plt.xlabel("Residuo")
+plt.ylabel("Frecuencia")
+plt.title("Distribución de residuos")
+
+plt.show()
+```
+
+## Q-Q plot
+
+```python
+import scipy.stats as stats
+import matplotlib.pyplot as plt
+
+stats.probplot(
+    residuals,
+    dist="norm",
+    plot=plt
+)
+
+plt.title("Q-Q plot de residuos")
+plt.show()
+```
+
+La normalidad de residuos es especialmente relevante para inferencia clásica, no siempre para predicción pura.
+
+## Baseline de regresión
+
+Un modelo debe compararse con una referencia simple.
+
+```python
+from sklearn.dummy import DummyRegressor
+
+baseline = DummyRegressor(
+    strategy="mean"
+)
+
+baseline.fit(
+    X_train,
+    y_train
+)
+
+y_pred_baseline = baseline.predict(
+    X_test
+)
+```
+
+## Evaluar el baseline
+
+```python
+baseline_mae = mean_absolute_error(
+    y_test,
+    y_pred_baseline
+)
+
+baseline_rmse = root_mean_squared_error(
+    y_test,
+    y_pred_baseline
+)
+
+baseline_r2 = r2_score(
+    y_test,
+    y_pred_baseline
+)
+
+print(
+    baseline_mae,
+    baseline_rmse,
+    baseline_r2
+)
+```
+
+## Comparación con baseline
+
+```python
+results = {
+    "baseline": {
+        "mae": baseline_mae,
+        "rmse": baseline_rmse,
+        "r2": baseline_r2
+    },
+    "model": {
+        "mae": mae,
+        "rmse": rmse,
+        "r2": r2
+    }
+}
+
+print(results)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+Un modelo complejo debe mejorar de forma clara y estable respecto a un baseline sencillo.
+:::
+
+## Baseline clínico
+
+Además de `DummyRegressor`, puede utilizarse:
+
+- Último valor observado.
+- Valor basal.
+- Media del centro.
+- Mediana histórica.
+- Regla clínica existente.
+- Modelo lineal simple.
+
+## Validación cruzada
+
+```python
+from sklearn.model_selection import cross_validate
+
+scoring = {
+    "mae": "neg_mean_absolute_error",
+    "rmse": "neg_root_mean_squared_error",
+    "r2": "r2"
+}
+
+scores = cross_validate(
+    estimator=model,
+    X=X,
+    y=y,
+    cv=5,
+    scoring=scoring
+)
+```
+
+Scikit-learn devuelve algunas métricas de error con signo negativo porque su sistema de selección maximiza puntuaciones.
+
+## Convertir errores a positivos
+
+```python
+import pandas as pd
+
+results = pd.DataFrame(
+    {
+        "mae": -scores["test_mae"],
+        "rmse": -scores["test_rmse"],
+        "r2": scores["test_r2"]
+    }
+)
+
+display(
+    results
+)
+```
+
+## Resumen de validación cruzada
+
+```python
+display(
+    results.agg(
+        [
+            "mean",
+            "std",
+            "min",
+            "max"
+        ]
+    )
+)
+```
+
+## Intervalos de confianza con bootstrap
+
+```python
+import numpy as np
+from sklearn.metrics import mean_absolute_error
+
+rng = np.random.default_rng(42)
+
+bootstrap_mae = []
+
+for _ in range(1000):
+
+    indices = rng.integers(
+        0,
+        len(y_test),
+        len(y_test)
+    )
+
+    score = mean_absolute_error(
+        y_test.iloc[indices],
+        y_pred[indices]
+    )
+
+    bootstrap_mae.append(
+        score
+    )
+
+lower = np.percentile(
+    bootstrap_mae,
+    2.5
+)
+
+upper = np.percentile(
+    bootstrap_mae,
+    97.5
+)
+
+print(
+    f"MAE 95% CI: "
+    f"{lower:.3f}–{upper:.3f}"
+)
+```
+
+## Métricas por subgrupos
+
+Puede ser importante evaluar por:
+
+- Centro.
+- Sexo.
+- Edad.
+- Diagnóstico.
+- Gravedad.
+- Periodo temporal.
+
+```python
+import pandas as pd
+
+evaluation_df = pd.DataFrame(
+    {
+        "y_true": y_test,
+        "y_pred": y_pred,
+        "center": X_test["center"]
+    }
+)
+
+subgroup_results = (
+    evaluation_df
+    .groupby("center")
+    .apply(
+        lambda group: pd.Series(
+            {
+                "n": len(group),
+                "mae": mean_absolute_error(
+                    group["y_true"],
+                    group["y_pred"]
+                ),
+                "rmse": root_mean_squared_error(
+                    group["y_true"],
+                    group["y_pred"]
+                )
+            }
+        )
+    )
+)
+
+display(subgroup_results)
+```
+
+## Métricas por rango del target
+
+Un modelo puede funcionar mejor en valores bajos que en valores altos.
+
+```python
+evaluation_df["target_group"] = pd.cut(
+    evaluation_df["y_true"],
+    bins=[
+        -float("inf"),
+        5,
+        10,
+        20,
+        float("inf")
+    ],
+    labels=[
+        "≤5",
+        "6–10",
+        "11–20",
+        ">20"
+    ]
+)
+```
+
+```python
+performance_by_range = (
+    evaluation_df
+    .groupby(
+        "target_group",
+        observed=False
+    )
+    .apply(
+        lambda group: pd.Series(
+            {
+                "n": len(group),
+                "mae": mean_absolute_error(
+                    group["y_true"],
+                    group["y_pred"]
+                )
+            }
+        )
+    )
+)
+
+display(performance_by_range)
+```
+
+## Error relativo
+
+Puede ser útil cuando la importancia del error depende de la magnitud real.
+
+```python
+relative_error = (
+    np.abs(
+        y_test - y_pred
+    )
+    / np.abs(y_test)
+)
+```
+
+Debe evitarse o adaptarse si hay ceros.
+
+## Error dentro de un margen clínico
+
+A veces interesa saber qué proporción de predicciones queda dentro de un margen aceptable.
+
+```python
+margin = 2
+
+within_margin = (
+    np.abs(
+        y_test - y_pred
+    )
+    <= margin
+)
+
+percentage_within_margin = (
+    within_margin.mean()
+    * 100
+)
+
+print(
+    f"Predicciones dentro de "
+    f"±{margin}: "
+    f"{percentage_within_margin:.1f}%"
+)
+```
+
+::: {.callout-note}
+## Interpretación clínica
+
+Una métrica como “porcentaje dentro de ±2 días” puede ser más comprensible que un valor abstracto de $R^2$.
+:::
+
+## Métricas asimétricas
+
+En algunos problemas, sobreestimar y subestimar no tienen el mismo coste.
+
+Ejemplo:
+
+- Infraestimar una estancia puede causar falta de camas.
+- Sobreestimarla puede reservar recursos innecesarios.
+
+Puede definirse una pérdida personalizada.
+
+```python
+import numpy as np
+
+errors = y_test - y_pred
+
+asymmetric_loss = np.where(
+    errors > 0,
+    2 * np.abs(errors),
+    np.abs(errors)
+).mean()
+```
+
+## Transformación del target
+
+En targets muy sesgados puede utilizarse logaritmo.
+
+```python
+import numpy as np
+
+y_train_log = np.log1p(
+    y_train
+)
+```
+
+Después, las predicciones deben volver a la escala original.
+
+```python
+y_pred_log = model.predict(
+    X_test
+)
+
+y_pred_original = np.expm1(
+    y_pred_log
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+Las métricas deben calcularse en una escala clínicamente interpretable, normalmente la escala original.
+:::
+
+## Intervalos de predicción
+
+Una predicción puntual no expresa incertidumbre.
+
+Ejemplo:
+
+```text
+Predicción: 8 días
+Intervalo de predicción: 5–14 días
+```
+
+Los intervalos pueden ser más útiles para la toma de decisiones.
+
+Métodos posibles:
+
+- Regresión cuantílica.
+- Bootstrap.
+- Conformal prediction.
+- Modelos bayesianos.
+- Modelos probabilísticos.
+
+## Regresión cuantílica
+
+```python
+from sklearn.ensemble import GradientBoostingRegressor
+
+lower_model = GradientBoostingRegressor(
+    loss="quantile",
+    alpha=0.05,
+    random_state=42
+)
+
+median_model = GradientBoostingRegressor(
+    loss="quantile",
+    alpha=0.50,
+    random_state=42
+)
+
+upper_model = GradientBoostingRegressor(
+    loss="quantile",
+    alpha=0.95,
+    random_state=42
+)
+```
+
+## Comparar modelos correctamente
+
+Los modelos deben compararse usando:
+
+- El mismo split.
+- Los mismos folds.
+- Las mismas variables.
+- El mismo pipeline.
+- La misma escala del target.
+- Las mismas métricas.
+- El mismo baseline.
+
+## Interpretación clínica
+
+::: {.callout-important}
+## Pregunta central
+
+¿Un error de esta magnitud cambia una decisión clínica u operativa?
+:::
+
+Ejemplo en duración de estancia:
+
+- MAE de 0.5 días puede ser excelente.
+- MAE de 3 días puede ser aceptable o inútil según el uso.
+- RMSE alto puede indicar fallos importantes en ingresos largos.
+
+## Buen ajuste estadístico frente a utilidad
+
+Un modelo puede tener:
+
+- $R^2$ alto.
+- Errores clínicamente inaceptables.
+
+También puede tener:
+
+- $R^2$ moderado.
+- Error suficientemente pequeño para apoyar una decisión.
+
+La utilidad depende del contexto.
+
+## Tabla comparativa
+
+| Métrica | Unidades | Penaliza outliers | Interpretación |
+|---|---|---|---|
+| MAE | Originales | Moderada | Error medio absoluto |
+| MSE | Al cuadrado | Alta | Penaliza errores grandes |
+| RMSE | Originales | Alta | Error con peso en extremos |
+| Median AE | Originales | Baja | Error típico robusto |
+| $R^2$ | Sin unidades | Indirecta | Varianza explicada |
+| MAPE | Porcentaje | Variable | Error relativo |
+| Mean error | Originales | Baja | Sesgo de dirección |
+
+## Errores frecuentes
+
+- Reportar solo $R^2$.
+- No comparar con baseline.
+- Interpretar MSE en unidades originales.
+- Usar MAPE con ceros.
+- No analizar residuos.
+- Ignorar heterocedasticidad.
+- No revisar errores extremos.
+- Calcular métricas solo en train.
+- Comparar modelos con splits distintos.
+- Evaluar en escala logarítmica sin volver a la original.
+- No revisar subgrupos.
+- No definir un margen clínicamente aceptable.
+
+## Flujo recomendado
+
+1. Definir la unidad del target.
+2. Definir qué error es clínicamente relevante.
+3. Elegir un baseline.
+4. Seleccionar MAE y RMSE como métricas básicas.
+5. Añadir $R^2$ como medida relativa.
+6. Analizar residuos.
+7. Revisar outliers.
+8. Evaluar subgrupos.
+9. Calcular incertidumbre.
+10. Comparar con un margen clínico.
+11. Evaluar una vez en test.
+12. Reportar limitaciones.
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad del target.
+- [ ] He creado un baseline.
+- [ ] He calculado MAE.
+- [ ] He calculado RMSE.
+- [ ] He calculado $R^2$.
+- [ ] He comparado MAE y RMSE.
+- [ ] He analizado residuos.
+- [ ] He revisado heterocedasticidad.
+- [ ] He revisado errores extremos.
+- [ ] He evitado MAPE si existen ceros.
+- [ ] He evaluado subgrupos.
+- [ ] He reportado incertidumbre.
+- [ ] He definido un margen clínico.
+- [ ] He comparado modelos con el mismo split.
+- [ ] He interpretado los resultados clínicamente.
+
+## Recursos
+
+### Documentación
+
+- Métricas de regresión de scikit-learn.
+- `DummyRegressor`.
+- Gráficos de residuos.
+- Bootstrap.
+- Regresión cuantílica.
+- Conformal prediction.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus propios ejemplos, márgenes clínicos y métricas preferidas.
