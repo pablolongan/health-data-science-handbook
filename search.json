@@ -188,6 +188,1249 @@
     ]
   },
   {
+    "objectID": "preprocessing/scaling-normalization.html",
+    "href": "preprocessing/scaling-normalization.html",
+    "title": "Escalado y normalización",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nEl escalado transforma variables numéricas para que sus magnitudes sean comparables.\nEs especialmente importante en modelos que utilizan:\n\nDistancias.\nProductos escalares.\nGradientes.\nRegularización.\nComponentes principales.\n\nNo todos los modelos necesitan escalado y no todas las transformaciones significan lo mismo.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#por-qué-hay-que-escalar",
+    "href": "preprocessing/scaling-normalization.html#por-qué-hay-que-escalar",
+    "title": "Escalado y normalización",
+    "section": "¿Por qué hay que escalar?",
+    "text": "¿Por qué hay que escalar?\nImagina estas variables:\n\nEdad: entre 0 y 100.\nPeso: entre 2 y 150.\nTroponina: entre 0 y 0.5.\nPresión arterial: entre 60 y 200.\n\nAunque todas sean clínicamente relevantes, sus escalas numéricas son muy distintas.\nEn determinados algoritmos, una variable con valores grandes puede dominar el modelo solo por su unidad de medida.\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nEscalar no hace que una variable sea más importante o menos importante clínicamente.\nSolo modifica su representación numérica.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#algoritmos-sensibles-al-escalado",
+    "href": "preprocessing/scaling-normalization.html#algoritmos-sensibles-al-escalado",
+    "title": "Escalado y normalización",
+    "section": "Algoritmos sensibles al escalado",
+    "text": "Algoritmos sensibles al escalado\nEl escalado suele ser importante en:\n\nK-nearest neighbors.\nK-means.\nSVM.\nRegresión logística regularizada.\nRegresión lineal regularizada.\nRedes neuronales.\nPCA.\nMétodos basados en gradiente.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#algoritmos-poco-sensibles-al-escalado",
+    "href": "preprocessing/scaling-normalization.html#algoritmos-poco-sensibles-al-escalado",
+    "title": "Escalado y normalización",
+    "section": "Algoritmos poco sensibles al escalado",
+    "text": "Algoritmos poco sensibles al escalado\nLos modelos basados en árboles suelen verse poco afectados:\n\nDecision trees.\nRandom forest.\nGradient boosting basado en árboles.\nXGBoost.\nLightGBM.\nCatBoost.\n\nEsto ocurre porque sus divisiones dependen principalmente del orden de los valores, no de sus magnitudes absolutas.\n\n\n\n\n\n\nWarningImportante\n\n\n\nAunque un árbol no necesite escalado, el pipeline completo puede incluir pasos que sí lo necesiten, como PCA o selección de variables basada en regularización.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#estandarización-con-standardscaler",
+    "href": "preprocessing/scaling-normalization.html#estandarización-con-standardscaler",
+    "title": "Escalado y normalización",
+    "section": "Estandarización con StandardScaler",
+    "text": "Estandarización con StandardScaler\nStandardScaler transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.\n\nLa fórmula es:\n\\[\nz = \\frac{x - \\mu}{\\sigma}\n\\]\ndonde:\n\n\\(x\\) es el valor original.\n\\(\\mu\\) es la media.\n\\(\\sigma\\) es la desviación estándar.\n\\(z\\) es el valor transformado.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#código-básico",
+    "href": "preprocessing/scaling-normalization.html#código-básico",
+    "title": "Escalado y normalización",
+    "section": "Código básico",
+    "text": "Código básico\nfrom sklearn.preprocessing import StandardScaler\n\nscaler = StandardScaler()\n\nX_scaled = scaler.fit_transform(X)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#interpretación",
+    "href": "preprocessing/scaling-normalization.html#interpretación",
+    "title": "Escalado y normalización",
+    "section": "Interpretación",
+    "text": "Interpretación\nDespués de estandarizar:\n\nUn valor de 0 está cerca de la media.\nUn valor de 1 está aproximadamente una desviación estándar por encima.\nUn valor de -1 está aproximadamente una desviación estándar por debajo.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#minmaxscaler",
+    "href": "preprocessing/scaling-normalization.html#minmaxscaler",
+    "title": "Escalado y normalización",
+    "section": "MinMaxScaler",
+    "text": "MinMaxScaler\nMinMaxScaler transforma cada variable a un rango definido, normalmente entre 0 y 1.\nLa transformación general es:\n\\[\nx' =\n\\frac{x - x_{\\min}}\n{x_{\\max} - x_{\\min}}\n\\]",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#código-básico-1",
+    "href": "preprocessing/scaling-normalization.html#código-básico-1",
+    "title": "Escalado y normalización",
+    "section": "Código básico",
+    "text": "Código básico\nfrom sklearn.preprocessing import MinMaxScaler\n\nscaler = MinMaxScaler(\n    feature_range=(0, 1)\n)\n\nX_scaled = scaler.fit_transform(X)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#cuándo-puede-ser-útil",
+    "href": "preprocessing/scaling-normalization.html#cuándo-puede-ser-útil",
+    "title": "Escalado y normalización",
+    "section": "Cuándo puede ser útil",
+    "text": "Cuándo puede ser útil\n\nRedes neuronales.\nVariables que deben quedar en un rango concreto.\nMétodos sensibles a escalas acotadas.\nVisualizaciones o comparaciones específicas.\n\n\n\n\n\n\n\nCautionLimitación\n\n\n\nMinMaxScaler es sensible a outliers.\nUn valor extremo puede comprimir casi todos los demás valores en una zona muy pequeña del rango.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#robustscaler",
+    "href": "preprocessing/scaling-normalization.html#robustscaler",
+    "title": "Escalado y normalización",
+    "section": "RobustScaler",
+    "text": "RobustScaler\nRobustScaler utiliza estadísticas más resistentes a valores extremos:\n\nMediana.\nRango intercuartílico.\n\nfrom sklearn.preprocessing import RobustScaler\n\nscaler = RobustScaler()\n\nX_scaled = scaler.fit_transform(X)\nPuede ser útil cuando:\n\nExisten outliers reales.\nLa distribución es muy asimétrica.\nNo quieres que unos pocos valores extremos dominen el escalado.\n\n\n\n\n\n\n\nNoteImportante\n\n\n\nRobustScaler reduce la influencia de los outliers, pero no elimina ni corrige esos valores.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#maxabsscaler",
+    "href": "preprocessing/scaling-normalization.html#maxabsscaler",
+    "title": "Escalado y normalización",
+    "section": "MaxAbsScaler",
+    "text": "MaxAbsScaler\nMaxAbsScaler divide cada variable por su valor absoluto máximo.\nfrom sklearn.preprocessing import MaxAbsScaler\n\nscaler = MaxAbsScaler()\n\nX_scaled = scaler.fit_transform(X)\nPuede ser útil con:\n\nDatos dispersos.\nMatrices sparse.\nVariables ya centradas alrededor de 0.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#normalizer",
+    "href": "preprocessing/scaling-normalization.html#normalizer",
+    "title": "Escalado y normalización",
+    "section": "Normalizer",
+    "text": "Normalizer\nNormalizer no escala cada columna.\nNormaliza cada fila individualmente para que tenga norma unitaria.\nfrom sklearn.preprocessing import Normalizer\n\nnormalizer = Normalizer(\n    norm=\"l2\"\n)\n\nX_normalized = normalizer.fit_transform(X)\nEsto significa que transforma cada observación considerando conjuntamente sus valores.\n\n\n\n\n\n\nWarningNo confundir\n\n\n\n\nStandardScaler, MinMaxScaler y RobustScaler actúan por variable.\nNormalizer actúa por fila.\n\nSon operaciones distintas y no son intercambiables.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#comparación-rápida",
+    "href": "preprocessing/scaling-normalization.html#comparación-rápida",
+    "title": "Escalado y normalización",
+    "section": "Comparación rápida",
+    "text": "Comparación rápida\n\n\n\n\n\n\n\n\n\nTransformador\nActúa sobre\nResultado principal\nSensibilidad a outliers\n\n\n\n\nStandardScaler\nCada variable\nMedia 0 y desviación 1\nAlta\n\n\nMinMaxScaler\nCada variable\nRango definido\nAlta\n\n\nRobustScaler\nCada variable\nEscalado robusto\nMenor\n\n\nMaxAbsScaler\nCada variable\nMáximo absoluto igual a 1\nAlta\n\n\nNormalizer\nCada fila\nNorma unitaria\nDepende de la fila",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#ajustar-con-train-y-transformar-test",
+    "href": "preprocessing/scaling-normalization.html#ajustar-con-train-y-transformar-test",
+    "title": "Escalado y normalización",
+    "section": "Ajustar con train y transformar test",
+    "text": "Ajustar con train y transformar test\nEl escalador debe aprender sus parámetros únicamente con el conjunto de entrenamiento.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#ejemplo-incorrecto",
+    "href": "preprocessing/scaling-normalization.html#ejemplo-incorrecto",
+    "title": "Escalado y normalización",
+    "section": "Ejemplo incorrecto",
+    "text": "Ejemplo incorrecto\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.model_selection import train_test_split\n\nscaler = StandardScaler()\n\nX_scaled = scaler.fit_transform(X)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_scaled,\n    y,\n    test_size=0.20,\n    random_state=42\n)\nAquí la media y la desviación estándar incluyen información del conjunto de test.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#ejemplo-correcto",
+    "href": "preprocessing/scaling-normalization.html#ejemplo-correcto",
+    "title": "Escalado y normalización",
+    "section": "Ejemplo correcto",
+    "text": "Ejemplo correcto\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.model_selection import train_test_split\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.20,\n    random_state=42\n)\n\nscaler = StandardScaler()\n\nX_train_scaled = scaler.fit_transform(\n    X_train\n)\n\nX_test_scaled = scaler.transform(\n    X_test\n)\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nEn train se utiliza fit_transform().\nEn validation y test se utiliza únicamente transform().",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#pipeline-recomendado",
+    "href": "preprocessing/scaling-normalization.html#pipeline-recomendado",
+    "title": "Escalado y normalización",
+    "section": "Pipeline recomendado",
+    "text": "Pipeline recomendado\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(\n                strategy=\"median\"\n            )\n        ),\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(\n    X_train,\n    y_train\n)\n\ny_pred = pipeline.predict(\n    X_test\n)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#variables-numéricas-y-categóricas",
+    "href": "preprocessing/scaling-normalization.html#variables-numéricas-y-categóricas",
+    "title": "Escalado y normalización",
+    "section": "Variables numéricas y categóricas",
+    "text": "Variables numéricas y categóricas\nNo debes escalar directamente categorías codificadas arbitrariamente.\nLo habitual es aplicar transformaciones distintas según el tipo de variable.\nfrom sklearn.compose import ColumnTransformer\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.preprocessing import OneHotEncoder\n\nnumeric_features = [\n    \"age\",\n    \"weight\",\n    \"troponin\"\n]\n\ncategorical_features = [\n    \"sex\",\n    \"center\"\n]\n\nnumeric_transformer = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(\n                strategy=\"median\"\n            )\n        ),\n        (\n            \"scaler\",\n            StandardScaler()\n        )\n    ]\n)\n\ncategorical_transformer = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(\n                strategy=\"most_frequent\"\n            )\n        ),\n        (\n            \"encoder\",\n            OneHotEncoder(\n                handle_unknown=\"ignore\"\n            )\n        )\n    ]\n)\n\npreprocessor = ColumnTransformer(\n    transformers=[\n        (\n            \"numeric\",\n            numeric_transformer,\n            numeric_features\n        ),\n        (\n            \"categorical\",\n            categorical_transformer,\n            categorical_features\n        )\n    ]\n)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#pipeline-completo",
+    "href": "preprocessing/scaling-normalization.html#pipeline-completo",
+    "title": "Escalado y normalización",
+    "section": "Pipeline completo",
+    "text": "Pipeline completo\nfrom sklearn.linear_model import LogisticRegression\n\nmodel = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"classifier\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\nmodel.fit(\n    X_train,\n    y_train\n)\n\ny_pred = model.predict(\n    X_test\n)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#comparar-escaladores",
+    "href": "preprocessing/scaling-normalization.html#comparar-escaladores",
+    "title": "Escalado y normalización",
+    "section": "Comparar escaladores",
+    "text": "Comparar escaladores\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.preprocessing import MinMaxScaler\nfrom sklearn.preprocessing import RobustScaler\nfrom sklearn.linear_model import LogisticRegression\n\nscalers = {\n    \"standard\": StandardScaler(),\n    \"minmax\": MinMaxScaler(),\n    \"robust\": RobustScaler()\n}\n\nresults = {}\n\nfor name, scaler in scalers.items():\n\n    pipeline = Pipeline(\n        steps=[\n            (\n                \"imputer\",\n                SimpleImputer(\n                    strategy=\"median\"\n                )\n            ),\n            (\n                \"scaler\",\n                scaler\n            ),\n            (\n                \"model\",\n                LogisticRegression(\n                    max_iter=1000,\n                    random_state=42\n                )\n            )\n        ]\n    )\n\n    scores = cross_val_score(\n        pipeline,\n        X,\n        y,\n        cv=5,\n        scoring=\"roc_auc\"\n    )\n\n    results[name] = {\n        \"mean\": scores.mean(),\n        \"std\": scores.std()\n    }\n\nprint(results)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#escalado-y-pca",
+    "href": "preprocessing/scaling-normalization.html#escalado-y-pca",
+    "title": "Escalado y normalización",
+    "section": "Escalado y PCA",
+    "text": "Escalado y PCA\nPCA busca direcciones que maximicen la varianza.\nSi una variable tiene una escala mucho mayor, puede dominar los componentes.\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"pca\",\n            PCA(\n                n_components=0.95\n            )\n        )\n    ]\n)\n\nX_pca = pipeline.fit_transform(\n    X_train\n)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#escalado-y-regularización",
+    "href": "preprocessing/scaling-normalization.html#escalado-y-regularización",
+    "title": "Escalado y normalización",
+    "section": "Escalado y regularización",
+    "text": "Escalado y regularización\nEn modelos regularizados, las penalizaciones actúan sobre los coeficientes.\nSi las variables están en escalas muy distintas:\n\nLos coeficientes no son directamente comparables.\nLa penalización puede afectar de forma desigual.\nLa optimización puede volverse menos estable.\n\nPor eso suele ser importante escalar antes de:\n\nRidge.\nLasso.\nElastic Net.\nRegresión logística regularizada.\nSVM lineal.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#escalado-y-distancias",
+    "href": "preprocessing/scaling-normalization.html#escalado-y-distancias",
+    "title": "Escalado y normalización",
+    "section": "Escalado y distancias",
+    "text": "Escalado y distancias\nKNN y K-means utilizan distancias.\nSin escalado, una variable con valores grandes puede dominar la distancia total.\nEjemplo:\n\nEdad: 40 frente a 60.\nTroponina: 0.01 frente a 0.03.\n\nLa diferencia en edad puede pesar mucho más solo por su escala.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#transformaciones-no-lineales",
+    "href": "preprocessing/scaling-normalization.html#transformaciones-no-lineales",
+    "title": "Escalado y normalización",
+    "section": "Transformaciones no lineales",
+    "text": "Transformaciones no lineales\nEscalar no siempre corrige distribuciones muy sesgadas.\nA veces puede ser útil aplicar antes una transformación.\n\nLogaritmo\nimport numpy as np\n\ndf[\"troponin_log\"] = np.log1p(\n    df[\"troponin\"]\n)\nlog1p() calcula:\nlog(1 + x)\ny puede utilizarse cuando hay ceros.\n\n\nPowerTransformer\nfrom sklearn.preprocessing import PowerTransformer\n\ntransformer = PowerTransformer(\n    method=\"yeo-johnson\"\n)\n\nX_transformed = transformer.fit_transform(\n    X\n)\n\n\nQuantileTransformer\nfrom sklearn.preprocessing import QuantileTransformer\n\ntransformer = QuantileTransformer(\n    output_distribution=\"normal\",\n    random_state=42\n)\n\nX_transformed = transformer.fit_transform(\n    X\n)\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nLas transformaciones no lineales cambian la forma de la distribución y pueden dificultar la interpretación clínica.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#valores-ausentes",
+    "href": "preprocessing/scaling-normalization.html#valores-ausentes",
+    "title": "Escalado y normalización",
+    "section": "Valores ausentes",
+    "text": "Valores ausentes\nLa mayoría de escaladores no deben recibir valores ausentes sin una estrategia definida.\nUn flujo habitual es:\n\nImputar.\nEscalar.\nEntrenar el modelo.\n\nEsto puede implementarse dentro de un pipeline.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#valores-binarios",
+    "href": "preprocessing/scaling-normalization.html#valores-binarios",
+    "title": "Escalado y normalización",
+    "section": "Valores binarios",
+    "text": "Valores binarios\nUna variable binaria codificada como 0 y 1 no siempre necesita escalado.\nEjemplos:\n\nSexo binario.\nPresencia o ausencia de una condición.\nTratamiento sí o no.\n\nLa decisión depende del modelo y del pipeline completo.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#variables-one-hot",
+    "href": "preprocessing/scaling-normalization.html#variables-one-hot",
+    "title": "Escalado y normalización",
+    "section": "Variables one-hot",
+    "text": "Variables one-hot\nLas columnas generadas por OneHotEncoder suelen mantenerse como 0 y 1.\nNo suele ser necesario aplicarles StandardScaler.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#consideraciones-en-datos-clínicos",
+    "href": "preprocessing/scaling-normalization.html#consideraciones-en-datos-clínicos",
+    "title": "Escalado y normalización",
+    "section": "Consideraciones en datos clínicos",
+    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nEl escalado no corrige problemas de calidad, unidades o interpretación.\nAntes de escalar, comprueba que las variables representan realmente la misma magnitud en todos los pacientes y centros.\n\n\n\nUnidades diferentes\nUna misma variable puede aparecer como:\n\nmg/dL.\nmmol/L.\nng/L.\npg/mL.\n\nNo debes escalar hasta haber armonizado las unidades.\n\n\nDiferencias por centro\nUn centro puede utilizar:\n\nEquipos distintos.\nMétodos de laboratorio diferentes.\nProtocolos distintos.\nRangos de referencia diferentes.\n\nEl escalado global puede ocultar estas diferencias.\n\n\nRangos pediátricos\nEn pediatría, muchos valores dependen de:\n\nEdad.\nSexo.\nPeso.\nAltura.\nSuperficie corporal.\n\nEn algunos casos puede ser más apropiado utilizar:\n\nZ-scores clínicos.\nPercentiles.\nValores normalizados por edad o superficie corporal.\n\n\n\nInterpretación de coeficientes\nTras StandardScaler, un coeficiente suele representar el cambio asociado a una desviación estándar de la variable.\nEsto puede facilitar la comparación estadística, pero no siempre la explicación clínica.\n\n\nOutliers reales\nUn valor extremo puede ser:\n\nUn error.\nUna unidad incorrecta.\nUn paciente clínicamente grave.\nUn caso raro pero válido.\n\nNo elijas RobustScaler sin revisar antes la causa del valor extremo.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#errores-frecuentes",
+    "href": "preprocessing/scaling-normalization.html#errores-frecuentes",
+    "title": "Escalado y normalización",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nEscalar antes del split.\nAjustar el escalador con test.\nEscalar categorías codificadas arbitrariamente.\nConfundir normalización por fila con escalado por variable.\nUtilizar MinMaxScaler sin revisar outliers.\nAplicar PCA sin escalar variables de unidades distintas.\nEscalar antes de armonizar unidades.\nPensar que todos los modelos necesitan escalado.\nInterpretar el escalado como una corrección de calidad.\nNo guardar el escalador junto con el modelo.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#tabla-de-decisión",
+    "href": "preprocessing/scaling-normalization.html#tabla-de-decisión",
+    "title": "Escalado y normalización",
+    "section": "Tabla de decisión",
+    "text": "Tabla de decisión\n\n\n\nSituación\nOpción habitual\n\n\n\n\nVariables aproximadamente simétricas\nStandardScaler\n\n\nVariables con outliers relevantes\nRobustScaler\n\n\nNecesitas rango 0–1\nMinMaxScaler\n\n\nMatriz sparse\nMaxAbsScaler\n\n\nComparar dirección de cada fila\nNormalizer\n\n\nÁrboles sin otros pasos sensibles\nPuede no ser necesario\n\n\nPCA, SVM, KNN o regularización\nEscalado recomendado",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#flujo-recomendado",
+    "href": "preprocessing/scaling-normalization.html#flujo-recomendado",
+    "title": "Escalado y normalización",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nRevisar unidades.\nRevisar distribuciones.\nRevisar valores extremos.\nSeparar train y test.\nImputar si es necesario.\nElegir el escalador.\nAjustarlo solo con train.\nTransformar validation y test.\nComparar el impacto en validación.\nGuardar todo dentro del pipeline.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#checklist-para-proyectos",
+    "href": "preprocessing/scaling-normalization.html#checklist-para-proyectos",
+    "title": "Escalado y normalización",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe armonizado las unidades.\nHe revisado distribuciones.\nHe revisado outliers.\nSé si el algoritmo necesita escalado.\nHe separado train y test.\nEl escalador se ajusta solo con train.\nEn validation y test uso solo transform().\nHe diferenciado variables numéricas y categóricas.\nNo he confundido Normalizer con StandardScaler.\nHe incluido el escalado dentro del pipeline.\nHe comparado alternativas cuando corresponde.\nHe considerado la interpretación clínica.\nHe documentado el escalador utilizado.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#recursos",
+    "href": "preprocessing/scaling-normalization.html#recursos",
+    "title": "Escalado y normalización",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\nStandardScaler de scikit-learn.\nMinMaxScaler de scikit-learn.\nRobustScaler de scikit-learn.\nMaxAbsScaler de scikit-learn.\nNormalizer de scikit-learn.\nEjemplo sobre la importancia del escalado en scikit-learn.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/scaling-normalization.html#notas-personales",
+    "href": "preprocessing/scaling-normalization.html#notas-personales",
+    "title": "Escalado y normalización",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus propios ejemplos, dudas y decisiones habituales.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Escalado y normalización"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html",
+    "href": "preprocessing/index.html",
+    "title": "Preprocesamiento",
+    "section": "",
+    "text": "Esta sección reúne las técnicas necesarias para limpiar, transformar y preparar los datos antes del modelado.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#contenidos-previstos",
+    "href": "preprocessing/index.html#contenidos-previstos",
+    "title": "Preprocesamiento",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Health Data Science Handbook",
+    "section": "",
+    "text": "Esta web es mi manual personal de consulta sobre:\n\nMachine learning\nDeep learning\nEstadística\nSeries temporales\nAnálisis de datos clínicos\n\nEl objetivo es reunir explicaciones teóricas, ejemplos prácticos y código reutilizable para futuros proyectos.",
+    "crumbs": [
+      "Inicio"
+    ]
+  },
+  {
+    "objectID": "index.html#bienvenido",
+    "href": "index.html#bienvenido",
+    "title": "Health Data Science Handbook",
+    "section": "",
+    "text": "Esta web es mi manual personal de consulta sobre:\n\nMachine learning\nDeep learning\nEstadística\nSeries temporales\nAnálisis de datos clínicos\n\nEl objetivo es reunir explicaciones teóricas, ejemplos prácticos y código reutilizable para futuros proyectos.",
+    "crumbs": [
+      "Inicio"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html",
+    "href": "foundations/data-exploration.html",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "",
+    "text": "La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#resumen",
+    "href": "foundations/data-exploration.html#resumen",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "",
+    "text": "La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#objetivos-principales",
+    "href": "foundations/data-exploration.html#objetivos-principales",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Objetivos principales",
+    "text": "Objetivos principales\n\nComprender qué representa cada fila y cada columna.\nIdentificar los tipos de variables.\nDetectar valores ausentes.\nEstudiar la distribución de las variables.\nLocalizar valores extremos o potencialmente erróneos.\nAnalizar relaciones entre variables.\nDetectar posibles problemas de calidad de datos.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#checklist-inicial",
+    "href": "foundations/data-exploration.html#checklist-inicial",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Checklist inicial",
+    "text": "Checklist inicial\nAntes de entrenar un modelo, conviene responder:\n\n¿Cuál es la unidad de análisis?\n¿Cuántas observaciones hay?\n¿Existen observaciones duplicadas?\n¿Qué variable queremos predecir?\n¿Qué variables son numéricas?\n¿Qué variables son categóricas?\n¿Hay valores ausentes?\n¿Existen valores imposibles?\n¿Puede haber información futura o data leakage?",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#código-básico",
+    "href": "foundations/data-exploration.html#código-básico",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Código básico",
+    "text": "Código básico\nimport pandas as pd\n\ndf = pd.read_csv(\"datos.csv\")\n\nprint(f\"Dimensiones del dataset: {df.shape}\")\n\ndisplay(df.head())\n\ndf.info()\n\ndisplay(df.describe(include=\"all\").T)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#valores-ausentes",
+    "href": "foundations/data-exploration.html#valores-ausentes",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Valores ausentes",
+    "text": "Valores ausentes\nmissing_summary = (\n    df.isna()\n    .sum()\n    .to_frame(\"missing_count\")\n    .assign(\n        missing_percentage=lambda x:\n        100 * x[\"missing_count\"] / len(df)\n    )\n    .sort_values(\n        \"missing_percentage\",\n        ascending=False\n    )\n)\n\ndisplay(missing_summary)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#filas-duplicadas",
+    "href": "foundations/data-exploration.html#filas-duplicadas",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Filas duplicadas",
+    "text": "Filas duplicadas\nn_duplicates = df.duplicated().sum()\n\nprint(f\"Número de filas duplicadas: {n_duplicates}\")",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#tipos-de-variables",
+    "href": "foundations/data-exploration.html#tipos-de-variables",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Tipos de variables",
+    "text": "Tipos de variables\nvariable_types = (\n    df.dtypes\n    .astype(str)\n    .to_frame(\"data_type\")\n)\n\ndisplay(variable_types)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#número-de-valores-únicos",
+    "href": "foundations/data-exploration.html#número-de-valores-únicos",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Número de valores únicos",
+    "text": "Número de valores únicos\nunique_values = (\n    df.nunique(dropna=False)\n    .to_frame(\"unique_values\")\n    .sort_values(\n        \"unique_values\",\n        ascending=True\n    )\n)\n\ndisplay(unique_values)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#variables-numéricas-y-categóricas",
+    "href": "foundations/data-exploration.html#variables-numéricas-y-categóricas",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Variables numéricas y categóricas",
+    "text": "Variables numéricas y categóricas\nnumeric_columns = df.select_dtypes(\n    include=\"number\"\n).columns.tolist()\n\ncategorical_columns = df.select_dtypes(\n    include=[\"object\", \"category\", \"bool\"]\n).columns.tolist()\n\nprint(\"Variables numéricas:\")\nprint(numeric_columns)\n\nprint(\"\\nVariables categóricas:\")\nprint(categorical_columns)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#consideraciones-en-datos-clínicos",
+    "href": "foundations/data-exploration.html#consideraciones-en-datos-clínicos",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Consideraciones en datos clínicos",
+    "text": "Consideraciones en datos clínicos\nEn datos sanitarios, un valor ausente no siempre significa que la información se haya perdido. Puede indicar que:\n\nLa prueba no estaba clínicamente indicada.\nEl paciente no acudió a la visita.\nEl dato se registró en otro sistema.\nLa prueba se realizó, pero no se importó correctamente.\nEl procedimiento no estaba disponible en ese momento.\nLa ausencia del dato está relacionada con el estado clínico del paciente.\nEl profesional decidió no solicitar la prueba porque ya disponía de información suficiente.\n\nPor este motivo, el mecanismo que genera los valores ausentes debe investigarse antes de eliminarlos o imputarlos.\nTambién es importante revisar:\n\nValores clínicamente imposibles.\nDiferencias de unidades entre centros.\nCambios en los métodos de medición.\nDuplicados asociados a distintas visitas.\nFechas incoherentes.\nVariables registradas después del desenlace.\nInformación que pueda producir data leakage.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#buenas-prácticas",
+    "href": "foundations/data-exploration.html#buenas-prácticas",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Buenas prácticas",
+    "text": "Buenas prácticas\nAntes de comenzar el modelado:\n\nComprender qué representa cada fila.\nIdentificar la variable objetivo.\nRevisar la calidad de las variables predictoras.\nDetectar duplicados y valores imposibles.\nAnalizar los valores ausentes.\nComprobar la distribución de las variables.\nSeparar los datos de entrenamiento y prueba antes de ajustar transformaciones.\nEvitar utilizar información futura para predecir eventos pasados.\nDocumentar todas las decisiones de limpieza y transformación.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#errores-frecuentes",
+    "href": "foundations/data-exploration.html#errores-frecuentes",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nEmpezar a entrenar modelos sin comprender el dataset.\nEliminar todos los valores ausentes automáticamente.\nConsiderar todos los valores extremos como errores.\nUtilizar identificadores de pacientes como variables predictoras.\nIncluir variables registradas después del desenlace.\nCalcular transformaciones utilizando todo el dataset antes de separar entrenamiento y prueba.\nInterpretar una correlación como una relación causal.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/index.html",
+    "href": "dimensionality-reduction/index.html",
+    "title": "Reducción de dimensionalidad",
+    "section": "",
+    "text": "Esta sección reúne métodos para reducir el número de variables conservando la mayor cantidad posible de información.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/index.html#contenidos-previstos",
+    "href": "dimensionality-reduction/index.html#contenidos-previstos",
+    "title": "Reducción de dimensionalidad",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "code-recipes/index.html",
+    "href": "code-recipes/index.html",
+    "title": "Recetario de código",
+    "section": "",
+    "text": "Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.",
+    "crumbs": [
+      "Inicio",
+      "Recetario de código",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "code-recipes/index.html#contenidos-previstos",
+    "href": "code-recipes/index.html#contenidos-previstos",
+    "title": "Recetario de código",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Recetario de código",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "Sobre el proyecto",
+    "section": "",
+    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
+    "crumbs": [
+      "Inicio",
+      "Sobre el proyecto"
+    ]
+  },
+  {
+    "objectID": "deep-learning/index.html",
+    "href": "deep-learning/index.html",
+    "title": "Deep learning",
+    "section": "",
+    "text": "Esta sección reunirá los fundamentos y modelos de deep learning que se añadirán durante el próximo curso.",
+    "crumbs": [
+      "Inicio",
+      "Deep learning",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "deep-learning/index.html#contenidos-previstos",
+    "href": "deep-learning/index.html#contenidos-previstos",
+    "title": "Deep learning",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Deep learning",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html",
+    "href": "dimensionality-reduction/pca.html",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nPCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.\nCada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#qué-problema-resuelve",
+    "href": "dimensionality-reduction/pca.html#qué-problema-resuelve",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "¿Qué problema resuelve?",
+    "text": "¿Qué problema resuelve?\nEn muchos datasets existen numerosas variables que contienen información parcialmente redundante.\nPor ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:\n\nPeso.\nAltura.\nÍndice de masa corporal.\nSuperficie corporal.\nPerímetros corporales.\n\nEstas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.\nPCA puede utilizarse para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nPCA no selecciona variables originales. Crea variables nuevas llamadas componentes principales.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#intuición",
+    "href": "dimensionality-reduction/pca.html#intuición",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Intuición",
+    "text": "Intuición\nImagina una nube de puntos formada por dos variables correlacionadas.\nAunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.\nPCA encuentra esa dirección y la convierte en el primer componente principal.\nEl segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.\nDe este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#fundamentos-teóricos",
+    "href": "dimensionality-reduction/pca.html#fundamentos-teóricos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Fundamentos teóricos",
+    "text": "Fundamentos teóricos\n\nComponentes principales\nCada componente principal es una combinación lineal de las variables originales.\nPara un dataset con variables \\(x_1, x_2, \\ldots, x_p\\), el primer componente puede expresarse como:\n\\[\nPC_1 = w_{11}x_1 + w_{12}x_2 + \\cdots + w_{1p}x_p\n\\]\nEl segundo componente se expresa como:\n\\[\nPC_2 = w_{21}x_1 + w_{22}x_2 + \\cdots + w_{2p}x_p\n\\]\nLos coeficientes \\(w\\) se denominan pesos o loadings.\n\n\nVarianza explicada\nCada componente explica una parte de la varianza total del dataset.\nLa proporción de varianza explicada por el componente \\(j\\) puede expresarse como:\n\\[\n\\text{Explained variance ratio}_j =\n\\frac{\\lambda_j}\n{\\sum_{k=1}^{p}\\lambda_k}\n\\]\ndonde \\(\\lambda_j\\) es el autovalor asociado al componente \\(j\\).\n\n\nVarianza explicada acumulada\nLa varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.\nPor ejemplo:\n\n1 componente: 45 %.\n2 componentes: 68 %.\n3 componentes: 82 %.\n4 componentes: 91 %.\n\nEn este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.\n\n\n\n\n\n\nWarningImportante\n\n\n\nUn componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
+    "href": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "¿Por qué es importante escalar?",
+    "text": "¿Por qué es importante escalar?\nPCA está influido por la escala de las variables.\nImagina estas variables:\n\nEdad, medida en años.\nTroponina, medida con valores pequeños.\nPresión arterial, medida en mmHg.\n\nUna variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.\nPor eso, antes de aplicar PCA suele utilizarse:\nStandardScaler()\nEl escalado transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
+    "href": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Supuestos y condiciones",
+    "text": "Supuestos y condiciones\nPCA funciona mejor cuando:\n\nLas variables son numéricas.\nExisten relaciones aproximadamente lineales.\nLas variables contienen varianza informativa.\nHay correlación entre algunas variables.\nLos valores extremos han sido revisados.\nLas escalas se han tratado adecuadamente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
+    "href": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Cuándo utilizar PCA",
+    "text": "Cuándo utilizar PCA\nPCA puede ser adecuado cuando:\n\nTienes muchas variables numéricas correlacionadas.\nQuieres reducir el número de variables.\nQuieres visualizar observaciones en dos o tres dimensiones.\nQuieres reducir multicolinealidad.\nQuieres comprimir información antes de otro modelo.\nQuieres explorar patrones latentes.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
+    "href": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Cuándo no utilizar PCA",
+    "text": "Cuándo no utilizar PCA\nPCA puede no ser adecuado cuando:\n\nNecesitas interpretar directamente cada variable original.\nLas relaciones entre variables son principalmente no lineales.\nLa mayoría de las variables son categóricas.\nTienes muy pocas variables.\nLos componentes son difíciles de justificar clínicamente.\nEl objetivo es seleccionar variables originales, no transformarlas.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
+    "href": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Flujo de trabajo recomendado",
+    "text": "Flujo de trabajo recomendado\n\nSeleccionar únicamente variables numéricas relevantes.\nRevisar valores ausentes.\nRevisar valores extremos.\nSeparar entrenamiento y prueba si PCA forma parte de un modelo predictivo.\nImputar valores ausentes utilizando solo entrenamiento.\nEscalar las variables utilizando solo entrenamiento.\nAjustar PCA utilizando solo entrenamiento.\nElegir el número de componentes.\nTransformar entrenamiento y prueba.\nInterpretar la varianza explicada y los loadings.\nEvaluar el impacto en el modelo posterior.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#código-mínimo",
+    "href": "dimensionality-reduction/pca.html#código-mínimo",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Código mínimo",
+    "text": "Código mínimo\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(pca.explained_variance_ratio_)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
+    "href": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Seleccionar componentes según varianza explicada",
+    "text": "Seleccionar componentes según varianza explicada\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(f\"Número de componentes: {pca.n_components_}\")\nprint(\n    \"Varianza explicada acumulada:\",\n    pca.explained_variance_ratio_.sum()\n)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
+    "href": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Implementación segura dentro de un pipeline",
+    "text": "Implementación segura dentro de un pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\"imputer\", SimpleImputer(strategy=\"median\")),\n        (\"scaler\", StandardScaler()),\n        (\"pca\", PCA(n_components=0.95)),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nCautionError frecuente: data leakage\n\n\n\nNo ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.\nEl pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
+    "href": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Inspeccionar la varianza explicada",
+    "text": "Inspeccionar la varianza explicada\nimport pandas as pd\n\nexplained_variance = pd.DataFrame(\n    {\n        \"component\": range(\n            1,\n            len(pca.explained_variance_ratio_) + 1\n        ),\n        \"explained_variance_ratio\":\n            pca.explained_variance_ratio_,\n        \"cumulative_explained_variance\":\n            pca.explained_variance_ratio_.cumsum()\n    }\n)\n\ndisplay(explained_variance)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#interpretar-los-loadings",
+    "href": "dimensionality-reduction/pca.html#interpretar-los-loadings",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Interpretar los loadings",
+    "text": "Interpretar los loadings\nimport pandas as pd\n\nloadings = pd.DataFrame(\n    pca.components_.T,\n    index=X.columns,\n    columns=[\n        f\"PC{i}\"\n        for i in range(\n            1,\n            pca.n_components_ + 1\n        )\n    ]\n)\n\ndisplay(loadings)\nUn valor absoluto elevado indica que la variable tiene una contribución importante al componente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
+    "href": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Consideraciones en datos clínicos",
+    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nPCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.\n\n\n\nMediciones repetidas\nSi un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.\n\n\nValores ausentes\nLa ausencia de una prueba puede estar relacionada con:\n\nLa gravedad.\nLa indicación clínica.\nEl centro.\nEl momento del seguimiento.\nLa disponibilidad de recursos.\n\n\n\nDiferencias entre centros\nPCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:\n\nEquipos.\nUnidades.\nProtocolos.\nPoblaciones.\nMétodos de laboratorio.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#errores-frecuentes",
+    "href": "dimensionality-reduction/pca.html#errores-frecuentes",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nAplicar PCA antes de separar entrenamiento y prueba.\nEscalar utilizando todo el dataset.\nNo escalar variables con unidades diferentes.\nAplicar PCA directamente a variables categóricas.\nInterpretar los componentes como variables clínicas reales.\nPensar que más varianza explicada siempre implica mejor predicción.\nIgnorar valores extremos que dominan los componentes.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#checklist-para-proyectos",
+    "href": "dimensionality-reduction/pca.html#checklist-para-proyectos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nLas variables son numéricas.\nHe revisado valores ausentes.\nHe revisado valores extremos.\nHe separado entrenamiento y prueba.\nLa separación se ha realizado por paciente cuando corresponde.\nLa imputación se ajusta solo con entrenamiento.\nEl escalado se ajusta solo con entrenamiento.\nPCA se ajusta solo con entrenamiento.\nHe revisado la varianza explicada.\nHe revisado los loadings.\nHe considerado la interpretabilidad clínica.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "foundations/index.html",
+    "href": "foundations/index.html",
+    "title": "Fundamentos",
+    "section": "",
+    "text": "Esta sección reúne los conceptos y procedimientos necesarios antes de entrenar modelos de machine learning.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "foundations/index.html#contenidos",
+    "href": "foundations/index.html#contenidos",
+    "title": "Fundamentos",
+    "section": "Contenidos",
+    "text": "Contenidos\n\nExploración de datos\nPreparación y limpieza de datos\nValores ausentes\nCodificación de variables categóricas\nEscalado y normalización\nSeparación entre entrenamiento, validación y prueba\nEvaluación de modelos\nPrevención de data leakage",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html",
+    "href": "preprocessing/data-leakage.html",
+    "title": "Data leakage",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nEl data leakage ocurre cuando el modelo utiliza información que no debería estar disponible en el momento real de hacer la predicción.\nEsto produce métricas artificialmente altas y modelos que parecen funcionar muy bien durante el desarrollo, pero fallan cuando se aplican a pacientes nuevos.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#qué-es-el-data-leakage",
+    "href": "preprocessing/data-leakage.html#qué-es-el-data-leakage",
+    "title": "Data leakage",
+    "section": "¿Qué es el data leakage?",
+    "text": "¿Qué es el data leakage?\nEl data leakage aparece cuando información del futuro, del conjunto de test o del desenlace entra directa o indirectamente en el proceso de entrenamiento.\nEl modelo recibe una ventaja injusta.\nNo aprende únicamente patrones generalizables: aprende información que en la práctica no estaría disponible.\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nUn modelo puede tener un ROC AUC excelente y, aun así, ser completamente inútil si existe data leakage.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#principales-tipos-de-leakage",
+    "href": "preprocessing/data-leakage.html#principales-tipos-de-leakage",
+    "title": "Data leakage",
+    "section": "Principales tipos de leakage",
+    "text": "Principales tipos de leakage\n\nTarget leakage\nOcurre cuando una variable predictora contiene información relacionada directamente con el desenlace.\nEjemplos:\n\nUtilizar el tratamiento iniciado después del diagnóstico para predecir ese diagnóstico.\nUtilizar una prueba solicitada como consecuencia del evento.\nUtilizar la fecha de alta para predecir la duración del ingreso.\nUtilizar una variable derivada del propio desenlace.\nUtilizar información registrada después del momento de predicción.\n\n\n\nTrain-test contamination\nOcurre cuando información del conjunto de test influye en el entrenamiento.\nEjemplos:\n\nImputar antes de separar train y test.\nEscalar antes del split.\nSeleccionar variables con todo el dataset.\nAjustar PCA con todos los datos.\nBalancear clases antes de separar.\nDefinir umbrales utilizando el test.\n\n\n\nLeakage entre pacientes o episodios relacionados\nOcurre cuando observaciones relacionadas aparecen en diferentes particiones.\nEjemplos:\n\nVarias visitas del mismo paciente en train y test.\nVarias imágenes del mismo estudio en diferentes conjuntos.\nDistintos ingresos del mismo paciente mezclados.\nMediciones repetidas de una misma muestra biológica.\n\n\n\nLeakage temporal\nOcurre cuando se utiliza información futura para predecir el pasado.\nEjemplos:\n\nUtilizar una analítica posterior al evento.\nCalcular una media con observaciones futuras.\nEntrenar con pacientes de 2025 y evaluar en pacientes de 2023.\nUtilizar un diagnóstico confirmado posteriormente.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#ejemplo-clínico",
+    "href": "preprocessing/data-leakage.html#ejemplo-clínico",
+    "title": "Data leakage",
+    "section": "Ejemplo clínico",
+    "text": "Ejemplo clínico\nImagina un modelo que predice si un paciente desarrollará cardiotoxicidad durante el tratamiento.\nPodrían producir leakage variables como:\n\nInicio de carvedilol después de detectar disfunción.\nSolicitud de una ecocardiografía adicional tras sospecha clínica.\nDiagnóstico de cardiotoxicidad registrado después del evento.\nValores de FEVI recogidos tras el momento que se quiere predecir.\nMarcadores calculados utilizando toda la trayectoria futura del paciente.\n\n\n\n\n\n\n\nWarningPregunta esencial\n\n\n\nPara cada variable, pregunta:\n¿Esta información estaría realmente disponible en el momento exacto en que quiero hacer la predicción?",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#ejemplo-incorrecto-escalar-antes-del-split",
+    "href": "preprocessing/data-leakage.html#ejemplo-incorrecto-escalar-antes-del-split",
+    "title": "Data leakage",
+    "section": "Ejemplo incorrecto: escalar antes del split",
+    "text": "Ejemplo incorrecto: escalar antes del split\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.model_selection import train_test_split\n\nscaler = StandardScaler()\n\nX_scaled = scaler.fit_transform(X)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_scaled,\n    y,\n    test_size=0.20,\n    random_state=42\n)\nAquí el escalador aprende la media y la desviación estándar utilizando también el conjunto de test.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#ejemplo-correcto",
+    "href": "preprocessing/data-leakage.html#ejemplo-correcto",
+    "title": "Data leakage",
+    "section": "Ejemplo correcto",
+    "text": "Ejemplo correcto\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.model_selection import train_test_split\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.20,\n    random_state=42\n)\n\nscaler = StandardScaler()\n\nX_train_scaled = scaler.fit_transform(X_train)\n\nX_test_scaled = scaler.transform(X_test)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#ejemplo-recomendado-con-pipeline",
+    "href": "preprocessing/data-leakage.html#ejemplo-recomendado-con-pipeline",
+    "title": "Data leakage",
+    "section": "Ejemplo recomendado con pipeline",
+    "text": "Ejemplo recomendado con pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(strategy=\"median\")\n        ),\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nTodo lo que aprende parámetros a partir de los datos debe ajustarse únicamente con entrenamiento.\nEsto incluye imputación, escalado, selección de variables, PCA, encoding y balanceo.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#leakage-en-imputación",
+    "href": "preprocessing/data-leakage.html#leakage-en-imputación",
+    "title": "Data leakage",
+    "section": "Leakage en imputación",
+    "text": "Leakage en imputación\n\nIncorrecto\nfrom sklearn.impute import SimpleImputer\n\nimputer = SimpleImputer(strategy=\"median\")\n\nX_imputed = imputer.fit_transform(X)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_imputed,\n    y,\n    test_size=0.20,\n    random_state=42\n)\n\n\nCorrecto\nX_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.20,\n    random_state=42\n)\n\nimputer = SimpleImputer(strategy=\"median\")\n\nX_train_imputed = imputer.fit_transform(X_train)\n\nX_test_imputed = imputer.transform(X_test)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#leakage-en-selección-de-variables",
+    "href": "preprocessing/data-leakage.html#leakage-en-selección-de-variables",
+    "title": "Data leakage",
+    "section": "Leakage en selección de variables",
+    "text": "Leakage en selección de variables\n\nIncorrecto\nfrom sklearn.feature_selection import SelectKBest\n\nselector = SelectKBest(k=10)\n\nX_selected = selector.fit_transform(X, y)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_selected,\n    y,\n    test_size=0.20,\n    random_state=42\n)\nAquí la selección de variables utiliza información del target de todo el dataset.\n\n\nCorrecto con pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.feature_selection import SelectKBest\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"selector\",\n            SelectKBest(k=10)\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#leakage-en-pca",
+    "href": "preprocessing/data-leakage.html#leakage-en-pca",
+    "title": "Data leakage",
+    "section": "Leakage en PCA",
+    "text": "Leakage en PCA\n\nIncorrecto\nfrom sklearn.decomposition import PCA\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_pca,\n    y,\n    test_size=0.20,\n    random_state=42\n)\n\n\nCorrecto\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"pca\",\n            PCA(n_components=0.95)\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#leakage-en-balanceo-de-clases",
+    "href": "preprocessing/data-leakage.html#leakage-en-balanceo-de-clases",
+    "title": "Data leakage",
+    "section": "Leakage en balanceo de clases",
+    "text": "Leakage en balanceo de clases\nTécnicas como SMOTE deben aplicarse únicamente dentro del entrenamiento.\n\nIncorrecto\nfrom imblearn.over_sampling import SMOTE\n\nsmote = SMOTE(random_state=42)\n\nX_resampled, y_resampled = smote.fit_resample(X, y)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_resampled,\n    y_resampled,\n    test_size=0.20,\n    random_state=42\n)\n\n\nCorrecto\nfrom imblearn.pipeline import Pipeline\nfrom imblearn.over_sampling import SMOTE\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"smote\",\n            SMOTE(random_state=42)\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#leakage-por-paciente",
+    "href": "preprocessing/data-leakage.html#leakage-por-paciente",
+    "title": "Data leakage",
+    "section": "Leakage por paciente",
+    "text": "Leakage por paciente\nSi un paciente tiene varias filas, no debe aparecer en train y test.\n\nComprobación básica\ntrain_patients = set(\n    df.loc[train_idx, \"patient_id\"]\n)\n\ntest_patients = set(\n    df.loc[test_idx, \"patient_id\"]\n)\n\noverlap = train_patients.intersection(\n    test_patients\n)\n\nprint(\n    f\"Pacientes presentes en ambos conjuntos: {len(overlap)}\"\n)\nLa salida correcta debería ser:\nPacientes presentes en ambos conjuntos: 0\n\n\n\n\n\n\nCautionError frecuente\n\n\n\nDividir por filas cuando existen varias observaciones por paciente puede generar métricas muy optimistas.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#leakage-temporal-1",
+    "href": "preprocessing/data-leakage.html#leakage-temporal-1",
+    "title": "Data leakage",
+    "section": "Leakage temporal",
+    "text": "Leakage temporal\nUna variable puede ser perfectamente válida desde el punto de vista estadístico y, aun así, ser inválida temporalmente.\nEjemplo:\nQuieres predecir cardiotoxicidad en la visita basal.\nNo puedes utilizar:\n\nEcocardiografías posteriores.\nTratamientos iniciados tras el deterioro.\nBiomarcadores recogidos después del evento.\nDiagnósticos confirmados en seguimientos futuros.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#definir-un-tiempo-índice",
+    "href": "preprocessing/data-leakage.html#definir-un-tiempo-índice",
+    "title": "Data leakage",
+    "section": "Definir un tiempo índice",
+    "text": "Definir un tiempo índice\nEn proyectos longitudinales conviene definir un tiempo índice.\nEs el momento exacto en el que se realiza la predicción.\nPor ejemplo:\n\nFecha de ingreso.\nInicio del tratamiento.\nPrimera valoración cardiovascular.\nDía de cirugía.\nMomento de alta.\n\nTodas las variables predictoras deben estar disponibles antes o en ese momento.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#ejemplo-de-filtrado-temporal",
+    "href": "preprocessing/data-leakage.html#ejemplo-de-filtrado-temporal",
+    "title": "Data leakage",
+    "section": "Ejemplo de filtrado temporal",
+    "text": "Ejemplo de filtrado temporal\nfeatures_df = measurements.loc[\n    measurements[\"measurement_date\"]\n    &lt;= measurements[\"prediction_date\"]\n].copy()\nEn proyectos reales, normalmente será necesario definir ventanas temporales específicas.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#variables-sospechosas",
+    "href": "preprocessing/data-leakage.html#variables-sospechosas",
+    "title": "Data leakage",
+    "section": "Variables sospechosas",
+    "text": "Variables sospechosas\nAlgunas variables merecen especial revisión:\n\nFecha de alta.\nDuración total del ingreso.\nDiagnóstico final.\nTratamientos de rescate.\nVariables de resultado.\nEstado al final del seguimiento.\nPruebas solicitadas tras una sospecha clínica.\nVariables calculadas usando toda la trayectoria.\nCampos administrativos cerrados después del evento.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#leakage-en-datos-derivados",
+    "href": "preprocessing/data-leakage.html#leakage-en-datos-derivados",
+    "title": "Data leakage",
+    "section": "Leakage en datos derivados",
+    "text": "Leakage en datos derivados\nTambién puede aparecer en variables que parecen inocentes.\nEjemplos:\n\nMedia de todas las analíticas del ingreso.\nMáximo valor observado durante todo el seguimiento.\nNúmero total de pruebas realizadas.\nNúmero total de reingresos.\nÚltima FEVI disponible.\nTiempo hasta el evento.\n\nSi estas variables usan información posterior al momento de predicción, producen leakage.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#cómo-detectar-data-leakage",
+    "href": "preprocessing/data-leakage.html#cómo-detectar-data-leakage",
+    "title": "Data leakage",
+    "section": "Cómo detectar data leakage",
+    "text": "Cómo detectar data leakage\n\nRevisar el proceso clínico\nPregunta cuándo y por qué se genera cada variable.\n\n\nRevisar las fechas\nComprueba que las variables predictoras sean anteriores al tiempo índice.\n\n\nRevisar el pipeline\nVerifica que todos los pasos se ajusten únicamente con entrenamiento.\n\n\nComparar resultados sospechosamente altos\nUn rendimiento casi perfecto en un problema complejo puede indicar leakage.\n\n\nRevisar variables demasiado predictivas\nUna variable con poder predictivo extremo merece una revisión clínica y temporal.\n\n\nEvaluar con una partición más realista\nPrueba:\n\nSplit por paciente.\nSplit temporal.\nSplit por centro.\nValidación externa.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#señales-de-alarma",
+    "href": "preprocessing/data-leakage.html#señales-de-alarma",
+    "title": "Data leakage",
+    "section": "Señales de alarma",
+    "text": "Señales de alarma\n\n\n\n\n\n\nWarningPosibles indicios de leakage\n\n\n\n\nAccuracy o ROC AUC casi perfectos.\nGran caída del rendimiento en validación externa.\nVariables administrativas entre las más importantes.\nRendimiento mucho peor al separar por paciente.\nRendimiento mucho peor con split temporal.\nVariables disponibles solo después del desenlace.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#flujo-recomendado",
+    "href": "preprocessing/data-leakage.html#flujo-recomendado",
+    "title": "Data leakage",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nDefinir claramente el desenlace.\nDefinir el momento de predicción.\nDefinir la unidad de análisis.\nIdentificar variables disponibles en ese momento.\nSeparar train y test.\nAjustar transformaciones solo con train.\nMantener grupos relacionados juntos.\nRespetar el orden temporal.\nEvaluar con una estrategia realista.\nRevisar clínicamente las variables más importantes.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#consideraciones-en-datos-clínicos",
+    "href": "preprocessing/data-leakage.html#consideraciones-en-datos-clínicos",
+    "title": "Data leakage",
+    "section": "Consideraciones en datos clínicos",
+    "text": "Consideraciones en datos clínicos\n\nMúltiples visitas\nNo mezclar visitas del mismo paciente entre train y test.\n\n\nIntervenciones posteriores\nLos tratamientos iniciados como consecuencia del deterioro no deben utilizarse para predecir ese deterioro.\n\n\nFrecuencia de medición\nLos pacientes más graves suelen tener más pruebas.\nEl número de mediciones puede actuar como marcador indirecto de gravedad y producir leakage o sesgo.\n\n\nDecisiones clínicas\nUna prueba puede haberse solicitado porque el clínico ya sospechaba el desenlace.\nEsto puede introducir información implícita sobre el target.\n\n\nValidación multicéntrica\nUn modelo puede aprender:\n\nEl centro.\nEl protocolo local.\nEl dispositivo.\nEl sistema de registro.\nLa práctica clínica.\n\nPor eso, la validación por centro puede revelar problemas ocultos.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#tabla-de-ejemplos",
+    "href": "preprocessing/data-leakage.html#tabla-de-ejemplos",
+    "title": "Data leakage",
+    "section": "Tabla de ejemplos",
+    "text": "Tabla de ejemplos\n\n\n\n\n\n\n\n\nSituación\n¿Hay leakage?\nMotivo\n\n\n\n\nEscalar antes del split\nSí\nTest influye en el escalado\n\n\nImputar dentro de un pipeline\nNo\nSe ajusta solo con train\n\n\nVarias visitas del paciente en train y test\nSí\nEl paciente aparece en ambos\n\n\nSplit por paciente\nNo\nSe mantienen grupos separados\n\n\nUtilizar tratamiento iniciado tras el evento\nSí\nInformación futura\n\n\nUtilizar edad basal\nNo\nDisponible en el momento índice\n\n\nAjustar hiperparámetros con test\nSí\nTest participa en decisiones\n\n\nEvaluar una sola vez con test\nNo\nUso correcto del test",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#errores-frecuentes",
+    "href": "preprocessing/data-leakage.html#errores-frecuentes",
+    "title": "Data leakage",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nPensar que leakage solo significa incluir el target.\nAjustar preprocesamiento antes del split.\nDividir por filas en datos longitudinales.\nUtilizar variables posteriores al evento.\nAjustar hiperparámetros con el test.\nSeleccionar variables con todo el dataset.\nAplicar SMOTE antes del split.\nIgnorar fechas de medición.\nUtilizar agregaciones calculadas con datos futuros.\nNo revisar variables administrativas.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#checklist-para-proyectos",
+    "href": "preprocessing/data-leakage.html#checklist-para-proyectos",
+    "title": "Data leakage",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe definido el desenlace.\nHe definido el momento exacto de predicción.\nTodas las variables están disponibles en ese momento.\nHe separado train y test antes del preprocesamiento.\nLa imputación se ajusta solo con train.\nEl escalado se ajusta solo con train.\nLa selección de variables se ajusta solo con train.\nPCA se ajusta solo con train.\nEl balanceo se aplica solo dentro de train.\nNo hay pacientes compartidos entre train y test.\nHe respetado el orden temporal.\nNo utilizo variables posteriores al evento.\nNo utilizo el test para elegir el modelo.\nHe revisado las variables más predictivas.\nHe considerado validación temporal o externa.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#recursos",
+    "href": "preprocessing/data-leakage.html#recursos",
+    "title": "Data leakage",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\nPipelines de scikit-learn.\nCross-validation de scikit-learn.\nGroup-based cross-validation.\nPipelines de imbalanced-learn.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
+    "objectID": "preprocessing/data-leakage.html#notas-personales",
+    "href": "preprocessing/data-leakage.html#notas-personales",
+    "title": "Data leakage",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus propios ejemplos de leakage, dudas y recordatorios.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Data leakage"
+    ]
+  },
+  {
     "objectID": "preprocessing/missing-data.html",
     "href": "preprocessing/missing-data.html",
     "title": "Valores ausentes",
@@ -581,829 +1824,6 @@
       "Inicio",
       "Preprocesamiento",
       "Valores ausentes"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html",
-    "href": "preprocessing/data-leakage.html",
-    "title": "Data leakage",
-    "section": "",
-    "text": "TipResumen en 30 segundos\n\n\n\nEl data leakage ocurre cuando el modelo utiliza información que no debería estar disponible en el momento real de hacer la predicción.\nEsto produce métricas artificialmente altas y modelos que parecen funcionar muy bien durante el desarrollo, pero fallan cuando se aplican a pacientes nuevos.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#qué-es-el-data-leakage",
-    "href": "preprocessing/data-leakage.html#qué-es-el-data-leakage",
-    "title": "Data leakage",
-    "section": "¿Qué es el data leakage?",
-    "text": "¿Qué es el data leakage?\nEl data leakage aparece cuando información del futuro, del conjunto de test o del desenlace entra directa o indirectamente en el proceso de entrenamiento.\nEl modelo recibe una ventaja injusta.\nNo aprende únicamente patrones generalizables: aprende información que en la práctica no estaría disponible.\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nUn modelo puede tener un ROC AUC excelente y, aun así, ser completamente inútil si existe data leakage.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#principales-tipos-de-leakage",
-    "href": "preprocessing/data-leakage.html#principales-tipos-de-leakage",
-    "title": "Data leakage",
-    "section": "Principales tipos de leakage",
-    "text": "Principales tipos de leakage\n\nTarget leakage\nOcurre cuando una variable predictora contiene información relacionada directamente con el desenlace.\nEjemplos:\n\nUtilizar el tratamiento iniciado después del diagnóstico para predecir ese diagnóstico.\nUtilizar una prueba solicitada como consecuencia del evento.\nUtilizar la fecha de alta para predecir la duración del ingreso.\nUtilizar una variable derivada del propio desenlace.\nUtilizar información registrada después del momento de predicción.\n\n\n\nTrain-test contamination\nOcurre cuando información del conjunto de test influye en el entrenamiento.\nEjemplos:\n\nImputar antes de separar train y test.\nEscalar antes del split.\nSeleccionar variables con todo el dataset.\nAjustar PCA con todos los datos.\nBalancear clases antes de separar.\nDefinir umbrales utilizando el test.\n\n\n\nLeakage entre pacientes o episodios relacionados\nOcurre cuando observaciones relacionadas aparecen en diferentes particiones.\nEjemplos:\n\nVarias visitas del mismo paciente en train y test.\nVarias imágenes del mismo estudio en diferentes conjuntos.\nDistintos ingresos del mismo paciente mezclados.\nMediciones repetidas de una misma muestra biológica.\n\n\n\nLeakage temporal\nOcurre cuando se utiliza información futura para predecir el pasado.\nEjemplos:\n\nUtilizar una analítica posterior al evento.\nCalcular una media con observaciones futuras.\nEntrenar con pacientes de 2025 y evaluar en pacientes de 2023.\nUtilizar un diagnóstico confirmado posteriormente.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#ejemplo-clínico",
-    "href": "preprocessing/data-leakage.html#ejemplo-clínico",
-    "title": "Data leakage",
-    "section": "Ejemplo clínico",
-    "text": "Ejemplo clínico\nImagina un modelo que predice si un paciente desarrollará cardiotoxicidad durante el tratamiento.\nPodrían producir leakage variables como:\n\nInicio de carvedilol después de detectar disfunción.\nSolicitud de una ecocardiografía adicional tras sospecha clínica.\nDiagnóstico de cardiotoxicidad registrado después del evento.\nValores de FEVI recogidos tras el momento que se quiere predecir.\nMarcadores calculados utilizando toda la trayectoria futura del paciente.\n\n\n\n\n\n\n\nWarningPregunta esencial\n\n\n\nPara cada variable, pregunta:\n¿Esta información estaría realmente disponible en el momento exacto en que quiero hacer la predicción?",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#ejemplo-incorrecto-escalar-antes-del-split",
-    "href": "preprocessing/data-leakage.html#ejemplo-incorrecto-escalar-antes-del-split",
-    "title": "Data leakage",
-    "section": "Ejemplo incorrecto: escalar antes del split",
-    "text": "Ejemplo incorrecto: escalar antes del split\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.model_selection import train_test_split\n\nscaler = StandardScaler()\n\nX_scaled = scaler.fit_transform(X)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_scaled,\n    y,\n    test_size=0.20,\n    random_state=42\n)\nAquí el escalador aprende la media y la desviación estándar utilizando también el conjunto de test.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#ejemplo-correcto",
-    "href": "preprocessing/data-leakage.html#ejemplo-correcto",
-    "title": "Data leakage",
-    "section": "Ejemplo correcto",
-    "text": "Ejemplo correcto\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.model_selection import train_test_split\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.20,\n    random_state=42\n)\n\nscaler = StandardScaler()\n\nX_train_scaled = scaler.fit_transform(X_train)\n\nX_test_scaled = scaler.transform(X_test)",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#ejemplo-recomendado-con-pipeline",
-    "href": "preprocessing/data-leakage.html#ejemplo-recomendado-con-pipeline",
-    "title": "Data leakage",
-    "section": "Ejemplo recomendado con pipeline",
-    "text": "Ejemplo recomendado con pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(strategy=\"median\")\n        ),\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nTodo lo que aprende parámetros a partir de los datos debe ajustarse únicamente con entrenamiento.\nEsto incluye imputación, escalado, selección de variables, PCA, encoding y balanceo.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#leakage-en-imputación",
-    "href": "preprocessing/data-leakage.html#leakage-en-imputación",
-    "title": "Data leakage",
-    "section": "Leakage en imputación",
-    "text": "Leakage en imputación\n\nIncorrecto\nfrom sklearn.impute import SimpleImputer\n\nimputer = SimpleImputer(strategy=\"median\")\n\nX_imputed = imputer.fit_transform(X)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_imputed,\n    y,\n    test_size=0.20,\n    random_state=42\n)\n\n\nCorrecto\nX_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.20,\n    random_state=42\n)\n\nimputer = SimpleImputer(strategy=\"median\")\n\nX_train_imputed = imputer.fit_transform(X_train)\n\nX_test_imputed = imputer.transform(X_test)",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#leakage-en-selección-de-variables",
-    "href": "preprocessing/data-leakage.html#leakage-en-selección-de-variables",
-    "title": "Data leakage",
-    "section": "Leakage en selección de variables",
-    "text": "Leakage en selección de variables\n\nIncorrecto\nfrom sklearn.feature_selection import SelectKBest\n\nselector = SelectKBest(k=10)\n\nX_selected = selector.fit_transform(X, y)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_selected,\n    y,\n    test_size=0.20,\n    random_state=42\n)\nAquí la selección de variables utiliza información del target de todo el dataset.\n\n\nCorrecto con pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.feature_selection import SelectKBest\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"selector\",\n            SelectKBest(k=10)\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#leakage-en-pca",
-    "href": "preprocessing/data-leakage.html#leakage-en-pca",
-    "title": "Data leakage",
-    "section": "Leakage en PCA",
-    "text": "Leakage en PCA\n\nIncorrecto\nfrom sklearn.decomposition import PCA\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_pca,\n    y,\n    test_size=0.20,\n    random_state=42\n)\n\n\nCorrecto\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"pca\",\n            PCA(n_components=0.95)\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#leakage-en-balanceo-de-clases",
-    "href": "preprocessing/data-leakage.html#leakage-en-balanceo-de-clases",
-    "title": "Data leakage",
-    "section": "Leakage en balanceo de clases",
-    "text": "Leakage en balanceo de clases\nTécnicas como SMOTE deben aplicarse únicamente dentro del entrenamiento.\n\nIncorrecto\nfrom imblearn.over_sampling import SMOTE\n\nsmote = SMOTE(random_state=42)\n\nX_resampled, y_resampled = smote.fit_resample(X, y)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_resampled,\n    y_resampled,\n    test_size=0.20,\n    random_state=42\n)\n\n\nCorrecto\nfrom imblearn.pipeline import Pipeline\nfrom imblearn.over_sampling import SMOTE\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"smote\",\n            SMOTE(random_state=42)\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#leakage-por-paciente",
-    "href": "preprocessing/data-leakage.html#leakage-por-paciente",
-    "title": "Data leakage",
-    "section": "Leakage por paciente",
-    "text": "Leakage por paciente\nSi un paciente tiene varias filas, no debe aparecer en train y test.\n\nComprobación básica\ntrain_patients = set(\n    df.loc[train_idx, \"patient_id\"]\n)\n\ntest_patients = set(\n    df.loc[test_idx, \"patient_id\"]\n)\n\noverlap = train_patients.intersection(\n    test_patients\n)\n\nprint(\n    f\"Pacientes presentes en ambos conjuntos: {len(overlap)}\"\n)\nLa salida correcta debería ser:\nPacientes presentes en ambos conjuntos: 0\n\n\n\n\n\n\nCautionError frecuente\n\n\n\nDividir por filas cuando existen varias observaciones por paciente puede generar métricas muy optimistas.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#leakage-temporal-1",
-    "href": "preprocessing/data-leakage.html#leakage-temporal-1",
-    "title": "Data leakage",
-    "section": "Leakage temporal",
-    "text": "Leakage temporal\nUna variable puede ser perfectamente válida desde el punto de vista estadístico y, aun así, ser inválida temporalmente.\nEjemplo:\nQuieres predecir cardiotoxicidad en la visita basal.\nNo puedes utilizar:\n\nEcocardiografías posteriores.\nTratamientos iniciados tras el deterioro.\nBiomarcadores recogidos después del evento.\nDiagnósticos confirmados en seguimientos futuros.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#definir-un-tiempo-índice",
-    "href": "preprocessing/data-leakage.html#definir-un-tiempo-índice",
-    "title": "Data leakage",
-    "section": "Definir un tiempo índice",
-    "text": "Definir un tiempo índice\nEn proyectos longitudinales conviene definir un tiempo índice.\nEs el momento exacto en el que se realiza la predicción.\nPor ejemplo:\n\nFecha de ingreso.\nInicio del tratamiento.\nPrimera valoración cardiovascular.\nDía de cirugía.\nMomento de alta.\n\nTodas las variables predictoras deben estar disponibles antes o en ese momento.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#ejemplo-de-filtrado-temporal",
-    "href": "preprocessing/data-leakage.html#ejemplo-de-filtrado-temporal",
-    "title": "Data leakage",
-    "section": "Ejemplo de filtrado temporal",
-    "text": "Ejemplo de filtrado temporal\nfeatures_df = measurements.loc[\n    measurements[\"measurement_date\"]\n    &lt;= measurements[\"prediction_date\"]\n].copy()\nEn proyectos reales, normalmente será necesario definir ventanas temporales específicas.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#variables-sospechosas",
-    "href": "preprocessing/data-leakage.html#variables-sospechosas",
-    "title": "Data leakage",
-    "section": "Variables sospechosas",
-    "text": "Variables sospechosas\nAlgunas variables merecen especial revisión:\n\nFecha de alta.\nDuración total del ingreso.\nDiagnóstico final.\nTratamientos de rescate.\nVariables de resultado.\nEstado al final del seguimiento.\nPruebas solicitadas tras una sospecha clínica.\nVariables calculadas usando toda la trayectoria.\nCampos administrativos cerrados después del evento.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#leakage-en-datos-derivados",
-    "href": "preprocessing/data-leakage.html#leakage-en-datos-derivados",
-    "title": "Data leakage",
-    "section": "Leakage en datos derivados",
-    "text": "Leakage en datos derivados\nTambién puede aparecer en variables que parecen inocentes.\nEjemplos:\n\nMedia de todas las analíticas del ingreso.\nMáximo valor observado durante todo el seguimiento.\nNúmero total de pruebas realizadas.\nNúmero total de reingresos.\nÚltima FEVI disponible.\nTiempo hasta el evento.\n\nSi estas variables usan información posterior al momento de predicción, producen leakage.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#cómo-detectar-data-leakage",
-    "href": "preprocessing/data-leakage.html#cómo-detectar-data-leakage",
-    "title": "Data leakage",
-    "section": "Cómo detectar data leakage",
-    "text": "Cómo detectar data leakage\n\nRevisar el proceso clínico\nPregunta cuándo y por qué se genera cada variable.\n\n\nRevisar las fechas\nComprueba que las variables predictoras sean anteriores al tiempo índice.\n\n\nRevisar el pipeline\nVerifica que todos los pasos se ajusten únicamente con entrenamiento.\n\n\nComparar resultados sospechosamente altos\nUn rendimiento casi perfecto en un problema complejo puede indicar leakage.\n\n\nRevisar variables demasiado predictivas\nUna variable con poder predictivo extremo merece una revisión clínica y temporal.\n\n\nEvaluar con una partición más realista\nPrueba:\n\nSplit por paciente.\nSplit temporal.\nSplit por centro.\nValidación externa.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#señales-de-alarma",
-    "href": "preprocessing/data-leakage.html#señales-de-alarma",
-    "title": "Data leakage",
-    "section": "Señales de alarma",
-    "text": "Señales de alarma\n\n\n\n\n\n\nWarningPosibles indicios de leakage\n\n\n\n\nAccuracy o ROC AUC casi perfectos.\nGran caída del rendimiento en validación externa.\nVariables administrativas entre las más importantes.\nRendimiento mucho peor al separar por paciente.\nRendimiento mucho peor con split temporal.\nVariables disponibles solo después del desenlace.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#flujo-recomendado",
-    "href": "preprocessing/data-leakage.html#flujo-recomendado",
-    "title": "Data leakage",
-    "section": "Flujo recomendado",
-    "text": "Flujo recomendado\n\nDefinir claramente el desenlace.\nDefinir el momento de predicción.\nDefinir la unidad de análisis.\nIdentificar variables disponibles en ese momento.\nSeparar train y test.\nAjustar transformaciones solo con train.\nMantener grupos relacionados juntos.\nRespetar el orden temporal.\nEvaluar con una estrategia realista.\nRevisar clínicamente las variables más importantes.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#consideraciones-en-datos-clínicos",
-    "href": "preprocessing/data-leakage.html#consideraciones-en-datos-clínicos",
-    "title": "Data leakage",
-    "section": "Consideraciones en datos clínicos",
-    "text": "Consideraciones en datos clínicos\n\nMúltiples visitas\nNo mezclar visitas del mismo paciente entre train y test.\n\n\nIntervenciones posteriores\nLos tratamientos iniciados como consecuencia del deterioro no deben utilizarse para predecir ese deterioro.\n\n\nFrecuencia de medición\nLos pacientes más graves suelen tener más pruebas.\nEl número de mediciones puede actuar como marcador indirecto de gravedad y producir leakage o sesgo.\n\n\nDecisiones clínicas\nUna prueba puede haberse solicitado porque el clínico ya sospechaba el desenlace.\nEsto puede introducir información implícita sobre el target.\n\n\nValidación multicéntrica\nUn modelo puede aprender:\n\nEl centro.\nEl protocolo local.\nEl dispositivo.\nEl sistema de registro.\nLa práctica clínica.\n\nPor eso, la validación por centro puede revelar problemas ocultos.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#tabla-de-ejemplos",
-    "href": "preprocessing/data-leakage.html#tabla-de-ejemplos",
-    "title": "Data leakage",
-    "section": "Tabla de ejemplos",
-    "text": "Tabla de ejemplos\n\n\n\n\n\n\n\n\nSituación\n¿Hay leakage?\nMotivo\n\n\n\n\nEscalar antes del split\nSí\nTest influye en el escalado\n\n\nImputar dentro de un pipeline\nNo\nSe ajusta solo con train\n\n\nVarias visitas del paciente en train y test\nSí\nEl paciente aparece en ambos\n\n\nSplit por paciente\nNo\nSe mantienen grupos separados\n\n\nUtilizar tratamiento iniciado tras el evento\nSí\nInformación futura\n\n\nUtilizar edad basal\nNo\nDisponible en el momento índice\n\n\nAjustar hiperparámetros con test\nSí\nTest participa en decisiones\n\n\nEvaluar una sola vez con test\nNo\nUso correcto del test",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#errores-frecuentes",
-    "href": "preprocessing/data-leakage.html#errores-frecuentes",
-    "title": "Data leakage",
-    "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nPensar que leakage solo significa incluir el target.\nAjustar preprocesamiento antes del split.\nDividir por filas en datos longitudinales.\nUtilizar variables posteriores al evento.\nAjustar hiperparámetros con el test.\nSeleccionar variables con todo el dataset.\nAplicar SMOTE antes del split.\nIgnorar fechas de medición.\nUtilizar agregaciones calculadas con datos futuros.\nNo revisar variables administrativas.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#checklist-para-proyectos",
-    "href": "preprocessing/data-leakage.html#checklist-para-proyectos",
-    "title": "Data leakage",
-    "section": "Checklist para proyectos",
-    "text": "Checklist para proyectos\n\nHe definido el desenlace.\nHe definido el momento exacto de predicción.\nTodas las variables están disponibles en ese momento.\nHe separado train y test antes del preprocesamiento.\nLa imputación se ajusta solo con train.\nEl escalado se ajusta solo con train.\nLa selección de variables se ajusta solo con train.\nPCA se ajusta solo con train.\nEl balanceo se aplica solo dentro de train.\nNo hay pacientes compartidos entre train y test.\nHe respetado el orden temporal.\nNo utilizo variables posteriores al evento.\nNo utilizo el test para elegir el modelo.\nHe revisado las variables más predictivas.\nHe considerado validación temporal o externa.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#recursos",
-    "href": "preprocessing/data-leakage.html#recursos",
-    "title": "Data leakage",
-    "section": "Recursos",
-    "text": "Recursos\n\nDocumentación\n\nPipelines de scikit-learn.\nCross-validation de scikit-learn.\nGroup-based cross-validation.\nPipelines de imbalanced-learn.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "preprocessing/data-leakage.html#notas-personales",
-    "href": "preprocessing/data-leakage.html#notas-personales",
-    "title": "Data leakage",
-    "section": "Notas personales",
-    "text": "Notas personales\nAñade aquí tus propios ejemplos de leakage, dudas y recordatorios.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Data leakage"
-    ]
-  },
-  {
-    "objectID": "foundations/index.html",
-    "href": "foundations/index.html",
-    "title": "Fundamentos",
-    "section": "",
-    "text": "Esta sección reúne los conceptos y procedimientos necesarios antes de entrenar modelos de machine learning.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "foundations/index.html#contenidos",
-    "href": "foundations/index.html#contenidos",
-    "title": "Fundamentos",
-    "section": "Contenidos",
-    "text": "Contenidos\n\nExploración de datos\nPreparación y limpieza de datos\nValores ausentes\nCodificación de variables categóricas\nEscalado y normalización\nSeparación entre entrenamiento, validación y prueba\nEvaluación de modelos\nPrevención de data leakage",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html",
-    "href": "dimensionality-reduction/pca.html",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "",
-    "text": "TipResumen en 30 segundos\n\n\n\nPCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.\nCada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#qué-problema-resuelve",
-    "href": "dimensionality-reduction/pca.html#qué-problema-resuelve",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "¿Qué problema resuelve?",
-    "text": "¿Qué problema resuelve?\nEn muchos datasets existen numerosas variables que contienen información parcialmente redundante.\nPor ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:\n\nPeso.\nAltura.\nÍndice de masa corporal.\nSuperficie corporal.\nPerímetros corporales.\n\nEstas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.\nPCA puede utilizarse para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nPCA no selecciona variables originales. Crea variables nuevas llamadas componentes principales.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#intuición",
-    "href": "dimensionality-reduction/pca.html#intuición",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Intuición",
-    "text": "Intuición\nImagina una nube de puntos formada por dos variables correlacionadas.\nAunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.\nPCA encuentra esa dirección y la convierte en el primer componente principal.\nEl segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.\nDe este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#fundamentos-teóricos",
-    "href": "dimensionality-reduction/pca.html#fundamentos-teóricos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Fundamentos teóricos",
-    "text": "Fundamentos teóricos\n\nComponentes principales\nCada componente principal es una combinación lineal de las variables originales.\nPara un dataset con variables \\(x_1, x_2, \\ldots, x_p\\), el primer componente puede expresarse como:\n\\[\nPC_1 = w_{11}x_1 + w_{12}x_2 + \\cdots + w_{1p}x_p\n\\]\nEl segundo componente se expresa como:\n\\[\nPC_2 = w_{21}x_1 + w_{22}x_2 + \\cdots + w_{2p}x_p\n\\]\nLos coeficientes \\(w\\) se denominan pesos o loadings.\n\n\nVarianza explicada\nCada componente explica una parte de la varianza total del dataset.\nLa proporción de varianza explicada por el componente \\(j\\) puede expresarse como:\n\\[\n\\text{Explained variance ratio}_j =\n\\frac{\\lambda_j}\n{\\sum_{k=1}^{p}\\lambda_k}\n\\]\ndonde \\(\\lambda_j\\) es el autovalor asociado al componente \\(j\\).\n\n\nVarianza explicada acumulada\nLa varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.\nPor ejemplo:\n\n1 componente: 45 %.\n2 componentes: 68 %.\n3 componentes: 82 %.\n4 componentes: 91 %.\n\nEn este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.\n\n\n\n\n\n\nWarningImportante\n\n\n\nUn componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
-    "href": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "¿Por qué es importante escalar?",
-    "text": "¿Por qué es importante escalar?\nPCA está influido por la escala de las variables.\nImagina estas variables:\n\nEdad, medida en años.\nTroponina, medida con valores pequeños.\nPresión arterial, medida en mmHg.\n\nUna variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.\nPor eso, antes de aplicar PCA suele utilizarse:\nStandardScaler()\nEl escalado transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
-    "href": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Supuestos y condiciones",
-    "text": "Supuestos y condiciones\nPCA funciona mejor cuando:\n\nLas variables son numéricas.\nExisten relaciones aproximadamente lineales.\nLas variables contienen varianza informativa.\nHay correlación entre algunas variables.\nLos valores extremos han sido revisados.\nLas escalas se han tratado adecuadamente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
-    "href": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Cuándo utilizar PCA",
-    "text": "Cuándo utilizar PCA\nPCA puede ser adecuado cuando:\n\nTienes muchas variables numéricas correlacionadas.\nQuieres reducir el número de variables.\nQuieres visualizar observaciones en dos o tres dimensiones.\nQuieres reducir multicolinealidad.\nQuieres comprimir información antes de otro modelo.\nQuieres explorar patrones latentes.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
-    "href": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Cuándo no utilizar PCA",
-    "text": "Cuándo no utilizar PCA\nPCA puede no ser adecuado cuando:\n\nNecesitas interpretar directamente cada variable original.\nLas relaciones entre variables son principalmente no lineales.\nLa mayoría de las variables son categóricas.\nTienes muy pocas variables.\nLos componentes son difíciles de justificar clínicamente.\nEl objetivo es seleccionar variables originales, no transformarlas.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
-    "href": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Flujo de trabajo recomendado",
-    "text": "Flujo de trabajo recomendado\n\nSeleccionar únicamente variables numéricas relevantes.\nRevisar valores ausentes.\nRevisar valores extremos.\nSeparar entrenamiento y prueba si PCA forma parte de un modelo predictivo.\nImputar valores ausentes utilizando solo entrenamiento.\nEscalar las variables utilizando solo entrenamiento.\nAjustar PCA utilizando solo entrenamiento.\nElegir el número de componentes.\nTransformar entrenamiento y prueba.\nInterpretar la varianza explicada y los loadings.\nEvaluar el impacto en el modelo posterior.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#código-mínimo",
-    "href": "dimensionality-reduction/pca.html#código-mínimo",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Código mínimo",
-    "text": "Código mínimo\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(pca.explained_variance_ratio_)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
-    "href": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Seleccionar componentes según varianza explicada",
-    "text": "Seleccionar componentes según varianza explicada\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(f\"Número de componentes: {pca.n_components_}\")\nprint(\n    \"Varianza explicada acumulada:\",\n    pca.explained_variance_ratio_.sum()\n)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
-    "href": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Implementación segura dentro de un pipeline",
-    "text": "Implementación segura dentro de un pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\"imputer\", SimpleImputer(strategy=\"median\")),\n        (\"scaler\", StandardScaler()),\n        (\"pca\", PCA(n_components=0.95)),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nCautionError frecuente: data leakage\n\n\n\nNo ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.\nEl pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
-    "href": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Inspeccionar la varianza explicada",
-    "text": "Inspeccionar la varianza explicada\nimport pandas as pd\n\nexplained_variance = pd.DataFrame(\n    {\n        \"component\": range(\n            1,\n            len(pca.explained_variance_ratio_) + 1\n        ),\n        \"explained_variance_ratio\":\n            pca.explained_variance_ratio_,\n        \"cumulative_explained_variance\":\n            pca.explained_variance_ratio_.cumsum()\n    }\n)\n\ndisplay(explained_variance)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#interpretar-los-loadings",
-    "href": "dimensionality-reduction/pca.html#interpretar-los-loadings",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Interpretar los loadings",
-    "text": "Interpretar los loadings\nimport pandas as pd\n\nloadings = pd.DataFrame(\n    pca.components_.T,\n    index=X.columns,\n    columns=[\n        f\"PC{i}\"\n        for i in range(\n            1,\n            pca.n_components_ + 1\n        )\n    ]\n)\n\ndisplay(loadings)\nUn valor absoluto elevado indica que la variable tiene una contribución importante al componente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
-    "href": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Consideraciones en datos clínicos",
-    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nPCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.\n\n\n\nMediciones repetidas\nSi un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.\n\n\nValores ausentes\nLa ausencia de una prueba puede estar relacionada con:\n\nLa gravedad.\nLa indicación clínica.\nEl centro.\nEl momento del seguimiento.\nLa disponibilidad de recursos.\n\n\n\nDiferencias entre centros\nPCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:\n\nEquipos.\nUnidades.\nProtocolos.\nPoblaciones.\nMétodos de laboratorio.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#errores-frecuentes",
-    "href": "dimensionality-reduction/pca.html#errores-frecuentes",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nAplicar PCA antes de separar entrenamiento y prueba.\nEscalar utilizando todo el dataset.\nNo escalar variables con unidades diferentes.\nAplicar PCA directamente a variables categóricas.\nInterpretar los componentes como variables clínicas reales.\nPensar que más varianza explicada siempre implica mejor predicción.\nIgnorar valores extremos que dominan los componentes.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#checklist-para-proyectos",
-    "href": "dimensionality-reduction/pca.html#checklist-para-proyectos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Checklist para proyectos",
-    "text": "Checklist para proyectos\n\nLas variables son numéricas.\nHe revisado valores ausentes.\nHe revisado valores extremos.\nHe separado entrenamiento y prueba.\nLa separación se ha realizado por paciente cuando corresponde.\nLa imputación se ajusta solo con entrenamiento.\nEl escalado se ajusta solo con entrenamiento.\nPCA se ajusta solo con entrenamiento.\nHe revisado la varianza explicada.\nHe revisado los loadings.\nHe considerado la interpretabilidad clínica.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "deep-learning/index.html",
-    "href": "deep-learning/index.html",
-    "title": "Deep learning",
-    "section": "",
-    "text": "Esta sección reunirá los fundamentos y modelos de deep learning que se añadirán durante el próximo curso.",
-    "crumbs": [
-      "Inicio",
-      "Deep learning",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "deep-learning/index.html#contenidos-previstos",
-    "href": "deep-learning/index.html#contenidos-previstos",
-    "title": "Deep learning",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Deep learning",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "Sobre el proyecto",
-    "section": "",
-    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
-    "crumbs": [
-      "Inicio",
-      "Sobre el proyecto"
-    ]
-  },
-  {
-    "objectID": "code-recipes/index.html",
-    "href": "code-recipes/index.html",
-    "title": "Recetario de código",
-    "section": "",
-    "text": "Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.",
-    "crumbs": [
-      "Inicio",
-      "Recetario de código",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "code-recipes/index.html#contenidos-previstos",
-    "href": "code-recipes/index.html#contenidos-previstos",
-    "title": "Recetario de código",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Recetario de código",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/index.html",
-    "href": "dimensionality-reduction/index.html",
-    "title": "Reducción de dimensionalidad",
-    "section": "",
-    "text": "Esta sección reúne métodos para reducir el número de variables conservando la mayor cantidad posible de información.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/index.html#contenidos-previstos",
-    "href": "dimensionality-reduction/index.html#contenidos-previstos",
-    "title": "Reducción de dimensionalidad",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html",
-    "href": "foundations/data-exploration.html",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "",
-    "text": "La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#resumen",
-    "href": "foundations/data-exploration.html#resumen",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "",
-    "text": "La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#objetivos-principales",
-    "href": "foundations/data-exploration.html#objetivos-principales",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Objetivos principales",
-    "text": "Objetivos principales\n\nComprender qué representa cada fila y cada columna.\nIdentificar los tipos de variables.\nDetectar valores ausentes.\nEstudiar la distribución de las variables.\nLocalizar valores extremos o potencialmente erróneos.\nAnalizar relaciones entre variables.\nDetectar posibles problemas de calidad de datos.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#checklist-inicial",
-    "href": "foundations/data-exploration.html#checklist-inicial",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Checklist inicial",
-    "text": "Checklist inicial\nAntes de entrenar un modelo, conviene responder:\n\n¿Cuál es la unidad de análisis?\n¿Cuántas observaciones hay?\n¿Existen observaciones duplicadas?\n¿Qué variable queremos predecir?\n¿Qué variables son numéricas?\n¿Qué variables son categóricas?\n¿Hay valores ausentes?\n¿Existen valores imposibles?\n¿Puede haber información futura o data leakage?",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#código-básico",
-    "href": "foundations/data-exploration.html#código-básico",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Código básico",
-    "text": "Código básico\nimport pandas as pd\n\ndf = pd.read_csv(\"datos.csv\")\n\nprint(f\"Dimensiones del dataset: {df.shape}\")\n\ndisplay(df.head())\n\ndf.info()\n\ndisplay(df.describe(include=\"all\").T)",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#valores-ausentes",
-    "href": "foundations/data-exploration.html#valores-ausentes",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Valores ausentes",
-    "text": "Valores ausentes\nmissing_summary = (\n    df.isna()\n    .sum()\n    .to_frame(\"missing_count\")\n    .assign(\n        missing_percentage=lambda x:\n        100 * x[\"missing_count\"] / len(df)\n    )\n    .sort_values(\n        \"missing_percentage\",\n        ascending=False\n    )\n)\n\ndisplay(missing_summary)",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#filas-duplicadas",
-    "href": "foundations/data-exploration.html#filas-duplicadas",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Filas duplicadas",
-    "text": "Filas duplicadas\nn_duplicates = df.duplicated().sum()\n\nprint(f\"Número de filas duplicadas: {n_duplicates}\")",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#tipos-de-variables",
-    "href": "foundations/data-exploration.html#tipos-de-variables",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Tipos de variables",
-    "text": "Tipos de variables\nvariable_types = (\n    df.dtypes\n    .astype(str)\n    .to_frame(\"data_type\")\n)\n\ndisplay(variable_types)",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#número-de-valores-únicos",
-    "href": "foundations/data-exploration.html#número-de-valores-únicos",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Número de valores únicos",
-    "text": "Número de valores únicos\nunique_values = (\n    df.nunique(dropna=False)\n    .to_frame(\"unique_values\")\n    .sort_values(\n        \"unique_values\",\n        ascending=True\n    )\n)\n\ndisplay(unique_values)",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#variables-numéricas-y-categóricas",
-    "href": "foundations/data-exploration.html#variables-numéricas-y-categóricas",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Variables numéricas y categóricas",
-    "text": "Variables numéricas y categóricas\nnumeric_columns = df.select_dtypes(\n    include=\"number\"\n).columns.tolist()\n\ncategorical_columns = df.select_dtypes(\n    include=[\"object\", \"category\", \"bool\"]\n).columns.tolist()\n\nprint(\"Variables numéricas:\")\nprint(numeric_columns)\n\nprint(\"\\nVariables categóricas:\")\nprint(categorical_columns)",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#consideraciones-en-datos-clínicos",
-    "href": "foundations/data-exploration.html#consideraciones-en-datos-clínicos",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Consideraciones en datos clínicos",
-    "text": "Consideraciones en datos clínicos\nEn datos sanitarios, un valor ausente no siempre significa que la información se haya perdido. Puede indicar que:\n\nLa prueba no estaba clínicamente indicada.\nEl paciente no acudió a la visita.\nEl dato se registró en otro sistema.\nLa prueba se realizó, pero no se importó correctamente.\nEl procedimiento no estaba disponible en ese momento.\nLa ausencia del dato está relacionada con el estado clínico del paciente.\nEl profesional decidió no solicitar la prueba porque ya disponía de información suficiente.\n\nPor este motivo, el mecanismo que genera los valores ausentes debe investigarse antes de eliminarlos o imputarlos.\nTambién es importante revisar:\n\nValores clínicamente imposibles.\nDiferencias de unidades entre centros.\nCambios en los métodos de medición.\nDuplicados asociados a distintas visitas.\nFechas incoherentes.\nVariables registradas después del desenlace.\nInformación que pueda producir data leakage.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#buenas-prácticas",
-    "href": "foundations/data-exploration.html#buenas-prácticas",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Buenas prácticas",
-    "text": "Buenas prácticas\nAntes de comenzar el modelado:\n\nComprender qué representa cada fila.\nIdentificar la variable objetivo.\nRevisar la calidad de las variables predictoras.\nDetectar duplicados y valores imposibles.\nAnalizar los valores ausentes.\nComprobar la distribución de las variables.\nSeparar los datos de entrenamiento y prueba antes de ajustar transformaciones.\nEvitar utilizar información futura para predecir eventos pasados.\nDocumentar todas las decisiones de limpieza y transformación.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#errores-frecuentes",
-    "href": "foundations/data-exploration.html#errores-frecuentes",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nEmpezar a entrenar modelos sin comprender el dataset.\nEliminar todos los valores ausentes automáticamente.\nConsiderar todos los valores extremos como errores.\nUtilizar identificadores de pacientes como variables predictoras.\nIncluir variables registradas después del desenlace.\nCalcular transformaciones utilizando todo el dataset antes de separar entrenamiento y prueba.\nInterpretar una correlación como una relación causal.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Health Data Science Handbook",
-    "section": "",
-    "text": "Esta web es mi manual personal de consulta sobre:\n\nMachine learning\nDeep learning\nEstadística\nSeries temporales\nAnálisis de datos clínicos\n\nEl objetivo es reunir explicaciones teóricas, ejemplos prácticos y código reutilizable para futuros proyectos.",
-    "crumbs": [
-      "Inicio"
-    ]
-  },
-  {
-    "objectID": "index.html#bienvenido",
-    "href": "index.html#bienvenido",
-    "title": "Health Data Science Handbook",
-    "section": "",
-    "text": "Esta web es mi manual personal de consulta sobre:\n\nMachine learning\nDeep learning\nEstadística\nSeries temporales\nAnálisis de datos clínicos\n\nEl objetivo es reunir explicaciones teóricas, ejemplos prácticos y código reutilizable para futuros proyectos.",
-    "crumbs": [
-      "Inicio"
-    ]
-  },
-  {
-    "objectID": "preprocessing/index.html",
-    "href": "preprocessing/index.html",
-    "title": "Preprocesamiento",
-    "section": "",
-    "text": "Esta sección reúne las técnicas necesarias para limpiar, transformar y preparar los datos antes del modelado.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "preprocessing/index.html#contenidos-previstos",
-    "href": "preprocessing/index.html#contenidos-previstos",
-    "title": "Preprocesamiento",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Introducción"
     ]
   },
   {
