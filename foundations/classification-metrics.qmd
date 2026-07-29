@@ -1,0 +1,1244 @@
+---
+title: "Métricas de clasificación"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Las métricas de clasificación evalúan distintos tipos de acierto y error.
+
+No existe una única métrica válida para todos los problemas.
+
+La elección depende de:
+
+- El balance de clases.
+- El coste de los falsos positivos.
+- El coste de los falsos negativos.
+- El uso clínico de la predicción.
+- El umbral de decisión.
+:::
+
+## ¿Qué evalúa un modelo de clasificación?
+
+Un modelo de clasificación intenta asignar una observación a una clase.
+
+Ejemplos:
+
+- Evento cardiovascular: sí o no.
+- Reingreso: sí o no.
+- Riesgo bajo, medio o alto.
+- Diagnóstico A, B o C.
+- Respuesta al tratamiento: completa, parcial o ausente.
+
+En clasificación binaria suele haber:
+
+- Clase positiva.
+- Clase negativa.
+
+La clase positiva debería representar el evento clínicamente relevante.
+
+::: {.callout-note}
+## Idea clave
+
+Antes de calcular métricas, define claramente qué clase se considera positiva.
+:::
+
+## Matriz de confusión
+
+La matriz de confusión resume los aciertos y errores.
+
+| | Predicción positiva | Predicción negativa |
+|---|---:|---:|
+| Real positiva | True Positive | False Negative |
+| Real negativa | False Positive | True Negative |
+
+Abreviaturas:
+
+- TP: true positives.
+- TN: true negatives.
+- FP: false positives.
+- FN: false negatives.
+
+## Calcular la matriz de confusión
+
+```python
+from sklearn.metrics import confusion_matrix
+
+cm = confusion_matrix(
+    y_test,
+    y_pred
+)
+
+print(cm)
+```
+
+## Visualizarla
+
+```python
+from sklearn.metrics import ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
+ConfusionMatrixDisplay.from_predictions(
+    y_test,
+    y_pred
+)
+
+plt.title("Matriz de confusión")
+plt.show()
+```
+
+## Interpretación clínica
+
+### True positive
+
+El modelo identifica correctamente un paciente con evento.
+
+### True negative
+
+El modelo identifica correctamente un paciente sin evento.
+
+### False positive
+
+El modelo predice evento, pero el evento no ocurre.
+
+Puede generar:
+
+- Pruebas innecesarias.
+- Derivaciones.
+- Ansiedad.
+- Costes.
+- Tratamientos evitables.
+
+### False negative
+
+El modelo predice ausencia de evento, pero el evento ocurre.
+
+Puede generar:
+
+- Retraso diagnóstico.
+- Falta de vigilancia.
+- Omisión de tratamiento.
+- Daño clínico.
+
+::: {.callout-warning}
+## Importante
+
+La gravedad de FP y FN depende del contexto.
+
+No existe una métrica universalmente superior.
+:::
+
+## Accuracy
+
+Accuracy es la proporción total de predicciones correctas.
+
+$$
+\text{Accuracy}
+=
+\frac{TP + TN}
+{TP + TN + FP + FN}
+$$
+
+```python
+from sklearn.metrics import accuracy_score
+
+accuracy = accuracy_score(
+    y_test,
+    y_pred
+)
+
+print(
+    f"Accuracy: {accuracy:.3f}"
+)
+```
+
+## Limitación con clases desbalanceadas
+
+Si el 95 % de los pacientes no presenta el evento, un modelo que predice siempre “no evento” obtiene:
+
+```text
+Accuracy = 95 %
+```
+
+pero no detecta ningún caso positivo.
+
+::: {.callout-caution}
+## Riesgo
+
+Una accuracy alta puede ocultar un modelo clínicamente inútil.
+:::
+
+## Sensibilidad
+
+También se llama:
+
+- Recall de la clase positiva.
+- True positive rate.
+- TPR.
+
+Mide la proporción de casos positivos detectados.
+
+$$
+\text{Sensibilidad}
+=
+\frac{TP}
+{TP + FN}
+$$
+
+```python
+from sklearn.metrics import recall_score
+
+sensitivity = recall_score(
+    y_test,
+    y_pred
+)
+
+print(
+    f"Sensibilidad: "
+    f"{sensitivity:.3f}"
+)
+```
+
+Una sensibilidad alta significa pocos falsos negativos.
+
+## Especificidad
+
+Mide la proporción de casos negativos correctamente identificados.
+
+$$
+\text{Especificidad}
+=
+\frac{TN}
+{TN + FP}
+$$
+
+```python
+tn, fp, fn, tp = confusion_matrix(
+    y_test,
+    y_pred
+).ravel()
+
+specificity = tn / (
+    tn + fp
+)
+
+print(
+    f"Especificidad: "
+    f"{specificity:.3f}"
+)
+```
+
+Una especificidad alta significa pocos falsos positivos.
+
+## Precision
+
+También se llama positive predictive value.
+
+Mide qué proporción de las predicciones positivas es correcta.
+
+$$
+\text{Precision}
+=
+\frac{TP}
+{TP + FP}
+$$
+
+```python
+from sklearn.metrics import precision_score
+
+precision = precision_score(
+    y_test,
+    y_pred
+)
+
+print(
+    f"Precision: {precision:.3f}"
+)
+```
+
+## Recall
+
+En clasificación binaria, recall de la clase positiva equivale a sensibilidad.
+
+```python
+from sklearn.metrics import recall_score
+
+recall = recall_score(
+    y_test,
+    y_pred
+)
+```
+
+## Diferencia entre precision y recall
+
+### Recall alto
+
+El modelo encuentra la mayoría de los positivos.
+
+Puede producir más falsos positivos.
+
+### Precision alta
+
+Cuando el modelo predice positivo, suele acertar.
+
+Puede dejar escapar positivos reales.
+
+## F1-score
+
+F1 combina precision y recall mediante la media armónica.
+
+$$
+F_1
+=
+2
+\cdot
+\frac{
+\text{Precision}
+\cdot
+\text{Recall}
+}{
+\text{Precision}
++
+\text{Recall}
+}
+$$
+
+```python
+from sklearn.metrics import f1_score
+
+f1 = f1_score(
+    y_test,
+    y_pred
+)
+
+print(
+    f"F1-score: {f1:.3f}"
+)
+```
+
+F1 puede ser útil cuando:
+
+- Hay clases desbalanceadas.
+- Importan FP y FN.
+- Se quiere un único resumen.
+
+## Balanced accuracy
+
+Balanced accuracy promedia sensibilidad y especificidad.
+
+$$
+\text{Balanced accuracy}
+=
+\frac{
+\text{Sensibilidad}
++
+\text{Especificidad}
+}{2}
+$$
+
+```python
+from sklearn.metrics import balanced_accuracy_score
+
+balanced_accuracy = balanced_accuracy_score(
+    y_test,
+    y_pred
+)
+
+print(
+    f"Balanced accuracy: "
+    f"{balanced_accuracy:.3f}"
+)
+```
+
+Es más informativa que accuracy cuando las clases están desbalanceadas.
+
+## Classification report
+
+```python
+from sklearn.metrics import classification_report
+
+report = classification_report(
+    y_test,
+    y_pred
+)
+
+print(report)
+```
+
+Incluye:
+
+- Precision.
+- Recall.
+- F1-score.
+- Support.
+
+## Support
+
+Support es el número de observaciones reales de cada clase.
+
+Es importante porque una métrica basada en pocos casos puede ser inestable.
+
+## Probabilidades y clases
+
+Muchos modelos producen probabilidades.
+
+```python
+y_probability = model.predict_proba(
+    X_test
+)[:, 1]
+```
+
+Después se aplica un umbral.
+
+```python
+threshold = 0.50
+
+y_pred = (
+    y_probability >= threshold
+).astype(int)
+```
+
+## El umbral modifica las métricas
+
+Con un umbral más bajo:
+
+- Aumenta la sensibilidad.
+- Disminuye la especificidad.
+- Suelen aumentar los falsos positivos.
+
+Con un umbral más alto:
+
+- Disminuye la sensibilidad.
+- Aumenta la especificidad.
+- Suelen aumentar los falsos negativos.
+
+::: {.callout-important}
+## Regla práctica
+
+El umbral de 0.50 es una convención, no una ley.
+:::
+
+## Evaluar varios umbrales
+
+```python
+import pandas as pd
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+
+rows = []
+
+for threshold in [
+    0.10,
+    0.20,
+    0.30,
+    0.40,
+    0.50,
+    0.60,
+    0.70,
+    0.80,
+    0.90
+]:
+
+    y_pred_threshold = (
+        y_probability >= threshold
+    ).astype(int)
+
+    tn, fp, fn, tp = confusion_matrix(
+        y_test,
+        y_pred_threshold
+    ).ravel()
+
+    sensitivity = tp / (
+        tp + fn
+    )
+
+    specificity = tn / (
+        tn + fp
+    )
+
+    precision = precision_score(
+        y_test,
+        y_pred_threshold,
+        zero_division=0
+    )
+
+    rows.append(
+        {
+            "threshold": threshold,
+            "sensitivity": sensitivity,
+            "specificity": specificity,
+            "precision": precision,
+            "false_positives": fp,
+            "false_negatives": fn
+        }
+    )
+
+threshold_results = pd.DataFrame(
+    rows
+)
+
+display(threshold_results)
+```
+
+## ROC curve
+
+La ROC curve representa:
+
+- Sensibilidad en el eje Y.
+- False positive rate en el eje X.
+
+$$
+\text{FPR}
+=
+1 - \text{Especificidad}
+$$
+
+```python
+from sklearn.metrics import RocCurveDisplay
+import matplotlib.pyplot as plt
+
+RocCurveDisplay.from_predictions(
+    y_test,
+    y_probability
+)
+
+plt.title("ROC curve")
+plt.show()
+```
+
+## ROC AUC
+
+ROC AUC resume la capacidad discriminativa del modelo.
+
+Interpretación aproximada:
+
+- 0.5: discriminación aleatoria.
+- 1.0: discriminación perfecta.
+
+```python
+from sklearn.metrics import roc_auc_score
+
+roc_auc = roc_auc_score(
+    y_test,
+    y_probability
+)
+
+print(
+    f"ROC AUC: {roc_auc:.3f}"
+)
+```
+
+::: {.callout-note}
+## Interpretación
+
+ROC AUC mide si el modelo asigna mayor riesgo a los positivos que a los negativos.
+
+No evalúa directamente la calibración.
+:::
+
+## Limitaciones de ROC AUC
+
+- Puede parecer alta con clases muy desbalanceadas.
+- No indica rendimiento en un umbral concreto.
+- No informa directamente sobre precision.
+- No refleja utilidad clínica.
+- No garantiza buena calibración.
+
+## Precision-recall curve
+
+La curva precision-recall representa:
+
+- Precision.
+- Recall.
+
+```python
+from sklearn.metrics import PrecisionRecallDisplay
+import matplotlib.pyplot as plt
+
+PrecisionRecallDisplay.from_predictions(
+    y_test,
+    y_probability
+)
+
+plt.title(
+    "Precision-recall curve"
+)
+
+plt.show()
+```
+
+## PR AUC
+
+Puede resumirse mediante average precision.
+
+```python
+from sklearn.metrics import average_precision_score
+
+average_precision = average_precision_score(
+    y_test,
+    y_probability
+)
+
+print(
+    f"Average precision: "
+    f"{average_precision:.3f}"
+)
+```
+
+PR AUC suele ser especialmente útil cuando la clase positiva es rara.
+
+::: {.callout-warning}
+## Importante
+
+La referencia de precision depende de la prevalencia de la clase positiva.
+
+Por eso PR AUC no debe interpretarse sin conocer dicha prevalencia.
+:::
+
+## ROC AUC frente a PR AUC
+
+| Situación | Métrica especialmente útil |
+|---|---|
+| Clases relativamente equilibradas | ROC AUC |
+| Clase positiva rara | PR AUC |
+| Importa el ranking general | ROC AUC |
+| Importa calidad de predicciones positivas | PR AUC |
+| Se necesita un umbral operativo | Sensibilidad, especificidad y precision |
+
+## Negative predictive value
+
+Mide qué proporción de las predicciones negativas es correcta.
+
+$$
+\text{NPV}
+=
+\frac{TN}
+{TN + FN}
+$$
+
+```python
+negative_predictive_value = tn / (
+    tn + fn
+)
+```
+
+## Predictive values y prevalencia
+
+Precision y NPV dependen de la prevalencia del evento.
+
+Un mismo modelo puede tener:
+
+- Precision alta en una población de alto riesgo.
+- Precision baja en una población de bajo riesgo.
+
+::: {.callout-caution}
+## Validez externa
+
+Los valores predictivos pueden cambiar al aplicar el modelo en otra población.
+:::
+
+## Likelihood ratios
+
+### Positive likelihood ratio
+
+$$
+LR^+
+=
+\frac{
+\text{Sensibilidad}
+}{
+1 - \text{Especificidad}
+}
+$$
+
+### Negative likelihood ratio
+
+$$
+LR^-
+=
+\frac{
+1 - \text{Sensibilidad}
+}{
+\text{Especificidad}
+}
+$$
+
+```python
+lr_positive = (
+    sensitivity
+    / (1 - specificity)
+)
+
+lr_negative = (
+    (1 - sensitivity)
+    / specificity
+)
+```
+
+## Matthews correlation coefficient
+
+MCC utiliza los cuatro elementos de la matriz de confusión.
+
+```python
+from sklearn.metrics import matthews_corrcoef
+
+mcc = matthews_corrcoef(
+    y_test,
+    y_pred
+)
+
+print(
+    f"MCC: {mcc:.3f}"
+)
+```
+
+Puede ser útil con clases desbalanceadas.
+
+Su rango habitual es:
+
+- -1: predicción inversa perfecta.
+- 0: comportamiento similar al azar.
+- 1: predicción perfecta.
+
+## Cohen's kappa
+
+```python
+from sklearn.metrics import cohen_kappa_score
+
+kappa = cohen_kappa_score(
+    y_test,
+    y_pred
+)
+
+print(
+    f"Cohen's kappa: "
+    f"{kappa:.3f}"
+)
+```
+
+Mide el acuerdo ajustando por el acuerdo esperado por azar.
+
+## Log loss
+
+Evalúa la calidad de las probabilidades.
+
+```python
+from sklearn.metrics import log_loss
+
+loss = log_loss(
+    y_test,
+    y_probability
+)
+
+print(
+    f"Log loss: {loss:.3f}"
+)
+```
+
+Penaliza fuertemente predicciones muy seguras y equivocadas.
+
+## Brier score
+
+Mide el error cuadrático de las probabilidades.
+
+```python
+from sklearn.metrics import brier_score_loss
+
+brier = brier_score_loss(
+    y_test,
+    y_probability
+)
+
+print(
+    f"Brier score: {brier:.3f}"
+)
+```
+
+Valores menores indican mejor precisión probabilística.
+
+## Calibración
+
+La calibración compara probabilidades predichas y frecuencias observadas.
+
+```python
+from sklearn.calibration import CalibrationDisplay
+import matplotlib.pyplot as plt
+
+CalibrationDisplay.from_predictions(
+    y_test,
+    y_probability,
+    n_bins=10
+)
+
+plt.title(
+    "Curva de calibración"
+)
+
+plt.show()
+```
+
+Un modelo puede tener:
+
+- ROC AUC alta.
+- Calibración deficiente.
+
+## Elegir un umbral clínico
+
+Un umbral puede elegirse según:
+
+- Sensibilidad mínima.
+- Especificidad mínima.
+- Número aceptable de falsas alarmas.
+- Recursos disponibles.
+- Coste clínico de FN.
+- Coste clínico de FP.
+- Beneficio neto.
+
+## Elegir umbral por sensibilidad mínima
+
+```python
+from sklearn.metrics import roc_curve
+import numpy as np
+
+fpr, tpr, thresholds = roc_curve(
+    y_test,
+    y_probability
+)
+
+target_sensitivity = 0.90
+
+valid_indices = np.where(
+    tpr >= target_sensitivity
+)[0]
+
+selected_index = valid_indices[
+    np.argmin(
+        fpr[valid_indices]
+    )
+]
+
+selected_threshold = thresholds[
+    selected_index
+]
+
+print(
+    selected_threshold
+)
+```
+
+::: {.callout-warning}
+## Data leakage
+
+El umbral no debe elegirse utilizando el conjunto de test.
+
+Debe definirse con train/validation y evaluarse finalmente en test.
+:::
+
+## Índice de Youden
+
+El índice de Youden se define como:
+
+$$
+J
+=
+\text{Sensibilidad}
++
+\text{Especificidad}
+-
+1
+$$
+
+```python
+youden = tpr - fpr
+
+best_index = youden.argmax()
+
+best_threshold = thresholds[
+    best_index
+]
+
+print(
+    f"Threshold: "
+    f"{best_threshold:.3f}"
+)
+```
+
+Puede ser útil como referencia, pero no incorpora costes clínicos.
+
+## Clases desbalanceadas
+
+Un dataset está desbalanceado cuando una clase es mucho más frecuente que otra.
+
+```python
+class_distribution = (
+    y.value_counts(
+        normalize=True
+    )
+)
+
+display(
+    class_distribution
+)
+```
+
+En esta situación conviene revisar:
+
+- PR AUC.
+- Sensibilidad.
+- Especificidad.
+- Precision.
+- F1.
+- Balanced accuracy.
+- MCC.
+- Matriz de confusión.
+- Calibración.
+
+## Micro, macro y weighted average
+
+En clasificación multiclase aparecen distintos promedios.
+
+### Macro
+
+Calcula la métrica por clase y después promedia.
+
+Todas las clases pesan igual.
+
+### Weighted
+
+Promedia por clase ponderando según el número de observaciones.
+
+Las clases frecuentes pesan más.
+
+### Micro
+
+Agrupa primero todos los TP, FP y FN.
+
+Las observaciones pesan de forma conjunta.
+
+```python
+from sklearn.metrics import f1_score
+
+f1_macro = f1_score(
+    y_test,
+    y_pred,
+    average="macro"
+)
+
+f1_weighted = f1_score(
+    y_test,
+    y_pred,
+    average="weighted"
+)
+
+f1_micro = f1_score(
+    y_test,
+    y_pred,
+    average="micro"
+)
+```
+
+## Clasificación multiclase
+
+```python
+from sklearn.metrics import classification_report
+
+print(
+    classification_report(
+        y_test,
+        y_pred
+    )
+)
+```
+
+La matriz de confusión puede mostrar qué clases se confunden entre sí.
+
+```python
+ConfusionMatrixDisplay.from_predictions(
+    y_test,
+    y_pred,
+    xticks_rotation=45
+)
+```
+
+## One-vs-rest y one-vs-one
+
+Para ROC AUC multiclase pueden utilizarse distintas estrategias.
+
+```python
+from sklearn.metrics import roc_auc_score
+
+roc_auc_ovr = roc_auc_score(
+    y_test,
+    y_probability_multiclass,
+    multi_class="ovr",
+    average="macro"
+)
+```
+
+```python
+roc_auc_ovo = roc_auc_score(
+    y_test,
+    y_probability_multiclass,
+    multi_class="ovo",
+    average="macro"
+)
+```
+
+## Validación cruzada con varias métricas
+
+```python
+from sklearn.model_selection import cross_validate
+
+scoring = {
+    "roc_auc": "roc_auc",
+    "average_precision": "average_precision",
+    "balanced_accuracy": "balanced_accuracy",
+    "f1": "f1"
+}
+
+scores = cross_validate(
+    estimator=model,
+    X=X,
+    y=y,
+    cv=5,
+    scoring=scoring
+)
+
+print(
+    scores
+)
+```
+
+## Resumir resultados
+
+```python
+import pandas as pd
+
+results = pd.DataFrame(
+    {
+        metric: values
+        for metric, values
+        in scores.items()
+        if metric.startswith(
+            "test_"
+        )
+    }
+)
+
+display(
+    results.describe()
+)
+```
+
+## Intervalos de confianza
+
+Las métricas deberían acompañarse de incertidumbre.
+
+Una opción es bootstrap.
+
+```python
+import numpy as np
+from sklearn.metrics import roc_auc_score
+
+rng = np.random.default_rng(42)
+
+bootstrap_scores = []
+
+for _ in range(1000):
+
+    indices = rng.integers(
+        0,
+        len(y_test),
+        len(y_test)
+    )
+
+    y_boot = y_test.iloc[
+        indices
+    ]
+
+    p_boot = y_probability[
+        indices
+    ]
+
+    if y_boot.nunique() < 2:
+        continue
+
+    bootstrap_scores.append(
+        roc_auc_score(
+            y_boot,
+            p_boot
+        )
+    )
+
+lower = np.percentile(
+    bootstrap_scores,
+    2.5
+)
+
+upper = np.percentile(
+    bootstrap_scores,
+    97.5
+)
+
+print(
+    f"ROC AUC 95% CI: "
+    f"{lower:.3f}–{upper:.3f}"
+)
+```
+
+## Comparar modelos
+
+Los modelos deben compararse con:
+
+- El mismo conjunto de test.
+- Los mismos folds.
+- La misma definición de target.
+- El mismo momento de predicción.
+- Las mismas métricas.
+- Intervalos de confianza.
+- Análisis de calibración.
+- Comparación con baseline.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+La métrica principal debería reflejar cómo se usará el modelo.
+
+Un modelo de screening puede priorizar sensibilidad.
+
+Un modelo que activa una intervención costosa puede priorizar precision o especificidad.
+:::
+
+## Ejemplo: modelo de screening
+
+Objetivo:
+
+- No perder pacientes de riesgo.
+
+Métricas prioritarias:
+
+- Sensibilidad.
+- NPV.
+- FN.
+- Calibración en riesgo bajo.
+
+## Ejemplo: alerta clínica
+
+Objetivo:
+
+- Evitar exceso de alertas.
+
+Métricas prioritarias:
+
+- Precision.
+- Especificidad.
+- FP por paciente.
+- Carga de alertas.
+- Valor predictivo positivo.
+
+## Ejemplo: selección de tratamiento
+
+Objetivo:
+
+- Identificar pacientes con alta probabilidad de beneficio.
+
+Métricas prioritarias:
+
+- Calibración.
+- Precision.
+- Utilidad clínica.
+- Decision curve analysis.
+- Validación externa.
+
+## Tabla comparativa
+
+| Métrica | Qué mide | Útil cuando |
+|---|---|---|
+| Accuracy | Aciertos totales | Clases equilibradas |
+| Sensibilidad | Positivos detectados | Evitar FN |
+| Especificidad | Negativos detectados | Evitar FP |
+| Precision | Calidad de positivos predichos | Alertas o intervenciones |
+| F1 | Equilibrio precision-recall | Clases desbalanceadas |
+| Balanced accuracy | Promedio por clases | Desbalance |
+| ROC AUC | Discriminación global | Comparar ranking |
+| PR AUC | Precision-recall global | Evento raro |
+| Brier score | Error probabilístico | Evaluar probabilidades |
+| Log loss | Calidad de probabilidades | Penalizar errores seguros |
+| MCC | Correlación global | Desbalance |
+| Kappa | Acuerdo ajustado | Comparar clasificación |
+
+## Errores frecuentes
+
+- Reportar solo accuracy.
+- No definir la clase positiva.
+- Usar ROC AUC sin revisar PR AUC.
+- Evaluar solo con un umbral de 0.50.
+- Elegir el umbral con test.
+- Ignorar prevalencia.
+- No reportar la matriz de confusión.
+- Confundir precision con sensibilidad.
+- No evaluar calibración.
+- Comparar modelos en splits distintos.
+- No reportar incertidumbre.
+- Ignorar subgrupos.
+
+## Flujo recomendado
+
+1. Definir la clase positiva.
+2. Revisar la prevalencia.
+3. Definir el uso del modelo.
+4. Elegir las métricas principales.
+5. Mantener métricas secundarias.
+6. Evaluar probabilidades.
+7. Seleccionar umbral con validation.
+8. Evaluar una vez en test.
+9. Reportar matriz de confusión.
+10. Reportar intervalos de confianza.
+11. Revisar calibración.
+12. Analizar subgrupos.
+
+## Checklist para proyectos
+
+- [ ] He definido la clase positiva.
+- [ ] He revisado el balance de clases.
+- [ ] He definido el coste de FP y FN.
+- [ ] He elegido una métrica principal.
+- [ ] He incluido métricas complementarias.
+- [ ] He reportado la matriz de confusión.
+- [ ] He revisado sensibilidad y especificidad.
+- [ ] He revisado precision y recall.
+- [ ] He comparado ROC AUC y PR AUC.
+- [ ] He evaluado probabilidades.
+- [ ] He revisado calibración.
+- [ ] He elegido el umbral sin utilizar test.
+- [ ] He reportado incertidumbre.
+- [ ] He revisado subgrupos.
+- [ ] He interpretado los resultados clínicamente.
+
+## Recursos
+
+### Documentación
+
+- Métricas de clasificación de scikit-learn.
+- Matriz de confusión.
+- ROC curve y ROC AUC.
+- Precision-recall curve.
+- Calibración.
+- Brier score.
+- Classification report.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus propios ejemplos, métricas prioritarias y umbrales clínicos.
