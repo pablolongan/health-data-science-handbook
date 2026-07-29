@@ -1,0 +1,799 @@
+---
+title: "Variables categóricas y encoding"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Las variables categóricas representan grupos o etiquetas, no cantidades continuas.
+
+Antes de utilizarlas en muchos modelos de machine learning, hay que convertirlas a una representación numérica adecuada.
+
+La técnica de encoding depende de si la variable es:
+
+- Nominal.
+- Ordinal.
+- Binaria.
+- De alta cardinalidad.
+:::
+
+## ¿Qué es una variable categórica?
+
+Una variable categórica describe una cualidad o grupo.
+
+Ejemplos clínicos:
+
+- Sexo.
+- Centro hospitalario.
+- Diagnóstico.
+- Tipo de tratamiento.
+- Estadio de enfermedad.
+- Grupo sanguíneo.
+- Presencia o ausencia de una condición.
+
+Aunque algunas categorías se guarden como números, eso no significa que sean variables numéricas.
+
+::: {.callout-note}
+## Idea clave
+
+Un código como `1 = Barcelona`, `2 = Helsinki` y `3 = Coimbra` no implica que Coimbra sea mayor que Helsinki.
+:::
+
+## Variables nominales
+
+Las categorías nominales no tienen un orden natural.
+
+Ejemplos:
+
+- Centro hospitalario.
+- Grupo sanguíneo.
+- Diagnóstico.
+- Tipo de fármaco.
+- País.
+
+Para estas variables suele utilizarse **one-hot encoding**.
+
+## Variables ordinales
+
+Las categorías ordinales tienen un orden.
+
+Ejemplos:
+
+- Leve, moderado, grave.
+- Bajo, medio, alto.
+- Estadio I, II, III y IV.
+- Calidad mala, aceptable, buena.
+
+El orden existe, pero la distancia entre categorías no tiene por qué ser constante.
+
+::: {.callout-warning}
+## Importante
+
+Codificar una variable ordinal como 0, 1 y 2 implica un orden, pero no demuestra que la diferencia entre 0 y 1 sea equivalente a la diferencia entre 1 y 2.
+:::
+
+## Variables binarias
+
+Una variable con dos categorías puede codificarse como 0 y 1.
+
+Ejemplo:
+
+```python
+mapping = {
+    "No": 0,
+    "Sí": 1
+}
+
+df["treatment_binary"] = (
+    df["treatment"]
+    .map(mapping)
+)
+```
+
+Debe documentarse claramente qué representa cada valor.
+
+## One-hot encoding
+
+One-hot encoding crea una columna binaria por categoría.
+
+Una variable:
+
+```text
+center
+Barcelona
+Helsinki
+Coimbra
+```
+
+puede transformarse en:
+
+| center_Barcelona | center_Helsinki | center_Coimbra |
+|---:|---:|---:|
+| 1 | 0 | 0 |
+| 0 | 1 | 0 |
+| 0 | 0 | 1 |
+
+## OneHotEncoder
+
+```python
+from sklearn.preprocessing import OneHotEncoder
+
+encoder = OneHotEncoder(
+    handle_unknown="ignore"
+)
+
+X_encoded = encoder.fit_transform(
+    X[["center"]]
+)
+```
+
+`handle_unknown="ignore"` evita un error cuando validation o test contienen una categoría que no apareció en train.
+
+La documentación oficial indica que `OneHotEncoder` crea una representación binaria por categoría y es necesaria para muchos estimadores, como modelos lineales y SVM. citeturn201415search1
+
+## Obtener nombres de las columnas
+
+```python
+feature_names = (
+    encoder.get_feature_names_out(
+        ["center"]
+    )
+)
+
+print(feature_names)
+```
+
+## Convertir la salida en DataFrame
+
+```python
+import pandas as pd
+
+X_encoded_df = pd.DataFrame(
+    X_encoded.toarray(),
+    columns=feature_names,
+    index=X.index
+)
+
+display(X_encoded_df.head())
+```
+
+## Salida densa o sparse
+
+Por defecto, `OneHotEncoder` puede devolver una matriz sparse.
+
+Esto es eficiente cuando:
+
+- Hay muchas categorías.
+- La mayoría de las celdas son 0.
+- El dataset es grande.
+
+Para obtener una matriz densa:
+
+```python
+encoder = OneHotEncoder(
+    handle_unknown="ignore",
+    sparse_output=False
+)
+```
+
+## Categorías desconocidas
+
+Imagina que train contiene:
+
+```text
+Barcelona
+Helsinki
+```
+
+y test contiene:
+
+```text
+Coimbra
+```
+
+Sin una estrategia definida, el transformador puede producir un error.
+
+```python
+encoder = OneHotEncoder(
+    handle_unknown="ignore"
+)
+```
+
+Con esta opción, la categoría desconocida se representa sin activar ninguna de las categorías aprendidas.
+
+::: {.callout-caution}
+## Precaución
+
+Ignorar categorías desconocidas evita errores técnicos, pero no garantiza que el modelo sepa generalizar bien a ellas.
+:::
+
+## Eliminar una categoría de referencia
+
+Puede utilizarse:
+
+```python
+encoder = OneHotEncoder(
+    drop="first",
+    handle_unknown="ignore"
+)
+```
+
+Esto elimina una categoría por variable.
+
+Puede ser útil en algunos modelos lineales para evitar redundancia perfecta.
+
+Sin embargo:
+
+- No siempre es necesario.
+- Puede complicar la interpretación.
+- No debe usarse automáticamente.
+
+## OrdinalEncoder
+
+`OrdinalEncoder` asigna un número entero a cada categoría.
+
+```python
+from sklearn.preprocessing import OrdinalEncoder
+
+encoder = OrdinalEncoder(
+    categories=[
+        [
+            "Leve",
+            "Moderado",
+            "Grave"
+        ]
+    ]
+)
+
+X_encoded = encoder.fit_transform(
+    X[["severity"]]
+)
+```
+
+El resultado será aproximadamente:
+
+```text
+Leve      → 0
+Moderado  → 1
+Grave     → 2
+```
+
+La documentación oficial permite definir el orden de categorías y gestionar valores desconocidos con parámetros específicos. citeturn201415search0
+
+## Gestionar categorías ordinales desconocidas
+
+```python
+encoder = OrdinalEncoder(
+    categories=[
+        [
+            "Leve",
+            "Moderado",
+            "Grave"
+        ]
+    ],
+    handle_unknown="use_encoded_value",
+    unknown_value=-1
+)
+```
+
+## LabelEncoder
+
+`LabelEncoder` está diseñado principalmente para codificar la variable objetivo `y`, no las variables predictoras `X`.
+
+```python
+from sklearn.preprocessing import LabelEncoder
+
+encoder = LabelEncoder()
+
+y_encoded = encoder.fit_transform(y)
+```
+
+::: {.callout-warning}
+## Error frecuente
+
+No utilices `LabelEncoder` como solución general para variables predictoras categóricas.
+
+Para `X`, utiliza normalmente `OneHotEncoder` u `OrdinalEncoder`.
+:::
+
+## Encoding con pandas
+
+### get_dummies
+
+```python
+X_encoded = pd.get_dummies(
+    X,
+    columns=["center"],
+    drop_first=False
+)
+```
+
+Es sencillo para análisis exploratorio.
+
+Para pipelines predictivos suele ser preferible `OneHotEncoder`, porque aprende las categorías con train y después transforma validation y test de forma consistente.
+
+## Imputación de categorías ausentes
+
+Antes del encoding, las categorías ausentes pueden imputarse.
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder
+
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="most_frequent"
+            )
+        ),
+        (
+            "encoder",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            )
+        )
+    ]
+)
+```
+
+Otra opción es crear una categoría explícita:
+
+```python
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="constant",
+                fill_value="Missing"
+            )
+        ),
+        (
+            "encoder",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            )
+        )
+    ]
+)
+```
+
+::: {.callout-note}
+## Aplicación clínica
+
+Una categoría ausente puede ser informativa.
+
+Por ejemplo, que no conste el tipo de tratamiento puede reflejar diferencias de registro o del momento asistencial.
+:::
+
+## ColumnTransformer
+
+`ColumnTransformer` permite aplicar transformaciones distintas a diferentes grupos de columnas y combinar los resultados en un único espacio de variables. citeturn201415search6turn201415search3
+
+```python
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+
+numeric_features = [
+    "age",
+    "weight",
+    "troponin"
+]
+
+categorical_features = [
+    "sex",
+    "center",
+    "diagnosis"
+]
+
+numeric_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        )
+    ]
+)
+
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="most_frequent"
+            )
+        ),
+        (
+            "encoder",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            )
+        )
+    ]
+)
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ]
+)
+```
+
+## Pipeline completo
+
+```python
+from sklearn.linear_model import LogisticRegression
+
+model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Evitar data leakage
+
+El encoder debe ajustarse únicamente con train.
+
+## Ejemplo incorrecto
+
+```python
+encoder = OneHotEncoder(
+    handle_unknown="ignore"
+)
+
+X_encoded = encoder.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_encoded,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+## Ejemplo correcto
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+encoder = OneHotEncoder(
+    handle_unknown="ignore"
+)
+
+X_train_encoded = encoder.fit_transform(
+    X_train[categorical_features]
+)
+
+X_test_encoded = encoder.transform(
+    X_test[categorical_features]
+)
+```
+
+La opción recomendada es incluirlo dentro de un pipeline.
+
+## Alta cardinalidad
+
+Una variable tiene alta cardinalidad cuando contiene muchas categorías.
+
+Ejemplos:
+
+- Miles de códigos diagnósticos.
+- Cientos de medicamentos.
+- Profesional responsable.
+- Hospital o servicio muy detallado.
+- Código postal.
+- Identificador de dispositivo.
+
+One-hot encoding puede generar:
+
+- Muchas columnas.
+- Matrices muy dispersas.
+- Sobreajuste.
+- Categorías con muy pocos casos.
+- Mayor consumo de memoria.
+
+## Agrupar categorías raras
+
+`OneHotEncoder` permite gestionar categorías infrecuentes mediante `min_frequency` o `max_categories`.
+
+```python
+encoder = OneHotEncoder(
+    handle_unknown="infrequent_if_exist",
+    min_frequency=10
+)
+```
+
+También puede agruparse manualmente:
+
+```python
+counts = df["diagnosis"].value_counts()
+
+rare_categories = counts[
+    counts < 10
+].index
+
+df["diagnosis_grouped"] = (
+    df["diagnosis"]
+    .replace(
+        rare_categories,
+        "Other"
+    )
+)
+```
+
+::: {.callout-caution}
+## Precaución
+
+Agrupar categorías debe hacerse con train y aplicarse después de forma consistente a validation y test.
+:::
+
+## Target encoding
+
+Target encoding sustituye cada categoría por una estadística relacionada con el target.
+
+Por ejemplo, para una clasificación binaria:
+
+```text
+Centro A → proporción de casos positivos
+Centro B → proporción de casos positivos
+Centro C → proporción de casos positivos
+```
+
+Puede ser útil en variables de alta cardinalidad, pero tiene mucho riesgo de leakage.
+
+Scikit-learn incluye `TargetEncoder` y utiliza cross-fitting interno en `fit_transform` para reducir el sobreajuste. citeturn201415search2turn201415search23
+
+```python
+from sklearn.preprocessing import TargetEncoder
+
+encoder = TargetEncoder(
+    random_state=42
+)
+
+X_encoded = encoder.fit_transform(
+    X[["center"]],
+    y
+)
+```
+
+::: {.callout-warning}
+## Riesgo de leakage
+
+No calcules la media del target de cada categoría utilizando todo el dataset.
+
+La codificación debe aprenderse únicamente con train y, dentro de validación cruzada, debe respetar los folds.
+:::
+
+## Frequency encoding
+
+Sustituye cada categoría por su frecuencia.
+
+```python
+frequency_map = (
+    X_train["diagnosis"]
+    .value_counts(normalize=True)
+)
+
+X_train["diagnosis_frequency"] = (
+    X_train["diagnosis"]
+    .map(frequency_map)
+)
+
+X_test["diagnosis_frequency"] = (
+    X_test["diagnosis"]
+    .map(frequency_map)
+    .fillna(0)
+)
+```
+
+No utiliza directamente el target, pero debe calcularse solo con train.
+
+## Códigos clínicos
+
+Variables como ICD, ATC o RxNorm pueden tener jerarquías.
+
+Opciones posibles:
+
+- Código completo.
+- Capítulo.
+- Categoría.
+- Ingrediente.
+- Clase terapéutica.
+- Agrupación clínica.
+
+La mejor representación depende de la pregunta y del tamaño de muestra.
+
+::: {.callout-important}
+## Regla clínica
+
+No reduzcas códigos clínicos solo por conveniencia técnica.
+
+La agrupación debe conservar un significado clínico coherente.
+:::
+
+## Variables ordinales clínicas
+
+Ejemplos:
+
+- NYHA I–IV.
+- Grado de toxicidad.
+- Estadios clínicos.
+- Calidad de imagen.
+- Escalas de severidad.
+
+Antes de codificarlas, comprueba:
+
+- Que el orden sea real.
+- Que no existan categorías especiales.
+- Que los valores ausentes no se mezclen con el nivel más bajo.
+- Que el modelo pueda interpretar correctamente la codificación.
+
+## Categorías nuevas por centro o periodo
+
+En validación externa pueden aparecer:
+
+- Nuevos fármacos.
+- Nuevos dispositivos.
+- Nuevos centros.
+- Nuevos códigos.
+- Nuevos protocolos.
+
+Por eso es importante:
+
+- Definir `handle_unknown`.
+- Revisar la frecuencia de categorías nuevas.
+- Documentar qué ocurre con ellas.
+- Evaluar el impacto en el rendimiento.
+
+## Inspeccionar categorías aprendidas
+
+```python
+encoder.fit(
+    X_train[["center"]]
+)
+
+print(
+    encoder.categories_
+)
+```
+
+## Obtener nombres finales de variables
+
+```python
+preprocessor.fit(
+    X_train
+)
+
+feature_names = (
+    preprocessor
+    .get_feature_names_out()
+)
+
+print(feature_names)
+```
+
+## Comparación de estrategias
+
+| Estrategia | Uso principal | Ventaja | Limitación |
+|---|---|---|---|
+| Binary mapping | Dos categorías | Simple | Requiere documentar el significado |
+| One-hot encoding | Nominales | No impone orden | Aumenta dimensionalidad |
+| Ordinal encoding | Ordinales | Conserva orden | Impone distancias numéricas |
+| Frequency encoding | Alta cardinalidad | Compacto | Pierde identidad directa |
+| Target encoding | Alta cardinalidad | Puede mejorar predicción | Alto riesgo de leakage |
+| Agrupación clínica | Códigos complejos | Mejora interpretabilidad | Requiere criterio experto |
+
+## Errores frecuentes
+
+- Tratar códigos numéricos como variables continuas.
+- Aplicar `LabelEncoder` a todas las variables predictoras.
+- Imponer orden a una variable nominal.
+- Ajustar el encoder antes del split.
+- No gestionar categorías nuevas.
+- Hacer one-hot encoding de identificadores.
+- Crear miles de columnas sin revisar cardinalidad.
+- Aplicar target encoding con todo el dataset.
+- Agrupar categorías sin criterio clínico.
+- Confundir ausencia con una categoría real.
+- Eliminar una categoría de referencia sin comprender el efecto.
+
+## Flujo recomendado
+
+1. Identificar variables categóricas.
+2. Distinguir nominales y ordinales.
+3. Revisar valores ausentes.
+4. Revisar cardinalidad.
+5. Separar train y test.
+6. Elegir el encoding adecuado.
+7. Ajustar el encoder solo con train.
+8. Gestionar categorías desconocidas.
+9. Integrar el encoding en un pipeline.
+10. Revisar los nombres finales de variables.
+11. Evaluar interpretabilidad y rendimiento.
+12. Documentar todas las decisiones.
+
+## Checklist para proyectos
+
+- [ ] He identificado todas las variables categóricas.
+- [ ] He distinguido nominales y ordinales.
+- [ ] No estoy tratando códigos como cantidades.
+- [ ] He revisado categorías ausentes.
+- [ ] He revisado categorías raras.
+- [ ] He revisado alta cardinalidad.
+- [ ] He separado train y test antes del encoding.
+- [ ] El encoder se ajusta solo con train.
+- [ ] He definido qué ocurre con categorías desconocidas.
+- [ ] No utilizo `LabelEncoder` incorrectamente.
+- [ ] He evitado target leakage.
+- [ ] He integrado el encoding en un pipeline.
+- [ ] He considerado la interpretación clínica.
+- [ ] He documentado las categorías y agrupaciones.
+
+## Recursos
+
+### Documentación
+
+- `OneHotEncoder` de scikit-learn.
+- `OrdinalEncoder` de scikit-learn.
+- `TargetEncoder` de scikit-learn.
+- `ColumnTransformer` de scikit-learn.
+- Ejemplo de tipos mixtos con `ColumnTransformer`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus propias dudas, ejemplos y decisiones habituales.
