@@ -2792,590 +2792,591 @@
     ]
   },
   {
-    "objectID": "feature-selection/index.html",
-    "href": "feature-selection/index.html",
-    "title": "Selección de variables y regularización",
+    "objectID": "feature-selection/wrapper-methods.html",
+    "href": "feature-selection/wrapper-methods.html",
+    "title": "Métodos wrapper",
     "section": "",
-    "text": "TipResumen en 30 segundos\n\n\n\nLa selección de variables busca conservar las características más útiles para el modelo.\nLa regularización reduce la complejidad penalizando coeficientes grandes.\nAmbas técnicas pueden ayudar a:\n\nReducir overfitting.\nMejorar interpretabilidad.\nDisminuir coste computacional.\nEliminar ruido.\nConstruir modelos más estables.",
+    "text": "TipResumen en 30 segundos\n\n\n\nLos métodos wrapper evalúan subconjuntos de variables entrenando repetidamente un modelo.\nA diferencia de los métodos filter, tienen en cuenta cómo funcionan las variables dentro de un modelo concreto.\nLos más habituales son:\n\nRecursive Feature Elimination.\nRFECV.\nSequential Feature Selection.\nForward selection.\nBackward selection.",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#objetivo-de-esta-sección",
-    "href": "feature-selection/index.html#objetivo-de-esta-sección",
-    "title": "Selección de variables y regularización",
-    "section": "Objetivo de esta sección",
-    "text": "Objetivo de esta sección\nEn muchos proyectos existen más variables de las necesarias.\nAlgunas pueden ser:\n\nRedundantes.\nIrrelevantes.\nMuy correlacionadas.\nInestables.\nDifíciles de obtener.\nCostosas clínicamente.\nPotencialmente relacionadas con leakage.\n\nEl objetivo no es eliminar variables por sistema, sino encontrar una representación:\n\nPredictiva.\nEstable.\nInterpretativa.\nReproducible.\nClínicamente coherente.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nMás variables no significa necesariamente mejor modelo.",
+    "objectID": "feature-selection/wrapper-methods.html#qué-son-los-métodos-wrapper",
+    "href": "feature-selection/wrapper-methods.html#qué-son-los-métodos-wrapper",
+    "title": "Métodos wrapper",
+    "section": "¿Qué son los métodos wrapper?",
+    "text": "¿Qué son los métodos wrapper?\nLos métodos wrapper utilizan el rendimiento de un modelo para decidir qué variables conservar.\nEl proceso general es:\nSubconjunto de variables\n        │\n        ▼\nEntrenar modelo\n        │\n        ▼\nEvaluar rendimiento\n        │\n        ▼\nModificar subconjunto\n        │\n        ▼\nRepetir\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nLos métodos wrapper pueden capturar mejor la relación entre variables y modelo, pero son más costosos computacionalmente.",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#selección-de-variables-frente-a-reducción-de-dimensionalidad",
-    "href": "feature-selection/index.html#selección-de-variables-frente-a-reducción-de-dimensionalidad",
-    "title": "Selección de variables y regularización",
-    "section": "Selección de variables frente a reducción de dimensionalidad",
-    "text": "Selección de variables frente a reducción de dimensionalidad\n\nSelección de variables\nConserva un subconjunto de las variables originales.\nEjemplo:\nEdad\nTroponina\nFEVI\nGLS\nVentajas:\n\nMantiene interpretabilidad.\nFacilita explicar el modelo.\nPermite identificar variables relevantes.\n\n\n\nReducción de dimensionalidad\nCrea nuevas variables combinando las originales.\nEjemplo:\nComponente principal 1\nComponente principal 2\nVentajas:\n\nPuede resumir información.\nReduce colinealidad.\nPuede mejorar eficiencia.\n\nLimitación:\n\nLas nuevas variables pueden ser difíciles de interpretar.",
+    "objectID": "feature-selection/wrapper-methods.html#ventajas",
+    "href": "feature-selection/wrapper-methods.html#ventajas",
+    "title": "Métodos wrapper",
+    "section": "Ventajas",
+    "text": "Ventajas\n\nConsideran el modelo final.\nPueden capturar interacciones.\nEvalúan subconjuntos completos.\nPueden mejorar interpretabilidad.\nPermiten buscar un número adecuado de variables.",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#familias-de-métodos",
-    "href": "feature-selection/index.html#familias-de-métodos",
-    "title": "Selección de variables y regularización",
-    "section": "Familias de métodos",
-    "text": "Familias de métodos\n\nMétodos filter\nEvalúan cada variable utilizando criterios estadísticos antes de entrenar el modelo final.\nEjemplos:\n\nCorrelación.\nChi-cuadrado.\nANOVA.\nMutual information.\nVariance threshold.\n\n\n\nMétodos wrapper\nEvalúan subconjuntos de variables entrenando repetidamente un modelo.\nEjemplos:\n\nRecursive Feature Elimination.\nSequential Feature Selection.\nForward selection.\nBackward elimination.\n\n\n\nMétodos embedded\nLa selección ocurre durante el entrenamiento.\nEjemplos:\n\nLasso.\nElastic Net.\nÁrboles.\nRandom forest.\nGradient boosting.\n\n\n\nRegularización\nPenaliza modelos excesivamente complejos.\nEjemplos:\n\nRidge.\nLasso.\nElastic Net.",
+    "objectID": "feature-selection/wrapper-methods.html#limitaciones",
+    "href": "feature-selection/wrapper-methods.html#limitaciones",
+    "title": "Métodos wrapper",
+    "section": "Limitaciones",
+    "text": "Limitaciones\n\nRequieren entrenar muchos modelos.\nPueden ser lentos.\nPueden sobreajustar si la selección no se valida correctamente.\nEl resultado depende del estimador.\nPueden ser inestables con muestras pequeñas.",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#contenidos-de-la-sección",
-    "href": "feature-selection/index.html#contenidos-de-la-sección",
-    "title": "Selección de variables y regularización",
-    "section": "Contenidos de la sección",
-    "text": "Contenidos de la sección\n\nMétodos filter\nAprenderás:\n\nVariance Threshold.\nCorrelación.\nChi-cuadrado.\nANOVA.\nMutual information.\nSelección univariante.\nLimitaciones de los métodos filter.\n\n\n\nMétodos wrapper\nAprenderás:\n\nRecursive Feature Elimination.\nRFECV.\nSequential Feature Selection.\nForward selection.\nBackward selection.\nCoste computacional.\n\n\n\nMétodos embedded\nAprenderás:\n\nSelección con modelos lineales.\nImportancia en árboles.\nSelectFromModel.\nLimitaciones de feature importance.\nEstabilidad de la selección.\n\n\n\nRegularización\nAprenderás:\n\nRidge.\nLasso.\nElastic Net.\nParámetro de penalización.\nRelación entre regularización y escalado.\nSelección de hiperparámetros.\nInterpretación de coeficientes.",
+    "objectID": "feature-selection/wrapper-methods.html#recursive-feature-elimination",
+    "href": "feature-selection/wrapper-methods.html#recursive-feature-elimination",
+    "title": "Métodos wrapper",
+    "section": "Recursive Feature Elimination",
+    "text": "Recursive Feature Elimination\nRFE significa Recursive Feature Elimination.\nFunciona así:\n\nEntrena el modelo con todas las variables.\nCalcula importancia o coeficientes.\nElimina las variables menos importantes.\nRepite el proceso.\nSe detiene al alcanzar el número deseado.",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#riesgo-de-data-leakage",
-    "href": "feature-selection/index.html#riesgo-de-data-leakage",
-    "title": "Selección de variables y regularización",
-    "section": "Riesgo de data leakage",
-    "text": "Riesgo de data leakage\nLa selección de variables debe aprenderse solo con train.",
+    "objectID": "feature-selection/wrapper-methods.html#ejemplo-con-regresión-logística",
+    "href": "feature-selection/wrapper-methods.html#ejemplo-con-regresión-logística",
+    "title": "Métodos wrapper",
+    "section": "Ejemplo con regresión logística",
+    "text": "Ejemplo con regresión logística\nfrom sklearn.feature_selection import RFE\nfrom sklearn.linear_model import LogisticRegression\n\nestimator = LogisticRegression(\n    max_iter=1000,\n    random_state=42\n)\n\nselector = RFE(\n    estimator=estimator,\n    n_features_to_select=10,\n    step=1\n)\n\nselector.fit(\n    X_train,\n    y_train\n)",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#ejemplo-incorrecto",
-    "href": "feature-selection/index.html#ejemplo-incorrecto",
-    "title": "Selección de variables y regularización",
+    "objectID": "feature-selection/wrapper-methods.html#obtener-variables-seleccionadas",
+    "href": "feature-selection/wrapper-methods.html#obtener-variables-seleccionadas",
+    "title": "Métodos wrapper",
+    "section": "Obtener variables seleccionadas",
+    "text": "Obtener variables seleccionadas\nselected_features = [\n    feature\n    for feature, selected\n    in zip(\n        X_train.columns,\n        selector.support_\n    )\n    if selected\n]\n\nprint(\n    selected_features\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#ranking-de-variables",
+    "href": "feature-selection/wrapper-methods.html#ranking-de-variables",
+    "title": "Métodos wrapper",
+    "section": "Ranking de variables",
+    "text": "Ranking de variables\nimport pandas as pd\n\nranking = pd.DataFrame(\n    {\n        \"feature\": X_train.columns,\n        \"selected\": selector.support_,\n        \"ranking\": selector.ranking_\n    }\n).sort_values(\n    [\n        \"selected\",\n        \"ranking\"\n    ],\n    ascending=[\n        False,\n        True\n    ]\n)\n\ndisplay(\n    ranking\n)\nLas variables seleccionadas tienen:\nranking = 1",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#parámetro-step",
+    "href": "feature-selection/wrapper-methods.html#parámetro-step",
+    "title": "Métodos wrapper",
+    "section": "Parámetro step",
+    "text": "Parámetro step\nstep controla cuántas variables se eliminan en cada iteración.\nselector = RFE(\n    estimator=estimator,\n    n_features_to_select=10,\n    step=5\n)\nUn step mayor:\n\nReduce el coste.\nHace la búsqueda menos fina.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#estimadores-compatibles",
+    "href": "feature-selection/wrapper-methods.html#estimadores-compatibles",
+    "title": "Métodos wrapper",
+    "section": "Estimadores compatibles",
+    "text": "Estimadores compatibles\nRFE necesita un estimador que exponga:\n\ncoef_.\nfeature_importances_.\n\nEjemplos:\n\nRegresión logística.\nRegresión lineal.\nSVM lineal.\nÁrboles.\nRandom forest.\nGradient boosting.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#rfe-con-pipeline",
+    "href": "feature-selection/wrapper-methods.html#rfe-con-pipeline",
+    "title": "Métodos wrapper",
+    "section": "RFE con pipeline",
+    "text": "RFE con pipeline\nfrom sklearn.pipeline import Pipeline\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"selector\",\n            RFE(\n                estimator=LogisticRegression(\n                    max_iter=1000,\n                    random_state=42\n                ),\n                n_features_to_select=10\n            )\n        ),\n        (\n            \"classifier\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#rfecv",
+    "href": "feature-selection/wrapper-methods.html#rfecv",
+    "title": "Métodos wrapper",
+    "section": "RFECV",
+    "text": "RFECV\nRFECV combina RFE con validación cruzada.\nSelecciona automáticamente el número de variables.\nfrom sklearn.feature_selection import RFECV\nfrom sklearn.model_selection import StratifiedKFold\n\ncv = StratifiedKFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=42\n)\n\nselector = RFECV(\n    estimator=LogisticRegression(\n        max_iter=1000,\n        random_state=42\n    ),\n    step=1,\n    cv=cv,\n    scoring=\"roc_auc\",\n    n_jobs=-1\n)\nselector.fit(\n    X_train,\n    y_train\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#número-óptimo-de-variables",
+    "href": "feature-selection/wrapper-methods.html#número-óptimo-de-variables",
+    "title": "Métodos wrapper",
+    "section": "Número óptimo de variables",
+    "text": "Número óptimo de variables\nprint(\n    selector.n_features_\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#variables-seleccionadas",
+    "href": "feature-selection/wrapper-methods.html#variables-seleccionadas",
+    "title": "Métodos wrapper",
+    "section": "Variables seleccionadas",
+    "text": "Variables seleccionadas\nselected_features = (\n    X_train.columns[\n        selector.support_\n    ]\n    .tolist()\n)\n\nprint(\n    selected_features\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#rendimiento-por-número-de-variables",
+    "href": "feature-selection/wrapper-methods.html#rendimiento-por-número-de-variables",
+    "title": "Métodos wrapper",
+    "section": "Rendimiento por número de variables",
+    "text": "Rendimiento por número de variables\nimport pandas as pd\n\ncv_results = pd.DataFrame(\n    selector.cv_results_\n)\n\ndisplay(\n    cv_results.head()\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#visualizar-rfecv",
+    "href": "feature-selection/wrapper-methods.html#visualizar-rfecv",
+    "title": "Métodos wrapper",
+    "section": "Visualizar RFECV",
+    "text": "Visualizar RFECV\nimport matplotlib.pyplot as plt\n\nplt.figure(figsize=(8, 5))\n\nplt.plot(\n    range(\n        1,\n        len(\n            selector.cv_results_[\n                \"mean_test_score\"\n            ]\n        ) + 1\n    ),\n    selector.cv_results_[\n        \"mean_test_score\"\n    ]\n)\n\nplt.xlabel(\n    \"Número de variables\"\n)\n\nplt.ylabel(\n    \"ROC AUC medio\"\n)\n\nplt.title(\n    \"RFECV\"\n)\n\nplt.show()\n\n\n\n\n\n\nWarningImportante\n\n\n\nRFECV es costoso porque ejecuta validación cruzada para muchos subconjuntos.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#nested-cross-validation-con-rfecv",
+    "href": "feature-selection/wrapper-methods.html#nested-cross-validation-con-rfecv",
+    "title": "Métodos wrapper",
+    "section": "Nested cross-validation con RFECV",
+    "text": "Nested cross-validation con RFECV\nSi se usa RFECV para seleccionar variables, el rendimiento final debería evaluarse en un bucle externo.\nOuter CV:\n    Train externo\n        │\n        └── RFECV interno\n\n    Validation externa\n        └── Evaluación final\nEsto reduce el optimismo.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#sequential-feature-selection",
+    "href": "feature-selection/wrapper-methods.html#sequential-feature-selection",
+    "title": "Métodos wrapper",
+    "section": "Sequential Feature Selection",
+    "text": "Sequential Feature Selection\nSequential Feature Selection añade o elimina variables progresivamente.\nfrom sklearn.feature_selection import SequentialFeatureSelector\nfrom sklearn.linear_model import LogisticRegression\n\nestimator = LogisticRegression(\n    max_iter=1000,\n    random_state=42\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#forward-selection",
+    "href": "feature-selection/wrapper-methods.html#forward-selection",
+    "title": "Métodos wrapper",
+    "section": "Forward selection",
+    "text": "Forward selection\nEmpieza sin variables y añade progresivamente las más útiles.\nselector = SequentialFeatureSelector(\n    estimator=estimator,\n    n_features_to_select=10,\n    direction=\"forward\",\n    scoring=\"roc_auc\",\n    cv=5,\n    n_jobs=-1\n)\n\nselector.fit(\n    X_train,\n    y_train\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#backward-selection",
+    "href": "feature-selection/wrapper-methods.html#backward-selection",
+    "title": "Métodos wrapper",
+    "section": "Backward selection",
+    "text": "Backward selection\nEmpieza con todas las variables y elimina progresivamente las menos útiles.\nselector = SequentialFeatureSelector(\n    estimator=estimator,\n    n_features_to_select=10,\n    direction=\"backward\",\n    scoring=\"roc_auc\",\n    cv=5,\n    n_jobs=-1\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#obtener-variables-seleccionadas-1",
+    "href": "feature-selection/wrapper-methods.html#obtener-variables-seleccionadas-1",
+    "title": "Métodos wrapper",
+    "section": "Obtener variables seleccionadas",
+    "text": "Obtener variables seleccionadas\nselected_features = (\n    X_train.columns[\n        selector.get_support()\n    ]\n    .tolist()\n)\n\nprint(\n    selected_features\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#forward-frente-a-backward",
+    "href": "feature-selection/wrapper-methods.html#forward-frente-a-backward",
+    "title": "Métodos wrapper",
+    "section": "Forward frente a backward",
+    "text": "Forward frente a backward\n\n\n\n\n\n\n\n\n\nEstrategia\nInicio\nAcción\nCoste habitual\n\n\n\n\nForward\nNinguna variable\nAñade variables\nMenor con muchas variables\n\n\nBackward\nTodas las variables\nElimina variables\nMayor con muchas variables",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#cuándo-usar-forward-selection",
+    "href": "feature-selection/wrapper-methods.html#cuándo-usar-forward-selection",
+    "title": "Métodos wrapper",
+    "section": "Cuándo usar forward selection",
+    "text": "Cuándo usar forward selection\nPuede ser útil cuando:\n\nHay muchas variables.\nSe espera un modelo pequeño.\nEntrenar el modelo es costoso.\nSe busca una selección progresiva.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#cuándo-usar-backward-selection",
+    "href": "feature-selection/wrapper-methods.html#cuándo-usar-backward-selection",
+    "title": "Métodos wrapper",
+    "section": "Cuándo usar backward selection",
+    "text": "Cuándo usar backward selection\nPuede ser útil cuando:\n\nHay pocas o moderadas variables.\nSe quiere partir del modelo completo.\nLas interacciones entre variables pueden ser importantes.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#ajustar-el-número-de-variables",
+    "href": "feature-selection/wrapper-methods.html#ajustar-el-número-de-variables",
+    "title": "Métodos wrapper",
+    "section": "Ajustar el número de variables",
+    "text": "Ajustar el número de variables\nselector = SequentialFeatureSelector(\n    estimator=estimator,\n    n_features_to_select=\"auto\",\n    direction=\"forward\",\n    scoring=\"roc_auc\",\n    cv=5,\n    tol=0.001\n)\ntol puede detener la selección cuando la mejora es muy pequeña.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#wrapper-dentro-de-pipeline",
+    "href": "feature-selection/wrapper-methods.html#wrapper-dentro-de-pipeline",
+    "title": "Métodos wrapper",
+    "section": "Wrapper dentro de pipeline",
+    "text": "Wrapper dentro de pipeline\npipeline = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"selector\",\n            SequentialFeatureSelector(\n                estimator=LogisticRegression(\n                    max_iter=1000,\n                    random_state=42\n                ),\n                n_features_to_select=10,\n                direction=\"forward\",\n                scoring=\"roc_auc\",\n                cv=5,\n                n_jobs=-1\n            )\n        ),\n        (\n            \"classifier\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#validación-cruzada-externa",
+    "href": "feature-selection/wrapper-methods.html#validación-cruzada-externa",
+    "title": "Métodos wrapper",
+    "section": "Validación cruzada externa",
+    "text": "Validación cruzada externa\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.model_selection import StratifiedKFold\n\nouter_cv = StratifiedKFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=123\n)\n\nscores = cross_val_score(\n    estimator=pipeline,\n    X=X,\n    y=y,\n    cv=outer_cv,\n    scoring=\"roc_auc\",\n    n_jobs=-1\n)\n\nprint(\n    scores.mean()\n)\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi la selección usa validación interna, evalúa el pipeline completo con validación externa.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#gridsearchcv-y-número-de-variables",
+    "href": "feature-selection/wrapper-methods.html#gridsearchcv-y-número-de-variables",
+    "title": "Métodos wrapper",
+    "section": "GridSearchCV y número de variables",
+    "text": "GridSearchCV y número de variables\nfrom sklearn.model_selection import GridSearchCV\n\nparam_grid = {\n    \"selector__n_features_to_select\": [\n        5,\n        10,\n        15,\n        20\n    ]\n}\n\nsearch = GridSearchCV(\n    estimator=pipeline,\n    param_grid=param_grid,\n    cv=5,\n    scoring=\"roc_auc\",\n    n_jobs=-1\n)\n\nsearch.fit(\n    X_train,\n    y_train\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#comparar-con-un-modelo-sin-selección",
+    "href": "feature-selection/wrapper-methods.html#comparar-con-un-modelo-sin-selección",
+    "title": "Métodos wrapper",
+    "section": "Comparar con un modelo sin selección",
+    "text": "Comparar con un modelo sin selección\npipeline_without_selection = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"classifier\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\nscores_without = cross_val_score(\n    pipeline_without_selection,\n    X,\n    y,\n    cv=outer_cv,\n    scoring=\"roc_auc\"\n)\n\nscores_with = cross_val_score(\n    pipeline,\n    X,\n    y,\n    cv=outer_cv,\n    scoring=\"roc_auc\"\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#comparar-complejidad",
+    "href": "feature-selection/wrapper-methods.html#comparar-complejidad",
+    "title": "Métodos wrapper",
+    "section": "Comparar complejidad",
+    "text": "Comparar complejidad\nNo solo importa la métrica.\nTambién conviene comparar:\n\nNúmero de variables.\nTiempo de entrenamiento.\nEstabilidad.\nInterpretabilidad.\nCoste clínico.\nRendimiento.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#estabilidad-de-la-selección",
+    "href": "feature-selection/wrapper-methods.html#estabilidad-de-la-selección",
+    "title": "Métodos wrapper",
+    "section": "Estabilidad de la selección",
+    "text": "Estabilidad de la selección\nPuede revisarse la frecuencia con que una variable aparece seleccionada.\nfrom collections import Counter\nfrom sklearn.base import clone\n\nselection_frequency = Counter()\n\nfor train_index, validation_index in outer_cv.split(\n    X,\n    y\n):\n\n    X_train_fold = X.iloc[\n        train_index\n    ]\n\n    y_train_fold = y.iloc[\n        train_index\n    ]\n\n    fitted_pipeline = clone(\n        pipeline\n    )\n\n    fitted_pipeline.fit(\n        X_train_fold,\n        y_train_fold\n    )\n\n    preprocessor_fold = (\n        fitted_pipeline\n        .named_steps[\"preprocessor\"]\n    )\n\n    selector_fold = (\n        fitted_pipeline\n        .named_steps[\"selector\"]\n    )\n\n    feature_names_fold = (\n        preprocessor_fold\n        .get_feature_names_out()\n    )\n\n    selected_fold = (\n        feature_names_fold[\n            selector_fold.get_support()\n        ]\n    )\n\n    selection_frequency.update(\n        selected_fold\n    )",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#visualizar-estabilidad",
+    "href": "feature-selection/wrapper-methods.html#visualizar-estabilidad",
+    "title": "Métodos wrapper",
+    "section": "Visualizar estabilidad",
+    "text": "Visualizar estabilidad\nimport pandas as pd\n\nstability = pd.DataFrame(\n    selection_frequency.items(),\n    columns=[\n        \"feature\",\n        \"selection_count\"\n    ]\n).sort_values(\n    \"selection_count\",\n    ascending=False\n)\n\ndisplay(\n    stability\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#dependencia-del-estimador",
+    "href": "feature-selection/wrapper-methods.html#dependencia-del-estimador",
+    "title": "Métodos wrapper",
+    "section": "Dependencia del estimador",
+    "text": "Dependencia del estimador\nLa selección puede cambiar según el modelo.\nEjemplo:\nRFE con regresión logística\n≠\nRFE con random forest\nEsto ocurre porque cada modelo representa relaciones distintas.\n\n\n\n\n\n\nNoteInterpretación\n\n\n\nUna variable seleccionada por un método wrapper es útil para ese estimador concreto, no necesariamente de forma universal.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#wrapper-con-variables-categóricas",
+    "href": "feature-selection/wrapper-methods.html#wrapper-con-variables-categóricas",
+    "title": "Métodos wrapper",
+    "section": "Wrapper con variables categóricas",
+    "text": "Wrapper con variables categóricas\nDespués de one-hot encoding, una variable categórica puede convertirse en muchas columnas.\nEl selector puede conservar unas categorías y eliminar otras.\nEsto puede dificultar la interpretación.\nOpciones:\n\nAceptar selección por columna.\nAgrupar categorías.\nUsar selección por grupos.\nMantener categorías clínicamente relevantes.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#coste-computacional",
+    "href": "feature-selection/wrapper-methods.html#coste-computacional",
+    "title": "Métodos wrapper",
+    "section": "Coste computacional",
+    "text": "Coste computacional\nEl coste aumenta con:\n\nNúmero de variables.\nNúmero de folds.\nNúmero de hiperparámetros.\nComplejidad del modelo.\nNúmero de iteraciones.\nRepeticiones.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#estrategia-para-muchas-variables",
+    "href": "feature-selection/wrapper-methods.html#estrategia-para-muchas-variables",
+    "title": "Métodos wrapper",
+    "section": "Estrategia para muchas variables",
+    "text": "Estrategia para muchas variables\nPuede utilizarse un enfoque en dos etapas:\nFilter method\n      │\n      ▼\nReducir de 1000 a 100 variables\n      │\n      ▼\nWrapper method\n      │\n      ▼\nSeleccionar 10–20 variables\nEsto reduce mucho el coste.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#métodos-wrapper-y-muestras-pequeñas",
+    "href": "feature-selection/wrapper-methods.html#métodos-wrapper-y-muestras-pequeñas",
+    "title": "Métodos wrapper",
+    "section": "Métodos wrapper y muestras pequeñas",
+    "text": "Métodos wrapper y muestras pequeñas\nCon pocos datos pueden seleccionar variables por azar.\nConviene:\n\nUsar validación repetida.\nRevisar estabilidad.\nLimitar el número de variables.\nComparar con selección clínica.\nReportar incertidumbre.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#variables-obligatorias",
+    "href": "feature-selection/wrapper-methods.html#variables-obligatorias",
+    "title": "Métodos wrapper",
+    "section": "Variables obligatorias",
+    "text": "Variables obligatorias\nAlgunas variables pueden mantenerse independientemente de la selección.\nEjemplos:\n\nEdad.\nSexo.\nCentro.\nTratamiento.\nVariables de ajuste clínico.\n\nScikit-learn no siempre gestiona esto directamente, por lo que puede requerirse una estrategia personalizada.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#interacciones",
+    "href": "feature-selection/wrapper-methods.html#interacciones",
+    "title": "Métodos wrapper",
+    "section": "Interacciones",
+    "text": "Interacciones\nLos métodos wrapper pueden detectar conjuntos útiles de variables.\nSin embargo, si el modelo no representa interacciones, el selector tampoco las detectará correctamente.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#data-leakage",
+    "href": "feature-selection/wrapper-methods.html#data-leakage",
+    "title": "Métodos wrapper",
+    "section": "Data leakage",
+    "text": "Data leakage\nLa selección wrapper debe ocurrir:\n\nDespués del split.\nDentro de cross-validation.\nDentro del pipeline.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos wrapper"
+    ]
+  },
+  {
+    "objectID": "feature-selection/wrapper-methods.html#ejemplo-incorrecto",
+    "href": "feature-selection/wrapper-methods.html#ejemplo-incorrecto",
+    "title": "Métodos wrapper",
     "section": "Ejemplo incorrecto",
-    "text": "Ejemplo incorrecto\nfrom sklearn.feature_selection import SelectKBest\nfrom sklearn.feature_selection import f_classif\n\nselector = SelectKBest(\n    score_func=f_classif,\n    k=20\n)\n\nX_selected = selector.fit_transform(\n    X,\n    y\n)\n\nscores = cross_val_score(\n    model,\n    X_selected,\n    y,\n    cv=5\n)\nAquí la selección utiliza todo el dataset antes de la validación cruzada.",
+    "text": "Ejemplo incorrecto\nselector.fit(\n    X,\n    y\n)\n\nX_selected = selector.transform(\n    X\n)\n\nscores = cross_val_score(\n    model,\n    X_selected,\n    y,\n    cv=5\n)",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#ejemplo-correcto",
-    "href": "feature-selection/index.html#ejemplo-correcto",
-    "title": "Selección de variables y regularización",
+    "objectID": "feature-selection/wrapper-methods.html#ejemplo-correcto",
+    "href": "feature-selection/wrapper-methods.html#ejemplo-correcto",
+    "title": "Métodos wrapper",
     "section": "Ejemplo correcto",
-    "text": "Ejemplo correcto\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.feature_selection import SelectKBest\nfrom sklearn.feature_selection import f_classif\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"selector\",\n            SelectKBest(\n                score_func=f_classif,\n                k=20\n            )\n        ),\n        (\n            \"model\",\n            model\n        )\n    ]\n)\n\nscores = cross_val_score(\n    pipeline,\n    X,\n    y,\n    cv=5\n)\n\n\n\n\n\n\nWarningImportante\n\n\n\nLa selección de variables debe repetirse dentro de cada fold.",
+    "text": "Ejemplo correcto\npipeline = Pipeline(\n    steps=[\n        (\n            \"selector\",\n            selector\n        ),\n        (\n            \"model\",\n            model\n        )\n    ]\n)\n\nscores = cross_val_score(\n    pipeline,\n    X,\n    y,\n    cv=5\n)",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#variables-irrelevantes",
-    "href": "feature-selection/index.html#variables-irrelevantes",
-    "title": "Selección de variables y regularización",
-    "section": "Variables irrelevantes",
-    "text": "Variables irrelevantes\nUna variable irrelevante no aporta información útil para predecir el target.\nPuede:\n\nIntroducir ruido.\nAumentar varianza.\nDificultar interpretación.\nIncrementar coste computacional.",
+    "objectID": "feature-selection/wrapper-methods.html#consideraciones-clínicas",
+    "href": "feature-selection/wrapper-methods.html#consideraciones-clínicas",
+    "title": "Métodos wrapper",
+    "section": "Consideraciones clínicas",
+    "text": "Consideraciones clínicas\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nUn método wrapper puede seleccionar una variable costosa porque mejora ligeramente la métrica.\nEso no implica que deba incluirse en el modelo final.\n\n\nDebe revisarse:\n\nDisponibilidad.\nInvasividad.\nCoste.\nTiempo.\nReproducibilidad.\nAccesibilidad en otros centros.",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#variables-redundantes",
-    "href": "feature-selection/index.html#variables-redundantes",
-    "title": "Selección de variables y regularización",
-    "section": "Variables redundantes",
-    "text": "Variables redundantes\nDos variables pueden aportar información muy parecida.\nEjemplos:\n\nPeso y superficie corporal.\nDos medidas muy correlacionadas.\nCódigos duplicados.\nVariables derivadas de otras.\n\nEsto puede generar:\n\nMulticolinealidad.\nInestabilidad de coeficientes.\nInterpretación confusa.",
+    "objectID": "feature-selection/wrapper-methods.html#tabla-comparativa",
+    "href": "feature-selection/wrapper-methods.html#tabla-comparativa",
+    "title": "Métodos wrapper",
+    "section": "Tabla comparativa",
+    "text": "Tabla comparativa\n\n\n\nMétodo\nDirección\nSelección de número\nCoste\n\n\n\n\nRFE\nElimina\nFijo\nAlto\n\n\nRFECV\nElimina\nAutomático con CV\nMuy alto\n\n\nForward selection\nAñade\nFijo o automático\nAlto\n\n\nBackward selection\nElimina\nFijo o automático\nMuy alto",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#multicolinealidad",
-    "href": "feature-selection/index.html#multicolinealidad",
-    "title": "Selección de variables y regularización",
-    "section": "Multicolinealidad",
-    "text": "Multicolinealidad\nLa multicolinealidad aparece cuando varias variables predictoras están fuertemente relacionadas.\nPuede afectar especialmente a modelos lineales.\nConsecuencias:\n\nCoeficientes inestables.\nSignos inesperados.\nIntervalos amplios.\nDificultad de interpretación.",
+    "objectID": "feature-selection/wrapper-methods.html#errores-frecuentes",
+    "href": "feature-selection/wrapper-methods.html#errores-frecuentes",
+    "title": "Métodos wrapper",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nEjecutar RFE antes de cross-validation.\nUtilizar RFECV sin evaluación externa.\nNo comparar con el modelo completo.\nIgnorar el coste computacional.\nAsumir que la selección es estable.\nCambiar el estimador y mantener las mismas variables sin validar.\nSeleccionar categorías one-hot sin revisar coherencia.\nElegir demasiadas variables.\nNo considerar coste clínico.\nInterpretar selección como causalidad.",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#matriz-de-correlación",
-    "href": "feature-selection/index.html#matriz-de-correlación",
-    "title": "Selección de variables y regularización",
-    "section": "Matriz de correlación",
-    "text": "Matriz de correlación\ncorrelation_matrix = (\n    X_train[\n        numeric_features\n    ]\n    .corr()\n)\n\ndisplay(\n    correlation_matrix\n)",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#identificar-correlaciones-altas",
-    "href": "feature-selection/index.html#identificar-correlaciones-altas",
-    "title": "Selección de variables y regularización",
-    "section": "Identificar correlaciones altas",
-    "text": "Identificar correlaciones altas\nimport numpy as np\n\nupper_triangle = (\n    correlation_matrix\n    .where(\n        np.triu(\n            np.ones(\n                correlation_matrix.shape\n            ),\n            k=1\n        ).astype(bool)\n    )\n)\n\nhigh_correlations = [\n    column\n    for column in upper_triangle.columns\n    if any(\n        upper_triangle[column]\n        .abs()\n        &gt; 0.90\n    )\n]\n\nprint(\n    high_correlations\n)\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nNo elimines automáticamente una variable solo por alta correlación.\nPuede tener mayor calidad, interpretabilidad o disponibilidad clínica.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#número-de-variables-y-tamaño-de-muestra",
-    "href": "feature-selection/index.html#número-de-variables-y-tamaño-de-muestra",
-    "title": "Selección de variables y regularización",
-    "section": "Número de variables y tamaño de muestra",
-    "text": "Número de variables y tamaño de muestra\nUn modelo con muchas variables y pocos pacientes tiene mayor riesgo de overfitting.\nConviene revisar:\n\nNúmero de observaciones.\nNúmero de eventos.\nNúmero de variables.\nComplejidad del modelo.\nEstabilidad de la selección.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#selección-y-estabilidad",
-    "href": "feature-selection/index.html#selección-y-estabilidad",
-    "title": "Selección de variables y regularización",
-    "section": "Selección y estabilidad",
-    "text": "Selección y estabilidad\nUna variable puede aparecer seleccionada en un fold y no en otro.\nEso puede indicar:\n\nMuestra pequeña.\nVariables correlacionadas.\nSeñal débil.\nModelo inestable.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#frecuencia-de-selección",
-    "href": "feature-selection/index.html#frecuencia-de-selección",
-    "title": "Selección de variables y regularización",
-    "section": "Frecuencia de selección",
-    "text": "Frecuencia de selección\nselection_counts = {\n    feature: 0\n    for feature in feature_names\n}\nDespués de cada fold puede incrementarse el contador de las variables seleccionadas.\nLas variables elegidas de forma consistente suelen ser más fiables.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#interpretabilidad-clínica",
-    "href": "feature-selection/index.html#interpretabilidad-clínica",
-    "title": "Selección de variables y regularización",
-    "section": "Interpretabilidad clínica",
-    "text": "Interpretabilidad clínica\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nUna variable puede ser predictiva pero poco útil si:\n\nNo está disponible en el momento de predicción.\nEs costosa.\nEs invasiva.\nTiene mucha ausencia.\nNo se mide en otros centros.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#coste-de-adquisición",
-    "href": "feature-selection/index.html#coste-de-adquisición",
-    "title": "Selección de variables y regularización",
-    "section": "Coste de adquisición",
-    "text": "Coste de adquisición\nLa selección también puede considerar:\n\nCoste económico.\nTiempo.\nInvasividad.\nCarga para el paciente.\nDisponibilidad.\nReproducibilidad.\n\nUn modelo ligeramente peor pero mucho más simple puede ser más útil.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#importancia-predictiva-frente-a-causalidad",
-    "href": "feature-selection/index.html#importancia-predictiva-frente-a-causalidad",
-    "title": "Selección de variables y regularización",
-    "section": "Importancia predictiva frente a causalidad",
-    "text": "Importancia predictiva frente a causalidad\nUna variable seleccionada no es necesariamente causal.\nPuede ser:\n\nMarcador.\nProxy.\nConfusor.\nConsecuencia del proceso.\nIndicador del centro.\n\n\n\n\n\n\n\nWarningImportante\n\n\n\nFeature importance no equivale a efecto causal.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#selección-supervisada-y-no-supervisada",
-    "href": "feature-selection/index.html#selección-supervisada-y-no-supervisada",
-    "title": "Selección de variables y regularización",
-    "section": "Selección supervisada y no supervisada",
-    "text": "Selección supervisada y no supervisada\n\nSupervisada\nUtiliza el target.\nEjemplos:\n\nANOVA.\nChi-cuadrado.\nMutual information.\nLasso.\nRFE.\n\n\n\nNo supervisada\nNo utiliza el target.\nEjemplos:\n\nVariance threshold.\nCorrelación entre predictores.\nPCA.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#flujo-recomendado",
-    "href": "feature-selection/index.html#flujo-recomendado",
-    "title": "Selección de variables y regularización",
+    "objectID": "feature-selection/wrapper-methods.html#flujo-recomendado",
+    "href": "feature-selection/wrapper-methods.html#flujo-recomendado",
+    "title": "Métodos wrapper",
     "section": "Flujo recomendado",
-    "text": "Flujo recomendado\n\nDefinir la pregunta.\nExcluir identificadores y leakage.\nRevisar calidad de variables.\nRevisar valores ausentes.\nRevisar redundancia.\nElegir familia de selección.\nIntegrar selección en pipeline.\nValidar con cross-validation.\nEvaluar estabilidad.\nComparar con modelo sin selección.\nRevisar interpretabilidad clínica.\nDocumentar variables finales.",
+    "text": "Flujo recomendado\n\nReducir variables irrelevantes.\nElegir un estimador.\nElegir dirección de búsqueda.\nDefinir métrica.\nIntegrar selección en pipeline.\nUsar validación interna.\nEvaluar con validación externa.\nComparar con modelo sin selección.\nRevisar estabilidad.\nRevisar coste computacional.\nRevisar utilidad clínica.\nDocumentar variables finales.",
     "crumbs": [
       "Inicio",
       "Selección de variables",
-      "Introducción"
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "feature-selection/index.html#qué-comparar",
-    "href": "feature-selection/index.html#qué-comparar",
-    "title": "Selección de variables y regularización",
-    "section": "Qué comparar",
-    "text": "Qué comparar\nSiempre conviene comparar:\nModelo sin selección\nvs\nModelo con selección\nDebe evaluarse:\n\nRendimiento.\nVariabilidad.\nNúmero de variables.\nInterpretabilidad.\nCoste.\nEstabilidad.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#errores-frecuentes",
-    "href": "feature-selection/index.html#errores-frecuentes",
-    "title": "Selección de variables y regularización",
-    "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nSeleccionar variables con todo el dataset.\nElegir variables por p-value sin validación.\nConfundir correlación con causalidad.\nEliminar variables correlacionadas automáticamente.\nUsar importancias de árboles como verdad absoluta.\nNo escalar antes de Lasso o Ridge.\nNo comparar con el modelo completo.\nIgnorar estabilidad entre folds.\nSeleccionar demasiadas variables.\nUsar información futura.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#checklist-general",
-    "href": "feature-selection/index.html#checklist-general",
-    "title": "Selección de variables y regularización",
-    "section": "Checklist general",
-    "text": "Checklist general\n\nHe eliminado identificadores.\nHe revisado data leakage.\nHe revisado correlaciones.\nHe considerado multicolinealidad.\nHe elegido un método adecuado.\nLa selección está dentro del pipeline.\nLa selección se repite en cada fold.\nHe comparado con un modelo sin selección.\nHe revisado estabilidad.\nHe considerado coste clínico.\nHe evitado interpretar importancia como causalidad.\nHe documentado las variables finales.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "feature-selection/index.html#próximos-documentos",
-    "href": "feature-selection/index.html#próximos-documentos",
-    "title": "Selección de variables y regularización",
-    "section": "Próximos documentos",
-    "text": "Próximos documentos\nEsta sección se completará con:\n\nMétodos filter.\nMétodos wrapper.\nMétodos embedded.\nRegularización.",
-    "crumbs": [
-      "Inicio",
-      "Selección de variables",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html",
-    "href": "dimensionality-reduction/pca.html",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "",
-    "text": "TipResumen en 30 segundos\n\n\n\nPCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.\nCada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#qué-problema-resuelve",
-    "href": "dimensionality-reduction/pca.html#qué-problema-resuelve",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "¿Qué problema resuelve?",
-    "text": "¿Qué problema resuelve?\nEn muchos datasets existen numerosas variables que contienen información parcialmente redundante.\nPor ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:\n\nPeso.\nAltura.\nÍndice de masa corporal.\nSuperficie corporal.\nPerímetros corporales.\n\nEstas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.\nPCA puede utilizarse para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nPCA no selecciona variables originales. Crea variables nuevas llamadas componentes principales.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#intuición",
-    "href": "dimensionality-reduction/pca.html#intuición",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Intuición",
-    "text": "Intuición\nImagina una nube de puntos formada por dos variables correlacionadas.\nAunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.\nPCA encuentra esa dirección y la convierte en el primer componente principal.\nEl segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.\nDe este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#fundamentos-teóricos",
-    "href": "dimensionality-reduction/pca.html#fundamentos-teóricos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Fundamentos teóricos",
-    "text": "Fundamentos teóricos\n\nComponentes principales\nCada componente principal es una combinación lineal de las variables originales.\nPara un dataset con variables \\(x_1, x_2, \\ldots, x_p\\), el primer componente puede expresarse como:\n\\[\nPC_1 = w_{11}x_1 + w_{12}x_2 + \\cdots + w_{1p}x_p\n\\]\nEl segundo componente se expresa como:\n\\[\nPC_2 = w_{21}x_1 + w_{22}x_2 + \\cdots + w_{2p}x_p\n\\]\nLos coeficientes \\(w\\) se denominan pesos o loadings.\n\n\nVarianza explicada\nCada componente explica una parte de la varianza total del dataset.\nLa proporción de varianza explicada por el componente \\(j\\) puede expresarse como:\n\\[\n\\text{Explained variance ratio}_j =\n\\frac{\\lambda_j}\n{\\sum_{k=1}^{p}\\lambda_k}\n\\]\ndonde \\(\\lambda_j\\) es el autovalor asociado al componente \\(j\\).\n\n\nVarianza explicada acumulada\nLa varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.\nPor ejemplo:\n\n1 componente: 45 %.\n2 componentes: 68 %.\n3 componentes: 82 %.\n4 componentes: 91 %.\n\nEn este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.\n\n\n\n\n\n\nWarningImportante\n\n\n\nUn componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
-    "href": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "¿Por qué es importante escalar?",
-    "text": "¿Por qué es importante escalar?\nPCA está influido por la escala de las variables.\nImagina estas variables:\n\nEdad, medida en años.\nTroponina, medida con valores pequeños.\nPresión arterial, medida en mmHg.\n\nUna variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.\nPor eso, antes de aplicar PCA suele utilizarse:\nStandardScaler()\nEl escalado transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
-    "href": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Supuestos y condiciones",
-    "text": "Supuestos y condiciones\nPCA funciona mejor cuando:\n\nLas variables son numéricas.\nExisten relaciones aproximadamente lineales.\nLas variables contienen varianza informativa.\nHay correlación entre algunas variables.\nLos valores extremos han sido revisados.\nLas escalas se han tratado adecuadamente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
-    "href": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Cuándo utilizar PCA",
-    "text": "Cuándo utilizar PCA\nPCA puede ser adecuado cuando:\n\nTienes muchas variables numéricas correlacionadas.\nQuieres reducir el número de variables.\nQuieres visualizar observaciones en dos o tres dimensiones.\nQuieres reducir multicolinealidad.\nQuieres comprimir información antes de otro modelo.\nQuieres explorar patrones latentes.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
-    "href": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Cuándo no utilizar PCA",
-    "text": "Cuándo no utilizar PCA\nPCA puede no ser adecuado cuando:\n\nNecesitas interpretar directamente cada variable original.\nLas relaciones entre variables son principalmente no lineales.\nLa mayoría de las variables son categóricas.\nTienes muy pocas variables.\nLos componentes son difíciles de justificar clínicamente.\nEl objetivo es seleccionar variables originales, no transformarlas.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
-    "href": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Flujo de trabajo recomendado",
-    "text": "Flujo de trabajo recomendado\n\nSeleccionar únicamente variables numéricas relevantes.\nRevisar valores ausentes.\nRevisar valores extremos.\nSeparar entrenamiento y prueba si PCA forma parte de un modelo predictivo.\nImputar valores ausentes utilizando solo entrenamiento.\nEscalar las variables utilizando solo entrenamiento.\nAjustar PCA utilizando solo entrenamiento.\nElegir el número de componentes.\nTransformar entrenamiento y prueba.\nInterpretar la varianza explicada y los loadings.\nEvaluar el impacto en el modelo posterior.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#código-mínimo",
-    "href": "dimensionality-reduction/pca.html#código-mínimo",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Código mínimo",
-    "text": "Código mínimo\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(pca.explained_variance_ratio_)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
-    "href": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Seleccionar componentes según varianza explicada",
-    "text": "Seleccionar componentes según varianza explicada\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(f\"Número de componentes: {pca.n_components_}\")\nprint(\n    \"Varianza explicada acumulada:\",\n    pca.explained_variance_ratio_.sum()\n)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
-    "href": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Implementación segura dentro de un pipeline",
-    "text": "Implementación segura dentro de un pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\"imputer\", SimpleImputer(strategy=\"median\")),\n        (\"scaler\", StandardScaler()),\n        (\"pca\", PCA(n_components=0.95)),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nCautionError frecuente: data leakage\n\n\n\nNo ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.\nEl pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
-    "href": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Inspeccionar la varianza explicada",
-    "text": "Inspeccionar la varianza explicada\nimport pandas as pd\n\nexplained_variance = pd.DataFrame(\n    {\n        \"component\": range(\n            1,\n            len(pca.explained_variance_ratio_) + 1\n        ),\n        \"explained_variance_ratio\":\n            pca.explained_variance_ratio_,\n        \"cumulative_explained_variance\":\n            pca.explained_variance_ratio_.cumsum()\n    }\n)\n\ndisplay(explained_variance)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#interpretar-los-loadings",
-    "href": "dimensionality-reduction/pca.html#interpretar-los-loadings",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Interpretar los loadings",
-    "text": "Interpretar los loadings\nimport pandas as pd\n\nloadings = pd.DataFrame(\n    pca.components_.T,\n    index=X.columns,\n    columns=[\n        f\"PC{i}\"\n        for i in range(\n            1,\n            pca.n_components_ + 1\n        )\n    ]\n)\n\ndisplay(loadings)\nUn valor absoluto elevado indica que la variable tiene una contribución importante al componente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
-    "href": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Consideraciones en datos clínicos",
-    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nPCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.\n\n\n\nMediciones repetidas\nSi un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.\n\n\nValores ausentes\nLa ausencia de una prueba puede estar relacionada con:\n\nLa gravedad.\nLa indicación clínica.\nEl centro.\nEl momento del seguimiento.\nLa disponibilidad de recursos.\n\n\n\nDiferencias entre centros\nPCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:\n\nEquipos.\nUnidades.\nProtocolos.\nPoblaciones.\nMétodos de laboratorio.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#errores-frecuentes",
-    "href": "dimensionality-reduction/pca.html#errores-frecuentes",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nAplicar PCA antes de separar entrenamiento y prueba.\nEscalar utilizando todo el dataset.\nNo escalar variables con unidades diferentes.\nAplicar PCA directamente a variables categóricas.\nInterpretar los componentes como variables clínicas reales.\nPensar que más varianza explicada siempre implica mejor predicción.\nIgnorar valores extremos que dominan los componentes.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#checklist-para-proyectos",
-    "href": "dimensionality-reduction/pca.html#checklist-para-proyectos",
-    "title": "Principal Component Analysis (PCA)",
+    "objectID": "feature-selection/wrapper-methods.html#checklist-para-proyectos",
+    "href": "feature-selection/wrapper-methods.html#checklist-para-proyectos",
+    "title": "Métodos wrapper",
     "section": "Checklist para proyectos",
-    "text": "Checklist para proyectos\n\nLas variables son numéricas.\nHe revisado valores ausentes.\nHe revisado valores extremos.\nHe separado entrenamiento y prueba.\nLa separación se ha realizado por paciente cuando corresponde.\nLa imputación se ajusta solo con entrenamiento.\nEl escalado se ajusta solo con entrenamiento.\nPCA se ajusta solo con entrenamiento.\nHe revisado la varianza explicada.\nHe revisado los loadings.\nHe considerado la interpretabilidad clínica.",
+    "text": "Checklist para proyectos\n\nHe elegido un estimador adecuado.\nLa selección está dentro del pipeline.\nHe definido la métrica.\nHe utilizado validación interna.\nHe evaluado el pipeline externamente.\nHe comparado con el modelo completo.\nHe revisado estabilidad.\nHe revisado tiempo de ejecución.\nHe considerado variables obligatorias.\nHe revisado categorías one-hot.\nHe considerado coste clínico.\nHe documentado la selección.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Selección de variables",
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "deep-learning/index.html",
-    "href": "deep-learning/index.html",
-    "title": "Deep learning",
-    "section": "",
-    "text": "Esta sección reunirá los fundamentos y modelos de deep learning que se añadirán durante el próximo curso.",
+    "objectID": "feature-selection/wrapper-methods.html#recursos",
+    "href": "feature-selection/wrapper-methods.html#recursos",
+    "title": "Métodos wrapper",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\nRFE.\nRFECV.\nSequentialFeatureSelector.\nGridSearchCV.\nPipeline.\nNested cross-validation.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
     "crumbs": [
       "Inicio",
-      "Deep learning",
-      "Introducción"
+      "Selección de variables",
+      "Métodos wrapper"
     ]
   },
   {
-    "objectID": "deep-learning/index.html#contenidos-previstos",
-    "href": "deep-learning/index.html#contenidos-previstos",
-    "title": "Deep learning",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "objectID": "feature-selection/wrapper-methods.html#notas-personales",
+    "href": "feature-selection/wrapper-methods.html#notas-personales",
+    "title": "Métodos wrapper",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus estrategias wrapper, tiempos de ejecución y comparaciones habituales.",
     "crumbs": [
       "Inicio",
-      "Deep learning",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "Sobre el proyecto",
-    "section": "",
-    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
-    "crumbs": [
-      "Inicio",
-      "Sobre el proyecto"
-    ]
-  },
-  {
-    "objectID": "code-recipes/index.html",
-    "href": "code-recipes/index.html",
-    "title": "Recetario de código",
-    "section": "",
-    "text": "Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.",
-    "crumbs": [
-      "Inicio",
-      "Recetario de código",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "code-recipes/index.html#contenidos-previstos",
-    "href": "code-recipes/index.html#contenidos-previstos",
-    "title": "Recetario de código",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Recetario de código",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/index.html",
-    "href": "dimensionality-reduction/index.html",
-    "title": "Reducción de dimensionalidad",
-    "section": "",
-    "text": "Esta sección reúne métodos para reducir el número de variables conservando la mayor cantidad posible de información.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/index.html#contenidos-previstos",
-    "href": "dimensionality-reduction/index.html#contenidos-previstos",
-    "title": "Reducción de dimensionalidad",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "Introducción"
+      "Selección de variables",
+      "Métodos wrapper"
     ]
   },
   {
@@ -3892,6 +3893,593 @@
       "Inicio",
       "Selección de variables",
       "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/index.html",
+    "href": "dimensionality-reduction/index.html",
+    "title": "Reducción de dimensionalidad",
+    "section": "",
+    "text": "Esta sección reúne métodos para reducir el número de variables conservando la mayor cantidad posible de información.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/index.html#contenidos-previstos",
+    "href": "dimensionality-reduction/index.html#contenidos-previstos",
+    "title": "Reducción de dimensionalidad",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "code-recipes/index.html",
+    "href": "code-recipes/index.html",
+    "title": "Recetario de código",
+    "section": "",
+    "text": "Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.",
+    "crumbs": [
+      "Inicio",
+      "Recetario de código",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "code-recipes/index.html#contenidos-previstos",
+    "href": "code-recipes/index.html#contenidos-previstos",
+    "title": "Recetario de código",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Recetario de código",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "Sobre el proyecto",
+    "section": "",
+    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
+    "crumbs": [
+      "Inicio",
+      "Sobre el proyecto"
+    ]
+  },
+  {
+    "objectID": "deep-learning/index.html",
+    "href": "deep-learning/index.html",
+    "title": "Deep learning",
+    "section": "",
+    "text": "Esta sección reunirá los fundamentos y modelos de deep learning que se añadirán durante el próximo curso.",
+    "crumbs": [
+      "Inicio",
+      "Deep learning",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "deep-learning/index.html#contenidos-previstos",
+    "href": "deep-learning/index.html#contenidos-previstos",
+    "title": "Deep learning",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Deep learning",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html",
+    "href": "dimensionality-reduction/pca.html",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nPCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.\nCada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#qué-problema-resuelve",
+    "href": "dimensionality-reduction/pca.html#qué-problema-resuelve",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "¿Qué problema resuelve?",
+    "text": "¿Qué problema resuelve?\nEn muchos datasets existen numerosas variables que contienen información parcialmente redundante.\nPor ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:\n\nPeso.\nAltura.\nÍndice de masa corporal.\nSuperficie corporal.\nPerímetros corporales.\n\nEstas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.\nPCA puede utilizarse para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nPCA no selecciona variables originales. Crea variables nuevas llamadas componentes principales.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#intuición",
+    "href": "dimensionality-reduction/pca.html#intuición",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Intuición",
+    "text": "Intuición\nImagina una nube de puntos formada por dos variables correlacionadas.\nAunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.\nPCA encuentra esa dirección y la convierte en el primer componente principal.\nEl segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.\nDe este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#fundamentos-teóricos",
+    "href": "dimensionality-reduction/pca.html#fundamentos-teóricos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Fundamentos teóricos",
+    "text": "Fundamentos teóricos\n\nComponentes principales\nCada componente principal es una combinación lineal de las variables originales.\nPara un dataset con variables \\(x_1, x_2, \\ldots, x_p\\), el primer componente puede expresarse como:\n\\[\nPC_1 = w_{11}x_1 + w_{12}x_2 + \\cdots + w_{1p}x_p\n\\]\nEl segundo componente se expresa como:\n\\[\nPC_2 = w_{21}x_1 + w_{22}x_2 + \\cdots + w_{2p}x_p\n\\]\nLos coeficientes \\(w\\) se denominan pesos o loadings.\n\n\nVarianza explicada\nCada componente explica una parte de la varianza total del dataset.\nLa proporción de varianza explicada por el componente \\(j\\) puede expresarse como:\n\\[\n\\text{Explained variance ratio}_j =\n\\frac{\\lambda_j}\n{\\sum_{k=1}^{p}\\lambda_k}\n\\]\ndonde \\(\\lambda_j\\) es el autovalor asociado al componente \\(j\\).\n\n\nVarianza explicada acumulada\nLa varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.\nPor ejemplo:\n\n1 componente: 45 %.\n2 componentes: 68 %.\n3 componentes: 82 %.\n4 componentes: 91 %.\n\nEn este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.\n\n\n\n\n\n\nWarningImportante\n\n\n\nUn componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
+    "href": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "¿Por qué es importante escalar?",
+    "text": "¿Por qué es importante escalar?\nPCA está influido por la escala de las variables.\nImagina estas variables:\n\nEdad, medida en años.\nTroponina, medida con valores pequeños.\nPresión arterial, medida en mmHg.\n\nUna variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.\nPor eso, antes de aplicar PCA suele utilizarse:\nStandardScaler()\nEl escalado transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
+    "href": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Supuestos y condiciones",
+    "text": "Supuestos y condiciones\nPCA funciona mejor cuando:\n\nLas variables son numéricas.\nExisten relaciones aproximadamente lineales.\nLas variables contienen varianza informativa.\nHay correlación entre algunas variables.\nLos valores extremos han sido revisados.\nLas escalas se han tratado adecuadamente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
+    "href": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Cuándo utilizar PCA",
+    "text": "Cuándo utilizar PCA\nPCA puede ser adecuado cuando:\n\nTienes muchas variables numéricas correlacionadas.\nQuieres reducir el número de variables.\nQuieres visualizar observaciones en dos o tres dimensiones.\nQuieres reducir multicolinealidad.\nQuieres comprimir información antes de otro modelo.\nQuieres explorar patrones latentes.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
+    "href": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Cuándo no utilizar PCA",
+    "text": "Cuándo no utilizar PCA\nPCA puede no ser adecuado cuando:\n\nNecesitas interpretar directamente cada variable original.\nLas relaciones entre variables son principalmente no lineales.\nLa mayoría de las variables son categóricas.\nTienes muy pocas variables.\nLos componentes son difíciles de justificar clínicamente.\nEl objetivo es seleccionar variables originales, no transformarlas.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
+    "href": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Flujo de trabajo recomendado",
+    "text": "Flujo de trabajo recomendado\n\nSeleccionar únicamente variables numéricas relevantes.\nRevisar valores ausentes.\nRevisar valores extremos.\nSeparar entrenamiento y prueba si PCA forma parte de un modelo predictivo.\nImputar valores ausentes utilizando solo entrenamiento.\nEscalar las variables utilizando solo entrenamiento.\nAjustar PCA utilizando solo entrenamiento.\nElegir el número de componentes.\nTransformar entrenamiento y prueba.\nInterpretar la varianza explicada y los loadings.\nEvaluar el impacto en el modelo posterior.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#código-mínimo",
+    "href": "dimensionality-reduction/pca.html#código-mínimo",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Código mínimo",
+    "text": "Código mínimo\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(pca.explained_variance_ratio_)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
+    "href": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Seleccionar componentes según varianza explicada",
+    "text": "Seleccionar componentes según varianza explicada\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(f\"Número de componentes: {pca.n_components_}\")\nprint(\n    \"Varianza explicada acumulada:\",\n    pca.explained_variance_ratio_.sum()\n)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
+    "href": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Implementación segura dentro de un pipeline",
+    "text": "Implementación segura dentro de un pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\"imputer\", SimpleImputer(strategy=\"median\")),\n        (\"scaler\", StandardScaler()),\n        (\"pca\", PCA(n_components=0.95)),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nCautionError frecuente: data leakage\n\n\n\nNo ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.\nEl pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
+    "href": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Inspeccionar la varianza explicada",
+    "text": "Inspeccionar la varianza explicada\nimport pandas as pd\n\nexplained_variance = pd.DataFrame(\n    {\n        \"component\": range(\n            1,\n            len(pca.explained_variance_ratio_) + 1\n        ),\n        \"explained_variance_ratio\":\n            pca.explained_variance_ratio_,\n        \"cumulative_explained_variance\":\n            pca.explained_variance_ratio_.cumsum()\n    }\n)\n\ndisplay(explained_variance)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#interpretar-los-loadings",
+    "href": "dimensionality-reduction/pca.html#interpretar-los-loadings",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Interpretar los loadings",
+    "text": "Interpretar los loadings\nimport pandas as pd\n\nloadings = pd.DataFrame(\n    pca.components_.T,\n    index=X.columns,\n    columns=[\n        f\"PC{i}\"\n        for i in range(\n            1,\n            pca.n_components_ + 1\n        )\n    ]\n)\n\ndisplay(loadings)\nUn valor absoluto elevado indica que la variable tiene una contribución importante al componente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
+    "href": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Consideraciones en datos clínicos",
+    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nPCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.\n\n\n\nMediciones repetidas\nSi un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.\n\n\nValores ausentes\nLa ausencia de una prueba puede estar relacionada con:\n\nLa gravedad.\nLa indicación clínica.\nEl centro.\nEl momento del seguimiento.\nLa disponibilidad de recursos.\n\n\n\nDiferencias entre centros\nPCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:\n\nEquipos.\nUnidades.\nProtocolos.\nPoblaciones.\nMétodos de laboratorio.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#errores-frecuentes",
+    "href": "dimensionality-reduction/pca.html#errores-frecuentes",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nAplicar PCA antes de separar entrenamiento y prueba.\nEscalar utilizando todo el dataset.\nNo escalar variables con unidades diferentes.\nAplicar PCA directamente a variables categóricas.\nInterpretar los componentes como variables clínicas reales.\nPensar que más varianza explicada siempre implica mejor predicción.\nIgnorar valores extremos que dominan los componentes.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#checklist-para-proyectos",
+    "href": "dimensionality-reduction/pca.html#checklist-para-proyectos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nLas variables son numéricas.\nHe revisado valores ausentes.\nHe revisado valores extremos.\nHe separado entrenamiento y prueba.\nLa separación se ha realizado por paciente cuando corresponde.\nLa imputación se ajusta solo con entrenamiento.\nEl escalado se ajusta solo con entrenamiento.\nPCA se ajusta solo con entrenamiento.\nHe revisado la varianza explicada.\nHe revisado los loadings.\nHe considerado la interpretabilidad clínica.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html",
+    "href": "feature-selection/index.html",
+    "title": "Selección de variables y regularización",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nLa selección de variables busca conservar las características más útiles para el modelo.\nLa regularización reduce la complejidad penalizando coeficientes grandes.\nAmbas técnicas pueden ayudar a:\n\nReducir overfitting.\nMejorar interpretabilidad.\nDisminuir coste computacional.\nEliminar ruido.\nConstruir modelos más estables.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#objetivo-de-esta-sección",
+    "href": "feature-selection/index.html#objetivo-de-esta-sección",
+    "title": "Selección de variables y regularización",
+    "section": "Objetivo de esta sección",
+    "text": "Objetivo de esta sección\nEn muchos proyectos existen más variables de las necesarias.\nAlgunas pueden ser:\n\nRedundantes.\nIrrelevantes.\nMuy correlacionadas.\nInestables.\nDifíciles de obtener.\nCostosas clínicamente.\nPotencialmente relacionadas con leakage.\n\nEl objetivo no es eliminar variables por sistema, sino encontrar una representación:\n\nPredictiva.\nEstable.\nInterpretativa.\nReproducible.\nClínicamente coherente.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nMás variables no significa necesariamente mejor modelo.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#selección-de-variables-frente-a-reducción-de-dimensionalidad",
+    "href": "feature-selection/index.html#selección-de-variables-frente-a-reducción-de-dimensionalidad",
+    "title": "Selección de variables y regularización",
+    "section": "Selección de variables frente a reducción de dimensionalidad",
+    "text": "Selección de variables frente a reducción de dimensionalidad\n\nSelección de variables\nConserva un subconjunto de las variables originales.\nEjemplo:\nEdad\nTroponina\nFEVI\nGLS\nVentajas:\n\nMantiene interpretabilidad.\nFacilita explicar el modelo.\nPermite identificar variables relevantes.\n\n\n\nReducción de dimensionalidad\nCrea nuevas variables combinando las originales.\nEjemplo:\nComponente principal 1\nComponente principal 2\nVentajas:\n\nPuede resumir información.\nReduce colinealidad.\nPuede mejorar eficiencia.\n\nLimitación:\n\nLas nuevas variables pueden ser difíciles de interpretar.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#familias-de-métodos",
+    "href": "feature-selection/index.html#familias-de-métodos",
+    "title": "Selección de variables y regularización",
+    "section": "Familias de métodos",
+    "text": "Familias de métodos\n\nMétodos filter\nEvalúan cada variable utilizando criterios estadísticos antes de entrenar el modelo final.\nEjemplos:\n\nCorrelación.\nChi-cuadrado.\nANOVA.\nMutual information.\nVariance threshold.\n\n\n\nMétodos wrapper\nEvalúan subconjuntos de variables entrenando repetidamente un modelo.\nEjemplos:\n\nRecursive Feature Elimination.\nSequential Feature Selection.\nForward selection.\nBackward elimination.\n\n\n\nMétodos embedded\nLa selección ocurre durante el entrenamiento.\nEjemplos:\n\nLasso.\nElastic Net.\nÁrboles.\nRandom forest.\nGradient boosting.\n\n\n\nRegularización\nPenaliza modelos excesivamente complejos.\nEjemplos:\n\nRidge.\nLasso.\nElastic Net.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#contenidos-de-la-sección",
+    "href": "feature-selection/index.html#contenidos-de-la-sección",
+    "title": "Selección de variables y regularización",
+    "section": "Contenidos de la sección",
+    "text": "Contenidos de la sección\n\nMétodos filter\nAprenderás:\n\nVariance Threshold.\nCorrelación.\nChi-cuadrado.\nANOVA.\nMutual information.\nSelección univariante.\nLimitaciones de los métodos filter.\n\n\n\nMétodos wrapper\nAprenderás:\n\nRecursive Feature Elimination.\nRFECV.\nSequential Feature Selection.\nForward selection.\nBackward selection.\nCoste computacional.\n\n\n\nMétodos embedded\nAprenderás:\n\nSelección con modelos lineales.\nImportancia en árboles.\nSelectFromModel.\nLimitaciones de feature importance.\nEstabilidad de la selección.\n\n\n\nRegularización\nAprenderás:\n\nRidge.\nLasso.\nElastic Net.\nParámetro de penalización.\nRelación entre regularización y escalado.\nSelección de hiperparámetros.\nInterpretación de coeficientes.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#riesgo-de-data-leakage",
+    "href": "feature-selection/index.html#riesgo-de-data-leakage",
+    "title": "Selección de variables y regularización",
+    "section": "Riesgo de data leakage",
+    "text": "Riesgo de data leakage\nLa selección de variables debe aprenderse solo con train.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#ejemplo-incorrecto",
+    "href": "feature-selection/index.html#ejemplo-incorrecto",
+    "title": "Selección de variables y regularización",
+    "section": "Ejemplo incorrecto",
+    "text": "Ejemplo incorrecto\nfrom sklearn.feature_selection import SelectKBest\nfrom sklearn.feature_selection import f_classif\n\nselector = SelectKBest(\n    score_func=f_classif,\n    k=20\n)\n\nX_selected = selector.fit_transform(\n    X,\n    y\n)\n\nscores = cross_val_score(\n    model,\n    X_selected,\n    y,\n    cv=5\n)\nAquí la selección utiliza todo el dataset antes de la validación cruzada.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#ejemplo-correcto",
+    "href": "feature-selection/index.html#ejemplo-correcto",
+    "title": "Selección de variables y regularización",
+    "section": "Ejemplo correcto",
+    "text": "Ejemplo correcto\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.feature_selection import SelectKBest\nfrom sklearn.feature_selection import f_classif\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"selector\",\n            SelectKBest(\n                score_func=f_classif,\n                k=20\n            )\n        ),\n        (\n            \"model\",\n            model\n        )\n    ]\n)\n\nscores = cross_val_score(\n    pipeline,\n    X,\n    y,\n    cv=5\n)\n\n\n\n\n\n\nWarningImportante\n\n\n\nLa selección de variables debe repetirse dentro de cada fold.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#variables-irrelevantes",
+    "href": "feature-selection/index.html#variables-irrelevantes",
+    "title": "Selección de variables y regularización",
+    "section": "Variables irrelevantes",
+    "text": "Variables irrelevantes\nUna variable irrelevante no aporta información útil para predecir el target.\nPuede:\n\nIntroducir ruido.\nAumentar varianza.\nDificultar interpretación.\nIncrementar coste computacional.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#variables-redundantes",
+    "href": "feature-selection/index.html#variables-redundantes",
+    "title": "Selección de variables y regularización",
+    "section": "Variables redundantes",
+    "text": "Variables redundantes\nDos variables pueden aportar información muy parecida.\nEjemplos:\n\nPeso y superficie corporal.\nDos medidas muy correlacionadas.\nCódigos duplicados.\nVariables derivadas de otras.\n\nEsto puede generar:\n\nMulticolinealidad.\nInestabilidad de coeficientes.\nInterpretación confusa.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#multicolinealidad",
+    "href": "feature-selection/index.html#multicolinealidad",
+    "title": "Selección de variables y regularización",
+    "section": "Multicolinealidad",
+    "text": "Multicolinealidad\nLa multicolinealidad aparece cuando varias variables predictoras están fuertemente relacionadas.\nPuede afectar especialmente a modelos lineales.\nConsecuencias:\n\nCoeficientes inestables.\nSignos inesperados.\nIntervalos amplios.\nDificultad de interpretación.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#matriz-de-correlación",
+    "href": "feature-selection/index.html#matriz-de-correlación",
+    "title": "Selección de variables y regularización",
+    "section": "Matriz de correlación",
+    "text": "Matriz de correlación\ncorrelation_matrix = (\n    X_train[\n        numeric_features\n    ]\n    .corr()\n)\n\ndisplay(\n    correlation_matrix\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#identificar-correlaciones-altas",
+    "href": "feature-selection/index.html#identificar-correlaciones-altas",
+    "title": "Selección de variables y regularización",
+    "section": "Identificar correlaciones altas",
+    "text": "Identificar correlaciones altas\nimport numpy as np\n\nupper_triangle = (\n    correlation_matrix\n    .where(\n        np.triu(\n            np.ones(\n                correlation_matrix.shape\n            ),\n            k=1\n        ).astype(bool)\n    )\n)\n\nhigh_correlations = [\n    column\n    for column in upper_triangle.columns\n    if any(\n        upper_triangle[column]\n        .abs()\n        &gt; 0.90\n    )\n]\n\nprint(\n    high_correlations\n)\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nNo elimines automáticamente una variable solo por alta correlación.\nPuede tener mayor calidad, interpretabilidad o disponibilidad clínica.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#número-de-variables-y-tamaño-de-muestra",
+    "href": "feature-selection/index.html#número-de-variables-y-tamaño-de-muestra",
+    "title": "Selección de variables y regularización",
+    "section": "Número de variables y tamaño de muestra",
+    "text": "Número de variables y tamaño de muestra\nUn modelo con muchas variables y pocos pacientes tiene mayor riesgo de overfitting.\nConviene revisar:\n\nNúmero de observaciones.\nNúmero de eventos.\nNúmero de variables.\nComplejidad del modelo.\nEstabilidad de la selección.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#selección-y-estabilidad",
+    "href": "feature-selection/index.html#selección-y-estabilidad",
+    "title": "Selección de variables y regularización",
+    "section": "Selección y estabilidad",
+    "text": "Selección y estabilidad\nUna variable puede aparecer seleccionada en un fold y no en otro.\nEso puede indicar:\n\nMuestra pequeña.\nVariables correlacionadas.\nSeñal débil.\nModelo inestable.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#frecuencia-de-selección",
+    "href": "feature-selection/index.html#frecuencia-de-selección",
+    "title": "Selección de variables y regularización",
+    "section": "Frecuencia de selección",
+    "text": "Frecuencia de selección\nselection_counts = {\n    feature: 0\n    for feature in feature_names\n}\nDespués de cada fold puede incrementarse el contador de las variables seleccionadas.\nLas variables elegidas de forma consistente suelen ser más fiables.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#interpretabilidad-clínica",
+    "href": "feature-selection/index.html#interpretabilidad-clínica",
+    "title": "Selección de variables y regularización",
+    "section": "Interpretabilidad clínica",
+    "text": "Interpretabilidad clínica\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nUna variable puede ser predictiva pero poco útil si:\n\nNo está disponible en el momento de predicción.\nEs costosa.\nEs invasiva.\nTiene mucha ausencia.\nNo se mide en otros centros.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#coste-de-adquisición",
+    "href": "feature-selection/index.html#coste-de-adquisición",
+    "title": "Selección de variables y regularización",
+    "section": "Coste de adquisición",
+    "text": "Coste de adquisición\nLa selección también puede considerar:\n\nCoste económico.\nTiempo.\nInvasividad.\nCarga para el paciente.\nDisponibilidad.\nReproducibilidad.\n\nUn modelo ligeramente peor pero mucho más simple puede ser más útil.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#importancia-predictiva-frente-a-causalidad",
+    "href": "feature-selection/index.html#importancia-predictiva-frente-a-causalidad",
+    "title": "Selección de variables y regularización",
+    "section": "Importancia predictiva frente a causalidad",
+    "text": "Importancia predictiva frente a causalidad\nUna variable seleccionada no es necesariamente causal.\nPuede ser:\n\nMarcador.\nProxy.\nConfusor.\nConsecuencia del proceso.\nIndicador del centro.\n\n\n\n\n\n\n\nWarningImportante\n\n\n\nFeature importance no equivale a efecto causal.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#selección-supervisada-y-no-supervisada",
+    "href": "feature-selection/index.html#selección-supervisada-y-no-supervisada",
+    "title": "Selección de variables y regularización",
+    "section": "Selección supervisada y no supervisada",
+    "text": "Selección supervisada y no supervisada\n\nSupervisada\nUtiliza el target.\nEjemplos:\n\nANOVA.\nChi-cuadrado.\nMutual information.\nLasso.\nRFE.\n\n\n\nNo supervisada\nNo utiliza el target.\nEjemplos:\n\nVariance threshold.\nCorrelación entre predictores.\nPCA.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#flujo-recomendado",
+    "href": "feature-selection/index.html#flujo-recomendado",
+    "title": "Selección de variables y regularización",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nDefinir la pregunta.\nExcluir identificadores y leakage.\nRevisar calidad de variables.\nRevisar valores ausentes.\nRevisar redundancia.\nElegir familia de selección.\nIntegrar selección en pipeline.\nValidar con cross-validation.\nEvaluar estabilidad.\nComparar con modelo sin selección.\nRevisar interpretabilidad clínica.\nDocumentar variables finales.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#qué-comparar",
+    "href": "feature-selection/index.html#qué-comparar",
+    "title": "Selección de variables y regularización",
+    "section": "Qué comparar",
+    "text": "Qué comparar\nSiempre conviene comparar:\nModelo sin selección\nvs\nModelo con selección\nDebe evaluarse:\n\nRendimiento.\nVariabilidad.\nNúmero de variables.\nInterpretabilidad.\nCoste.\nEstabilidad.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#errores-frecuentes",
+    "href": "feature-selection/index.html#errores-frecuentes",
+    "title": "Selección de variables y regularización",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nSeleccionar variables con todo el dataset.\nElegir variables por p-value sin validación.\nConfundir correlación con causalidad.\nEliminar variables correlacionadas automáticamente.\nUsar importancias de árboles como verdad absoluta.\nNo escalar antes de Lasso o Ridge.\nNo comparar con el modelo completo.\nIgnorar estabilidad entre folds.\nSeleccionar demasiadas variables.\nUsar información futura.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#checklist-general",
+    "href": "feature-selection/index.html#checklist-general",
+    "title": "Selección de variables y regularización",
+    "section": "Checklist general",
+    "text": "Checklist general\n\nHe eliminado identificadores.\nHe revisado data leakage.\nHe revisado correlaciones.\nHe considerado multicolinealidad.\nHe elegido un método adecuado.\nLa selección está dentro del pipeline.\nLa selección se repite en cada fold.\nHe comparado con un modelo sin selección.\nHe revisado estabilidad.\nHe considerado coste clínico.\nHe evitado interpretar importancia como causalidad.\nHe documentado las variables finales.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#próximos-documentos",
+    "href": "feature-selection/index.html#próximos-documentos",
+    "title": "Selección de variables y regularización",
+    "section": "Próximos documentos",
+    "text": "Próximos documentos\nEsta sección se completará con:\n\nMétodos filter.\nMétodos wrapper.\nMétodos embedded.\nRegularización.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
     ]
   },
   {
