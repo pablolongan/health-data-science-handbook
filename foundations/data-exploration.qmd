@@ -1,0 +1,170 @@
+---
+title: "Exploración de datos"
+---
+
+# Exploratory Data Analysis
+
+## Resumen
+
+La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.
+
+## Objetivos principales
+
+- Comprender qué representa cada fila y cada columna.
+- Identificar los tipos de variables.
+- Detectar valores ausentes.
+- Estudiar la distribución de las variables.
+- Localizar valores extremos o potencialmente erróneos.
+- Analizar relaciones entre variables.
+- Detectar posibles problemas de calidad de datos.
+
+## Checklist inicial
+
+Antes de entrenar un modelo, conviene responder:
+
+- ¿Cuál es la unidad de análisis?
+- ¿Cuántas observaciones hay?
+- ¿Existen observaciones duplicadas?
+- ¿Qué variable queremos predecir?
+- ¿Qué variables son numéricas?
+- ¿Qué variables son categóricas?
+- ¿Hay valores ausentes?
+- ¿Existen valores imposibles?
+- ¿Puede haber información futura o data leakage?
+
+## Código básico
+
+```python
+import pandas as pd
+
+df = pd.read_csv("datos.csv")
+
+print(f"Dimensiones del dataset: {df.shape}")
+
+display(df.head())
+
+df.info()
+
+display(df.describe(include="all").T)
+```
+
+## Valores ausentes
+
+```python
+missing_summary = (
+    df.isna()
+    .sum()
+    .to_frame("missing_count")
+    .assign(
+        missing_percentage=lambda x:
+        100 * x["missing_count"] / len(df)
+    )
+    .sort_values(
+        "missing_percentage",
+        ascending=False
+    )
+)
+
+display(missing_summary)
+```
+
+## Filas duplicadas
+
+```python
+n_duplicates = df.duplicated().sum()
+
+print(f"Número de filas duplicadas: {n_duplicates}")
+```
+
+## Tipos de variables
+
+```python
+variable_types = (
+    df.dtypes
+    .astype(str)
+    .to_frame("data_type")
+)
+
+display(variable_types)
+```
+
+## Número de valores únicos
+
+```python
+unique_values = (
+    df.nunique(dropna=False)
+    .to_frame("unique_values")
+    .sort_values(
+        "unique_values",
+        ascending=True
+    )
+)
+
+display(unique_values)
+```
+
+## Variables numéricas y categóricas
+
+```python
+numeric_columns = df.select_dtypes(
+    include="number"
+).columns.tolist()
+
+categorical_columns = df.select_dtypes(
+    include=["object", "category", "bool"]
+).columns.tolist()
+
+print("Variables numéricas:")
+print(numeric_columns)
+
+print("\nVariables categóricas:")
+print(categorical_columns)
+```
+
+## Consideraciones en datos clínicos
+
+En datos sanitarios, un valor ausente no siempre significa que la información se haya perdido. Puede indicar que:
+
+- La prueba no estaba clínicamente indicada.
+- El paciente no acudió a la visita.
+- El dato se registró en otro sistema.
+- La prueba se realizó, pero no se importó correctamente.
+- El procedimiento no estaba disponible en ese momento.
+- La ausencia del dato está relacionada con el estado clínico del paciente.
+- El profesional decidió no solicitar la prueba porque ya disponía de información suficiente.
+
+Por este motivo, el mecanismo que genera los valores ausentes debe investigarse antes de eliminarlos o imputarlos.
+
+También es importante revisar:
+
+- Valores clínicamente imposibles.
+- Diferencias de unidades entre centros.
+- Cambios en los métodos de medición.
+- Duplicados asociados a distintas visitas.
+- Fechas incoherentes.
+- Variables registradas después del desenlace.
+- Información que pueda producir data leakage.
+
+## Buenas prácticas
+
+Antes de comenzar el modelado:
+
+1. Comprender qué representa cada fila.
+2. Identificar la variable objetivo.
+3. Revisar la calidad de las variables predictoras.
+4. Detectar duplicados y valores imposibles.
+5. Analizar los valores ausentes.
+6. Comprobar la distribución de las variables.
+7. Separar los datos de entrenamiento y prueba antes de ajustar transformaciones.
+8. Evitar utilizar información futura para predecir eventos pasados.
+9. Documentar todas las decisiones de limpieza y transformación.
+
+## Errores frecuentes
+
+- Empezar a entrenar modelos sin comprender el dataset.
+- Eliminar todos los valores ausentes automáticamente.
+- Considerar todos los valores extremos como errores.
+- Utilizar identificadores de pacientes como variables predictoras.
+- Incluir variables registradas después del desenlace.
+- Calcular transformaciones utilizando todo el dataset antes de separar entrenamiento y prueba.
+- Interpretar una correlación como una relación causal.
