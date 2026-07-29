@@ -996,7 +996,7 @@
     "href": "preprocessing/index.html",
     "title": "Preprocesamiento",
     "section": "",
-    "text": "Esta sección reúne las técnicas necesarias para limpiar, transformar y preparar los datos antes del modelado.",
+    "text": "TipResumen en 30 segundos\n\n\n\nEl preprocesamiento transforma los datos originales en una representación adecuada para el análisis y el modelado.\nIncluye decisiones sobre:\n\nSeparación de datos.\nValores ausentes.\nEscalado.\nVariables categóricas.\nOutliers.\nPipelines.\nPrevención de data leakage.\n\nUn buen modelo no compensa un preprocesamiento incorrecto.",
     "crumbs": [
       "Inicio",
       "Preprocesamiento",
@@ -1004,11 +1004,131 @@
     ]
   },
   {
-    "objectID": "preprocessing/index.html#contenidos-previstos",
-    "href": "preprocessing/index.html#contenidos-previstos",
+    "objectID": "preprocessing/index.html#objetivo-de-esta-sección",
+    "href": "preprocessing/index.html#objetivo-de-esta-sección",
     "title": "Preprocesamiento",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "section": "Objetivo de esta sección",
+    "text": "Objetivo de esta sección\nEsta sección reúne los pasos necesarios para preparar los datos antes de entrenar un modelo de machine learning.\nEl objetivo no es aplicar transformaciones automáticamente, sino construir un flujo:\n\nReproducible.\nJustificado.\nClínicamente coherente.\nLibre de data leakage.\nCompatible con validación cruzada.\nFácil de reutilizar en nuevos proyectos.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#orden-recomendado",
+    "href": "preprocessing/index.html#orden-recomendado",
+    "title": "Preprocesamiento",
+    "section": "Orden recomendado",
+    "text": "Orden recomendado\nUn flujo habitual puede seguir este orden:\n\nDefinir la unidad de análisis.\nDefinir la variable objetivo.\nDefinir el momento de predicción.\nSeparar train, validation y test.\nRevisar data leakage.\nAnalizar valores ausentes.\nRevisar outliers y unidades.\nPreparar variables numéricas.\nPreparar variables categóricas.\nIntegrar todo en un pipeline.\nValidar el flujo completo.\nEvaluar finalmente con test.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nEl orden de las transformaciones importa.\nMuchas operaciones deben aprenderse únicamente con el conjunto de entrenamiento.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#contenidos",
+    "href": "preprocessing/index.html#contenidos",
+    "title": "Preprocesamiento",
+    "section": "Contenidos",
+    "text": "Contenidos\n\nTrain, validation and test\nAprenderás:\n\nPara qué sirve cada conjunto.\nCómo hacer un split simple.\nCómo utilizar validación cruzada.\nCómo separar por paciente.\nCómo respetar el orden temporal.\nCómo validar por centro.\n\nIr a Train, validation and test\n\n\nData leakage\nAprenderás:\n\nQué es el target leakage.\nQué es la contaminación entre train y test.\nCómo aparece en imputación, escalado, PCA y selección de variables.\nCómo detectar leakage temporal.\nCómo evitar mezclar visitas del mismo paciente.\n\nIr a Data leakage\n\n\nValores ausentes\nAprenderás:\n\nDiferencias entre MCAR, MAR y MNAR.\nCómo explorar patrones de ausencia.\nCuándo eliminar o imputar.\nImputación simple, KNN e iterativa.\nIndicadores de ausencia.\nImputación dentro de pipelines.\n\nIr a Valores ausentes\n\n\nEscalado y normalización\nAprenderás:\n\nCuándo escalar.\nDiferencias entre StandardScaler, MinMaxScaler y RobustScaler.\nQué hace Normalizer.\nRelación entre escalado, PCA, SVM, KNN y regularización.\nCómo evitar leakage al escalar.\n\nIr a Escalado y normalización\n\n\nVariables categóricas y encoding\nAprenderás:\n\nDiferencia entre nominal y ordinal.\nOne-hot encoding.\nOrdinal encoding.\nCategorías desconocidas.\nAlta cardinalidad.\nTarget encoding.\nEncoding dentro de ColumnTransformer.\n\nIr a Variables categóricas y encoding\n\n\nOutliers\nAprenderás:\n\nDiferencia entre valor raro y valor erróneo.\nDetección univariante y multivariante.\nIQR, z-score e Isolation Forest.\nWinsorización y transformaciones.\nOutliers clínicos y longitudinales.\nCálculo de umbrales solo con train.\n\nIr a Outliers\n\n\nPipelines y ColumnTransformer\nAprenderás:\n\nCómo encadenar transformaciones.\nCómo tratar variables numéricas y categóricas de forma distinta.\nCómo integrar preprocesamiento y modelo.\nCómo usar validación cruzada y GridSearchCV.\nCómo guardar el pipeline completo.\nCómo reducir errores y data leakage.\n\nIr a Pipelines y ColumnTransformer",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#flujo-visual",
+    "href": "preprocessing/index.html#flujo-visual",
+    "title": "Preprocesamiento",
+    "section": "Flujo visual",
+    "text": "Flujo visual\nDatos originales\n      │\n      ▼\nDefinir cohorte, target y tiempo índice\n      │\n      ▼\nSeparar train / validation / test\n      │\n      ▼\nRevisar data leakage\n      │\n      ▼\nPreprocesamiento dentro del pipeline\n      │\n      ├── Valores ausentes\n      ├── Outliers\n      ├── Escalado\n      └── Encoding\n      │\n      ▼\nEntrenamiento y validación cruzada\n      │\n      ▼\nEvaluación final con test",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#qué-debe-hacerse-antes-del-pipeline",
+    "href": "preprocessing/index.html#qué-debe-hacerse-antes-del-pipeline",
+    "title": "Preprocesamiento",
+    "section": "Qué debe hacerse antes del pipeline",
+    "text": "Qué debe hacerse antes del pipeline\nNormalmente, antes del pipeline se realizan decisiones estructurales:\n\nDefinir la cohorte.\nCrear la variable objetivo.\nDefinir el momento de predicción.\nArmonizar unidades.\nCorregir errores conocidos.\nExcluir variables con leakage.\nSeparar por paciente, tiempo o centro.\nEliminar identificadores de las variables predictoras.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#qué-debe-estar-dentro-del-pipeline",
+    "href": "preprocessing/index.html#qué-debe-estar-dentro-del-pipeline",
+    "title": "Preprocesamiento",
+    "section": "Qué debe estar dentro del pipeline",
+    "text": "Qué debe estar dentro del pipeline\nNormalmente, dentro del pipeline se incluyen:\n\nImputación.\nEscalado.\nEncoding.\nSelección de variables.\nPCA.\nBalanceo.\nModelo.\n\n\n\n\n\n\n\nWarningImportante\n\n\n\nSi una transformación aprende parámetros a partir de los datos, debería formar parte del pipeline o ajustarse únicamente con train.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#ejemplo-conceptual",
+    "href": "preprocessing/index.html#ejemplo-conceptual",
+    "title": "Preprocesamiento",
+    "section": "Ejemplo conceptual",
+    "text": "Ejemplo conceptual\nmodel = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"classifier\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#errores-frecuentes",
+    "href": "preprocessing/index.html#errores-frecuentes",
+    "title": "Preprocesamiento",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nPreprocesar antes del split.\nImputar con todo el dataset.\nEscalar train y test por separado.\nMezclar pacientes entre particiones.\nUtilizar información futura.\nTratar códigos categóricos como cantidades.\nEliminar outliers automáticamente.\nNo armonizar unidades.\nComparar modelos con splits diferentes.\nGuardar solo el modelo y no el pipeline.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#consideraciones-en-datos-clínicos",
+    "href": "preprocessing/index.html#consideraciones-en-datos-clínicos",
+    "title": "Preprocesamiento",
+    "section": "Consideraciones en datos clínicos",
+    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nEl preprocesamiento no es solo una tarea técnica.\nCada decisión puede modificar:\n\nLa población analizada.\nLa representación de los pacientes.\nLa interpretabilidad.\nLa validez externa.\nLa utilidad clínica del modelo.\n\n\n\n\nUnidad de análisis\nPuede ser:\n\nPaciente.\nVisita.\nIngreso.\nEpisodio.\nPrueba.\nVentana temporal.\n\nDebe quedar definida antes del split.\n\n\nTiempo índice\nEs el momento exacto en que se genera la predicción.\nTodas las variables predictoras deben estar disponibles antes o en ese momento.\n\n\nDiferencias entre centros\nPueden existir diferencias en:\n\nProtocolos.\nEquipos.\nUnidades.\nFrecuencia de medición.\nSistemas de información.\nPoblación atendida.\n\n\n\nDatos longitudinales\nDebe evitarse utilizar observaciones futuras para construir variables pasadas.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#checklist-general",
+    "href": "preprocessing/index.html#checklist-general",
+    "title": "Preprocesamiento",
+    "section": "Checklist general",
+    "text": "Checklist general\nAntes de entrenar un modelo:\n\nHe definido la unidad de análisis.\nHe definido el target.\nHe definido el momento de predicción.\nHe separado train y test.\nHe respetado pacientes, centros y tiempo.\nHe revisado data leakage.\nHe cuantificado valores ausentes.\nHe revisado unidades.\nHe revisado outliers.\nHe distinguido variables numéricas y categóricas.\nHe integrado transformaciones en un pipeline.\nHe validado el pipeline completo.\nHe mantenido el test sin tocar.\nHe documentado todas las decisiones.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "preprocessing/index.html#próximo-bloque",
+    "href": "preprocessing/index.html#próximo-bloque",
+    "title": "Preprocesamiento",
+    "section": "Próximo bloque",
+    "text": "Próximo bloque\nDespués del preprocesamiento, el siguiente paso es aprender a evaluar correctamente los modelos:\n\nOverfitting y underfitting.\nBaselines.\nMétricas de clasificación.\nMétricas de regresión.\nValidación cruzada.\nCalibración.\nValidación externa.",
     "crumbs": [
       "Inicio",
       "Preprocesamiento",

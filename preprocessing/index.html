@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -366,7 +401,32 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#contenidos-previstos" id="toc-contenidos-previstos" class="nav-link active" data-scroll-target="#contenidos-previstos">Contenidos previstos</a></li>
+  <li><a href="#objetivo-de-esta-sección" id="toc-objetivo-de-esta-sección" class="nav-link active" data-scroll-target="#objetivo-de-esta-sección">Objetivo de esta sección</a></li>
+  <li><a href="#orden-recomendado" id="toc-orden-recomendado" class="nav-link" data-scroll-target="#orden-recomendado">Orden recomendado</a></li>
+  <li><a href="#contenidos" id="toc-contenidos" class="nav-link" data-scroll-target="#contenidos">Contenidos</a>
+  <ul class="collapse">
+  <li><a href="#train-validation-and-test" id="toc-train-validation-and-test" class="nav-link" data-scroll-target="#train-validation-and-test">Train, validation and test</a></li>
+  <li><a href="#data-leakage" id="toc-data-leakage" class="nav-link" data-scroll-target="#data-leakage">Data leakage</a></li>
+  <li><a href="#valores-ausentes" id="toc-valores-ausentes" class="nav-link" data-scroll-target="#valores-ausentes">Valores ausentes</a></li>
+  <li><a href="#escalado-y-normalización" id="toc-escalado-y-normalización" class="nav-link" data-scroll-target="#escalado-y-normalización">Escalado y normalización</a></li>
+  <li><a href="#variables-categóricas-y-encoding" id="toc-variables-categóricas-y-encoding" class="nav-link" data-scroll-target="#variables-categóricas-y-encoding">Variables categóricas y encoding</a></li>
+  <li><a href="#outliers" id="toc-outliers" class="nav-link" data-scroll-target="#outliers">Outliers</a></li>
+  <li><a href="#pipelines-y-columntransformer" id="toc-pipelines-y-columntransformer" class="nav-link" data-scroll-target="#pipelines-y-columntransformer">Pipelines y ColumnTransformer</a></li>
+  </ul></li>
+  <li><a href="#flujo-visual" id="toc-flujo-visual" class="nav-link" data-scroll-target="#flujo-visual">Flujo visual</a></li>
+  <li><a href="#qué-debe-hacerse-antes-del-pipeline" id="toc-qué-debe-hacerse-antes-del-pipeline" class="nav-link" data-scroll-target="#qué-debe-hacerse-antes-del-pipeline">Qué debe hacerse antes del pipeline</a></li>
+  <li><a href="#qué-debe-estar-dentro-del-pipeline" id="toc-qué-debe-estar-dentro-del-pipeline" class="nav-link" data-scroll-target="#qué-debe-estar-dentro-del-pipeline">Qué debe estar dentro del pipeline</a></li>
+  <li><a href="#ejemplo-conceptual" id="toc-ejemplo-conceptual" class="nav-link" data-scroll-target="#ejemplo-conceptual">Ejemplo conceptual</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#consideraciones-en-datos-clínicos" id="toc-consideraciones-en-datos-clínicos" class="nav-link" data-scroll-target="#consideraciones-en-datos-clínicos">Consideraciones en datos clínicos</a>
+  <ul class="collapse">
+  <li><a href="#unidad-de-análisis" id="toc-unidad-de-análisis" class="nav-link" data-scroll-target="#unidad-de-análisis">Unidad de análisis</a></li>
+  <li><a href="#tiempo-índice" id="toc-tiempo-índice" class="nav-link" data-scroll-target="#tiempo-índice">Tiempo índice</a></li>
+  <li><a href="#diferencias-entre-centros" id="toc-diferencias-entre-centros" class="nav-link" data-scroll-target="#diferencias-entre-centros">Diferencias entre centros</a></li>
+  <li><a href="#datos-longitudinales" id="toc-datos-longitudinales" class="nav-link" data-scroll-target="#datos-longitudinales">Datos longitudinales</a></li>
+  </ul></li>
+  <li><a href="#checklist-general" id="toc-checklist-general" class="nav-link" data-scroll-target="#checklist-general">Checklist general</a></li>
+  <li><a href="#próximo-bloque" id="toc-próximo-bloque" class="nav-link" data-scroll-target="#próximo-bloque">Próximo bloque</a></li>
   </ul>
 </nav>
     </div>
@@ -392,17 +452,357 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Esta sección reúne las técnicas necesarias para limpiar, transformar y preparar los datos antes del modelado.</p>
-<section id="contenidos-previstos" class="level2">
-<h2 data-anchor-id="contenidos-previstos">Contenidos previstos</h2>
-<p>Esta sección se irá ampliando progresivamente con:</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El preprocesamiento transforma los datos originales en una representación adecuada para el análisis y el modelado.</p>
+<p>Incluye decisiones sobre:</p>
 <ul>
-<li>Fundamentos teóricos.</li>
-<li>Cuándo utilizar cada técnica.</li>
-<li>Código listo para adaptar.</li>
-<li>Interpretación de resultados.</li>
-<li>Errores frecuentes.</li>
-<li>Consideraciones específicas en datos clínicos.</li>
+<li>Separación de datos.</li>
+<li>Valores ausentes.</li>
+<li>Escalado.</li>
+<li>Variables categóricas.</li>
+<li>Outliers.</li>
+<li>Pipelines.</li>
+<li>Prevención de data leakage.</li>
+</ul>
+<p>Un buen modelo no compensa un preprocesamiento incorrecto.</p>
+</div>
+</div>
+<section id="objetivo-de-esta-sección" class="level2">
+<h2 data-anchor-id="objetivo-de-esta-sección">Objetivo de esta sección</h2>
+<p>Esta sección reúne los pasos necesarios para preparar los datos antes de entrenar un modelo de machine learning.</p>
+<p>El objetivo no es aplicar transformaciones automáticamente, sino construir un flujo:</p>
+<ul>
+<li>Reproducible.</li>
+<li>Justificado.</li>
+<li>Clínicamente coherente.</li>
+<li>Libre de data leakage.</li>
+<li>Compatible con validación cruzada.</li>
+<li>Fácil de reutilizar en nuevos proyectos.</li>
+</ul>
+</section>
+<section id="orden-recomendado" class="level2">
+<h2 data-anchor-id="orden-recomendado">Orden recomendado</h2>
+<p>Un flujo habitual puede seguir este orden:</p>
+<ol type="1">
+<li>Definir la unidad de análisis.</li>
+<li>Definir la variable objetivo.</li>
+<li>Definir el momento de predicción.</li>
+<li>Separar train, validation y test.</li>
+<li>Revisar data leakage.</li>
+<li>Analizar valores ausentes.</li>
+<li>Revisar outliers y unidades.</li>
+<li>Preparar variables numéricas.</li>
+<li>Preparar variables categóricas.</li>
+<li>Integrar todo en un pipeline.</li>
+<li>Validar el flujo completo.</li>
+<li>Evaluar finalmente con test.</li>
+</ol>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El orden de las transformaciones importa.</p>
+<p>Muchas operaciones deben aprenderse únicamente con el conjunto de entrenamiento.</p>
+</div>
+</div>
+</section>
+<section id="contenidos" class="level2">
+<h2 data-anchor-id="contenidos">Contenidos</h2>
+<section id="train-validation-and-test" class="level3">
+<h3 data-anchor-id="train-validation-and-test">Train, validation and test</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Para qué sirve cada conjunto.</li>
+<li>Cómo hacer un split simple.</li>
+<li>Cómo utilizar validación cruzada.</li>
+<li>Cómo separar por paciente.</li>
+<li>Cómo respetar el orden temporal.</li>
+<li>Cómo validar por centro.</li>
+</ul>
+<p><a href="../preprocessing/train-test-split.html">Ir a Train, validation and test</a></p>
+</section>
+<section id="data-leakage" class="level3">
+<h3 data-anchor-id="data-leakage">Data leakage</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Qué es el target leakage.</li>
+<li>Qué es la contaminación entre train y test.</li>
+<li>Cómo aparece en imputación, escalado, PCA y selección de variables.</li>
+<li>Cómo detectar leakage temporal.</li>
+<li>Cómo evitar mezclar visitas del mismo paciente.</li>
+</ul>
+<p><a href="../preprocessing/data-leakage.html">Ir a Data leakage</a></p>
+</section>
+<section id="valores-ausentes" class="level3">
+<h3 data-anchor-id="valores-ausentes">Valores ausentes</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Diferencias entre MCAR, MAR y MNAR.</li>
+<li>Cómo explorar patrones de ausencia.</li>
+<li>Cuándo eliminar o imputar.</li>
+<li>Imputación simple, KNN e iterativa.</li>
+<li>Indicadores de ausencia.</li>
+<li>Imputación dentro de pipelines.</li>
+</ul>
+<p><a href="../preprocessing/missing-data.html">Ir a Valores ausentes</a></p>
+</section>
+<section id="escalado-y-normalización" class="level3">
+<h3 data-anchor-id="escalado-y-normalización">Escalado y normalización</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Cuándo escalar.</li>
+<li>Diferencias entre StandardScaler, MinMaxScaler y RobustScaler.</li>
+<li>Qué hace Normalizer.</li>
+<li>Relación entre escalado, PCA, SVM, KNN y regularización.</li>
+<li>Cómo evitar leakage al escalar.</li>
+</ul>
+<p><a href="../preprocessing/scaling-normalization.html">Ir a Escalado y normalización</a></p>
+</section>
+<section id="variables-categóricas-y-encoding" class="level3">
+<h3 data-anchor-id="variables-categóricas-y-encoding">Variables categóricas y encoding</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Diferencia entre nominal y ordinal.</li>
+<li>One-hot encoding.</li>
+<li>Ordinal encoding.</li>
+<li>Categorías desconocidas.</li>
+<li>Alta cardinalidad.</li>
+<li>Target encoding.</li>
+<li>Encoding dentro de ColumnTransformer.</li>
+</ul>
+<p><a href="../preprocessing/categorical-encoding.html">Ir a Variables categóricas y encoding</a></p>
+</section>
+<section id="outliers" class="level3">
+<h3 data-anchor-id="outliers">Outliers</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Diferencia entre valor raro y valor erróneo.</li>
+<li>Detección univariante y multivariante.</li>
+<li>IQR, z-score e Isolation Forest.</li>
+<li>Winsorización y transformaciones.</li>
+<li>Outliers clínicos y longitudinales.</li>
+<li>Cálculo de umbrales solo con train.</li>
+</ul>
+<p><a href="../preprocessing/outliers.html">Ir a Outliers</a></p>
+</section>
+<section id="pipelines-y-columntransformer" class="level3">
+<h3 data-anchor-id="pipelines-y-columntransformer">Pipelines y ColumnTransformer</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Cómo encadenar transformaciones.</li>
+<li>Cómo tratar variables numéricas y categóricas de forma distinta.</li>
+<li>Cómo integrar preprocesamiento y modelo.</li>
+<li>Cómo usar validación cruzada y GridSearchCV.</li>
+<li>Cómo guardar el pipeline completo.</li>
+<li>Cómo reducir errores y data leakage.</li>
+</ul>
+<p><a href="../preprocessing/pipelines-columntransformer.html">Ir a Pipelines y ColumnTransformer</a></p>
+</section>
+</section>
+<section id="flujo-visual" class="level2">
+<h2 data-anchor-id="flujo-visual">Flujo visual</h2>
+<pre class="text"><code>Datos originales
+      │
+      ▼
+Definir cohorte, target y tiempo índice
+      │
+      ▼
+Separar train / validation / test
+      │
+      ▼
+Revisar data leakage
+      │
+      ▼
+Preprocesamiento dentro del pipeline
+      │
+      ├── Valores ausentes
+      ├── Outliers
+      ├── Escalado
+      └── Encoding
+      │
+      ▼
+Entrenamiento y validación cruzada
+      │
+      ▼
+Evaluación final con test</code></pre>
+</section>
+<section id="qué-debe-hacerse-antes-del-pipeline" class="level2">
+<h2 data-anchor-id="qué-debe-hacerse-antes-del-pipeline">Qué debe hacerse antes del pipeline</h2>
+<p>Normalmente, antes del pipeline se realizan decisiones estructurales:</p>
+<ul>
+<li>Definir la cohorte.</li>
+<li>Crear la variable objetivo.</li>
+<li>Definir el momento de predicción.</li>
+<li>Armonizar unidades.</li>
+<li>Corregir errores conocidos.</li>
+<li>Excluir variables con leakage.</li>
+<li>Separar por paciente, tiempo o centro.</li>
+<li>Eliminar identificadores de las variables predictoras.</li>
+</ul>
+</section>
+<section id="qué-debe-estar-dentro-del-pipeline" class="level2">
+<h2 data-anchor-id="qué-debe-estar-dentro-del-pipeline">Qué debe estar dentro del pipeline</h2>
+<p>Normalmente, dentro del pipeline se incluyen:</p>
+<ul>
+<li>Imputación.</li>
+<li>Escalado.</li>
+<li>Encoding.</li>
+<li>Selección de variables.</li>
+<li>PCA.</li>
+<li>Balanceo.</li>
+<li>Modelo.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Si una transformación aprende parámetros a partir de los datos, debería formar parte del pipeline o ajustarse únicamente con train.</p>
+</div>
+</div>
+</section>
+<section id="ejemplo-conceptual" class="level2">
+<h2 data-anchor-id="ejemplo-conceptual">Ejemplo conceptual</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Pipeline(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"preprocessor"</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>            preprocessor</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"classifier"</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>            LogisticRegression(</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>                max_iter<span class="op">=</span><span class="dv">1000</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>Preprocesar antes del split.</li>
+<li>Imputar con todo el dataset.</li>
+<li>Escalar train y test por separado.</li>
+<li>Mezclar pacientes entre particiones.</li>
+<li>Utilizar información futura.</li>
+<li>Tratar códigos categóricos como cantidades.</li>
+<li>Eliminar outliers automáticamente.</li>
+<li>No armonizar unidades.</li>
+<li>Comparar modelos con splits diferentes.</li>
+<li>Guardar solo el modelo y no el pipeline.</li>
+</ul>
+</section>
+<section id="consideraciones-en-datos-clínicos" class="level2">
+<h2 data-anchor-id="consideraciones-en-datos-clínicos">Consideraciones en datos clínicos</h2>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Aplicación clínica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El preprocesamiento no es solo una tarea técnica.</p>
+<p>Cada decisión puede modificar:</p>
+<ul>
+<li>La población analizada.</li>
+<li>La representación de los pacientes.</li>
+<li>La interpretabilidad.</li>
+<li>La validez externa.</li>
+<li>La utilidad clínica del modelo.</li>
+</ul>
+</div>
+</div>
+<section id="unidad-de-análisis" class="level3">
+<h3 data-anchor-id="unidad-de-análisis">Unidad de análisis</h3>
+<p>Puede ser:</p>
+<ul>
+<li>Paciente.</li>
+<li>Visita.</li>
+<li>Ingreso.</li>
+<li>Episodio.</li>
+<li>Prueba.</li>
+<li>Ventana temporal.</li>
+</ul>
+<p>Debe quedar definida antes del split.</p>
+</section>
+<section id="tiempo-índice" class="level3">
+<h3 data-anchor-id="tiempo-índice">Tiempo índice</h3>
+<p>Es el momento exacto en que se genera la predicción.</p>
+<p>Todas las variables predictoras deben estar disponibles antes o en ese momento.</p>
+</section>
+<section id="diferencias-entre-centros" class="level3">
+<h3 data-anchor-id="diferencias-entre-centros">Diferencias entre centros</h3>
+<p>Pueden existir diferencias en:</p>
+<ul>
+<li>Protocolos.</li>
+<li>Equipos.</li>
+<li>Unidades.</li>
+<li>Frecuencia de medición.</li>
+<li>Sistemas de información.</li>
+<li>Población atendida.</li>
+</ul>
+</section>
+<section id="datos-longitudinales" class="level3">
+<h3 data-anchor-id="datos-longitudinales">Datos longitudinales</h3>
+<p>Debe evitarse utilizar observaciones futuras para construir variables pasadas.</p>
+</section>
+</section>
+<section id="checklist-general" class="level2">
+<h2 data-anchor-id="checklist-general">Checklist general</h2>
+<p>Antes de entrenar un modelo:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">He definido la unidad de análisis.</label></li>
+<li><label><input type="checkbox">He definido el target.</label></li>
+<li><label><input type="checkbox">He definido el momento de predicción.</label></li>
+<li><label><input type="checkbox">He separado train y test.</label></li>
+<li><label><input type="checkbox">He respetado pacientes, centros y tiempo.</label></li>
+<li><label><input type="checkbox">He revisado data leakage.</label></li>
+<li><label><input type="checkbox">He cuantificado valores ausentes.</label></li>
+<li><label><input type="checkbox">He revisado unidades.</label></li>
+<li><label><input type="checkbox">He revisado outliers.</label></li>
+<li><label><input type="checkbox">He distinguido variables numéricas y categóricas.</label></li>
+<li><label><input type="checkbox">He integrado transformaciones en un pipeline.</label></li>
+<li><label><input type="checkbox">He validado el pipeline completo.</label></li>
+<li><label><input type="checkbox">He mantenido el test sin tocar.</label></li>
+<li><label><input type="checkbox">He documentado todas las decisiones.</label></li>
+</ul>
+</section>
+<section id="próximo-bloque" class="level2">
+<h2 data-anchor-id="próximo-bloque">Próximo bloque</h2>
+<p>Después del preprocesamiento, el siguiente paso es aprender a evaluar correctamente los modelos:</p>
+<ul>
+<li>Overfitting y underfitting.</li>
+<li>Baselines.</li>
+<li>Métricas de clasificación.</li>
+<li>Métricas de regresión.</li>
+<li>Validación cruzada.</li>
+<li>Calibración.</li>
+<li>Validación externa.</li>
 </ul>
 
 
