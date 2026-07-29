@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Principal Component Analysis (PCA) – Health Data Science Handbook</title>
+<title>Selección de variables y regularización – Health Data Science Handbook</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -108,35 +108,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -181,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../dimensionality-reduction/index.html">Reducción de dimensionalidad</a></li><li class="breadcrumb-item"><a href="../dimensionality-reduction/pca.html">PCA</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../feature-selection/index.html">Selección de variables</a></li><li class="breadcrumb-item"><a href="../feature-selection/index.html">Introducción</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -321,13 +292,13 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
  <span class="menu-text">Reducción de dimensionalidad</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../dimensionality-reduction/index.html" class="sidebar-item-text sidebar-link">
@@ -336,7 +307,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../dimensionality-reduction/pca.html" class="sidebar-item-text sidebar-link active">
+  <a href="../dimensionality-reduction/pca.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">PCA</span></a>
   </div>
 </li>
@@ -344,16 +315,16 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
  <span class="menu-text">Selección de variables</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../feature-selection/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../feature-selection/index.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -477,41 +448,59 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#qué-problema-resuelve" id="toc-qué-problema-resuelve" class="nav-link active" data-scroll-target="#qué-problema-resuelve">¿Qué problema resuelve?</a></li>
-  <li><a href="#intuición" id="toc-intuición" class="nav-link" data-scroll-target="#intuición">Intuición</a></li>
-  <li><a href="#fundamentos-teóricos" id="toc-fundamentos-teóricos" class="nav-link" data-scroll-target="#fundamentos-teóricos">Fundamentos teóricos</a>
+  <li><a href="#objetivo-de-esta-sección" id="toc-objetivo-de-esta-sección" class="nav-link active" data-scroll-target="#objetivo-de-esta-sección">Objetivo de esta sección</a></li>
+  <li><a href="#selección-de-variables-frente-a-reducción-de-dimensionalidad" id="toc-selección-de-variables-frente-a-reducción-de-dimensionalidad" class="nav-link" data-scroll-target="#selección-de-variables-frente-a-reducción-de-dimensionalidad">Selección de variables frente a reducción de dimensionalidad</a>
   <ul class="collapse">
-  <li><a href="#componentes-principales" id="toc-componentes-principales" class="nav-link" data-scroll-target="#componentes-principales">Componentes principales</a></li>
-  <li><a href="#varianza-explicada" id="toc-varianza-explicada" class="nav-link" data-scroll-target="#varianza-explicada">Varianza explicada</a></li>
-  <li><a href="#varianza-explicada-acumulada" id="toc-varianza-explicada-acumulada" class="nav-link" data-scroll-target="#varianza-explicada-acumulada">Varianza explicada acumulada</a></li>
+  <li><a href="#selección-de-variables" id="toc-selección-de-variables" class="nav-link" data-scroll-target="#selección-de-variables">Selección de variables</a></li>
+  <li><a href="#reducción-de-dimensionalidad" id="toc-reducción-de-dimensionalidad" class="nav-link" data-scroll-target="#reducción-de-dimensionalidad">Reducción de dimensionalidad</a></li>
   </ul></li>
-  <li><a href="#por-qué-es-importante-escalar" id="toc-por-qué-es-importante-escalar" class="nav-link" data-scroll-target="#por-qué-es-importante-escalar">¿Por qué es importante escalar?</a></li>
-  <li><a href="#supuestos-y-condiciones" id="toc-supuestos-y-condiciones" class="nav-link" data-scroll-target="#supuestos-y-condiciones">Supuestos y condiciones</a></li>
-  <li><a href="#cuándo-utilizar-pca" id="toc-cuándo-utilizar-pca" class="nav-link" data-scroll-target="#cuándo-utilizar-pca">Cuándo utilizar PCA</a></li>
-  <li><a href="#cuándo-no-utilizar-pca" id="toc-cuándo-no-utilizar-pca" class="nav-link" data-scroll-target="#cuándo-no-utilizar-pca">Cuándo no utilizar PCA</a></li>
-  <li><a href="#flujo-de-trabajo-recomendado" id="toc-flujo-de-trabajo-recomendado" class="nav-link" data-scroll-target="#flujo-de-trabajo-recomendado">Flujo de trabajo recomendado</a></li>
-  <li><a href="#código-mínimo" id="toc-código-mínimo" class="nav-link" data-scroll-target="#código-mínimo">Código mínimo</a></li>
-  <li><a href="#seleccionar-componentes-según-varianza-explicada" id="toc-seleccionar-componentes-según-varianza-explicada" class="nav-link" data-scroll-target="#seleccionar-componentes-según-varianza-explicada">Seleccionar componentes según varianza explicada</a></li>
-  <li><a href="#implementación-segura-dentro-de-un-pipeline" id="toc-implementación-segura-dentro-de-un-pipeline" class="nav-link" data-scroll-target="#implementación-segura-dentro-de-un-pipeline">Implementación segura dentro de un pipeline</a></li>
-  <li><a href="#inspeccionar-la-varianza-explicada" id="toc-inspeccionar-la-varianza-explicada" class="nav-link" data-scroll-target="#inspeccionar-la-varianza-explicada">Inspeccionar la varianza explicada</a></li>
-  <li><a href="#interpretar-los-loadings" id="toc-interpretar-los-loadings" class="nav-link" data-scroll-target="#interpretar-los-loadings">Interpretar los loadings</a></li>
-  <li><a href="#consideraciones-en-datos-clínicos" id="toc-consideraciones-en-datos-clínicos" class="nav-link" data-scroll-target="#consideraciones-en-datos-clínicos">Consideraciones en datos clínicos</a>
+  <li><a href="#familias-de-métodos" id="toc-familias-de-métodos" class="nav-link" data-scroll-target="#familias-de-métodos">Familias de métodos</a>
   <ul class="collapse">
-  <li><a href="#mediciones-repetidas" id="toc-mediciones-repetidas" class="nav-link" data-scroll-target="#mediciones-repetidas">Mediciones repetidas</a></li>
-  <li><a href="#valores-ausentes" id="toc-valores-ausentes" class="nav-link" data-scroll-target="#valores-ausentes">Valores ausentes</a></li>
-  <li><a href="#diferencias-entre-centros" id="toc-diferencias-entre-centros" class="nav-link" data-scroll-target="#diferencias-entre-centros">Diferencias entre centros</a></li>
+  <li><a href="#métodos-filter" id="toc-métodos-filter" class="nav-link" data-scroll-target="#métodos-filter">Métodos filter</a></li>
+  <li><a href="#métodos-wrapper" id="toc-métodos-wrapper" class="nav-link" data-scroll-target="#métodos-wrapper">Métodos wrapper</a></li>
+  <li><a href="#métodos-embedded" id="toc-métodos-embedded" class="nav-link" data-scroll-target="#métodos-embedded">Métodos embedded</a></li>
+  <li><a href="#regularización" id="toc-regularización" class="nav-link" data-scroll-target="#regularización">Regularización</a></li>
   </ul></li>
+  <li><a href="#contenidos-de-la-sección" id="toc-contenidos-de-la-sección" class="nav-link" data-scroll-target="#contenidos-de-la-sección">Contenidos de la sección</a>
+  <ul class="collapse">
+  <li><a href="#métodos-filter-1" id="toc-métodos-filter-1" class="nav-link" data-scroll-target="#métodos-filter-1">Métodos filter</a></li>
+  <li><a href="#métodos-wrapper-1" id="toc-métodos-wrapper-1" class="nav-link" data-scroll-target="#métodos-wrapper-1">Métodos wrapper</a></li>
+  <li><a href="#métodos-embedded-1" id="toc-métodos-embedded-1" class="nav-link" data-scroll-target="#métodos-embedded-1">Métodos embedded</a></li>
+  <li><a href="#regularización-1" id="toc-regularización-1" class="nav-link" data-scroll-target="#regularización-1">Regularización</a></li>
+  </ul></li>
+  <li><a href="#riesgo-de-data-leakage" id="toc-riesgo-de-data-leakage" class="nav-link" data-scroll-target="#riesgo-de-data-leakage">Riesgo de data leakage</a></li>
+  <li><a href="#ejemplo-incorrecto" id="toc-ejemplo-incorrecto" class="nav-link" data-scroll-target="#ejemplo-incorrecto">Ejemplo incorrecto</a></li>
+  <li><a href="#ejemplo-correcto" id="toc-ejemplo-correcto" class="nav-link" data-scroll-target="#ejemplo-correcto">Ejemplo correcto</a></li>
+  <li><a href="#variables-irrelevantes" id="toc-variables-irrelevantes" class="nav-link" data-scroll-target="#variables-irrelevantes">Variables irrelevantes</a></li>
+  <li><a href="#variables-redundantes" id="toc-variables-redundantes" class="nav-link" data-scroll-target="#variables-redundantes">Variables redundantes</a></li>
+  <li><a href="#multicolinealidad" id="toc-multicolinealidad" class="nav-link" data-scroll-target="#multicolinealidad">Multicolinealidad</a></li>
+  <li><a href="#matriz-de-correlación" id="toc-matriz-de-correlación" class="nav-link" data-scroll-target="#matriz-de-correlación">Matriz de correlación</a></li>
+  <li><a href="#identificar-correlaciones-altas" id="toc-identificar-correlaciones-altas" class="nav-link" data-scroll-target="#identificar-correlaciones-altas">Identificar correlaciones altas</a></li>
+  <li><a href="#número-de-variables-y-tamaño-de-muestra" id="toc-número-de-variables-y-tamaño-de-muestra" class="nav-link" data-scroll-target="#número-de-variables-y-tamaño-de-muestra">Número de variables y tamaño de muestra</a></li>
+  <li><a href="#selección-y-estabilidad" id="toc-selección-y-estabilidad" class="nav-link" data-scroll-target="#selección-y-estabilidad">Selección y estabilidad</a></li>
+  <li><a href="#frecuencia-de-selección" id="toc-frecuencia-de-selección" class="nav-link" data-scroll-target="#frecuencia-de-selección">Frecuencia de selección</a></li>
+  <li><a href="#interpretabilidad-clínica" id="toc-interpretabilidad-clínica" class="nav-link" data-scroll-target="#interpretabilidad-clínica">Interpretabilidad clínica</a></li>
+  <li><a href="#coste-de-adquisición" id="toc-coste-de-adquisición" class="nav-link" data-scroll-target="#coste-de-adquisición">Coste de adquisición</a></li>
+  <li><a href="#importancia-predictiva-frente-a-causalidad" id="toc-importancia-predictiva-frente-a-causalidad" class="nav-link" data-scroll-target="#importancia-predictiva-frente-a-causalidad">Importancia predictiva frente a causalidad</a></li>
+  <li><a href="#selección-supervisada-y-no-supervisada" id="toc-selección-supervisada-y-no-supervisada" class="nav-link" data-scroll-target="#selección-supervisada-y-no-supervisada">Selección supervisada y no supervisada</a>
+  <ul class="collapse">
+  <li><a href="#supervisada" id="toc-supervisada" class="nav-link" data-scroll-target="#supervisada">Supervisada</a></li>
+  <li><a href="#no-supervisada" id="toc-no-supervisada" class="nav-link" data-scroll-target="#no-supervisada">No supervisada</a></li>
+  </ul></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#qué-comparar" id="toc-qué-comparar" class="nav-link" data-scroll-target="#qué-comparar">Qué comparar</a></li>
   <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
-  <li><a href="#checklist-para-proyectos" id="toc-checklist-para-proyectos" class="nav-link" data-scroll-target="#checklist-para-proyectos">Checklist para proyectos</a></li>
+  <li><a href="#checklist-general" id="toc-checklist-general" class="nav-link" data-scroll-target="#checklist-general">Checklist general</a></li>
+  <li><a href="#próximos-documentos" id="toc-próximos-documentos" class="nav-link" data-scroll-target="#próximos-documentos">Próximos documentos</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../dimensionality-reduction/index.html">Reducción de dimensionalidad</a></li><li class="breadcrumb-item"><a href="../dimensionality-reduction/pca.html">PCA</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../feature-selection/index.html">Selección de variables</a></li><li class="breadcrumb-item"><a href="../feature-selection/index.html">Introducción</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Principal Component Analysis (PCA)</h1>
+<h1 class="title">Selección de variables y regularización</h1>
 </div>
 
 
@@ -538,29 +527,38 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>PCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.</p>
-<p>Cada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.</p>
-</div>
-</div>
-<section id="qué-problema-resuelve" class="level2">
-<h2 data-anchor-id="qué-problema-resuelve">¿Qué problema resuelve?</h2>
-<p>En muchos datasets existen numerosas variables que contienen información parcialmente redundante.</p>
-<p>Por ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:</p>
+<p>La selección de variables busca conservar las características más útiles para el modelo.</p>
+<p>La regularización reduce la complejidad penalizando coeficientes grandes.</p>
+<p>Ambas técnicas pueden ayudar a:</p>
 <ul>
-<li>Peso.</li>
-<li>Altura.</li>
-<li>Índice de masa corporal.</li>
-<li>Superficie corporal.</li>
-<li>Perímetros corporales.</li>
+<li>Reducir overfitting.</li>
+<li>Mejorar interpretabilidad.</li>
+<li>Disminuir coste computacional.</li>
+<li>Eliminar ruido.</li>
+<li>Construir modelos más estables.</li>
 </ul>
-<p>Estas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.</p>
-<p>PCA puede utilizarse para:</p>
+</div>
+</div>
+<section id="objetivo-de-esta-sección" class="level2">
+<h2 data-anchor-id="objetivo-de-esta-sección">Objetivo de esta sección</h2>
+<p>En muchos proyectos existen más variables de las necesarias.</p>
+<p>Algunas pueden ser:</p>
 <ul>
-<li>Reducir el número de variables.</li>
-<li>Visualizar datasets de alta dimensionalidad.</li>
-<li>Detectar patrones.</li>
-<li>Mitigar problemas de multicolinealidad.</li>
-<li>Crear variables de entrada para otros modelos.</li>
+<li>Redundantes.</li>
+<li>Irrelevantes.</li>
+<li>Muy correlacionadas.</li>
+<li>Inestables.</li>
+<li>Difíciles de obtener.</li>
+<li>Costosas clínicamente.</li>
+<li>Potencialmente relacionadas con leakage.</li>
+</ul>
+<p>El objetivo no es eliminar variables por sistema, sino encontrar una representación:</p>
+<ul>
+<li>Predictiva.</li>
+<li>Estable.</li>
+<li>Interpretativa.</li>
+<li>Reproducible.</li>
+<li>Clínicamente coherente.</li>
 </ul>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
@@ -572,55 +570,204 @@ window.Quarto = {
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>PCA no selecciona variables originales. Crea variables nuevas llamadas <strong>componentes principales</strong>.</p>
+<p>Más variables no significa necesariamente mejor modelo.</p>
 </div>
 </div>
 </section>
-<section id="intuición" class="level2">
-<h2 data-anchor-id="intuición">Intuición</h2>
-<p>Imagina una nube de puntos formada por dos variables correlacionadas.</p>
-<p>Aunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.</p>
-<p>PCA encuentra esa dirección y la convierte en el primer componente principal.</p>
-<p>El segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.</p>
-<p>De este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.</p>
-</section>
-<section id="fundamentos-teóricos" class="level2">
-<h2 data-anchor-id="fundamentos-teóricos">Fundamentos teóricos</h2>
-<section id="componentes-principales" class="level3">
-<h3 data-anchor-id="componentes-principales">Componentes principales</h3>
-<p>Cada componente principal es una combinación lineal de las variables originales.</p>
-<p>Para un dataset con variables <span class="math inline">\(x_1, x_2, \ldots, x_p\)</span>, el primer componente puede expresarse como:</p>
-<p><span class="math display">\[
-PC_1 = w_{11}x_1 + w_{12}x_2 + \cdots + w_{1p}x_p
-\]</span></p>
-<p>El segundo componente se expresa como:</p>
-<p><span class="math display">\[
-PC_2 = w_{21}x_1 + w_{22}x_2 + \cdots + w_{2p}x_p
-\]</span></p>
-<p>Los coeficientes <span class="math inline">\(w\)</span> se denominan pesos o <em>loadings</em>.</p>
-</section>
-<section id="varianza-explicada" class="level3">
-<h3 data-anchor-id="varianza-explicada">Varianza explicada</h3>
-<p>Cada componente explica una parte de la varianza total del dataset.</p>
-<p>La proporción de varianza explicada por el componente <span class="math inline">\(j\)</span> puede expresarse como:</p>
-<p><span class="math display">\[
-\text{Explained variance ratio}_j =
-\frac{\lambda_j}
-{\sum_{k=1}^{p}\lambda_k}
-\]</span></p>
-<p>donde <span class="math inline">\(\lambda_j\)</span> es el autovalor asociado al componente <span class="math inline">\(j\)</span>.</p>
-</section>
-<section id="varianza-explicada-acumulada" class="level3">
-<h3 data-anchor-id="varianza-explicada-acumulada">Varianza explicada acumulada</h3>
-<p>La varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.</p>
-<p>Por ejemplo:</p>
+<section id="selección-de-variables-frente-a-reducción-de-dimensionalidad" class="level2">
+<h2 data-anchor-id="selección-de-variables-frente-a-reducción-de-dimensionalidad">Selección de variables frente a reducción de dimensionalidad</h2>
+<section id="selección-de-variables" class="level3">
+<h3 data-anchor-id="selección-de-variables">Selección de variables</h3>
+<p>Conserva un subconjunto de las variables originales.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Edad
+Troponina
+FEVI
+GLS</code></pre>
+<p>Ventajas:</p>
 <ul>
-<li>1 componente: 45 %.</li>
-<li>2 componentes: 68 %.</li>
-<li>3 componentes: 82 %.</li>
-<li>4 componentes: 91 %.</li>
+<li>Mantiene interpretabilidad.</li>
+<li>Facilita explicar el modelo.</li>
+<li>Permite identificar variables relevantes.</li>
 </ul>
-<p>En este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.</p>
+</section>
+<section id="reducción-de-dimensionalidad" class="level3">
+<h3 data-anchor-id="reducción-de-dimensionalidad">Reducción de dimensionalidad</h3>
+<p>Crea nuevas variables combinando las originales.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Componente principal 1
+Componente principal 2</code></pre>
+<p>Ventajas:</p>
+<ul>
+<li>Puede resumir información.</li>
+<li>Reduce colinealidad.</li>
+<li>Puede mejorar eficiencia.</li>
+</ul>
+<p>Limitación:</p>
+<ul>
+<li>Las nuevas variables pueden ser difíciles de interpretar.</li>
+</ul>
+</section>
+</section>
+<section id="familias-de-métodos" class="level2">
+<h2 data-anchor-id="familias-de-métodos">Familias de métodos</h2>
+<section id="métodos-filter" class="level3">
+<h3 data-anchor-id="métodos-filter">Métodos filter</h3>
+<p>Evalúan cada variable utilizando criterios estadísticos antes de entrenar el modelo final.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Correlación.</li>
+<li>Chi-cuadrado.</li>
+<li>ANOVA.</li>
+<li>Mutual information.</li>
+<li>Variance threshold.</li>
+</ul>
+</section>
+<section id="métodos-wrapper" class="level3">
+<h3 data-anchor-id="métodos-wrapper">Métodos wrapper</h3>
+<p>Evalúan subconjuntos de variables entrenando repetidamente un modelo.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Recursive Feature Elimination.</li>
+<li>Sequential Feature Selection.</li>
+<li>Forward selection.</li>
+<li>Backward elimination.</li>
+</ul>
+</section>
+<section id="métodos-embedded" class="level3">
+<h3 data-anchor-id="métodos-embedded">Métodos embedded</h3>
+<p>La selección ocurre durante el entrenamiento.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Lasso.</li>
+<li>Elastic Net.</li>
+<li>Árboles.</li>
+<li>Random forest.</li>
+<li>Gradient boosting.</li>
+</ul>
+</section>
+<section id="regularización" class="level3">
+<h3 data-anchor-id="regularización">Regularización</h3>
+<p>Penaliza modelos excesivamente complejos.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Ridge.</li>
+<li>Lasso.</li>
+<li>Elastic Net.</li>
+</ul>
+</section>
+</section>
+<section id="contenidos-de-la-sección" class="level2">
+<h2 data-anchor-id="contenidos-de-la-sección">Contenidos de la sección</h2>
+<section id="métodos-filter-1" class="level3">
+<h3 data-anchor-id="métodos-filter-1">Métodos filter</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Variance Threshold.</li>
+<li>Correlación.</li>
+<li>Chi-cuadrado.</li>
+<li>ANOVA.</li>
+<li>Mutual information.</li>
+<li>Selección univariante.</li>
+<li>Limitaciones de los métodos filter.</li>
+</ul>
+</section>
+<section id="métodos-wrapper-1" class="level3">
+<h3 data-anchor-id="métodos-wrapper-1">Métodos wrapper</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Recursive Feature Elimination.</li>
+<li>RFECV.</li>
+<li>Sequential Feature Selection.</li>
+<li>Forward selection.</li>
+<li>Backward selection.</li>
+<li>Coste computacional.</li>
+</ul>
+</section>
+<section id="métodos-embedded-1" class="level3">
+<h3 data-anchor-id="métodos-embedded-1">Métodos embedded</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Selección con modelos lineales.</li>
+<li>Importancia en árboles.</li>
+<li>SelectFromModel.</li>
+<li>Limitaciones de feature importance.</li>
+<li>Estabilidad de la selección.</li>
+</ul>
+</section>
+<section id="regularización-1" class="level3">
+<h3 data-anchor-id="regularización-1">Regularización</h3>
+<p>Aprenderás:</p>
+<ul>
+<li>Ridge.</li>
+<li>Lasso.</li>
+<li>Elastic Net.</li>
+<li>Parámetro de penalización.</li>
+<li>Relación entre regularización y escalado.</li>
+<li>Selección de hiperparámetros.</li>
+<li>Interpretación de coeficientes.</li>
+</ul>
+</section>
+</section>
+<section id="riesgo-de-data-leakage" class="level2">
+<h2 data-anchor-id="riesgo-de-data-leakage">Riesgo de data leakage</h2>
+<p>La selección de variables debe aprenderse solo con train.</p>
+</section>
+<section id="ejemplo-incorrecto" class="level2">
+<h2 data-anchor-id="ejemplo-incorrecto">Ejemplo incorrecto</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.feature_selection <span class="im">import</span> SelectKBest</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.feature_selection <span class="im">import</span> f_classif</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>selector <span class="op">=</span> SelectKBest(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    score_func<span class="op">=</span>f_classif,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    k<span class="op">=</span><span class="dv">20</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>X_selected <span class="op">=</span> selector.fit_transform(</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    X,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    y</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> cross_val_score(</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    model,</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    X_selected,</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>    y,</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span><span class="dv">5</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Aquí la selección utiliza todo el dataset antes de la validación cruzada.</p>
+</section>
+<section id="ejemplo-correcto" class="level2">
+<h2 data-anchor-id="ejemplo-correcto">Ejemplo correcto</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.feature_selection <span class="im">import</span> SelectKBest</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.feature_selection <span class="im">import</span> f_classif</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>pipeline <span class="op">=</span> Pipeline(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"preprocessor"</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            preprocessor</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"selector"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            SelectKBest(</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                score_func<span class="op">=</span>f_classif,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                k<span class="op">=</span><span class="dv">20</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">"model"</span>,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>            model</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> cross_val_score(</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>    pipeline,</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    X,</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    y,</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span><span class="dv">5</span></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -631,205 +778,141 @@ PC_2 = w_{21}x_1 + w_{22}x_2 + \cdots + w_{2p}x_p
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Un componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.</p>
+<p>La selección de variables debe repetirse dentro de cada fold.</p>
 </div>
 </div>
 </section>
-</section>
-<section id="por-qué-es-importante-escalar" class="level2">
-<h2 data-anchor-id="por-qué-es-importante-escalar">¿Por qué es importante escalar?</h2>
-<p>PCA está influido por la escala de las variables.</p>
-<p>Imagina estas variables:</p>
+<section id="variables-irrelevantes" class="level2">
+<h2 data-anchor-id="variables-irrelevantes">Variables irrelevantes</h2>
+<p>Una variable irrelevante no aporta información útil para predecir el target.</p>
+<p>Puede:</p>
 <ul>
-<li>Edad, medida en años.</li>
-<li>Troponina, medida con valores pequeños.</li>
-<li>Presión arterial, medida en mmHg.</li>
-</ul>
-<p>Una variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.</p>
-<p>Por eso, antes de aplicar PCA suele utilizarse:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>StandardScaler()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>El escalado transforma cada variable para que tenga aproximadamente:</p>
-<ul>
-<li>Media igual a 0.</li>
-<li>Desviación estándar igual a 1.</li>
-</ul>
-<div class="callout callout-style-default callout-important callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Important</span>Regla práctica
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Si las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.</p>
-</div>
-</div>
-</section>
-<section id="supuestos-y-condiciones" class="level2">
-<h2 data-anchor-id="supuestos-y-condiciones">Supuestos y condiciones</h2>
-<p>PCA funciona mejor cuando:</p>
-<ul>
-<li>Las variables son numéricas.</li>
-<li>Existen relaciones aproximadamente lineales.</li>
-<li>Las variables contienen varianza informativa.</li>
-<li>Hay correlación entre algunas variables.</li>
-<li>Los valores extremos han sido revisados.</li>
-<li>Las escalas se han tratado adecuadamente.</li>
+<li>Introducir ruido.</li>
+<li>Aumentar varianza.</li>
+<li>Dificultar interpretación.</li>
+<li>Incrementar coste computacional.</li>
 </ul>
 </section>
-<section id="cuándo-utilizar-pca" class="level2">
-<h2 data-anchor-id="cuándo-utilizar-pca">Cuándo utilizar PCA</h2>
-<p>PCA puede ser adecuado cuando:</p>
+<section id="variables-redundantes" class="level2">
+<h2 data-anchor-id="variables-redundantes">Variables redundantes</h2>
+<p>Dos variables pueden aportar información muy parecida.</p>
+<p>Ejemplos:</p>
 <ul>
-<li>Tienes muchas variables numéricas correlacionadas.</li>
-<li>Quieres reducir el número de variables.</li>
-<li>Quieres visualizar observaciones en dos o tres dimensiones.</li>
-<li>Quieres reducir multicolinealidad.</li>
-<li>Quieres comprimir información antes de otro modelo.</li>
-<li>Quieres explorar patrones latentes.</li>
+<li>Peso y superficie corporal.</li>
+<li>Dos medidas muy correlacionadas.</li>
+<li>Códigos duplicados.</li>
+<li>Variables derivadas de otras.</li>
+</ul>
+<p>Esto puede generar:</p>
+<ul>
+<li>Multicolinealidad.</li>
+<li>Inestabilidad de coeficientes.</li>
+<li>Interpretación confusa.</li>
 </ul>
 </section>
-<section id="cuándo-no-utilizar-pca" class="level2">
-<h2 data-anchor-id="cuándo-no-utilizar-pca">Cuándo no utilizar PCA</h2>
-<p>PCA puede no ser adecuado cuando:</p>
+<section id="multicolinealidad" class="level2">
+<h2 data-anchor-id="multicolinealidad">Multicolinealidad</h2>
+<p>La multicolinealidad aparece cuando varias variables predictoras están fuertemente relacionadas.</p>
+<p>Puede afectar especialmente a modelos lineales.</p>
+<p>Consecuencias:</p>
 <ul>
-<li>Necesitas interpretar directamente cada variable original.</li>
-<li>Las relaciones entre variables son principalmente no lineales.</li>
-<li>La mayoría de las variables son categóricas.</li>
-<li>Tienes muy pocas variables.</li>
-<li>Los componentes son difíciles de justificar clínicamente.</li>
-<li>El objetivo es seleccionar variables originales, no transformarlas.</li>
+<li>Coeficientes inestables.</li>
+<li>Signos inesperados.</li>
+<li>Intervalos amplios.</li>
+<li>Dificultad de interpretación.</li>
 </ul>
 </section>
-<section id="flujo-de-trabajo-recomendado" class="level2">
-<h2 data-anchor-id="flujo-de-trabajo-recomendado">Flujo de trabajo recomendado</h2>
-<ol type="1">
-<li>Seleccionar únicamente variables numéricas relevantes.</li>
-<li>Revisar valores ausentes.</li>
-<li>Revisar valores extremos.</li>
-<li>Separar entrenamiento y prueba si PCA forma parte de un modelo predictivo.</li>
-<li>Imputar valores ausentes utilizando solo entrenamiento.</li>
-<li>Escalar las variables utilizando solo entrenamiento.</li>
-<li>Ajustar PCA utilizando solo entrenamiento.</li>
-<li>Elegir el número de componentes.</li>
-<li>Transformar entrenamiento y prueba.</li>
-<li>Interpretar la varianza explicada y los loadings.</li>
-<li>Evaluar el impacto en el modelo posterior.</li>
-</ol>
+<section id="matriz-de-correlación" class="level2">
+<h2 data-anchor-id="matriz-de-correlación">Matriz de correlación</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="op">=</span> (</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    X_train[</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        numeric_features</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    .corr()</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>display(</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    correlation_matrix</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="código-mínimo" class="level2">
-<h2 data-anchor-id="código-mínimo">Código mínimo</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>X_scaled <span class="op">=</span> StandardScaler().fit_transform(X)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>X_pca <span class="op">=</span> pca.fit_transform(X_scaled)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pca.explained_variance_ratio_)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="seleccionar-componentes-según-varianza-explicada" class="level2">
-<h2 data-anchor-id="seleccionar-componentes-según-varianza-explicada">Seleccionar componentes según varianza explicada</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>X_scaled <span class="op">=</span> StandardScaler().fit_transform(X)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="fl">0.95</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>X_pca <span class="op">=</span> pca.fit_transform(X_scaled)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Número de componentes: </span><span class="sc">{</span>pca<span class="sc">.</span>n_components_<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Varianza explicada acumulada:"</span>,</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    pca.explained_variance_ratio_.<span class="bu">sum</span>()</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="implementación-segura-dentro-de-un-pipeline" class="level2">
-<h2 data-anchor-id="implementación-segura-dentro-de-un-pipeline">Implementación segura dentro de un pipeline</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>pipeline <span class="op">=</span> Pipeline(</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"imputer"</span>, SimpleImputer(strategy<span class="op">=</span><span class="st">"median"</span>)),</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"scaler"</span>, StandardScaler()),</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"pca"</span>, PCA(n_components<span class="op">=</span><span class="fl">0.95</span>)),</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"model"</span>,</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            LogisticRegression(</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                max_iter<span class="op">=</span><span class="dv">1000</span>,</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>pipeline.fit(X_train, y_train)</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> pipeline.predict(X_test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="identificar-correlaciones-altas" class="level2">
+<h2 data-anchor-id="identificar-correlaciones-altas">Identificar correlaciones altas</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>upper_triangle <span class="op">=</span> (</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    correlation_matrix</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    .where(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        np.triu(</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            np.ones(</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                correlation_matrix.shape</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            k<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        ).astype(<span class="bu">bool</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>high_correlations <span class="op">=</span> [</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    column</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> column <span class="kw">in</span> upper_triangle.columns</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">any</span>(</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        upper_triangle[column]</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">abs</span>()</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>        <span class="op">&gt;</span> <span class="fl">0.90</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    high_correlations</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="callout callout-style-default callout-caution callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Caution</span>Error frecuente: data leakage
+<span class="screen-reader-only">Caution</span>Precaución
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>No ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.</p>
-<p>El pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.</p>
+<p>No elimines automáticamente una variable solo por alta correlación.</p>
+<p>Puede tener mayor calidad, interpretabilidad o disponibilidad clínica.</p>
 </div>
 </div>
 </section>
-<section id="inspeccionar-la-varianza-explicada" class="level2">
-<h2 data-anchor-id="inspeccionar-la-varianza-explicada">Inspeccionar la varianza explicada</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>explained_variance <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"component"</span>: <span class="bu">range</span>(</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span>,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            <span class="bu">len</span>(pca.explained_variance_ratio_) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"explained_variance_ratio"</span>:</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            pca.explained_variance_ratio_,</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cumulative_explained_variance"</span>:</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            pca.explained_variance_ratio_.cumsum()</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>display(explained_variance)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="número-de-variables-y-tamaño-de-muestra" class="level2">
+<h2 data-anchor-id="número-de-variables-y-tamaño-de-muestra">Número de variables y tamaño de muestra</h2>
+<p>Un modelo con muchas variables y pocos pacientes tiene mayor riesgo de overfitting.</p>
+<p>Conviene revisar:</p>
+<ul>
+<li>Número de observaciones.</li>
+<li>Número de eventos.</li>
+<li>Número de variables.</li>
+<li>Complejidad del modelo.</li>
+<li>Estabilidad de la selección.</li>
+</ul>
 </section>
-<section id="interpretar-los-loadings" class="level2">
-<h2 data-anchor-id="interpretar-los-loadings">Interpretar los loadings</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>loadings <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    pca.components_.T,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    index<span class="op">=</span>X.columns,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"PC</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span>,</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            pca.n_components_ <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>display(loadings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Un valor absoluto elevado indica que la variable tiene una contribución importante al componente.</p>
+<section id="selección-y-estabilidad" class="level2">
+<h2 data-anchor-id="selección-y-estabilidad">Selección y estabilidad</h2>
+<p>Una variable puede aparecer seleccionada en un fold y no en otro.</p>
+<p>Eso puede indicar:</p>
+<ul>
+<li>Muestra pequeña.</li>
+<li>Variables correlacionadas.</li>
+<li>Señal débil.</li>
+<li>Modelo inestable.</li>
+</ul>
 </section>
-<section id="consideraciones-en-datos-clínicos" class="level2">
-<h2 data-anchor-id="consideraciones-en-datos-clínicos">Consideraciones en datos clínicos</h2>
+<section id="frecuencia-de-selección" class="level2">
+<h2 data-anchor-id="frecuencia-de-selección">Frecuencia de selección</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>selection_counts <span class="op">=</span> {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    feature: <span class="dv">0</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> feature <span class="kw">in</span> feature_names</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Después de cada fold puede incrementarse el contador de las variables seleccionadas.</p>
+<p>Las variables elegidas de forma consistente suelen ser más fiables.</p>
+</section>
+<section id="interpretabilidad-clínica" class="level2">
+<h2 data-anchor-id="interpretabilidad-clínica">Interpretabilidad clínica</h2>
 <div class="callout callout-style-default callout-note callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -840,63 +923,154 @@ PC_2 = w_{21}x_1 + w_{22}x_2 + \cdots + w_{2p}x_p
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>PCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.</p>
+<p>Una variable puede ser predictiva pero poco útil si:</p>
+<ul>
+<li>No está disponible en el momento de predicción.</li>
+<li>Es costosa.</li>
+<li>Es invasiva.</li>
+<li>Tiene mucha ausencia.</li>
+<li>No se mide en otros centros.</li>
+</ul>
 </div>
 </div>
-<section id="mediciones-repetidas" class="level3">
-<h3 data-anchor-id="mediciones-repetidas">Mediciones repetidas</h3>
-<p>Si un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.</p>
 </section>
-<section id="valores-ausentes" class="level3">
-<h3 data-anchor-id="valores-ausentes">Valores ausentes</h3>
-<p>La ausencia de una prueba puede estar relacionada con:</p>
+<section id="coste-de-adquisición" class="level2">
+<h2 data-anchor-id="coste-de-adquisición">Coste de adquisición</h2>
+<p>La selección también puede considerar:</p>
 <ul>
-<li>La gravedad.</li>
-<li>La indicación clínica.</li>
-<li>El centro.</li>
-<li>El momento del seguimiento.</li>
-<li>La disponibilidad de recursos.</li>
+<li>Coste económico.</li>
+<li>Tiempo.</li>
+<li>Invasividad.</li>
+<li>Carga para el paciente.</li>
+<li>Disponibilidad.</li>
+<li>Reproducibilidad.</li>
+</ul>
+<p>Un modelo ligeramente peor pero mucho más simple puede ser más útil.</p>
+</section>
+<section id="importancia-predictiva-frente-a-causalidad" class="level2">
+<h2 data-anchor-id="importancia-predictiva-frente-a-causalidad">Importancia predictiva frente a causalidad</h2>
+<p>Una variable seleccionada no es necesariamente causal.</p>
+<p>Puede ser:</p>
+<ul>
+<li>Marcador.</li>
+<li>Proxy.</li>
+<li>Confusor.</li>
+<li>Consecuencia del proceso.</li>
+<li>Indicador del centro.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Feature importance no equivale a efecto causal.</p>
+</div>
+</div>
+</section>
+<section id="selección-supervisada-y-no-supervisada" class="level2">
+<h2 data-anchor-id="selección-supervisada-y-no-supervisada">Selección supervisada y no supervisada</h2>
+<section id="supervisada" class="level3">
+<h3 data-anchor-id="supervisada">Supervisada</h3>
+<p>Utiliza el target.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>ANOVA.</li>
+<li>Chi-cuadrado.</li>
+<li>Mutual information.</li>
+<li>Lasso.</li>
+<li>RFE.</li>
 </ul>
 </section>
-<section id="diferencias-entre-centros" class="level3">
-<h3 data-anchor-id="diferencias-entre-centros">Diferencias entre centros</h3>
-<p>PCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:</p>
+<section id="no-supervisada" class="level3">
+<h3 data-anchor-id="no-supervisada">No supervisada</h3>
+<p>No utiliza el target.</p>
+<p>Ejemplos:</p>
 <ul>
-<li>Equipos.</li>
-<li>Unidades.</li>
-<li>Protocolos.</li>
-<li>Poblaciones.</li>
-<li>Métodos de laboratorio.</li>
+<li>Variance threshold.</li>
+<li>Correlación entre predictores.</li>
+<li>PCA.</li>
 </ul>
 </section>
+</section>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Definir la pregunta.</li>
+<li>Excluir identificadores y leakage.</li>
+<li>Revisar calidad de variables.</li>
+<li>Revisar valores ausentes.</li>
+<li>Revisar redundancia.</li>
+<li>Elegir familia de selección.</li>
+<li>Integrar selección en pipeline.</li>
+<li>Validar con cross-validation.</li>
+<li>Evaluar estabilidad.</li>
+<li>Comparar con modelo sin selección.</li>
+<li>Revisar interpretabilidad clínica.</li>
+<li>Documentar variables finales.</li>
+</ol>
+</section>
+<section id="qué-comparar" class="level2">
+<h2 data-anchor-id="qué-comparar">Qué comparar</h2>
+<p>Siempre conviene comparar:</p>
+<pre class="text"><code>Modelo sin selección
+vs
+Modelo con selección</code></pre>
+<p>Debe evaluarse:</p>
+<ul>
+<li>Rendimiento.</li>
+<li>Variabilidad.</li>
+<li>Número de variables.</li>
+<li>Interpretabilidad.</li>
+<li>Coste.</li>
+<li>Estabilidad.</li>
+</ul>
 </section>
 <section id="errores-frecuentes" class="level2">
 <h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
 <ul>
-<li>Aplicar PCA antes de separar entrenamiento y prueba.</li>
-<li>Escalar utilizando todo el dataset.</li>
-<li>No escalar variables con unidades diferentes.</li>
-<li>Aplicar PCA directamente a variables categóricas.</li>
-<li>Interpretar los componentes como variables clínicas reales.</li>
-<li>Pensar que más varianza explicada siempre implica mejor predicción.</li>
-<li>Ignorar valores extremos que dominan los componentes.</li>
+<li>Seleccionar variables con todo el dataset.</li>
+<li>Elegir variables por p-value sin validación.</li>
+<li>Confundir correlación con causalidad.</li>
+<li>Eliminar variables correlacionadas automáticamente.</li>
+<li>Usar importancias de árboles como verdad absoluta.</li>
+<li>No escalar antes de Lasso o Ridge.</li>
+<li>No comparar con el modelo completo.</li>
+<li>Ignorar estabilidad entre folds.</li>
+<li>Seleccionar demasiadas variables.</li>
+<li>Usar información futura.</li>
 </ul>
 </section>
-<section id="checklist-para-proyectos" class="level2">
-<h2 data-anchor-id="checklist-para-proyectos">Checklist para proyectos</h2>
+<section id="checklist-general" class="level2">
+<h2 data-anchor-id="checklist-general">Checklist general</h2>
 <ul class="task-list">
-<li><label><input type="checkbox">Las variables son numéricas.</label></li>
-<li><label><input type="checkbox">He revisado valores ausentes.</label></li>
-<li><label><input type="checkbox">He revisado valores extremos.</label></li>
-<li><label><input type="checkbox">He separado entrenamiento y prueba.</label></li>
-<li><label><input type="checkbox">La separación se ha realizado por paciente cuando corresponde.</label></li>
-<li><label><input type="checkbox">La imputación se ajusta solo con entrenamiento.</label></li>
-<li><label><input type="checkbox">El escalado se ajusta solo con entrenamiento.</label></li>
-<li><label><input type="checkbox">PCA se ajusta solo con entrenamiento.</label></li>
-<li><label><input type="checkbox">He revisado la varianza explicada.</label></li>
-<li><label><input type="checkbox">He revisado los loadings.</label></li>
-<li><label><input type="checkbox">He considerado la interpretabilidad clínica.</label></li>
+<li><label><input type="checkbox">He eliminado identificadores.</label></li>
+<li><label><input type="checkbox">He revisado data leakage.</label></li>
+<li><label><input type="checkbox">He revisado correlaciones.</label></li>
+<li><label><input type="checkbox">He considerado multicolinealidad.</label></li>
+<li><label><input type="checkbox">He elegido un método adecuado.</label></li>
+<li><label><input type="checkbox">La selección está dentro del pipeline.</label></li>
+<li><label><input type="checkbox">La selección se repite en cada fold.</label></li>
+<li><label><input type="checkbox">He comparado con un modelo sin selección.</label></li>
+<li><label><input type="checkbox">He revisado estabilidad.</label></li>
+<li><label><input type="checkbox">He considerado coste clínico.</label></li>
+<li><label><input type="checkbox">He evitado interpretar importancia como causalidad.</label></li>
+<li><label><input type="checkbox">He documentado las variables finales.</label></li>
 </ul>
+</section>
+<section id="próximos-documentos" class="level2">
+<h2 data-anchor-id="próximos-documentos">Próximos documentos</h2>
+<p>Esta sección se completará con:</p>
+<ol type="1">
+<li>Métodos filter.</li>
+<li>Métodos wrapper.</li>
+<li>Métodos embedded.</li>
+<li>Regularización.</li>
+</ol>
 
 
 </section>

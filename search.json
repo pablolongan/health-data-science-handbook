@@ -2792,6 +2792,306 @@
     ]
   },
   {
+    "objectID": "feature-selection/index.html",
+    "href": "feature-selection/index.html",
+    "title": "Selección de variables y regularización",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nLa selección de variables busca conservar las características más útiles para el modelo.\nLa regularización reduce la complejidad penalizando coeficientes grandes.\nAmbas técnicas pueden ayudar a:\n\nReducir overfitting.\nMejorar interpretabilidad.\nDisminuir coste computacional.\nEliminar ruido.\nConstruir modelos más estables.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#objetivo-de-esta-sección",
+    "href": "feature-selection/index.html#objetivo-de-esta-sección",
+    "title": "Selección de variables y regularización",
+    "section": "Objetivo de esta sección",
+    "text": "Objetivo de esta sección\nEn muchos proyectos existen más variables de las necesarias.\nAlgunas pueden ser:\n\nRedundantes.\nIrrelevantes.\nMuy correlacionadas.\nInestables.\nDifíciles de obtener.\nCostosas clínicamente.\nPotencialmente relacionadas con leakage.\n\nEl objetivo no es eliminar variables por sistema, sino encontrar una representación:\n\nPredictiva.\nEstable.\nInterpretativa.\nReproducible.\nClínicamente coherente.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nMás variables no significa necesariamente mejor modelo.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#selección-de-variables-frente-a-reducción-de-dimensionalidad",
+    "href": "feature-selection/index.html#selección-de-variables-frente-a-reducción-de-dimensionalidad",
+    "title": "Selección de variables y regularización",
+    "section": "Selección de variables frente a reducción de dimensionalidad",
+    "text": "Selección de variables frente a reducción de dimensionalidad\n\nSelección de variables\nConserva un subconjunto de las variables originales.\nEjemplo:\nEdad\nTroponina\nFEVI\nGLS\nVentajas:\n\nMantiene interpretabilidad.\nFacilita explicar el modelo.\nPermite identificar variables relevantes.\n\n\n\nReducción de dimensionalidad\nCrea nuevas variables combinando las originales.\nEjemplo:\nComponente principal 1\nComponente principal 2\nVentajas:\n\nPuede resumir información.\nReduce colinealidad.\nPuede mejorar eficiencia.\n\nLimitación:\n\nLas nuevas variables pueden ser difíciles de interpretar.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#familias-de-métodos",
+    "href": "feature-selection/index.html#familias-de-métodos",
+    "title": "Selección de variables y regularización",
+    "section": "Familias de métodos",
+    "text": "Familias de métodos\n\nMétodos filter\nEvalúan cada variable utilizando criterios estadísticos antes de entrenar el modelo final.\nEjemplos:\n\nCorrelación.\nChi-cuadrado.\nANOVA.\nMutual information.\nVariance threshold.\n\n\n\nMétodos wrapper\nEvalúan subconjuntos de variables entrenando repetidamente un modelo.\nEjemplos:\n\nRecursive Feature Elimination.\nSequential Feature Selection.\nForward selection.\nBackward elimination.\n\n\n\nMétodos embedded\nLa selección ocurre durante el entrenamiento.\nEjemplos:\n\nLasso.\nElastic Net.\nÁrboles.\nRandom forest.\nGradient boosting.\n\n\n\nRegularización\nPenaliza modelos excesivamente complejos.\nEjemplos:\n\nRidge.\nLasso.\nElastic Net.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#contenidos-de-la-sección",
+    "href": "feature-selection/index.html#contenidos-de-la-sección",
+    "title": "Selección de variables y regularización",
+    "section": "Contenidos de la sección",
+    "text": "Contenidos de la sección\n\nMétodos filter\nAprenderás:\n\nVariance Threshold.\nCorrelación.\nChi-cuadrado.\nANOVA.\nMutual information.\nSelección univariante.\nLimitaciones de los métodos filter.\n\n\n\nMétodos wrapper\nAprenderás:\n\nRecursive Feature Elimination.\nRFECV.\nSequential Feature Selection.\nForward selection.\nBackward selection.\nCoste computacional.\n\n\n\nMétodos embedded\nAprenderás:\n\nSelección con modelos lineales.\nImportancia en árboles.\nSelectFromModel.\nLimitaciones de feature importance.\nEstabilidad de la selección.\n\n\n\nRegularización\nAprenderás:\n\nRidge.\nLasso.\nElastic Net.\nParámetro de penalización.\nRelación entre regularización y escalado.\nSelección de hiperparámetros.\nInterpretación de coeficientes.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#riesgo-de-data-leakage",
+    "href": "feature-selection/index.html#riesgo-de-data-leakage",
+    "title": "Selección de variables y regularización",
+    "section": "Riesgo de data leakage",
+    "text": "Riesgo de data leakage\nLa selección de variables debe aprenderse solo con train.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#ejemplo-incorrecto",
+    "href": "feature-selection/index.html#ejemplo-incorrecto",
+    "title": "Selección de variables y regularización",
+    "section": "Ejemplo incorrecto",
+    "text": "Ejemplo incorrecto\nfrom sklearn.feature_selection import SelectKBest\nfrom sklearn.feature_selection import f_classif\n\nselector = SelectKBest(\n    score_func=f_classif,\n    k=20\n)\n\nX_selected = selector.fit_transform(\n    X,\n    y\n)\n\nscores = cross_val_score(\n    model,\n    X_selected,\n    y,\n    cv=5\n)\nAquí la selección utiliza todo el dataset antes de la validación cruzada.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#ejemplo-correcto",
+    "href": "feature-selection/index.html#ejemplo-correcto",
+    "title": "Selección de variables y regularización",
+    "section": "Ejemplo correcto",
+    "text": "Ejemplo correcto\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.feature_selection import SelectKBest\nfrom sklearn.feature_selection import f_classif\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"selector\",\n            SelectKBest(\n                score_func=f_classif,\n                k=20\n            )\n        ),\n        (\n            \"model\",\n            model\n        )\n    ]\n)\n\nscores = cross_val_score(\n    pipeline,\n    X,\n    y,\n    cv=5\n)\n\n\n\n\n\n\nWarningImportante\n\n\n\nLa selección de variables debe repetirse dentro de cada fold.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#variables-irrelevantes",
+    "href": "feature-selection/index.html#variables-irrelevantes",
+    "title": "Selección de variables y regularización",
+    "section": "Variables irrelevantes",
+    "text": "Variables irrelevantes\nUna variable irrelevante no aporta información útil para predecir el target.\nPuede:\n\nIntroducir ruido.\nAumentar varianza.\nDificultar interpretación.\nIncrementar coste computacional.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#variables-redundantes",
+    "href": "feature-selection/index.html#variables-redundantes",
+    "title": "Selección de variables y regularización",
+    "section": "Variables redundantes",
+    "text": "Variables redundantes\nDos variables pueden aportar información muy parecida.\nEjemplos:\n\nPeso y superficie corporal.\nDos medidas muy correlacionadas.\nCódigos duplicados.\nVariables derivadas de otras.\n\nEsto puede generar:\n\nMulticolinealidad.\nInestabilidad de coeficientes.\nInterpretación confusa.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#multicolinealidad",
+    "href": "feature-selection/index.html#multicolinealidad",
+    "title": "Selección de variables y regularización",
+    "section": "Multicolinealidad",
+    "text": "Multicolinealidad\nLa multicolinealidad aparece cuando varias variables predictoras están fuertemente relacionadas.\nPuede afectar especialmente a modelos lineales.\nConsecuencias:\n\nCoeficientes inestables.\nSignos inesperados.\nIntervalos amplios.\nDificultad de interpretación.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#matriz-de-correlación",
+    "href": "feature-selection/index.html#matriz-de-correlación",
+    "title": "Selección de variables y regularización",
+    "section": "Matriz de correlación",
+    "text": "Matriz de correlación\ncorrelation_matrix = (\n    X_train[\n        numeric_features\n    ]\n    .corr()\n)\n\ndisplay(\n    correlation_matrix\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#identificar-correlaciones-altas",
+    "href": "feature-selection/index.html#identificar-correlaciones-altas",
+    "title": "Selección de variables y regularización",
+    "section": "Identificar correlaciones altas",
+    "text": "Identificar correlaciones altas\nimport numpy as np\n\nupper_triangle = (\n    correlation_matrix\n    .where(\n        np.triu(\n            np.ones(\n                correlation_matrix.shape\n            ),\n            k=1\n        ).astype(bool)\n    )\n)\n\nhigh_correlations = [\n    column\n    for column in upper_triangle.columns\n    if any(\n        upper_triangle[column]\n        .abs()\n        &gt; 0.90\n    )\n]\n\nprint(\n    high_correlations\n)\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nNo elimines automáticamente una variable solo por alta correlación.\nPuede tener mayor calidad, interpretabilidad o disponibilidad clínica.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#número-de-variables-y-tamaño-de-muestra",
+    "href": "feature-selection/index.html#número-de-variables-y-tamaño-de-muestra",
+    "title": "Selección de variables y regularización",
+    "section": "Número de variables y tamaño de muestra",
+    "text": "Número de variables y tamaño de muestra\nUn modelo con muchas variables y pocos pacientes tiene mayor riesgo de overfitting.\nConviene revisar:\n\nNúmero de observaciones.\nNúmero de eventos.\nNúmero de variables.\nComplejidad del modelo.\nEstabilidad de la selección.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#selección-y-estabilidad",
+    "href": "feature-selection/index.html#selección-y-estabilidad",
+    "title": "Selección de variables y regularización",
+    "section": "Selección y estabilidad",
+    "text": "Selección y estabilidad\nUna variable puede aparecer seleccionada en un fold y no en otro.\nEso puede indicar:\n\nMuestra pequeña.\nVariables correlacionadas.\nSeñal débil.\nModelo inestable.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#frecuencia-de-selección",
+    "href": "feature-selection/index.html#frecuencia-de-selección",
+    "title": "Selección de variables y regularización",
+    "section": "Frecuencia de selección",
+    "text": "Frecuencia de selección\nselection_counts = {\n    feature: 0\n    for feature in feature_names\n}\nDespués de cada fold puede incrementarse el contador de las variables seleccionadas.\nLas variables elegidas de forma consistente suelen ser más fiables.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#interpretabilidad-clínica",
+    "href": "feature-selection/index.html#interpretabilidad-clínica",
+    "title": "Selección de variables y regularización",
+    "section": "Interpretabilidad clínica",
+    "text": "Interpretabilidad clínica\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nUna variable puede ser predictiva pero poco útil si:\n\nNo está disponible en el momento de predicción.\nEs costosa.\nEs invasiva.\nTiene mucha ausencia.\nNo se mide en otros centros.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#coste-de-adquisición",
+    "href": "feature-selection/index.html#coste-de-adquisición",
+    "title": "Selección de variables y regularización",
+    "section": "Coste de adquisición",
+    "text": "Coste de adquisición\nLa selección también puede considerar:\n\nCoste económico.\nTiempo.\nInvasividad.\nCarga para el paciente.\nDisponibilidad.\nReproducibilidad.\n\nUn modelo ligeramente peor pero mucho más simple puede ser más útil.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#importancia-predictiva-frente-a-causalidad",
+    "href": "feature-selection/index.html#importancia-predictiva-frente-a-causalidad",
+    "title": "Selección de variables y regularización",
+    "section": "Importancia predictiva frente a causalidad",
+    "text": "Importancia predictiva frente a causalidad\nUna variable seleccionada no es necesariamente causal.\nPuede ser:\n\nMarcador.\nProxy.\nConfusor.\nConsecuencia del proceso.\nIndicador del centro.\n\n\n\n\n\n\n\nWarningImportante\n\n\n\nFeature importance no equivale a efecto causal.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#selección-supervisada-y-no-supervisada",
+    "href": "feature-selection/index.html#selección-supervisada-y-no-supervisada",
+    "title": "Selección de variables y regularización",
+    "section": "Selección supervisada y no supervisada",
+    "text": "Selección supervisada y no supervisada\n\nSupervisada\nUtiliza el target.\nEjemplos:\n\nANOVA.\nChi-cuadrado.\nMutual information.\nLasso.\nRFE.\n\n\n\nNo supervisada\nNo utiliza el target.\nEjemplos:\n\nVariance threshold.\nCorrelación entre predictores.\nPCA.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#flujo-recomendado",
+    "href": "feature-selection/index.html#flujo-recomendado",
+    "title": "Selección de variables y regularización",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nDefinir la pregunta.\nExcluir identificadores y leakage.\nRevisar calidad de variables.\nRevisar valores ausentes.\nRevisar redundancia.\nElegir familia de selección.\nIntegrar selección en pipeline.\nValidar con cross-validation.\nEvaluar estabilidad.\nComparar con modelo sin selección.\nRevisar interpretabilidad clínica.\nDocumentar variables finales.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#qué-comparar",
+    "href": "feature-selection/index.html#qué-comparar",
+    "title": "Selección de variables y regularización",
+    "section": "Qué comparar",
+    "text": "Qué comparar\nSiempre conviene comparar:\nModelo sin selección\nvs\nModelo con selección\nDebe evaluarse:\n\nRendimiento.\nVariabilidad.\nNúmero de variables.\nInterpretabilidad.\nCoste.\nEstabilidad.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#errores-frecuentes",
+    "href": "feature-selection/index.html#errores-frecuentes",
+    "title": "Selección de variables y regularización",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nSeleccionar variables con todo el dataset.\nElegir variables por p-value sin validación.\nConfundir correlación con causalidad.\nEliminar variables correlacionadas automáticamente.\nUsar importancias de árboles como verdad absoluta.\nNo escalar antes de Lasso o Ridge.\nNo comparar con el modelo completo.\nIgnorar estabilidad entre folds.\nSeleccionar demasiadas variables.\nUsar información futura.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#checklist-general",
+    "href": "feature-selection/index.html#checklist-general",
+    "title": "Selección de variables y regularización",
+    "section": "Checklist general",
+    "text": "Checklist general\n\nHe eliminado identificadores.\nHe revisado data leakage.\nHe revisado correlaciones.\nHe considerado multicolinealidad.\nHe elegido un método adecuado.\nLa selección está dentro del pipeline.\nLa selección se repite en cada fold.\nHe comparado con un modelo sin selección.\nHe revisado estabilidad.\nHe considerado coste clínico.\nHe evitado interpretar importancia como causalidad.\nHe documentado las variables finales.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/index.html#próximos-documentos",
+    "href": "feature-selection/index.html#próximos-documentos",
+    "title": "Selección de variables y regularización",
+    "section": "Próximos documentos",
+    "text": "Próximos documentos\nEsta sección se completará con:\n\nMétodos filter.\nMétodos wrapper.\nMétodos embedded.\nRegularización.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Introducción"
+    ]
+  },
+  {
     "objectID": "dimensionality-reduction/pca.html",
     "href": "dimensionality-reduction/pca.html",
     "title": "Principal Component Analysis (PCA)",
@@ -3076,6 +3376,522 @@
       "Inicio",
       "Reducción de dimensionalidad",
       "Introducción"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html",
+    "href": "feature-selection/filter-methods.html",
+    "title": "Métodos filter",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nLos métodos filter seleccionan variables usando criterios estadísticos antes de entrenar el modelo final.\nSon rápidos y fáciles de interpretar, pero suelen evaluar cada variable de forma aislada.\nIncluyen:\n\nVariance Threshold.\nCorrelación.\nChi-cuadrado.\nANOVA.\nMutual information.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#qué-son-los-métodos-filter",
+    "href": "feature-selection/filter-methods.html#qué-son-los-métodos-filter",
+    "title": "Métodos filter",
+    "section": "¿Qué son los métodos filter?",
+    "text": "¿Qué son los métodos filter?\nLos métodos filter asignan una puntuación a cada variable y seleccionan aquellas que cumplen un criterio.\nNo dependen directamente del modelo final.\nEjemplo:\nVariables originales\n      │\n      ▼\nCriterio estadístico\n      │\n      ▼\nRanking de variables\n      │\n      ▼\nSelección\n      │\n      ▼\nModelo\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nLos métodos filter son rápidos, pero pueden perder interacciones entre variables.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#ventajas",
+    "href": "feature-selection/filter-methods.html#ventajas",
+    "title": "Métodos filter",
+    "section": "Ventajas",
+    "text": "Ventajas\n\nBajo coste computacional.\nFáciles de aplicar.\nIndependientes del modelo.\nÚtiles con muchas variables.\nFacilitan una primera reducción.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#limitaciones",
+    "href": "feature-selection/filter-methods.html#limitaciones",
+    "title": "Métodos filter",
+    "section": "Limitaciones",
+    "text": "Limitaciones\n\nSuelen evaluar variables por separado.\nPueden seleccionar variables redundantes.\nNo siempre capturan relaciones no lineales.\nUna variable débil individualmente puede ser útil en combinación.\nNo garantizan mejorar el rendimiento final.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#variance-threshold",
+    "href": "feature-selection/filter-methods.html#variance-threshold",
+    "title": "Métodos filter",
+    "section": "Variance Threshold",
+    "text": "Variance Threshold\nElimina variables con varianza muy baja.\nfrom sklearn.feature_selection import VarianceThreshold\n\nselector = VarianceThreshold(\n    threshold=0.0\n)\n\nX_selected = selector.fit_transform(\n    X_train\n)\nCon threshold=0.0 elimina variables constantes.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#variables-constantes",
+    "href": "feature-selection/filter-methods.html#variables-constantes",
+    "title": "Métodos filter",
+    "section": "Variables constantes",
+    "text": "Variables constantes\nconstant_columns = [\n    column\n    for column in X_train.columns\n    if X_train[column].nunique(\n        dropna=False\n    ) &lt;= 1\n]\n\nprint(\n    constant_columns\n)\nUna variable constante no puede discriminar entre observaciones.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#variables-casi-constantes",
+    "href": "feature-selection/filter-methods.html#variables-casi-constantes",
+    "title": "Métodos filter",
+    "section": "Variables casi constantes",
+    "text": "Variables casi constantes\nselector = VarianceThreshold(\n    threshold=0.01\n)\nLa interpretación del umbral depende de la escala.\n\n\n\n\n\n\nWarningImportante\n\n\n\nVariance Threshold es sensible a la escala de las variables.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#correlación-entre-predictores",
+    "href": "feature-selection/filter-methods.html#correlación-entre-predictores",
+    "title": "Métodos filter",
+    "section": "Correlación entre predictores",
+    "text": "Correlación entre predictores\nLa correlación puede utilizarse para detectar redundancia.\ncorrelation_matrix = (\n    X_train[\n        numeric_features\n    ]\n    .corr()\n)\n\ndisplay(\n    correlation_matrix\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#detectar-correlaciones-altas",
+    "href": "feature-selection/filter-methods.html#detectar-correlaciones-altas",
+    "title": "Métodos filter",
+    "section": "Detectar correlaciones altas",
+    "text": "Detectar correlaciones altas\nimport numpy as np\n\nupper_triangle = (\n    correlation_matrix\n    .where(\n        np.triu(\n            np.ones(\n                correlation_matrix.shape\n            ),\n            k=1\n        ).astype(bool)\n    )\n)\n\nhighly_correlated = []\n\nfor column in upper_triangle.columns:\n\n    related = (\n        upper_triangle[column]\n        .abs()\n        .loc[\n            lambda x:\n            x &gt; 0.90\n        ]\n    )\n\n    for related_feature, value in related.items():\n\n        highly_correlated.append(\n            {\n                \"feature_1\": related_feature,\n                \"feature_2\": column,\n                \"correlation\": value\n            }\n        )",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#correlación-con-el-target",
+    "href": "feature-selection/filter-methods.html#correlación-con-el-target",
+    "title": "Métodos filter",
+    "section": "Correlación con el target",
+    "text": "Correlación con el target\nEn regresión puede explorarse:\ncorrelation_with_target = (\n    X_train[\n        numeric_features\n    ]\n    .corrwith(\n        y_train\n    )\n    .sort_values(\n        key=abs,\n        ascending=False\n    )\n)\n\ndisplay(\n    correlation_with_target\n)\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nUna correlación baja no implica ausencia de relación.\nLa relación puede ser no lineal.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#pearson-y-spearman",
+    "href": "feature-selection/filter-methods.html#pearson-y-spearman",
+    "title": "Métodos filter",
+    "section": "Pearson y Spearman",
+    "text": "Pearson y Spearman\n\nPearson\nEvalúa asociación lineal.\npearson_matrix = (\n    X_train[\n        numeric_features\n    ]\n    .corr(\n        method=\"pearson\"\n    )\n)\n\n\nSpearman\nEvalúa asociación monotónica basada en rangos.\nspearman_matrix = (\n    X_train[\n        numeric_features\n    ]\n    .corr(\n        method=\"spearman\"\n    )\n)\nSpearman puede ser más robusta ante:\n\nOutliers.\nDistribuciones asimétricas.\nRelaciones monotónicas no lineales.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#chi-cuadrado",
+    "href": "feature-selection/filter-methods.html#chi-cuadrado",
+    "title": "Métodos filter",
+    "section": "Chi-cuadrado",
+    "text": "Chi-cuadrado\nChi-cuadrado evalúa la dependencia entre una variable no negativa y un target categórico.\nfrom sklearn.feature_selection import chi2\nfrom sklearn.feature_selection import SelectKBest\n\nselector = SelectKBest(\n    score_func=chi2,\n    k=10\n)\n\nX_selected = selector.fit_transform(\n    X_train_non_negative,\n    y_train\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#requisitos-de-chi-cuadrado",
+    "href": "feature-selection/filter-methods.html#requisitos-de-chi-cuadrado",
+    "title": "Métodos filter",
+    "section": "Requisitos de chi-cuadrado",
+    "text": "Requisitos de chi-cuadrado\nLas variables deben ser:\n\nNo negativas.\nFrecuencias.\nConteos.\nVariables binarias.\nOne-hot encoded.\n\n\n\n\n\n\n\nWarningError frecuente\n\n\n\nNo utilices chi-cuadrado directamente con variables estandarizadas que contienen valores negativos.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#obtener-puntuaciones-chi-cuadrado",
+    "href": "feature-selection/filter-methods.html#obtener-puntuaciones-chi-cuadrado",
+    "title": "Métodos filter",
+    "section": "Obtener puntuaciones chi-cuadrado",
+    "text": "Obtener puntuaciones chi-cuadrado\nimport pandas as pd\n\nchi2_scores, p_values = chi2(\n    X_train_non_negative,\n    y_train\n)\n\nchi2_results = pd.DataFrame(\n    {\n        \"feature\": feature_names,\n        \"chi2_score\": chi2_scores,\n        \"p_value\": p_values\n    }\n).sort_values(\n    \"chi2_score\",\n    ascending=False\n)\n\ndisplay(\n    chi2_results\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#anova-f-test-para-clasificación",
+    "href": "feature-selection/filter-methods.html#anova-f-test-para-clasificación",
+    "title": "Métodos filter",
+    "section": "ANOVA F-test para clasificación",
+    "text": "ANOVA F-test para clasificación\nf_classif evalúa si la media de una variable difiere entre clases.\nfrom sklearn.feature_selection import f_classif\nfrom sklearn.feature_selection import SelectKBest\n\nselector = SelectKBest(\n    score_func=f_classif,\n    k=10\n)\n\nX_selected = selector.fit_transform(\n    X_train,\n    y_train\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#obtener-resultados-de-anova",
+    "href": "feature-selection/filter-methods.html#obtener-resultados-de-anova",
+    "title": "Métodos filter",
+    "section": "Obtener resultados de ANOVA",
+    "text": "Obtener resultados de ANOVA\nf_scores, p_values = f_classif(\n    X_train,\n    y_train\n)\n\nanova_results = pd.DataFrame(\n    {\n        \"feature\": feature_names,\n        \"f_score\": f_scores,\n        \"p_value\": p_values\n    }\n).sort_values(\n    \"f_score\",\n    ascending=False\n)\n\ndisplay(\n    anova_results\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#anova-para-regresión",
+    "href": "feature-selection/filter-methods.html#anova-para-regresión",
+    "title": "Métodos filter",
+    "section": "ANOVA para regresión",
+    "text": "ANOVA para regresión\nfrom sklearn.feature_selection import f_regression\n\nselector = SelectKBest(\n    score_func=f_regression,\n    k=10\n)\n\nX_selected = selector.fit_transform(\n    X_train,\n    y_train\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#limitaciones-de-anova",
+    "href": "feature-selection/filter-methods.html#limitaciones-de-anova",
+    "title": "Métodos filter",
+    "section": "Limitaciones de ANOVA",
+    "text": "Limitaciones de ANOVA\n\nEvalúa principalmente relaciones lineales.\nPuede verse afectado por outliers.\nNo captura interacciones.\nUn p-value bajo no garantiza utilidad predictiva.\nPuede ser inestable con muestras pequeñas.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#mutual-information",
+    "href": "feature-selection/filter-methods.html#mutual-information",
+    "title": "Métodos filter",
+    "section": "Mutual information",
+    "text": "Mutual information\nMutual information mide dependencia entre variables y target.\nPuede capturar relaciones no lineales.\n\nClasificación\nfrom sklearn.feature_selection import mutual_info_classif\n\nmi_scores = mutual_info_classif(\n    X_train,\n    y_train,\n    random_state=42\n)\n\n\nRegresión\nfrom sklearn.feature_selection import mutual_info_regression\n\nmi_scores = mutual_info_regression(\n    X_train,\n    y_train,\n    random_state=42\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#ranking-con-mutual-information",
+    "href": "feature-selection/filter-methods.html#ranking-con-mutual-information",
+    "title": "Métodos filter",
+    "section": "Ranking con mutual information",
+    "text": "Ranking con mutual information\nmi_results = pd.DataFrame(\n    {\n        \"feature\": feature_names,\n        \"mutual_information\": mi_scores\n    }\n).sort_values(\n    \"mutual_information\",\n    ascending=False\n)\n\ndisplay(\n    mi_results\n)\n\n\n\n\n\n\nNoteVentaja\n\n\n\nMutual information puede detectar relaciones que Pearson o ANOVA no detectan.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#limitaciones-de-mutual-information",
+    "href": "feature-selection/filter-methods.html#limitaciones-de-mutual-information",
+    "title": "Métodos filter",
+    "section": "Limitaciones de mutual information",
+    "text": "Limitaciones de mutual information\n\nPuede ser inestable con pocos datos.\nDepende de la estimación de densidad.\nNo indica dirección de la relación.\nNo distingue causalidad.\nPuede variar con la semilla.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#selectkbest",
+    "href": "feature-selection/filter-methods.html#selectkbest",
+    "title": "Métodos filter",
+    "section": "SelectKBest",
+    "text": "SelectKBest\nSelecciona las k variables con mejor puntuación.\nfrom sklearn.feature_selection import SelectKBest\nfrom sklearn.feature_selection import mutual_info_classif\n\nselector = SelectKBest(\n    score_func=mutual_info_classif,\n    k=20\n)\n\nX_selected = selector.fit_transform(\n    X_train,\n    y_train\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#selectpercentile",
+    "href": "feature-selection/filter-methods.html#selectpercentile",
+    "title": "Métodos filter",
+    "section": "SelectPercentile",
+    "text": "SelectPercentile\nSelecciona un porcentaje de variables.\nfrom sklearn.feature_selection import SelectPercentile\nfrom sklearn.feature_selection import f_classif\n\nselector = SelectPercentile(\n    score_func=f_classif,\n    percentile=25\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#selectfpr-selectfdr-y-selectfwe",
+    "href": "feature-selection/filter-methods.html#selectfpr-selectfdr-y-selectfwe",
+    "title": "Métodos filter",
+    "section": "SelectFpr, SelectFdr y SelectFwe",
+    "text": "SelectFpr, SelectFdr y SelectFwe\nPermiten seleccionar utilizando criterios basados en p-values.\nfrom sklearn.feature_selection import SelectFdr\nfrom sklearn.feature_selection import f_classif\n\nselector = SelectFdr(\n    score_func=f_classif,\n    alpha=0.05\n)\nDeben interpretarse con cautela en contextos predictivos.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#obtener-variables-seleccionadas",
+    "href": "feature-selection/filter-methods.html#obtener-variables-seleccionadas",
+    "title": "Métodos filter",
+    "section": "Obtener variables seleccionadas",
+    "text": "Obtener variables seleccionadas\nselector.fit(\n    X_train,\n    y_train\n)\n\nselected_mask = (\n    selector.get_support()\n)\n\nselected_features = [\n    feature\n    for feature, selected\n    in zip(\n        feature_names,\n        selected_mask\n    )\n    if selected\n]\n\nprint(\n    selected_features\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#integrar-en-un-pipeline",
+    "href": "feature-selection/filter-methods.html#integrar-en-un-pipeline",
+    "title": "Métodos filter",
+    "section": "Integrar en un pipeline",
+    "text": "Integrar en un pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"selector\",\n            SelectKBest(\n                score_func=f_classif,\n                k=20\n            )\n        ),\n        (\n            \"classifier\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#validación-cruzada",
+    "href": "feature-selection/filter-methods.html#validación-cruzada",
+    "title": "Métodos filter",
+    "section": "Validación cruzada",
+    "text": "Validación cruzada\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.model_selection import StratifiedKFold\n\ncv = StratifiedKFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=42\n)\n\nscores = cross_val_score(\n    estimator=pipeline,\n    X=X,\n    y=y,\n    cv=cv,\n    scoring=\"roc_auc\"\n)\n\nprint(\n    scores.mean()\n)\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nLa selección debe ajustarse de nuevo dentro de cada fold.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#ajustar-el-número-de-variables",
+    "href": "feature-selection/filter-methods.html#ajustar-el-número-de-variables",
+    "title": "Métodos filter",
+    "section": "Ajustar el número de variables",
+    "text": "Ajustar el número de variables\nfrom sklearn.model_selection import GridSearchCV\n\nparam_grid = {\n    \"selector__k\": [\n        5,\n        10,\n        20,\n        30,\n        \"all\"\n    ]\n}\n\nsearch = GridSearchCV(\n    estimator=pipeline,\n    param_grid=param_grid,\n    cv=cv,\n    scoring=\"roc_auc\",\n    n_jobs=-1\n)\n\nsearch.fit(\n    X_train,\n    y_train\n)\n\nprint(\n    search.best_params_\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#comparar-con-todas-las-variables",
+    "href": "feature-selection/filter-methods.html#comparar-con-todas-las-variables",
+    "title": "Métodos filter",
+    "section": "Comparar con todas las variables",
+    "text": "Comparar con todas las variables\npipeline_all = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"classifier\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\nscores_all = cross_val_score(\n    pipeline_all,\n    X,\n    y,\n    cv=cv,\n    scoring=\"roc_auc\"\n)\n\nscores_selected = cross_val_score(\n    pipeline,\n    X,\n    y,\n    cv=cv,\n    scoring=\"roc_auc\"\n)",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#selección-por-correlación-con-target",
+    "href": "feature-selection/filter-methods.html#selección-por-correlación-con-target",
+    "title": "Métodos filter",
+    "section": "Selección por correlación con target",
+    "text": "Selección por correlación con target\nEn regresión puede implementarse manualmente.\ncorrelations = (\n    X_train[\n        numeric_features\n    ]\n    .corrwith(\n        y_train\n    )\n    .abs()\n)\n\nselected_features = (\n    correlations[\n        correlations &gt; 0.20\n    ]\n    .index\n    .tolist()\n)\n\n\n\n\n\n\nWarningData leakage\n\n\n\nEste cálculo debe realizarse solo con train o dentro de cada fold.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#variables-categóricas",
+    "href": "feature-selection/filter-methods.html#variables-categóricas",
+    "title": "Métodos filter",
+    "section": "Variables categóricas",
+    "text": "Variables categóricas\nDespués de one-hot encoding, una sola variable original puede generar muchas columnas.\nEjemplo:\ndiagnosis_A\ndiagnosis_B\ndiagnosis_C\nLa selección puede elegir algunas categorías y descartar otras.\nEso puede complicar:\n\nInterpretación.\nEstabilidad.\nCoherencia clínica.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#selección-por-grupos-de-variables",
+    "href": "feature-selection/filter-methods.html#selección-por-grupos-de-variables",
+    "title": "Métodos filter",
+    "section": "Selección por grupos de variables",
+    "text": "Selección por grupos de variables\nA veces conviene seleccionar o descartar grupos completos.\nEjemplos:\n\nTodas las categorías de un diagnóstico.\nTodas las mediciones de un biomarcador.\nTodas las variables de una visita.\nTodas las variables de un centro.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#métodos-filter-y-variables-clínicas",
+    "href": "feature-selection/filter-methods.html#métodos-filter-y-variables-clínicas",
+    "title": "Métodos filter",
+    "section": "Métodos filter y variables clínicas",
+    "text": "Métodos filter y variables clínicas\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nUna variable puede tener baja puntuación estadística y seguir siendo clínicamente importante.\n\n\nEjemplos:\n\nEdad.\nSexo.\nTratamiento.\nCentro.\nVariable de ajuste obligatoria.\n\nEstas variables pueden conservarse por criterio clínico.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#p-values-y-predicción",
+    "href": "feature-selection/filter-methods.html#p-values-y-predicción",
+    "title": "Métodos filter",
+    "section": "P-values y predicción",
+    "text": "P-values y predicción\nUn p-value responde a una pregunta inferencial.\nNo mide directamente:\n\nRendimiento predictivo.\nUtilidad clínica.\nEstabilidad.\nGeneralización.\n\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nNo selecciones variables únicamente por p &lt; 0.05.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#corrección-por-comparaciones-múltiples",
+    "href": "feature-selection/filter-methods.html#corrección-por-comparaciones-múltiples",
+    "title": "Métodos filter",
+    "section": "Corrección por comparaciones múltiples",
+    "text": "Corrección por comparaciones múltiples\nCuando se evalúan muchas variables, aumenta el riesgo de falsos positivos.\nMétodos posibles:\n\nBonferroni.\nFalse discovery rate.\nBenjamini-Hochberg.\n\nEn selección predictiva, la validación cruzada sigue siendo esencial.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#estabilidad-de-la-selección",
+    "href": "feature-selection/filter-methods.html#estabilidad-de-la-selección",
+    "title": "Métodos filter",
+    "section": "Estabilidad de la selección",
+    "text": "Estabilidad de la selección\nPuede evaluarse cuántas veces se selecciona cada variable.\nfrom collections import Counter\n\nselection_frequency = Counter()\n\nfor train_index, validation_index in cv.split(\n    X,\n    y\n):\n\n    X_train_fold = X.iloc[\n        train_index\n    ]\n\n    y_train_fold = y.iloc[\n        train_index\n    ]\n\n    fitted_pipeline = pipeline.fit(\n        X_train_fold,\n        y_train_fold\n    )\n\n    selector_fold = (\n        fitted_pipeline\n        .named_steps[\"selector\"]\n    )\n\n    feature_names_fold = (\n        fitted_pipeline\n        .named_steps[\"preprocessor\"]\n        .get_feature_names_out()\n    )\n\n    selected_features_fold = (\n        feature_names_fold[\n            selector_fold.get_support()\n        ]\n    )\n\n    selection_frequency.update(\n        selected_features_fold\n    )",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#visualizar-ranking",
+    "href": "feature-selection/filter-methods.html#visualizar-ranking",
+    "title": "Métodos filter",
+    "section": "Visualizar ranking",
+    "text": "Visualizar ranking\nimport matplotlib.pyplot as plt\n\ntop_features = (\n    mi_results\n    .head(20)\n    .sort_values(\n        \"mutual_information\"\n    )\n)\n\nplt.figure(figsize=(8, 6))\n\nplt.barh(\n    top_features[\"feature\"],\n    top_features[\"mutual_information\"]\n)\n\nplt.xlabel(\"Mutual information\")\nplt.title(\"Top variables\")\n\nplt.tight_layout()\nplt.show()",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#comparación-de-métodos",
+    "href": "feature-selection/filter-methods.html#comparación-de-métodos",
+    "title": "Métodos filter",
+    "section": "Comparación de métodos",
+    "text": "Comparación de métodos\n\n\n\n\n\n\n\n\n\nMétodo\nTipo de relación\nUso típico\nLimitación\n\n\n\n\nVariance Threshold\nVariabilidad\nEliminar constantes\nSensible a escala\n\n\nPearson\nLineal\nNuméricas\nNo linealidad\n\n\nSpearman\nMonotónica\nNuméricas\nNo captura todo tipo de relación\n\n\nChi-cuadrado\nDependencia categórica\nVariables no negativas\nRequiere no negatividad\n\n\nANOVA\nDiferencia de medias\nNuméricas y clases\nPrincipalmente lineal\n\n\nMutual information\nGeneral\nLineal y no lineal\nMás inestable",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#errores-frecuentes",
+    "href": "feature-selection/filter-methods.html#errores-frecuentes",
+    "title": "Métodos filter",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nAplicar selección antes del split.\nUtilizar chi-cuadrado con valores negativos.\nEliminar variables solo por correlación.\nConfundir p-value con utilidad predictiva.\nElegir k sin validación cruzada.\nNo comparar con todas las variables.\nIgnorar estabilidad.\nEliminar variables clínicamente esenciales.\nInterpretar mutual information como causalidad.\nSeleccionar categorías individuales sin revisar coherencia.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#flujo-recomendado",
+    "href": "feature-selection/filter-methods.html#flujo-recomendado",
+    "title": "Métodos filter",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nEliminar constantes.\nRevisar calidad y unidades.\nRevisar correlaciones.\nDefinir variables obligatorias.\nElegir el score adecuado.\nIntegrar selección en pipeline.\nAjustar el número de variables.\nValidar con cross-validation.\nComparar con el modelo completo.\nRevisar estabilidad.\nRevisar coherencia clínica.\nDocumentar la selección.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#checklist-para-proyectos",
+    "href": "feature-selection/filter-methods.html#checklist-para-proyectos",
+    "title": "Métodos filter",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe eliminado variables constantes.\nHe revisado correlaciones.\nHe elegido el método adecuado.\nCumplo los requisitos de chi-cuadrado.\nLa selección está dentro del pipeline.\nEl número de variables se ajusta con validation.\nHe comparado con todas las variables.\nHe revisado estabilidad.\nHe conservado variables clínicas obligatorias.\nNo he interpretado p-values como rendimiento.\nHe evitado data leakage.\nHe documentado las variables finales.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#recursos",
+    "href": "feature-selection/filter-methods.html#recursos",
+    "title": "Métodos filter",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\nVarianceThreshold.\nSelectKBest.\nSelectPercentile.\nchi2.\nf_classif.\nf_regression.\nmutual_info_classif.\nmutual_info_regression.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
+    ]
+  },
+  {
+    "objectID": "feature-selection/filter-methods.html#notas-personales",
+    "href": "feature-selection/filter-methods.html#notas-personales",
+    "title": "Métodos filter",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus criterios de selección, umbrales y comparaciones habituales.",
+    "crumbs": [
+      "Inicio",
+      "Selección de variables",
+      "Métodos filter"
     ]
   },
   {
