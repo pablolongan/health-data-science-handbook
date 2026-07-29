@@ -1,0 +1,1154 @@
+---
+title: "Pipelines y ColumnTransformer"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Un `Pipeline` encadena varios pasos de preprocesamiento y modelado en un único objeto.
+
+`ColumnTransformer` permite aplicar transformaciones distintas a grupos diferentes de columnas.
+
+Juntos permiten construir flujos:
+
+- Reproducibles.
+- Más seguros.
+- Más fáciles de validar.
+- Menos propensos a data leakage.
+:::
+
+## ¿Por qué usar pipelines?
+
+En un proyecto real, el modelo rara vez recibe datos listos.
+
+Antes suele ser necesario:
+
+- Imputar valores ausentes.
+- Escalar variables numéricas.
+- Codificar variables categóricas.
+- Seleccionar variables.
+- Reducir dimensionalidad.
+- Balancear clases.
+- Entrenar el modelo.
+
+Sin pipeline, estos pasos suelen hacerse manualmente y en distintos momentos.
+
+Eso aumenta el riesgo de:
+
+- Aplicar transformaciones en distinto orden.
+- Ajustar preprocesamiento con test.
+- Olvidar un paso al predecir nuevos datos.
+- Generar resultados no reproducibles.
+- Romper el flujo al cambiar de modelo.
+
+::: {.callout-note}
+## Idea clave
+
+El pipeline representa todo el proceso que debe aplicarse desde los datos originales hasta la predicción final.
+:::
+
+## Pipeline básico
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Entrenar y predecir
+
+```python
+pipeline.fit(
+    X_train,
+    y_train
+)
+
+y_pred = pipeline.predict(
+    X_test
+)
+
+y_probability = pipeline.predict_proba(
+    X_test
+)[:, 1]
+```
+
+El pipeline ajusta todos los pasos en orden.
+
+Durante `fit()`:
+
+1. Imputa train.
+2. Escala train.
+3. Ajusta el modelo.
+
+Durante `predict()`:
+
+1. Aplica al test la imputación aprendida con train.
+2. Aplica al test el escalado aprendido con train.
+3. Genera predicciones.
+
+::: {.callout-important}
+## Regla práctica
+
+Las transformaciones aprendidas con `fit()` se reutilizan automáticamente con `transform()` al predecir.
+:::
+
+## ¿Qué es ColumnTransformer?
+
+`ColumnTransformer` permite aplicar transformaciones diferentes a distintos grupos de columnas.
+
+Ejemplo:
+
+- Numéricas: imputación por mediana y escalado.
+- Categóricas: imputación por moda y one-hot encoding.
+- Binarias: paso directo.
+- Fechas: transformación personalizada.
+
+## Definir grupos de variables
+
+```python
+numeric_features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp"
+]
+
+categorical_features = [
+    "sex",
+    "center",
+    "diagnosis"
+]
+```
+
+## Pipeline numérico
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+
+numeric_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median",
+                add_indicator=True
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        )
+    ]
+)
+```
+
+## Pipeline categórico
+
+```python
+from sklearn.preprocessing import OneHotEncoder
+
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="most_frequent"
+            )
+        ),
+        (
+            "encoder",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            )
+        )
+    ]
+)
+```
+
+## Combinar con ColumnTransformer
+
+```python
+from sklearn.compose import ColumnTransformer
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ]
+)
+```
+
+## Pipeline completo
+
+```python
+from sklearn.linear_model import LogisticRegression
+
+model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Estructura conceptual
+
+```text
+Datos originales
+      │
+      ▼
+ColumnTransformer
+      │
+      ├── Variables numéricas
+      │      ├── Imputación
+      │      └── Escalado
+      │
+      └── Variables categóricas
+             ├── Imputación
+             └── One-hot encoding
+      │
+      ▼
+Modelo
+      │
+      ▼
+Predicción
+```
+
+## Columnas no transformadas
+
+Por defecto, las columnas no incluidas se eliminan.
+
+Puede conservarse el resto con:
+
+```python
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ],
+    remainder="passthrough"
+)
+```
+
+::: {.callout-warning}
+## Precaución
+
+`remainder="passthrough"` puede introducir columnas no revisadas, identificadores o variables con leakage.
+
+Utilízalo solo si sabes exactamente qué columnas se conservarán.
+:::
+
+## Eliminar columnas explícitamente
+
+```python
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ],
+    remainder="drop"
+)
+```
+
+## Seleccionar columnas automáticamente
+
+Puede hacerse por tipo de dato.
+
+```python
+from sklearn.compose import make_column_selector
+
+numeric_selector = make_column_selector(
+    dtype_include="number"
+)
+
+categorical_selector = make_column_selector(
+    dtype_include=[
+        "object",
+        "category",
+        "bool"
+    ]
+)
+```
+
+```python
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_selector
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_selector
+        )
+    ]
+)
+```
+
+::: {.callout-caution}
+## Riesgo
+
+La selección automática por tipo puede incluir identificadores numéricos o excluir categorías mal tipadas.
+
+En proyectos clínicos suele ser más seguro definir las columnas explícitamente.
+:::
+
+## Obtener nombres de variables transformadas
+
+```python
+model.fit(
+    X_train,
+    y_train
+)
+
+feature_names = (
+    model
+    .named_steps["preprocessor"]
+    .get_feature_names_out()
+)
+
+print(feature_names)
+```
+
+Esto permite conocer columnas como:
+
+```text
+numeric__age
+numeric__weight
+categorical__center_Barcelona
+categorical__center_Helsinki
+```
+
+## Inspeccionar pasos del pipeline
+
+```python
+print(
+    model.named_steps
+)
+```
+
+## Acceder al preprocesador
+
+```python
+fitted_preprocessor = (
+    model.named_steps[
+        "preprocessor"
+    ]
+)
+```
+
+## Acceder al modelo final
+
+```python
+fitted_classifier = (
+    model.named_steps[
+        "classifier"
+    ]
+)
+```
+
+## Acceder al escalador
+
+```python
+fitted_scaler = (
+    model
+    .named_steps["preprocessor"]
+    .named_transformers_["numeric"]
+    .named_steps["scaler"]
+)
+```
+
+## Acceder al encoder
+
+```python
+fitted_encoder = (
+    model
+    .named_steps["preprocessor"]
+    .named_transformers_["categorical"]
+    .named_steps["encoder"]
+)
+```
+
+## Ver categorías aprendidas
+
+```python
+for feature, categories in zip(
+    categorical_features,
+    fitted_encoder.categories_
+):
+    print(
+        feature,
+        categories
+    )
+```
+
+## Validación cruzada con pipeline
+
+```python
+from sklearn.model_selection import cross_val_score
+
+scores = cross_val_score(
+    model,
+    X,
+    y,
+    cv=5,
+    scoring="roc_auc"
+)
+
+print(
+    "ROC AUC medio:",
+    scores.mean()
+)
+
+print(
+    "Desviación estándar:",
+    scores.std()
+)
+```
+
+El preprocesamiento se vuelve a ajustar dentro de cada fold.
+
+::: {.callout-note}
+## Ventaja principal
+
+El pipeline evita que imputación, escalado o encoding aprendan información del fold de validación.
+:::
+
+## Ajuste de hiperparámetros
+
+Los parámetros se nombran mediante:
+
+```text
+nombre_paso__nombre_parametro
+```
+
+Ejemplo:
+
+```python
+param_grid = {
+    "classifier__C": [
+        0.01,
+        0.1,
+        1,
+        10
+    ]
+}
+```
+
+## GridSearchCV
+
+```python
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    "classifier__C": [
+        0.01,
+        0.1,
+        1,
+        10
+    ],
+    "classifier__class_weight": [
+        None,
+        "balanced"
+    ]
+}
+
+search = GridSearchCV(
+    estimator=model,
+    param_grid=param_grid,
+    scoring="roc_auc",
+    cv=5,
+    n_jobs=-1
+)
+
+search.fit(
+    X_train,
+    y_train
+)
+
+print(
+    search.best_params_
+)
+
+print(
+    search.best_score_
+)
+```
+
+## Evaluar el mejor pipeline
+
+```python
+best_model = search.best_estimator_
+
+y_probability = best_model.predict_proba(
+    X_test
+)[:, 1]
+```
+
+## Cambiar el modelo final
+
+La misma preparación puede reutilizarse.
+
+### Random forest
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+random_forest_model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            RandomForestClassifier(
+                n_estimators=500,
+                random_state=42,
+                n_jobs=-1
+            )
+        )
+    ]
+)
+```
+
+### SVM
+
+```python
+from sklearn.svm import SVC
+
+svm_model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            SVC(
+                probability=True,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Añadir PCA
+
+```python
+from sklearn.decomposition import PCA
+
+numeric_transformer_with_pca = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "pca",
+            PCA(
+                n_components=0.95
+            )
+        )
+    ]
+)
+```
+
+## Añadir selección de variables
+
+```python
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_classif
+
+pipeline_with_selection = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "selector",
+            SelectKBest(
+                score_func=f_classif,
+                k=20
+            )
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Balanceo con SMOTE
+
+Para integrar SMOTE debe utilizarse el pipeline de `imbalanced-learn`.
+
+```python
+from imblearn.pipeline import Pipeline
+from imblearn.over_sampling import SMOTE
+from sklearn.linear_model import LogisticRegression
+
+model_with_smote = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "smote",
+            SMOTE(
+                random_state=42
+            )
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+SMOTE debe aplicarse dentro del pipeline y solo sobre train o sobre los folds de entrenamiento.
+:::
+
+## Transformadores personalizados
+
+Puede crearse una función propia.
+
+```python
+import numpy as np
+from sklearn.preprocessing import FunctionTransformer
+
+log_transformer = FunctionTransformer(
+    np.log1p,
+    feature_names_out="one-to-one"
+)
+```
+
+## Aplicar logaritmo a variables concretas
+
+```python
+log_features = [
+    "troponin",
+    "ntprobnp"
+]
+
+log_pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "log",
+            log_transformer
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        )
+    ]
+)
+```
+
+```python
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "log_numeric",
+            log_pipeline,
+            log_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ]
+)
+```
+
+Asegúrate de no incluir la misma columna en varios bloques sin intención.
+
+## Pipeline para regresión
+
+```python
+from sklearn.linear_model import Ridge
+
+regression_model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "regressor",
+            Ridge(
+                alpha=1.0
+            )
+        )
+    ]
+)
+
+regression_model.fit(
+    X_train,
+    y_train
+)
+
+y_pred = regression_model.predict(
+    X_test
+)
+```
+
+## Guardar el pipeline entrenado
+
+```python
+import joblib
+
+joblib.dump(
+    model,
+    "clinical_model_pipeline.joblib"
+)
+```
+
+## Cargar el pipeline
+
+```python
+loaded_model = joblib.load(
+    "clinical_model_pipeline.joblib"
+)
+
+y_pred = loaded_model.predict(
+    X_new
+)
+```
+
+::: {.callout-important}
+## Ventaja
+
+Guardar el pipeline completo garantiza que los datos nuevos reciben exactamente las mismas transformaciones utilizadas durante el entrenamiento.
+:::
+
+## Comprobar columnas esperadas
+
+```python
+expected_columns = list(
+    model.feature_names_in_
+)
+
+print(expected_columns)
+```
+
+## Validar datos nuevos
+
+```python
+missing_columns = set(
+    expected_columns
+) - set(
+    X_new.columns
+)
+
+extra_columns = set(
+    X_new.columns
+) - set(
+    expected_columns
+)
+
+print(
+    "Columnas ausentes:",
+    missing_columns
+)
+
+print(
+    "Columnas adicionales:",
+    extra_columns
+)
+```
+
+## Pipeline y datos clínicos
+
+::: {.callout-note}
+## Aplicación clínica
+
+Un pipeline ayuda a documentar exactamente cómo se transforma cada variable antes de generar una predicción.
+:::
+
+### Identificadores
+
+No deben incluirse como predictores:
+
+- ID de paciente.
+- Número de historia clínica.
+- ID de episodio.
+- ID de centro codificado arbitrariamente.
+- Identificador de muestra.
+
+Pueden utilizarse para realizar el split por grupos, pero no como variables de entrada.
+
+### Fechas
+
+Las fechas no deberían introducirse como texto sin procesar.
+
+Pueden transformarse en:
+
+- Edad.
+- Tiempo desde baseline.
+- Año.
+- Mes.
+- Día de tratamiento.
+- Duración previa.
+
+### Variables longitudinales
+
+Antes del pipeline tabular, puede ser necesario construir:
+
+- Último valor disponible.
+- Cambio desde baseline.
+- Pendiente.
+- Máximo previo.
+- Ventanas temporales.
+
+Estas variables deben calcularse sin usar información futura.
+
+### Unidades
+
+El pipeline no corrige automáticamente unidades incoherentes.
+
+La armonización debe realizarse antes o mediante un transformador específico.
+
+### Centro hospitalario
+
+El centro puede incluirse como variable si tiene sentido, pero puede hacer que el modelo aprenda diferencias organizativas.
+
+También puede reservarse para:
+
+- Estratificación.
+- Validación externa.
+- Evaluación de transportabilidad.
+
+## Qué debe estar dentro del pipeline
+
+Normalmente:
+
+- Imputación.
+- Escalado.
+- Encoding.
+- Selección de variables.
+- PCA.
+- Balanceo.
+- Modelo.
+
+## Qué suele estar antes del pipeline
+
+Normalmente:
+
+- Definición de la cohorte.
+- Corrección de errores conocidos.
+- Armonización de unidades.
+- Creación del target.
+- Definición del tiempo índice.
+- Split por paciente o tiempo.
+- Exclusión de identificadores.
+
+## Pipeline y reproducibilidad
+
+Un pipeline permite documentar:
+
+- Orden de transformaciones.
+- Parámetros.
+- Variables utilizadas.
+- Modelo.
+- Semilla aleatoria.
+- Versión entrenada.
+
+También facilita:
+
+- Validación cruzada.
+- Comparación de modelos.
+- Despliegue.
+- Reentrenamiento.
+- Auditoría.
+
+## Ejemplo completo de clasificación clínica
+
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    stratify=y,
+    random_state=42
+)
+
+numeric_features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp"
+]
+
+categorical_features = [
+    "sex",
+    "center",
+    "diagnosis"
+]
+
+numeric_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median",
+                add_indicator=True
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        )
+    ]
+)
+
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="most_frequent"
+            )
+        ),
+        (
+            "encoder",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            )
+        )
+    ]
+)
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ]
+)
+
+model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                class_weight="balanced",
+                random_state=42
+            )
+        )
+    ]
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+
+y_probability = model.predict_proba(
+    X_test
+)[:, 1]
+
+roc_auc = roc_auc_score(
+    y_test,
+    y_probability
+)
+
+print(
+    f"Test ROC AUC: {roc_auc:.3f}"
+)
+```
+
+## Errores frecuentes
+
+- Preprocesar antes del split.
+- Ajustar manualmente train y olvidar test.
+- No incluir el preprocesamiento en validación cruzada.
+- Utilizar `remainder="passthrough"` sin revisar columnas.
+- Incluir identificadores.
+- Seleccionar columnas solo por tipo de dato.
+- No gestionar categorías desconocidas.
+- Aplicar SMOTE antes del split.
+- Guardar solo el modelo y no el preprocesador.
+- Cambiar el orden de columnas al predecir.
+- No documentar transformaciones personalizadas.
+- Crear variables longitudinales con información futura.
+
+## Flujo recomendado
+
+1. Definir la cohorte y el target.
+2. Definir el momento de predicción.
+3. Separar train y test.
+4. Identificar variables numéricas y categóricas.
+5. Crear pipelines por tipo de variable.
+6. Combinar con `ColumnTransformer`.
+7. Añadir el modelo.
+8. Validar con cross-validation.
+9. Ajustar hiperparámetros.
+10. Evaluar una vez con test.
+11. Guardar el pipeline completo.
+12. Documentar variables y versiones.
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad de análisis.
+- [ ] He realizado el split antes del preprocesamiento.
+- [ ] He excluido identificadores.
+- [ ] He definido explícitamente variables numéricas.
+- [ ] He definido explícitamente variables categóricas.
+- [ ] La imputación está dentro del pipeline.
+- [ ] El escalado está dentro del pipeline.
+- [ ] El encoding está dentro del pipeline.
+- [ ] Gestiono categorías desconocidas.
+- [ ] La selección de variables está dentro del pipeline.
+- [ ] PCA está dentro del pipeline si se utiliza.
+- [ ] El balanceo está dentro del pipeline.
+- [ ] La validación cruzada evalúa el pipeline completo.
+- [ ] He inspeccionado las variables finales.
+- [ ] He guardado el pipeline completo.
+- [ ] He documentado las transformaciones.
+
+## Recursos
+
+### Documentación
+
+- `Pipeline` de scikit-learn.
+- `ColumnTransformer` de scikit-learn.
+- `GridSearchCV` de scikit-learn.
+- `FunctionTransformer` de scikit-learn.
+- Pipeline de imbalanced-learn.
+- Persistencia de modelos con joblib.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus propios pipelines, errores habituales y fragmentos reutilizables.
