@@ -1,0 +1,906 @@
+---
+title: "Métodos filter"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Los métodos filter seleccionan variables usando criterios estadísticos antes de entrenar el modelo final.
+
+Son rápidos y fáciles de interpretar, pero suelen evaluar cada variable de forma aislada.
+
+Incluyen:
+
+- Variance Threshold.
+- Correlación.
+- Chi-cuadrado.
+- ANOVA.
+- Mutual information.
+:::
+
+## ¿Qué son los métodos filter?
+
+Los métodos filter asignan una puntuación a cada variable y seleccionan aquellas que cumplen un criterio.
+
+No dependen directamente del modelo final.
+
+Ejemplo:
+
+```text
+Variables originales
+      │
+      ▼
+Criterio estadístico
+      │
+      ▼
+Ranking de variables
+      │
+      ▼
+Selección
+      │
+      ▼
+Modelo
+```
+
+::: {.callout-note}
+## Idea clave
+
+Los métodos filter son rápidos, pero pueden perder interacciones entre variables.
+:::
+
+## Ventajas
+
+- Bajo coste computacional.
+- Fáciles de aplicar.
+- Independientes del modelo.
+- Útiles con muchas variables.
+- Facilitan una primera reducción.
+
+## Limitaciones
+
+- Suelen evaluar variables por separado.
+- Pueden seleccionar variables redundantes.
+- No siempre capturan relaciones no lineales.
+- Una variable débil individualmente puede ser útil en combinación.
+- No garantizan mejorar el rendimiento final.
+
+## Variance Threshold
+
+Elimina variables con varianza muy baja.
+
+```python
+from sklearn.feature_selection import VarianceThreshold
+
+selector = VarianceThreshold(
+    threshold=0.0
+)
+
+X_selected = selector.fit_transform(
+    X_train
+)
+```
+
+Con `threshold=0.0` elimina variables constantes.
+
+## Variables constantes
+
+```python
+constant_columns = [
+    column
+    for column in X_train.columns
+    if X_train[column].nunique(
+        dropna=False
+    ) <= 1
+]
+
+print(
+    constant_columns
+)
+```
+
+Una variable constante no puede discriminar entre observaciones.
+
+## Variables casi constantes
+
+```python
+selector = VarianceThreshold(
+    threshold=0.01
+)
+```
+
+La interpretación del umbral depende de la escala.
+
+::: {.callout-warning}
+## Importante
+
+Variance Threshold es sensible a la escala de las variables.
+:::
+
+## Correlación entre predictores
+
+La correlación puede utilizarse para detectar redundancia.
+
+```python
+correlation_matrix = (
+    X_train[
+        numeric_features
+    ]
+    .corr()
+)
+
+display(
+    correlation_matrix
+)
+```
+
+## Detectar correlaciones altas
+
+```python
+import numpy as np
+
+upper_triangle = (
+    correlation_matrix
+    .where(
+        np.triu(
+            np.ones(
+                correlation_matrix.shape
+            ),
+            k=1
+        ).astype(bool)
+    )
+)
+
+highly_correlated = []
+
+for column in upper_triangle.columns:
+
+    related = (
+        upper_triangle[column]
+        .abs()
+        .loc[
+            lambda x:
+            x > 0.90
+        ]
+    )
+
+    for related_feature, value in related.items():
+
+        highly_correlated.append(
+            {
+                "feature_1": related_feature,
+                "feature_2": column,
+                "correlation": value
+            }
+        )
+```
+
+## Correlación con el target
+
+En regresión puede explorarse:
+
+```python
+correlation_with_target = (
+    X_train[
+        numeric_features
+    ]
+    .corrwith(
+        y_train
+    )
+    .sort_values(
+        key=abs,
+        ascending=False
+    )
+)
+
+display(
+    correlation_with_target
+)
+```
+
+::: {.callout-caution}
+## Precaución
+
+Una correlación baja no implica ausencia de relación.
+
+La relación puede ser no lineal.
+:::
+
+## Pearson y Spearman
+
+### Pearson
+
+Evalúa asociación lineal.
+
+```python
+pearson_matrix = (
+    X_train[
+        numeric_features
+    ]
+    .corr(
+        method="pearson"
+    )
+)
+```
+
+### Spearman
+
+Evalúa asociación monotónica basada en rangos.
+
+```python
+spearman_matrix = (
+    X_train[
+        numeric_features
+    ]
+    .corr(
+        method="spearman"
+    )
+)
+```
+
+Spearman puede ser más robusta ante:
+
+- Outliers.
+- Distribuciones asimétricas.
+- Relaciones monotónicas no lineales.
+
+## Chi-cuadrado
+
+Chi-cuadrado evalúa la dependencia entre una variable no negativa y un target categórico.
+
+```python
+from sklearn.feature_selection import chi2
+from sklearn.feature_selection import SelectKBest
+
+selector = SelectKBest(
+    score_func=chi2,
+    k=10
+)
+
+X_selected = selector.fit_transform(
+    X_train_non_negative,
+    y_train
+)
+```
+
+## Requisitos de chi-cuadrado
+
+Las variables deben ser:
+
+- No negativas.
+- Frecuencias.
+- Conteos.
+- Variables binarias.
+- One-hot encoded.
+
+::: {.callout-warning}
+## Error frecuente
+
+No utilices chi-cuadrado directamente con variables estandarizadas que contienen valores negativos.
+:::
+
+## Obtener puntuaciones chi-cuadrado
+
+```python
+import pandas as pd
+
+chi2_scores, p_values = chi2(
+    X_train_non_negative,
+    y_train
+)
+
+chi2_results = pd.DataFrame(
+    {
+        "feature": feature_names,
+        "chi2_score": chi2_scores,
+        "p_value": p_values
+    }
+).sort_values(
+    "chi2_score",
+    ascending=False
+)
+
+display(
+    chi2_results
+)
+```
+
+## ANOVA F-test para clasificación
+
+`f_classif` evalúa si la media de una variable difiere entre clases.
+
+```python
+from sklearn.feature_selection import f_classif
+from sklearn.feature_selection import SelectKBest
+
+selector = SelectKBest(
+    score_func=f_classif,
+    k=10
+)
+
+X_selected = selector.fit_transform(
+    X_train,
+    y_train
+)
+```
+
+## Obtener resultados de ANOVA
+
+```python
+f_scores, p_values = f_classif(
+    X_train,
+    y_train
+)
+
+anova_results = pd.DataFrame(
+    {
+        "feature": feature_names,
+        "f_score": f_scores,
+        "p_value": p_values
+    }
+).sort_values(
+    "f_score",
+    ascending=False
+)
+
+display(
+    anova_results
+)
+```
+
+## ANOVA para regresión
+
+```python
+from sklearn.feature_selection import f_regression
+
+selector = SelectKBest(
+    score_func=f_regression,
+    k=10
+)
+
+X_selected = selector.fit_transform(
+    X_train,
+    y_train
+)
+```
+
+## Limitaciones de ANOVA
+
+- Evalúa principalmente relaciones lineales.
+- Puede verse afectado por outliers.
+- No captura interacciones.
+- Un p-value bajo no garantiza utilidad predictiva.
+- Puede ser inestable con muestras pequeñas.
+
+## Mutual information
+
+Mutual information mide dependencia entre variables y target.
+
+Puede capturar relaciones no lineales.
+
+### Clasificación
+
+```python
+from sklearn.feature_selection import mutual_info_classif
+
+mi_scores = mutual_info_classif(
+    X_train,
+    y_train,
+    random_state=42
+)
+```
+
+### Regresión
+
+```python
+from sklearn.feature_selection import mutual_info_regression
+
+mi_scores = mutual_info_regression(
+    X_train,
+    y_train,
+    random_state=42
+)
+```
+
+## Ranking con mutual information
+
+```python
+mi_results = pd.DataFrame(
+    {
+        "feature": feature_names,
+        "mutual_information": mi_scores
+    }
+).sort_values(
+    "mutual_information",
+    ascending=False
+)
+
+display(
+    mi_results
+)
+```
+
+::: {.callout-note}
+## Ventaja
+
+Mutual information puede detectar relaciones que Pearson o ANOVA no detectan.
+:::
+
+## Limitaciones de mutual information
+
+- Puede ser inestable con pocos datos.
+- Depende de la estimación de densidad.
+- No indica dirección de la relación.
+- No distingue causalidad.
+- Puede variar con la semilla.
+
+## SelectKBest
+
+Selecciona las `k` variables con mejor puntuación.
+
+```python
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import mutual_info_classif
+
+selector = SelectKBest(
+    score_func=mutual_info_classif,
+    k=20
+)
+
+X_selected = selector.fit_transform(
+    X_train,
+    y_train
+)
+```
+
+## SelectPercentile
+
+Selecciona un porcentaje de variables.
+
+```python
+from sklearn.feature_selection import SelectPercentile
+from sklearn.feature_selection import f_classif
+
+selector = SelectPercentile(
+    score_func=f_classif,
+    percentile=25
+)
+```
+
+## SelectFpr, SelectFdr y SelectFwe
+
+Permiten seleccionar utilizando criterios basados en p-values.
+
+```python
+from sklearn.feature_selection import SelectFdr
+from sklearn.feature_selection import f_classif
+
+selector = SelectFdr(
+    score_func=f_classif,
+    alpha=0.05
+)
+```
+
+Deben interpretarse con cautela en contextos predictivos.
+
+## Obtener variables seleccionadas
+
+```python
+selector.fit(
+    X_train,
+    y_train
+)
+
+selected_mask = (
+    selector.get_support()
+)
+
+selected_features = [
+    feature
+    for feature, selected
+    in zip(
+        feature_names,
+        selected_mask
+    )
+    if selected
+]
+
+print(
+    selected_features
+)
+```
+
+## Integrar en un pipeline
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "selector",
+            SelectKBest(
+                score_func=f_classif,
+                k=20
+            )
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Validación cruzada
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import StratifiedKFold
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+scores = cross_val_score(
+    estimator=pipeline,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring="roc_auc"
+)
+
+print(
+    scores.mean()
+)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+La selección debe ajustarse de nuevo dentro de cada fold.
+:::
+
+## Ajustar el número de variables
+
+```python
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    "selector__k": [
+        5,
+        10,
+        20,
+        30,
+        "all"
+    ]
+}
+
+search = GridSearchCV(
+    estimator=pipeline,
+    param_grid=param_grid,
+    cv=cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+search.fit(
+    X_train,
+    y_train
+)
+
+print(
+    search.best_params_
+)
+```
+
+## Comparar con todas las variables
+
+```python
+pipeline_all = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+```python
+scores_all = cross_val_score(
+    pipeline_all,
+    X,
+    y,
+    cv=cv,
+    scoring="roc_auc"
+)
+
+scores_selected = cross_val_score(
+    pipeline,
+    X,
+    y,
+    cv=cv,
+    scoring="roc_auc"
+)
+```
+
+## Selección por correlación con target
+
+En regresión puede implementarse manualmente.
+
+```python
+correlations = (
+    X_train[
+        numeric_features
+    ]
+    .corrwith(
+        y_train
+    )
+    .abs()
+)
+
+selected_features = (
+    correlations[
+        correlations > 0.20
+    ]
+    .index
+    .tolist()
+)
+```
+
+::: {.callout-warning}
+## Data leakage
+
+Este cálculo debe realizarse solo con train o dentro de cada fold.
+:::
+
+## Variables categóricas
+
+Después de one-hot encoding, una sola variable original puede generar muchas columnas.
+
+Ejemplo:
+
+```text
+diagnosis_A
+diagnosis_B
+diagnosis_C
+```
+
+La selección puede elegir algunas categorías y descartar otras.
+
+Eso puede complicar:
+
+- Interpretación.
+- Estabilidad.
+- Coherencia clínica.
+
+## Selección por grupos de variables
+
+A veces conviene seleccionar o descartar grupos completos.
+
+Ejemplos:
+
+- Todas las categorías de un diagnóstico.
+- Todas las mediciones de un biomarcador.
+- Todas las variables de una visita.
+- Todas las variables de un centro.
+
+## Métodos filter y variables clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Una variable puede tener baja puntuación estadística y seguir siendo clínicamente importante.
+:::
+
+Ejemplos:
+
+- Edad.
+- Sexo.
+- Tratamiento.
+- Centro.
+- Variable de ajuste obligatoria.
+
+Estas variables pueden conservarse por criterio clínico.
+
+## P-values y predicción
+
+Un p-value responde a una pregunta inferencial.
+
+No mide directamente:
+
+- Rendimiento predictivo.
+- Utilidad clínica.
+- Estabilidad.
+- Generalización.
+
+::: {.callout-caution}
+## Precaución
+
+No selecciones variables únicamente por `p < 0.05`.
+:::
+
+## Corrección por comparaciones múltiples
+
+Cuando se evalúan muchas variables, aumenta el riesgo de falsos positivos.
+
+Métodos posibles:
+
+- Bonferroni.
+- False discovery rate.
+- Benjamini-Hochberg.
+
+En selección predictiva, la validación cruzada sigue siendo esencial.
+
+## Estabilidad de la selección
+
+Puede evaluarse cuántas veces se selecciona cada variable.
+
+```python
+from collections import Counter
+
+selection_frequency = Counter()
+
+for train_index, validation_index in cv.split(
+    X,
+    y
+):
+
+    X_train_fold = X.iloc[
+        train_index
+    ]
+
+    y_train_fold = y.iloc[
+        train_index
+    ]
+
+    fitted_pipeline = pipeline.fit(
+        X_train_fold,
+        y_train_fold
+    )
+
+    selector_fold = (
+        fitted_pipeline
+        .named_steps["selector"]
+    )
+
+    feature_names_fold = (
+        fitted_pipeline
+        .named_steps["preprocessor"]
+        .get_feature_names_out()
+    )
+
+    selected_features_fold = (
+        feature_names_fold[
+            selector_fold.get_support()
+        ]
+    )
+
+    selection_frequency.update(
+        selected_features_fold
+    )
+```
+
+## Visualizar ranking
+
+```python
+import matplotlib.pyplot as plt
+
+top_features = (
+    mi_results
+    .head(20)
+    .sort_values(
+        "mutual_information"
+    )
+)
+
+plt.figure(figsize=(8, 6))
+
+plt.barh(
+    top_features["feature"],
+    top_features["mutual_information"]
+)
+
+plt.xlabel("Mutual information")
+plt.title("Top variables")
+
+plt.tight_layout()
+plt.show()
+```
+
+## Comparación de métodos
+
+| Método | Tipo de relación | Uso típico | Limitación |
+|---|---|---|---|
+| Variance Threshold | Variabilidad | Eliminar constantes | Sensible a escala |
+| Pearson | Lineal | Numéricas | No linealidad |
+| Spearman | Monotónica | Numéricas | No captura todo tipo de relación |
+| Chi-cuadrado | Dependencia categórica | Variables no negativas | Requiere no negatividad |
+| ANOVA | Diferencia de medias | Numéricas y clases | Principalmente lineal |
+| Mutual information | General | Lineal y no lineal | Más inestable |
+
+## Errores frecuentes
+
+- Aplicar selección antes del split.
+- Utilizar chi-cuadrado con valores negativos.
+- Eliminar variables solo por correlación.
+- Confundir p-value con utilidad predictiva.
+- Elegir `k` sin validación cruzada.
+- No comparar con todas las variables.
+- Ignorar estabilidad.
+- Eliminar variables clínicamente esenciales.
+- Interpretar mutual information como causalidad.
+- Seleccionar categorías individuales sin revisar coherencia.
+
+## Flujo recomendado
+
+1. Eliminar constantes.
+2. Revisar calidad y unidades.
+3. Revisar correlaciones.
+4. Definir variables obligatorias.
+5. Elegir el score adecuado.
+6. Integrar selección en pipeline.
+7. Ajustar el número de variables.
+8. Validar con cross-validation.
+9. Comparar con el modelo completo.
+10. Revisar estabilidad.
+11. Revisar coherencia clínica.
+12. Documentar la selección.
+
+## Checklist para proyectos
+
+- [ ] He eliminado variables constantes.
+- [ ] He revisado correlaciones.
+- [ ] He elegido el método adecuado.
+- [ ] Cumplo los requisitos de chi-cuadrado.
+- [ ] La selección está dentro del pipeline.
+- [ ] El número de variables se ajusta con validation.
+- [ ] He comparado con todas las variables.
+- [ ] He revisado estabilidad.
+- [ ] He conservado variables clínicas obligatorias.
+- [ ] No he interpretado p-values como rendimiento.
+- [ ] He evitado data leakage.
+- [ ] He documentado las variables finales.
+
+## Recursos
+
+### Documentación
+
+- `VarianceThreshold`.
+- `SelectKBest`.
+- `SelectPercentile`.
+- `chi2`.
+- `f_classif`.
+- `f_regression`.
+- `mutual_info_classif`.
+- `mutual_info_regression`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus criterios de selección, umbrales y comparaciones habituales.
