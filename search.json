@@ -188,23 +188,338 @@
     ]
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Health Data Science Handbook",
+    "objectID": "preprocessing/index.html",
+    "href": "preprocessing/index.html",
+    "title": "Preprocesamiento",
     "section": "",
-    "text": "Esta web es mi manual personal de consulta sobre:\n\nMachine learning\nDeep learning\nEstadística\nSeries temporales\nAnálisis de datos clínicos\n\nEl objetivo es reunir explicaciones teóricas, ejemplos prácticos y código reutilizable para futuros proyectos.",
+    "text": "Esta sección reúne las técnicas necesarias para limpiar, transformar y preparar los datos antes del modelado.",
     "crumbs": [
-      "Inicio"
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
     ]
   },
   {
-    "objectID": "index.html#bienvenido",
-    "href": "index.html#bienvenido",
-    "title": "Health Data Science Handbook",
-    "section": "",
-    "text": "Esta web es mi manual personal de consulta sobre:\n\nMachine learning\nDeep learning\nEstadística\nSeries temporales\nAnálisis de datos clínicos\n\nEl objetivo es reunir explicaciones teóricas, ejemplos prácticos y código reutilizable para futuros proyectos.",
+    "objectID": "preprocessing/index.html#contenidos-previstos",
+    "href": "preprocessing/index.html#contenidos-previstos",
+    "title": "Preprocesamiento",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
     "crumbs": [
-      "Inicio"
+      "Inicio",
+      "Preprocesamiento",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "foundations/index.html",
+    "href": "foundations/index.html",
+    "title": "Fundamentos",
+    "section": "",
+    "text": "Esta sección reúne los conceptos y procedimientos necesarios antes de entrenar modelos de machine learning.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "foundations/index.html#contenidos",
+    "href": "foundations/index.html#contenidos",
+    "title": "Fundamentos",
+    "section": "Contenidos",
+    "text": "Contenidos\n\nExploración de datos\nPreparación y limpieza de datos\nValores ausentes\nCodificación de variables categóricas\nEscalado y normalización\nSeparación entre entrenamiento, validación y prueba\nEvaluación de modelos\nPrevención de data leakage",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html",
+    "href": "dimensionality-reduction/pca.html",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nPCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.\nCada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#qué-problema-resuelve",
+    "href": "dimensionality-reduction/pca.html#qué-problema-resuelve",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "¿Qué problema resuelve?",
+    "text": "¿Qué problema resuelve?\nEn muchos datasets existen numerosas variables que contienen información parcialmente redundante.\nPor ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:\n\nPeso.\nAltura.\nÍndice de masa corporal.\nSuperficie corporal.\nPerímetros corporales.\n\nEstas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.\nPCA puede utilizarse para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nPCA no selecciona variables originales. Crea variables nuevas llamadas componentes principales.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#intuición",
+    "href": "dimensionality-reduction/pca.html#intuición",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Intuición",
+    "text": "Intuición\nImagina una nube de puntos formada por dos variables correlacionadas.\nAunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.\nPCA encuentra esa dirección y la convierte en el primer componente principal.\nEl segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.\nDe este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#fundamentos-teóricos",
+    "href": "dimensionality-reduction/pca.html#fundamentos-teóricos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Fundamentos teóricos",
+    "text": "Fundamentos teóricos\n\nComponentes principales\nCada componente principal es una combinación lineal de las variables originales.\nPara un dataset con variables \\(x_1, x_2, \\ldots, x_p\\), el primer componente puede expresarse como:\n\\[\nPC_1 = w_{11}x_1 + w_{12}x_2 + \\cdots + w_{1p}x_p\n\\]\nEl segundo componente se expresa como:\n\\[\nPC_2 = w_{21}x_1 + w_{22}x_2 + \\cdots + w_{2p}x_p\n\\]\nLos coeficientes \\(w\\) se denominan pesos o loadings.\n\n\nVarianza explicada\nCada componente explica una parte de la varianza total del dataset.\nLa proporción de varianza explicada por el componente \\(j\\) puede expresarse como:\n\\[\n\\text{Explained variance ratio}_j =\n\\frac{\\lambda_j}\n{\\sum_{k=1}^{p}\\lambda_k}\n\\]\ndonde \\(\\lambda_j\\) es el autovalor asociado al componente \\(j\\).\n\n\nVarianza explicada acumulada\nLa varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.\nPor ejemplo:\n\n1 componente: 45 %.\n2 componentes: 68 %.\n3 componentes: 82 %.\n4 componentes: 91 %.\n\nEn este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.\n\n\n\n\n\n\nWarningImportante\n\n\n\nUn componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
+    "href": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "¿Por qué es importante escalar?",
+    "text": "¿Por qué es importante escalar?\nPCA está influido por la escala de las variables.\nImagina estas variables:\n\nEdad, medida en años.\nTroponina, medida con valores pequeños.\nPresión arterial, medida en mmHg.\n\nUna variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.\nPor eso, antes de aplicar PCA suele utilizarse:\nStandardScaler()\nEl escalado transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
+    "href": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Supuestos y condiciones",
+    "text": "Supuestos y condiciones\nPCA funciona mejor cuando:\n\nLas variables son numéricas.\nExisten relaciones aproximadamente lineales.\nLas variables contienen varianza informativa.\nHay correlación entre algunas variables.\nLos valores extremos han sido revisados.\nLas escalas se han tratado adecuadamente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
+    "href": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Cuándo utilizar PCA",
+    "text": "Cuándo utilizar PCA\nPCA puede ser adecuado cuando:\n\nTienes muchas variables numéricas correlacionadas.\nQuieres reducir el número de variables.\nQuieres visualizar observaciones en dos o tres dimensiones.\nQuieres reducir multicolinealidad.\nQuieres comprimir información antes de otro modelo.\nQuieres explorar patrones latentes.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
+    "href": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Cuándo no utilizar PCA",
+    "text": "Cuándo no utilizar PCA\nPCA puede no ser adecuado cuando:\n\nNecesitas interpretar directamente cada variable original.\nLas relaciones entre variables son principalmente no lineales.\nLa mayoría de las variables son categóricas.\nTienes muy pocas variables.\nLos componentes son difíciles de justificar clínicamente.\nEl objetivo es seleccionar variables originales, no transformarlas.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
+    "href": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Flujo de trabajo recomendado",
+    "text": "Flujo de trabajo recomendado\n\nSeleccionar únicamente variables numéricas relevantes.\nRevisar valores ausentes.\nRevisar valores extremos.\nSeparar entrenamiento y prueba si PCA forma parte de un modelo predictivo.\nImputar valores ausentes utilizando solo entrenamiento.\nEscalar las variables utilizando solo entrenamiento.\nAjustar PCA utilizando solo entrenamiento.\nElegir el número de componentes.\nTransformar entrenamiento y prueba.\nInterpretar la varianza explicada y los loadings.\nEvaluar el impacto en el modelo posterior.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#código-mínimo",
+    "href": "dimensionality-reduction/pca.html#código-mínimo",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Código mínimo",
+    "text": "Código mínimo\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(pca.explained_variance_ratio_)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
+    "href": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Seleccionar componentes según varianza explicada",
+    "text": "Seleccionar componentes según varianza explicada\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(f\"Número de componentes: {pca.n_components_}\")\nprint(\n    \"Varianza explicada acumulada:\",\n    pca.explained_variance_ratio_.sum()\n)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
+    "href": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Implementación segura dentro de un pipeline",
+    "text": "Implementación segura dentro de un pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\"imputer\", SimpleImputer(strategy=\"median\")),\n        (\"scaler\", StandardScaler()),\n        (\"pca\", PCA(n_components=0.95)),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nCautionError frecuente: data leakage\n\n\n\nNo ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.\nEl pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
+    "href": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Inspeccionar la varianza explicada",
+    "text": "Inspeccionar la varianza explicada\nimport pandas as pd\n\nexplained_variance = pd.DataFrame(\n    {\n        \"component\": range(\n            1,\n            len(pca.explained_variance_ratio_) + 1\n        ),\n        \"explained_variance_ratio\":\n            pca.explained_variance_ratio_,\n        \"cumulative_explained_variance\":\n            pca.explained_variance_ratio_.cumsum()\n    }\n)\n\ndisplay(explained_variance)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#interpretar-los-loadings",
+    "href": "dimensionality-reduction/pca.html#interpretar-los-loadings",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Interpretar los loadings",
+    "text": "Interpretar los loadings\nimport pandas as pd\n\nloadings = pd.DataFrame(\n    pca.components_.T,\n    index=X.columns,\n    columns=[\n        f\"PC{i}\"\n        for i in range(\n            1,\n            pca.n_components_ + 1\n        )\n    ]\n)\n\ndisplay(loadings)\nUn valor absoluto elevado indica que la variable tiene una contribución importante al componente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
+    "href": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Consideraciones en datos clínicos",
+    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nPCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.\n\n\n\nMediciones repetidas\nSi un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.\n\n\nValores ausentes\nLa ausencia de una prueba puede estar relacionada con:\n\nLa gravedad.\nLa indicación clínica.\nEl centro.\nEl momento del seguimiento.\nLa disponibilidad de recursos.\n\n\n\nDiferencias entre centros\nPCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:\n\nEquipos.\nUnidades.\nProtocolos.\nPoblaciones.\nMétodos de laboratorio.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#errores-frecuentes",
+    "href": "dimensionality-reduction/pca.html#errores-frecuentes",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nAplicar PCA antes de separar entrenamiento y prueba.\nEscalar utilizando todo el dataset.\nNo escalar variables con unidades diferentes.\nAplicar PCA directamente a variables categóricas.\nInterpretar los componentes como variables clínicas reales.\nPensar que más varianza explicada siempre implica mejor predicción.\nIgnorar valores extremos que dominan los componentes.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#checklist-para-proyectos",
+    "href": "dimensionality-reduction/pca.html#checklist-para-proyectos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nLas variables son numéricas.\nHe revisado valores ausentes.\nHe revisado valores extremos.\nHe separado entrenamiento y prueba.\nLa separación se ha realizado por paciente cuando corresponde.\nLa imputación se ajusta solo con entrenamiento.\nEl escalado se ajusta solo con entrenamiento.\nPCA se ajusta solo con entrenamiento.\nHe revisado la varianza explicada.\nHe revisado los loadings.\nHe considerado la interpretabilidad clínica.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "deep-learning/index.html",
+    "href": "deep-learning/index.html",
+    "title": "Deep learning",
+    "section": "",
+    "text": "Esta sección reunirá los fundamentos y modelos de deep learning que se añadirán durante el próximo curso.",
+    "crumbs": [
+      "Inicio",
+      "Deep learning",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "deep-learning/index.html#contenidos-previstos",
+    "href": "deep-learning/index.html#contenidos-previstos",
+    "title": "Deep learning",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Deep learning",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "Sobre el proyecto",
+    "section": "",
+    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
+    "crumbs": [
+      "Inicio",
+      "Sobre el proyecto"
+    ]
+  },
+  {
+    "objectID": "code-recipes/index.html",
+    "href": "code-recipes/index.html",
+    "title": "Recetario de código",
+    "section": "",
+    "text": "Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.",
+    "crumbs": [
+      "Inicio",
+      "Recetario de código",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "code-recipes/index.html#contenidos-previstos",
+    "href": "code-recipes/index.html#contenidos-previstos",
+    "title": "Recetario de código",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Recetario de código",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/index.html",
+    "href": "dimensionality-reduction/index.html",
+    "title": "Reducción de dimensionalidad",
+    "section": "",
+    "text": "Esta sección reúne métodos para reducir el número de variables conservando la mayor cantidad posible de información.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/index.html#contenidos-previstos",
+    "href": "dimensionality-reduction/index.html#contenidos-previstos",
+    "title": "Reducción de dimensionalidad",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "Introducción"
     ]
   },
   {
@@ -364,458 +679,395 @@
     ]
   },
   {
-    "objectID": "dimensionality-reduction/index.html",
-    "href": "dimensionality-reduction/index.html",
-    "title": "Reducción de dimensionalidad",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Health Data Science Handbook",
     "section": "",
-    "text": "Esta sección reúne métodos para reducir el número de variables conservando la mayor cantidad posible de información.",
+    "text": "Esta web es mi manual personal de consulta sobre:\n\nMachine learning\nDeep learning\nEstadística\nSeries temporales\nAnálisis de datos clínicos\n\nEl objetivo es reunir explicaciones teóricas, ejemplos prácticos y código reutilizable para futuros proyectos.",
     "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "Introducción"
+      "Inicio"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/index.html#contenidos-previstos",
-    "href": "dimensionality-reduction/index.html#contenidos-previstos",
-    "title": "Reducción de dimensionalidad",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "code-recipes/index.html",
-    "href": "code-recipes/index.html",
-    "title": "Recetario de código",
+    "objectID": "index.html#bienvenido",
+    "href": "index.html#bienvenido",
+    "title": "Health Data Science Handbook",
     "section": "",
-    "text": "Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.",
+    "text": "Esta web es mi manual personal de consulta sobre:\n\nMachine learning\nDeep learning\nEstadística\nSeries temporales\nAnálisis de datos clínicos\n\nEl objetivo es reunir explicaciones teóricas, ejemplos prácticos y código reutilizable para futuros proyectos.",
     "crumbs": [
-      "Inicio",
-      "Recetario de código",
-      "Introducción"
+      "Inicio"
     ]
   },
   {
-    "objectID": "code-recipes/index.html#contenidos-previstos",
-    "href": "code-recipes/index.html#contenidos-previstos",
-    "title": "Recetario de código",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Recetario de código",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "Sobre el proyecto",
+    "objectID": "preprocessing/train-test-split.html",
+    "href": "preprocessing/train-test-split.html",
+    "title": "Train, validation and test",
     "section": "",
-    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
+    "text": "TipResumen en 30 segundos\n\n\n\nDividir correctamente los datos permite estimar cómo funcionará un modelo con observaciones nuevas.\n\nTrain se utiliza para ajustar el modelo.\nValidation se utiliza para elegir modelos e hiperparámetros.\nTest se utiliza una sola vez para obtener una estimación final del rendimiento.",
     "crumbs": [
       "Inicio",
-      "Sobre el proyecto"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "deep-learning/index.html",
-    "href": "deep-learning/index.html",
-    "title": "Deep learning",
-    "section": "",
-    "text": "Esta sección reunirá los fundamentos y modelos de deep learning que se añadirán durante el próximo curso.",
+    "objectID": "preprocessing/train-test-split.html#por-qué-hay-que-dividir-los-datos",
+    "href": "preprocessing/train-test-split.html#por-qué-hay-que-dividir-los-datos",
+    "title": "Train, validation and test",
+    "section": "¿Por qué hay que dividir los datos?",
+    "text": "¿Por qué hay que dividir los datos?\nUn modelo puede funcionar muy bien con los mismos datos con los que se ha entrenado y, sin embargo, fallar con pacientes nuevos.\nEl objetivo real no es memorizar el dataset disponible, sino aprender patrones que puedan generalizarse.\nLa separación de datos intenta simular esta situación:\n\nEl modelo aprende con un grupo de observaciones.\nSe toman decisiones con otro grupo.\nSe evalúa finalmente con observaciones que no han influido en ninguna decisión previa.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nEl conjunto de test debe representar datos realmente no vistos.\nSi utilizas el test repetidamente para decidir qué modelo conservar, deja de ser un conjunto de test y pasa a actuar como validación.",
     "crumbs": [
       "Inicio",
-      "Deep learning",
-      "Introducción"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "deep-learning/index.html#contenidos-previstos",
-    "href": "deep-learning/index.html#contenidos-previstos",
-    "title": "Deep learning",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "objectID": "preprocessing/train-test-split.html#los-tres-conjuntos",
+    "href": "preprocessing/train-test-split.html#los-tres-conjuntos",
+    "title": "Train, validation and test",
+    "section": "Los tres conjuntos",
+    "text": "Los tres conjuntos\n\nTrain set\nEl conjunto de entrenamiento se utiliza para:\n\nAjustar los parámetros del modelo.\nCalcular imputaciones.\nAjustar escaladores.\nAprender transformaciones.\nAjustar selección de variables.\nAjustar PCA.\nEntrenar el modelo final.\n\nEjemplos de parámetros aprendidos:\n\nCoeficientes de una regresión.\nReglas de un árbol.\nPesos de una red neuronal.\nCentroides de K-means.\n\n\n\nValidation set\nEl conjunto de validación se utiliza para:\n\nComparar modelos.\nElegir hiperparámetros.\nAjustar el umbral de clasificación.\nDecidir el número de componentes.\nSeleccionar variables.\nDetectar sobreajuste.\nAplicar early stopping.\n\nEjemplos de hiperparámetros:\n\nProfundidad máxima de un árbol.\nValor de C en una SVM.\nNúmero de vecinos.\nNúmero de componentes de PCA.\nLearning rate.\nNúmero de capas de una red neuronal.\n\n\n\nTest set\nEl conjunto de test se utiliza para:\n\nObtener una estimación final del rendimiento.\nComparar las predicciones con los valores reales.\nInformar las métricas finales.\nEvaluar la generalización.\n\n\n\n\n\n\n\nWarningImportante\n\n\n\nNo utilices el test para decidir:\n\nQué variables incluir.\nQué modelo elegir.\nQué hiperparámetros usar.\nQué umbral de clasificación aplicar.\nQué estrategia de imputación funciona mejor.",
     "crumbs": [
       "Inicio",
-      "Deep learning",
-      "Introducción"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html",
-    "href": "dimensionality-reduction/pca.html",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "",
-    "text": "Principal Component Analysis, o PCA, es una técnica de reducción de dimensionalidad que transforma un conjunto de variables numéricas correlacionadas en un conjunto más pequeño de componentes no correlacionados.\nCada componente principal es una combinación lineal de las variables originales. Los componentes se ordenan según la cantidad de varianza que explican:\n\nEl primer componente explica la mayor cantidad posible de varianza.\nEl segundo explica la mayor cantidad posible de la varianza restante.\nLos componentes posteriores explican cantidades progresivamente menores.\n\nPCA se utiliza principalmente para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.",
+    "objectID": "preprocessing/train-test-split.html#esquema-general",
+    "href": "preprocessing/train-test-split.html#esquema-general",
+    "title": "Train, validation and test",
+    "section": "Esquema general",
+    "text": "Esquema general\nUna división típica puede ser:\n\n60 % entrenamiento.\n20 % validación.\n20 % test.\n\nOtra posibilidad:\n\n70 % entrenamiento.\n15 % validación.\n15 % test.\n\nNo existe una única proporción correcta. Depende del tamaño del dataset y del problema.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#resumen-en-30-segundos",
-    "href": "dimensionality-reduction/pca.html#resumen-en-30-segundos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "",
-    "text": "Principal Component Analysis, o PCA, es una técnica de reducción de dimensionalidad que transforma un conjunto de variables numéricas correlacionadas en un conjunto más pequeño de componentes no correlacionados.\nCada componente principal es una combinación lineal de las variables originales. Los componentes se ordenan según la cantidad de varianza que explican:\n\nEl primer componente explica la mayor cantidad posible de varianza.\nEl segundo explica la mayor cantidad posible de la varianza restante.\nLos componentes posteriores explican cantidades progresivamente menores.\n\nPCA se utiliza principalmente para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.",
+    "objectID": "preprocessing/train-test-split.html#división-simple-con-scikit-learn",
+    "href": "preprocessing/train-test-split.html#división-simple-con-scikit-learn",
+    "title": "Train, validation and test",
+    "section": "División simple con scikit-learn",
+    "text": "División simple con scikit-learn\nfrom sklearn.model_selection import train_test_split\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.20,\n    random_state=42\n)\nEn este ejemplo:\n\n80 % de las observaciones se destinan a entrenamiento.\n20 % se destinan a test.\nrandom_state=42 permite reproducir la misma partición.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#qué-problema-resuelve",
-    "href": "dimensionality-reduction/pca.html#qué-problema-resuelve",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "¿Qué problema resuelve?",
-    "text": "¿Qué problema resuelve?\nEn muchos datasets existen numerosas variables que contienen información parcialmente redundante.\nPor ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:\n\nPeso.\nAltura.\nÍndice de masa corporal.\nSuperficie corporal.\nPerímetros corporales.\n\nEstas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.\nLa técnica puede ser útil cuando:\n\nHay muchas variables numéricas.\nExisten correlaciones entre variables.\nSe desea simplificar el dataset.\nSe quiere visualizar la estructura de los datos.\nSe quiere reducir el coste computacional de modelos posteriores.",
+    "objectID": "preprocessing/train-test-split.html#crear-train-validation-y-test",
+    "href": "preprocessing/train-test-split.html#crear-train-validation-y-test",
+    "title": "Train, validation and test",
+    "section": "Crear train, validation y test",
+    "text": "Crear train, validation y test\nfrom sklearn.model_selection import train_test_split\n\nX_train, X_temp, y_train, y_temp = train_test_split(\n    X,\n    y,\n    test_size=0.40,\n    random_state=42\n)\n\nX_validation, X_test, y_validation, y_test = (\n    train_test_split(\n        X_temp,\n        y_temp,\n        test_size=0.50,\n        random_state=42\n    )\n)\n\nprint(\"Train:\", X_train.shape)\nprint(\"Validation:\", X_validation.shape)\nprint(\"Test:\", X_test.shape)\nEl resultado aproximado será:\n\n60 % train.\n20 % validation.\n20 % test.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#intuición",
-    "href": "dimensionality-reduction/pca.html#intuición",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Intuición",
-    "text": "Intuición\nImagina que observas una nube de puntos con dos variables correlacionadas.\nAunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.\nPCA encuentra esa dirección y la convierte en el primer componente principal.\nEl segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.\nDe este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.",
+    "objectID": "preprocessing/train-test-split.html#clasificación-estratificada",
+    "href": "preprocessing/train-test-split.html#clasificación-estratificada",
+    "title": "Train, validation and test",
+    "section": "Clasificación estratificada",
+    "text": "Clasificación estratificada\nEn problemas de clasificación, especialmente si las clases están desbalanceadas, conviene mantener proporciones similares en cada conjunto.\nfrom sklearn.model_selection import train_test_split\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.20,\n    stratify=y,\n    random_state=42\n)\nEl argumento:\nstratify=y\nintenta conservar la proporción de cada clase.\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nEn clasificación, utiliza estratificación cuando sea posible, especialmente si una clase es poco frecuente.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#fundamentos-teóricos",
-    "href": "dimensionality-reduction/pca.html#fundamentos-teóricos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Fundamentos teóricos",
-    "text": "Fundamentos teóricos\n\nComponentes principales\nCada componente principal es una combinación lineal de las variables originales.\nPara un dataset con variables \\(x_1, x_2, \\ldots, x_p\\), el primer componente puede expresarse como:\n\\[\nPC_1 = w_{11}x_1 + w_{12}x_2 + \\cdots + w_{1p}x_p\n\\]\nEl segundo componente se expresa como:\n\\[\nPC_2 = w_{21}x_1 + w_{22}x_2 + \\cdots + w_{2p}x_p\n\\]\nLos coeficientes \\(w\\) se denominan pesos o loadings.\n\n\nVarianza explicada\nCada componente explica una parte de la varianza total del dataset.\nLa proporción de varianza explicada por el componente \\(j\\) puede expresarse como:\n\\[\n\\text{Explained variance ratio}_j =\n\\frac{\\lambda_j}\n{\\sum_{k=1}^{p}\\lambda_k}\n\\]\ndonde \\(\\lambda_j\\) es el autovalor asociado al componente \\(j\\).\n\n\nVarianza explicada acumulada\nLa varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.\nPor ejemplo:\n\n1 componente: 45 %.\n2 componentes: 68 %.\n3 componentes: 82 %.\n4 componentes: 91 %.\n\nEn este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.",
+    "objectID": "preprocessing/train-test-split.html#comprobar-la-distribución-de-clases",
+    "href": "preprocessing/train-test-split.html#comprobar-la-distribución-de-clases",
+    "title": "Train, validation and test",
+    "section": "Comprobar la distribución de clases",
+    "text": "Comprobar la distribución de clases\nimport pandas as pd\n\nclass_distribution = pd.DataFrame(\n    {\n        \"full_dataset\": y.value_counts(normalize=True),\n        \"train\": y_train.value_counts(normalize=True),\n        \"test\": y_test.value_counts(normalize=True)\n    }\n)\n\ndisplay(class_distribution)",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
-    "href": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "¿Por qué es importante escalar?",
-    "text": "¿Por qué es importante escalar?\nPCA está influido por la escala de las variables.\nImagina estas dos variables:\n\nEdad, medida en años.\nTroponina, medida con valores pequeños.\nPresión arterial, medida en mmHg.\n\nUna variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.\nPor eso, antes de aplicar PCA suele utilizarse:\nStandardScaler()\nEl escalado transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.",
+    "objectID": "preprocessing/train-test-split.html#qué-es-la-validación-cruzada",
+    "href": "preprocessing/train-test-split.html#qué-es-la-validación-cruzada",
+    "title": "Train, validation and test",
+    "section": "¿Qué es la validación cruzada?",
+    "text": "¿Qué es la validación cruzada?\nLa validación cruzada divide el conjunto de entrenamiento en varios bloques o folds.\nEn una validación cruzada de 5 folds:\n\nSe divide el entrenamiento en 5 partes.\nSe entrena con 4 partes.\nSe valida con la parte restante.\nEl proceso se repite 5 veces.\nSe calcula la media de las métricas.\n\nEl test permanece separado durante todo el proceso.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
-    "href": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Supuestos y condiciones",
-    "text": "Supuestos y condiciones\nPCA no tiene los mismos supuestos que un modelo inferencial clásico, pero funciona mejor cuando:\n\nLas variables son numéricas.\nExisten relaciones aproximadamente lineales.\nLas variables contienen varianza informativa.\nHay correlación entre algunas variables.\nLos valores extremos han sido revisados.\nLas escalas se han tratado adecuadamente.\n\nPCA puede aportar poco valor si las variables son casi independientes entre sí.",
+    "objectID": "preprocessing/train-test-split.html#validación-cruzada-básica",
+    "href": "preprocessing/train-test-split.html#validación-cruzada-básica",
+    "title": "Train, validation and test",
+    "section": "Validación cruzada básica",
+    "text": "Validación cruzada básica\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.linear_model import LogisticRegression\n\nmodel = LogisticRegression(\n    max_iter=1000,\n    random_state=42\n)\n\nscores = cross_val_score(\n    model,\n    X_train,\n    y_train,\n    cv=5,\n    scoring=\"roc_auc\"\n)\n\nprint(\"Scores:\", scores)\nprint(\"ROC AUC medio:\", scores.mean())\nprint(\"Desviación estándar:\", scores.std())",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
-    "href": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Cuándo utilizar PCA",
-    "text": "Cuándo utilizar PCA\nPCA puede ser adecuado cuando:\n\nTienes muchas variables numéricas correlacionadas.\nQuieres reducir el número de variables.\nQuieres visualizar observaciones en dos o tres dimensiones.\nQuieres reducir multicolinealidad.\nQuieres comprimir información antes de otro modelo.\nQuieres explorar patrones latentes.",
+    "objectID": "preprocessing/train-test-split.html#validación-cruzada-estratificada",
+    "href": "preprocessing/train-test-split.html#validación-cruzada-estratificada",
+    "title": "Train, validation and test",
+    "section": "Validación cruzada estratificada",
+    "text": "Validación cruzada estratificada\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.linear_model import LogisticRegression\n\ncv = StratifiedKFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=42\n)\n\nmodel = LogisticRegression(\n    max_iter=1000,\n    random_state=42\n)\n\nscores = cross_val_score(\n    model,\n    X_train,\n    y_train,\n    cv=cv,\n    scoring=\"roc_auc\"\n)\n\nprint(\"ROC AUC medio:\", scores.mean())",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
-    "href": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Cuándo no utilizar PCA",
-    "text": "Cuándo no utilizar PCA\nPCA puede no ser adecuado cuando:\n\nNecesitas interpretar directamente cada variable original.\nLas relaciones entre variables son principalmente no lineales.\nLa mayoría de las variables son categóricas.\nTienes muy pocas variables.\nLos componentes son difíciles de justificar clínicamente.\nEl objetivo es seleccionar variables originales, no transformarlas.\nLa varianza no representa necesariamente información relevante para el problema.\n\nUn componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.",
+    "objectID": "preprocessing/train-test-split.html#flujo-recomendado-con-validación-cruzada",
+    "href": "preprocessing/train-test-split.html#flujo-recomendado-con-validación-cruzada",
+    "title": "Train, validation and test",
+    "section": "Flujo recomendado con validación cruzada",
+    "text": "Flujo recomendado con validación cruzada\n\nSeparar train y test.\nMantener el test sin tocar.\nUtilizar validación cruzada dentro de train.\nSeleccionar el mejor modelo.\nReentrenar el pipeline final con todo el train.\nEvaluar una sola vez con test.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
-    "href": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Flujo de trabajo recomendado",
-    "text": "Flujo de trabajo recomendado\n\nSeleccionar únicamente variables numéricas relevantes.\nRevisar valores ausentes.\nRevisar valores extremos.\nSeparar entrenamiento y prueba si PCA forma parte de un modelo predictivo.\nImputar valores ausentes utilizando solo entrenamiento.\nEscalar las variables utilizando solo entrenamiento.\nAjustar PCA utilizando solo entrenamiento.\nElegir el número de componentes.\nTransformar entrenamiento y prueba.\nInterpretar la varianza explicada y los loadings.\nEvaluar el impacto en el modelo posterior.",
+    "objectID": "preprocessing/train-test-split.html#separación-por-paciente",
+    "href": "preprocessing/train-test-split.html#separación-por-paciente",
+    "title": "Train, validation and test",
+    "section": "Separación por paciente",
+    "text": "Separación por paciente\nEn datos clínicos, un mismo paciente puede tener múltiples filas:\n\nVarias visitas.\nVarias analíticas.\nVarias ecocardiografías.\nVarios ingresos.\nVarias ventanas temporales.\n\nNo debe haber registros del mismo paciente en train y test.\nSi esto ocurre, el modelo puede reconocer características del paciente en lugar de aprender patrones generalizables.\n\n\n\n\n\n\nCautionError frecuente: dividir por filas\n\n\n\nSi cada paciente tiene varias observaciones, una división aleatoria por filas puede producir data leakage.\nLa separación debe realizarse por identificador de paciente.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#código-mínimo",
-    "href": "dimensionality-reduction/pca.html#código-mínimo",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Código mínimo",
-    "text": "Código mínimo\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\n# X contiene únicamente variables numéricas\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(pca.explained_variance_ratio_)",
+    "objectID": "preprocessing/train-test-split.html#groupshufflesplit",
+    "href": "preprocessing/train-test-split.html#groupshufflesplit",
+    "title": "Train, validation and test",
+    "section": "GroupShuffleSplit",
+    "text": "GroupShuffleSplit\nfrom sklearn.model_selection import GroupShuffleSplit\n\ngroups = df[\"patient_id\"]\n\nsplitter = GroupShuffleSplit(\n    n_splits=1,\n    test_size=0.20,\n    random_state=42\n)\n\ntrain_idx, test_idx = next(\n    splitter.split(\n        X,\n        y,\n        groups=groups\n    )\n)\n\nX_train = X.iloc[train_idx]\nX_test = X.iloc[test_idx]\n\ny_train = y.iloc[train_idx]\ny_test = y.iloc[test_idx]\n\ntrain_patients = set(groups.iloc[train_idx])\ntest_patients = set(groups.iloc[test_idx])\n\nassert train_patients.isdisjoint(test_patients)\nLa comprobación final garantiza que ningún paciente aparece en ambos conjuntos.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
-    "href": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Seleccionar componentes según varianza explicada",
-    "text": "Seleccionar componentes según varianza explicada\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(f\"Número de componentes: {pca.n_components_}\")\nprint(\n    \"Varianza explicada acumulada:\",\n    pca.explained_variance_ratio_.sum()\n)\nCon:\nn_components=0.95\nPCA selecciona automáticamente el número mínimo de componentes necesario para explicar al menos el 95 % de la varianza.",
+    "objectID": "preprocessing/train-test-split.html#groupkfold",
+    "href": "preprocessing/train-test-split.html#groupkfold",
+    "title": "Train, validation and test",
+    "section": "GroupKFold",
+    "text": "GroupKFold\nfrom sklearn.model_selection import GroupKFold\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.linear_model import LogisticRegression\n\ngroups = df[\"patient_id\"]\n\ncv = GroupKFold(n_splits=5)\n\nmodel = LogisticRegression(\n    max_iter=1000,\n    random_state=42\n)\n\nscores = cross_val_score(\n    model,\n    X,\n    y,\n    groups=groups,\n    cv=cv,\n    scoring=\"roc_auc\"\n)\n\nprint(\"ROC AUC medio:\", scores.mean())",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
-    "href": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Implementación segura dentro de un pipeline",
-    "text": "Implementación segura dentro de un pipeline\nCuando PCA forma parte de un modelo predictivo, debe ajustarse únicamente con los datos de entrenamiento.\nLa forma recomendada es utilizar un Pipeline.\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(strategy=\"median\")\n        ),\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"pca\",\n            PCA(n_components=0.95)\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\nEste pipeline evita ajustar la imputación, el escalado o PCA con información procedente del conjunto de prueba.",
+    "objectID": "preprocessing/train-test-split.html#stratifiedgroupkfold",
+    "href": "preprocessing/train-test-split.html#stratifiedgroupkfold",
+    "title": "Train, validation and test",
+    "section": "StratifiedGroupKFold",
+    "text": "StratifiedGroupKFold\nCuando necesitas mantener las proporciones de clase y, además, evitar que un paciente aparezca en varios folds:\nfrom sklearn.model_selection import StratifiedGroupKFold\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.linear_model import LogisticRegression\n\ngroups = df[\"patient_id\"]\n\ncv = StratifiedGroupKFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=42\n)\n\nmodel = LogisticRegression(\n    max_iter=1000,\n    random_state=42\n)\n\nscores = cross_val_score(\n    model,\n    X,\n    y,\n    groups=groups,\n    cv=cv,\n    scoring=\"roc_auc\"\n)\n\nprint(\"ROC AUC medio:\", scores.mean())",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
-    "href": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Inspeccionar la varianza explicada",
-    "text": "Inspeccionar la varianza explicada\nimport pandas as pd\n\nexplained_variance = pd.DataFrame(\n    {\n        \"component\": range(\n            1,\n            len(pca.explained_variance_ratio_) + 1\n        ),\n        \"explained_variance_ratio\":\n            pca.explained_variance_ratio_,\n        \"cumulative_explained_variance\":\n            pca.explained_variance_ratio_.cumsum()\n    }\n)\n\ndisplay(explained_variance)",
+    "objectID": "preprocessing/train-test-split.html#separación-temporal",
+    "href": "preprocessing/train-test-split.html#separación-temporal",
+    "title": "Train, validation and test",
+    "section": "Separación temporal",
+    "text": "Separación temporal\nEn algunos proyectos, el modelo se utilizará para predecir el futuro.\nEn estos casos, una división aleatoria puede ser poco realista.\nPor ejemplo:\n\nEntrenamiento: pacientes atendidos entre 2018 y 2023.\nValidación: pacientes atendidos en 2024.\nTest: pacientes atendidos en 2025.\n\ntrain_mask = df[\"date\"] &lt; \"2024-01-01\"\n\nvalidation_mask = (\n    (df[\"date\"] &gt;= \"2024-01-01\")\n    & (df[\"date\"] &lt; \"2025-01-01\")\n)\n\ntest_mask = df[\"date\"] &gt;= \"2025-01-01\"\n\ntrain_df = df.loc[train_mask]\nvalidation_df = df.loc[validation_mask]\ntest_df = df.loc[test_mask]\n\n\n\n\n\n\nNoteAplicación realista\n\n\n\nUna separación temporal suele aproximarse mejor al uso real del modelo cuando el objetivo es predecir pacientes futuros.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#scree-plot",
-    "href": "dimensionality-reduction/pca.html#scree-plot",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Scree plot",
-    "text": "Scree plot\nEl scree plot muestra la varianza explicada por cada componente.\nimport matplotlib.pyplot as plt\n\nexplained_variance_ratio = (\n    pca.explained_variance_ratio_\n)\n\ncomponents = range(\n    1,\n    len(explained_variance_ratio) + 1\n)\n\nplt.figure(figsize=(8, 5))\n\nplt.plot(\n    components,\n    explained_variance_ratio,\n    marker=\"o\"\n)\n\nplt.xlabel(\"Componente principal\")\nplt.ylabel(\"Proporción de varianza explicada\")\nplt.title(\"Scree plot\")\n\nplt.show()",
+    "objectID": "preprocessing/train-test-split.html#series-temporales",
+    "href": "preprocessing/train-test-split.html#series-temporales",
+    "title": "Train, validation and test",
+    "section": "Series temporales",
+    "text": "Series temporales\nEn series temporales no se debe mezclar aleatoriamente el pasado y el futuro.\nDebe respetarse el orden temporal.\nfrom sklearn.model_selection import TimeSeriesSplit\n\ncv = TimeSeriesSplit(n_splits=5)\n\nfor train_idx, validation_idx in cv.split(X):\n    X_train = X.iloc[train_idx]\n    X_validation = X.iloc[validation_idx]",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#varianza-explicada-acumulada-1",
-    "href": "dimensionality-reduction/pca.html#varianza-explicada-acumulada-1",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Varianza explicada acumulada",
-    "text": "Varianza explicada acumulada\nimport numpy as np\nimport matplotlib.pyplot as plt\n\ncumulative_variance = np.cumsum(\n    pca.explained_variance_ratio_\n)\n\ncomponents = range(\n    1,\n    len(cumulative_variance) + 1\n)\n\nplt.figure(figsize=(8, 5))\n\nplt.plot(\n    components,\n    cumulative_variance,\n    marker=\"o\"\n)\n\nplt.axhline(\n    y=0.95,\n    linestyle=\"--\"\n)\n\nplt.xlabel(\"Número de componentes\")\nplt.ylabel(\"Varianza explicada acumulada\")\nplt.title(\"Varianza explicada acumulada\")\n\nplt.show()",
+    "objectID": "preprocessing/train-test-split.html#separación-por-centro",
+    "href": "preprocessing/train-test-split.html#separación-por-centro",
+    "title": "Train, validation and test",
+    "section": "Separación por centro",
+    "text": "Separación por centro\nEn estudios multicéntricos, una validación especialmente exigente consiste en entrenar con unos centros y evaluar en otro centro.\nEjemplo:\n\nTrain: Barcelona y Helsinki.\nValidation: Coimbra.\nTest externo: un centro no utilizado previamente.\n\nEsto permite estudiar si el modelo generaliza a:\n\nOtros equipos.\nOtros protocolos.\nOtras poblaciones.\nOtros sistemas de registro.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#visualizar-observaciones-con-dos-componentes",
-    "href": "dimensionality-reduction/pca.html#visualizar-observaciones-con-dos-componentes",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Visualizar observaciones con dos componentes",
-    "text": "Visualizar observaciones con dos componentes\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\npca_df = pd.DataFrame(\n    X_pca[:, :2],\n    columns=[\"PC1\", \"PC2\"]\n)\n\nplt.figure(figsize=(8, 6))\n\nplt.scatter(\n    pca_df[\"PC1\"],\n    pca_df[\"PC2\"],\n    alpha=0.7\n)\n\nplt.xlabel(\"PC1\")\nplt.ylabel(\"PC2\")\nplt.title(\"Observaciones proyectadas en los dos primeros componentes\")\n\nplt.show()\nSi existe una variable objetivo, puede utilizarse para distinguir visualmente los grupos.\nplt.figure(figsize=(8, 6))\n\nscatter = plt.scatter(\n    pca_df[\"PC1\"],\n    pca_df[\"PC2\"],\n    c=y,\n    alpha=0.7\n)\n\nplt.xlabel(\"PC1\")\nplt.ylabel(\"PC2\")\nplt.title(\"PCA según la variable objetivo\")\n\nplt.colorbar(scatter)\n\nplt.show()",
+    "objectID": "preprocessing/train-test-split.html#validación-interna-y-externa",
+    "href": "preprocessing/train-test-split.html#validación-interna-y-externa",
+    "title": "Train, validation and test",
+    "section": "Validación interna y externa",
+    "text": "Validación interna y externa\n\nValidación interna\nEvalúa el modelo dentro de la misma fuente de datos.\nEjemplos:\n\nHoldout.\nCross-validation.\nBootstrap.\n\n\n\nValidación externa\nEvalúa el modelo en datos procedentes de:\n\nOtro centro.\nOtro país.\nOtro periodo temporal.\nOtra población.\nOtro sistema sanitario.\n\nLa validación externa aporta una evidencia más fuerte sobre generalización.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#interpretar-los-loadings",
-    "href": "dimensionality-reduction/pca.html#interpretar-los-loadings",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Interpretar los loadings",
-    "text": "Interpretar los loadings\nLos loadings indican cuánto contribuye cada variable original a cada componente.\nimport pandas as pd\n\nloadings = pd.DataFrame(\n    pca.components_.T,\n    index=X.columns,\n    columns=[\n        f\"PC{i}\"\n        for i in range(\n            1,\n            pca.n_components_ + 1\n        )\n    ]\n)\n\ndisplay(loadings)\nUn valor absoluto elevado indica que la variable tiene una contribución importante al componente.\nEl signo indica la dirección de la relación:\n\nLoading positivo: la variable aumenta cuando aumenta el componente.\nLoading negativo: la variable disminuye cuando aumenta el componente.\n\nEl signo global de un componente puede invertirse sin cambiar su significado matemático.",
+    "objectID": "preprocessing/train-test-split.html#preprocesamiento-y-split",
+    "href": "preprocessing/train-test-split.html#preprocesamiento-y-split",
+    "title": "Train, validation and test",
+    "section": "Preprocesamiento y split",
+    "text": "Preprocesamiento y split\nLas transformaciones deben ajustarse únicamente con entrenamiento.\nEsto incluye:\n\nImputación.\nEscalado.\nEncoding.\nSelección de variables.\nPCA.\nEliminación de outliers basada en distribución.\nAjuste de umbrales.\nBalanceo de clases.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#interpretación-de-resultados",
-    "href": "dimensionality-reduction/pca.html#interpretación-de-resultados",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Interpretación de resultados",
-    "text": "Interpretación de resultados\nAl revisar un PCA conviene analizar:\n\nNúmero de componentes seleccionados.\nVarianza explicada individual.\nVarianza explicada acumulada.\nVariables con mayores loadings.\nSeparación visual entre observaciones.\nPosibles valores extremos.\nUtilidad de los componentes en modelos posteriores.\n\nPCA no identifica automáticamente variables causales ni variables clínicamente importantes.",
+    "objectID": "preprocessing/train-test-split.html#ejemplo-incorrecto",
+    "href": "preprocessing/train-test-split.html#ejemplo-incorrecto",
+    "title": "Train, validation and test",
+    "section": "Ejemplo incorrecto",
+    "text": "Ejemplo incorrecto\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.model_selection import train_test_split\n\nscaler = StandardScaler()\n\nX_scaled = scaler.fit_transform(X)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_scaled,\n    y,\n    test_size=0.20,\n    random_state=42\n)\nAquí el escalador se ha ajustado utilizando también el test.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#evaluación",
-    "href": "dimensionality-reduction/pca.html#evaluación",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Evaluación",
-    "text": "Evaluación\nPCA no se evalúa con métricas de clasificación o regresión cuando se utiliza de forma exploratoria.\nLas principales evaluaciones son:\n\nVarianza explicada.\nVarianza explicada acumulada.\nScree plot.\nEstabilidad de los componentes.\nInterpretabilidad de los loadings.\nRendimiento del modelo posterior.\nComparación con un pipeline sin PCA.\n\nSi PCA forma parte de un modelo predictivo, debe evaluarse el pipeline completo mediante validación cruzada.",
+    "objectID": "preprocessing/train-test-split.html#ejemplo-correcto",
+    "href": "preprocessing/train-test-split.html#ejemplo-correcto",
+    "title": "Train, validation and test",
+    "section": "Ejemplo correcto",
+    "text": "Ejemplo correcto\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.preprocessing import StandardScaler\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X,\n    y,\n    test_size=0.20,\n    random_state=42\n)\n\nscaler = StandardScaler()\n\nX_train_scaled = scaler.fit_transform(X_train)\n\nX_test_scaled = scaler.transform(X_test)",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#comparar-un-modelo-con-y-sin-pca",
-    "href": "dimensionality-reduction/pca.html#comparar-un-modelo-con-y-sin-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Comparar un modelo con y sin PCA",
-    "text": "Comparar un modelo con y sin PCA\nfrom sklearn.model_selection import cross_val_score\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline_without_pca = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(strategy=\"median\")\n        ),\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline_with_pca = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(strategy=\"median\")\n        ),\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"pca\",\n            PCA(n_components=0.95)\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\nscores_without_pca = cross_val_score(\n    pipeline_without_pca,\n    X,\n    y,\n    cv=5,\n    scoring=\"roc_auc\"\n)\n\nscores_with_pca = cross_val_score(\n    pipeline_with_pca,\n    X,\n    y,\n    cv=5,\n    scoring=\"roc_auc\"\n)\n\nprint(\n    \"ROC AUC sin PCA:\",\n    scores_without_pca.mean()\n)\n\nprint(\n    \"ROC AUC con PCA:\",\n    scores_with_pca.mean()\n)",
+    "objectID": "preprocessing/train-test-split.html#ejemplo-recomendado-con-pipeline",
+    "href": "preprocessing/train-test-split.html#ejemplo-recomendado-con-pipeline",
+    "title": "Train, validation and test",
+    "section": "Ejemplo recomendado con pipeline",
+    "text": "Ejemplo recomendado con pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(strategy=\"median\")\n        ),\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#errores-frecuentes",
-    "href": "dimensionality-reduction/pca.html#errores-frecuentes",
-    "title": "Principal Component Analysis (PCA)",
+    "objectID": "preprocessing/train-test-split.html#qué-proporción-elegir",
+    "href": "preprocessing/train-test-split.html#qué-proporción-elegir",
+    "title": "Train, validation and test",
+    "section": "¿Qué proporción elegir?",
+    "text": "¿Qué proporción elegir?\nNo existe una regla universal.\n\nDataset pequeño\nPuede ser preferible:\n\nSeparar un test pequeño pero representativo.\nUtilizar validación cruzada dentro del entrenamiento.\n\n\n\nDataset grande\nPuede ser suficiente:\n\n80 % train.\n10 % validation.\n10 % test.\n\n\n\nDeep learning\nEs frecuente utilizar:\n\nTrain.\nValidation.\nTest.\n\nLa validación se utiliza para:\n\nEarly stopping.\nAjustar hiperparámetros.\nElegir la mejor época.",
+    "crumbs": [
+      "Inicio",
+      "Preprocesamiento",
+      "Train, validation and test"
+    ]
+  },
+  {
+    "objectID": "preprocessing/train-test-split.html#errores-frecuentes",
+    "href": "preprocessing/train-test-split.html#errores-frecuentes",
+    "title": "Train, validation and test",
     "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nAplicar PCA antes de separar entrenamiento y prueba.\nEscalar utilizando todo el dataset.\nNo escalar variables con unidades diferentes.\nAplicar PCA directamente a variables categóricas.\nElegir componentes únicamente por una regla automática.\nInterpretar los componentes como variables clínicas reales.\nPensar que más varianza explicada siempre implica mejor predicción.\nUtilizar PCA cuando la interpretabilidad de las variables originales es esencial.\nIgnorar valores extremos que dominan los componentes.\nComparar modelos con particiones distintas.",
+    "text": "Errores frecuentes\n\nUtilizar el test varias veces.\nAjustar el preprocesamiento antes del split.\nDividir por filas cuando hay varias filas por paciente.\nMezclar observaciones futuras y pasadas.\nIgnorar el desbalanceo de clases.\nNo fijar random_state.\nElegir el modelo con las métricas del test.\nCrear variables utilizando información posterior al desenlace.\nComparar modelos con particiones diferentes.\nUtilizar una partición no representativa.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
-    "href": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
-    "title": "Principal Component Analysis (PCA)",
+    "objectID": "preprocessing/train-test-split.html#consideraciones-en-datos-clínicos",
+    "href": "preprocessing/train-test-split.html#consideraciones-en-datos-clínicos",
+    "title": "Train, validation and test",
     "section": "Consideraciones en datos clínicos",
-    "text": "Consideraciones en datos clínicos\nEn datos clínicos, PCA requiere precaución.\n\nMediciones repetidas\nSi un paciente aparece varias veces, las observaciones no son independientes.\nLa separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.\n\n\nVariables con significado clínico distinto\nDos variables pueden estar correlacionadas estadísticamente, pero representar fenómenos clínicos diferentes.\nReducirlas a un componente puede dificultar la interpretación.\n\n\nValores ausentes\nLa ausencia de una prueba puede estar relacionada con:\n\nLa gravedad.\nLa indicación clínica.\nEl centro.\nEl momento del seguimiento.\nLa disponibilidad de recursos.\n\nLa imputación debe incluirse dentro del pipeline.\n\n\nDiferencias entre centros\nLas variables pueden estar afectadas por:\n\nEquipos diferentes.\nUnidades distintas.\nProtocolos locales.\nPoblaciones diferentes.\nMétodos de laboratorio distintos.\n\nPCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes.\n\n\nInterpretabilidad\nLos componentes pueden ser difíciles de explicar a profesionales sanitarios.\nSi la interpretación clínica es prioritaria, puede ser preferible utilizar:\n\nSelección de variables.\nRegularización.\nModelos interpretables.\nAgrupaciones clínicas definidas previamente.",
+    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nImportantRegla clínica\n\n\n\nLa unidad de separación debe corresponder a la unidad real de generalización.\nPuede ser:\n\nPaciente.\nCentro.\nPeriodo temporal.\nHospital.\nEpisodio asistencial.\n\n\n\n\nVarios episodios por paciente\nSi un paciente tiene varios ingresos, debes decidir si el modelo generalizará a:\n\nNuevos ingresos de pacientes conocidos.\nPacientes completamente nuevos.\n\nEstas dos preguntas requieren splits diferentes.\n\n\nDatos longitudinales\nUna observación futura del mismo paciente no debe utilizarse para predecir una observación pasada.\n\n\nCambios en la práctica clínica\nUna división temporal puede revelar problemas causados por:\n\nNuevos protocolos.\nCambios de equipos.\nNuevas técnicas diagnósticas.\nCambios en los sistemas de registro.\nCambios en la población atendida.\n\n\n\nEventos poco frecuentes\nEn desenlaces raros, el test puede contener muy pocos casos positivos.\nConviene revisar:\n\nNúmero absoluto de eventos.\nIntervalos de confianza.\nEstratificación.\nVariabilidad entre folds.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#comparación-con-otras-técnicas",
-    "href": "dimensionality-reduction/pca.html#comparación-con-otras-técnicas",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Comparación con otras técnicas",
-    "text": "Comparación con otras técnicas\n\n\n\n\n\n\n\n\n\nTécnica\nResultado\nVentaja principal\nLimitación principal\n\n\n\n\nPCA\nComponentes lineales\nSimple y eficiente\nPierde interpretación directa\n\n\nSelección de variables\nVariables originales\nMantiene interpretabilidad\nPuede perder información conjunta\n\n\nt-SNE\nRepresentación de baja dimensión\nBuena visualización local\nNo es ideal para pipelines predictivos\n\n\nUMAP\nRepresentación no lineal\nCaptura estructuras complejas\nMás sensible a hiperparámetros\n\n\nAutoencoder\nRepresentación aprendida\nPuede modelar relaciones no lineales\nRequiere más datos y complejidad",
+    "objectID": "preprocessing/train-test-split.html#tabla-comparativa",
+    "href": "preprocessing/train-test-split.html#tabla-comparativa",
+    "title": "Train, validation and test",
+    "section": "Tabla comparativa",
+    "text": "Tabla comparativa\n\n\n\n\n\n\n\n\n\nEstrategia\nCuándo utilizarla\nVentaja\nRiesgo\n\n\n\n\nHoldout aleatorio\nObservaciones independientes\nSimple\nPuede ser inestable\n\n\nEstratificado\nClasificación desbalanceada\nMantiene proporciones\nNo controla grupos\n\n\nGroup split\nVarias filas por paciente\nEvita mezcla de pacientes\nPuede desbalancear clases\n\n\nStratified group split\nGrupos y clases desbalanceadas\nCombina ambas necesidades\nMás complejo\n\n\nTemporal\nPredicción futura\nSimula uso real\nPuede reflejar drift\n\n\nPor centro\nEstudios multicéntricos\nEvalúa transportabilidad\nPuede ser muy exigente\n\n\nCross-validation\nDataset limitado\nAprovecha mejor los datos\nMayor coste computacional",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#checklist-para-proyectos",
-    "href": "dimensionality-reduction/pca.html#checklist-para-proyectos",
-    "title": "Principal Component Analysis (PCA)",
+    "objectID": "preprocessing/train-test-split.html#checklist-para-proyectos",
+    "href": "preprocessing/train-test-split.html#checklist-para-proyectos",
+    "title": "Train, validation and test",
     "section": "Checklist para proyectos",
-    "text": "Checklist para proyectos\nAntes de utilizar PCA, comprobar:\n\nLas variables seleccionadas son numéricas.\nHe revisado valores ausentes.\nHe revisado valores extremos.\nHe separado entrenamiento y prueba.\nLa separación se ha realizado por paciente cuando corresponde.\nLa imputación se ajusta únicamente con entrenamiento.\nEl escalado se ajusta únicamente con entrenamiento.\nPCA se ajusta únicamente con entrenamiento.\nHe revisado la varianza explicada.\nHe revisado los loadings.\nHe comparado el modelo con y sin PCA.\nHe considerado la interpretabilidad clínica.\nHe documentado el número de componentes elegido.",
+    "text": "Checklist para proyectos\n\nHe definido la unidad de análisis.\nHe identificado si hay varias filas por paciente.\nHe separado el test antes de tomar decisiones.\nHe decidido si necesito validación simple o cruzada.\nHe utilizado estratificación cuando corresponde.\nHe respetado los grupos de pacientes.\nHe respetado el orden temporal.\nHe ajustado el preprocesamiento solo con train.\nHe mantenido el test sin tocar.\nHe utilizado la misma partición para comparar modelos.\nHe comprobado la distribución de clases.\nHe documentado random_state.\nHe considerado validación externa.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#recursos",
-    "href": "dimensionality-reduction/pca.html#recursos",
-    "title": "Principal Component Analysis (PCA)",
+    "objectID": "preprocessing/train-test-split.html#recursos",
+    "href": "preprocessing/train-test-split.html#recursos",
+    "title": "Train, validation and test",
     "section": "Recursos",
-    "text": "Recursos\n\nDocumentación\n\nDocumentación de PCA en scikit-learn.\nDocumentación de StandardScaler en scikit-learn.\nDocumentación de Pipeline en scikit-learn.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nNombre de la presentación.\nNúmero de diapositivas relevantes.\nEnlaces a apuntes de Notion.\nEjercicios realizados durante la asignatura.",
+    "text": "Recursos\n\nDocumentación\n\ntrain_test_split de scikit-learn.\nStratifiedKFold de scikit-learn.\nGroupKFold de scikit-learn.\nStratifiedGroupKFold de scikit-learn.\nTimeSeriesSplit de scikit-learn.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
     "crumbs": [
       "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
+      "Preprocesamiento",
+      "Train, validation and test"
     ]
   },
   {
-    "objectID": "dimensionality-reduction/pca.html#notas-personales",
-    "href": "dimensionality-reduction/pca.html#notas-personales",
-    "title": "Principal Component Analysis (PCA)",
+    "objectID": "preprocessing/train-test-split.html#notas-personales",
+    "href": "preprocessing/train-test-split.html#notas-personales",
+    "title": "Train, validation and test",
     "section": "Notas personales",
-    "text": "Notas personales\nAñade aquí tus propias notas, dudas, ejemplos o recordatorios sobre PCA.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "foundations/index.html",
-    "href": "foundations/index.html",
-    "title": "Fundamentos",
-    "section": "",
-    "text": "Esta sección reúne los conceptos y procedimientos necesarios antes de entrenar modelos de machine learning.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "foundations/index.html#contenidos",
-    "href": "foundations/index.html#contenidos",
-    "title": "Fundamentos",
-    "section": "Contenidos",
-    "text": "Contenidos\n\nExploración de datos\nPreparación y limpieza de datos\nValores ausentes\nCodificación de variables categóricas\nEscalado y normalización\nSeparación entre entrenamiento, validación y prueba\nEvaluación de modelos\nPrevención de data leakage",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "preprocessing/index.html",
-    "href": "preprocessing/index.html",
-    "title": "Preprocesamiento",
-    "section": "",
-    "text": "Esta sección reúne las técnicas necesarias para limpiar, transformar y preparar los datos antes del modelado.",
+    "text": "Notas personales\nAñade aquí tus propias dudas, ejemplos y recordatorios.",
     "crumbs": [
       "Inicio",
       "Preprocesamiento",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "preprocessing/index.html#contenidos-previstos",
-    "href": "preprocessing/index.html#contenidos-previstos",
-    "title": "Preprocesamiento",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Preprocesamiento",
-      "Introducción"
+      "Train, validation and test"
     ]
   },
   {

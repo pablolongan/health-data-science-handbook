@@ -251,6 +251,12 @@ window.Quarto = {
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/train-test-split.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Train, validation and test</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -388,8 +394,7 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#resumen-en-30-segundos" id="toc-resumen-en-30-segundos" class="nav-link active" data-scroll-target="#resumen-en-30-segundos">Resumen en 30 segundos</a></li>
-  <li><a href="#qué-problema-resuelve" id="toc-qué-problema-resuelve" class="nav-link" data-scroll-target="#qué-problema-resuelve">¿Qué problema resuelve?</a></li>
+  <li><a href="#qué-problema-resuelve" id="toc-qué-problema-resuelve" class="nav-link active" data-scroll-target="#qué-problema-resuelve">¿Qué problema resuelve?</a></li>
   <li><a href="#intuición" id="toc-intuición" class="nav-link" data-scroll-target="#intuición">Intuición</a></li>
   <li><a href="#fundamentos-teóricos" id="toc-fundamentos-teóricos" class="nav-link" data-scroll-target="#fundamentos-teóricos">Fundamentos teóricos</a>
   <ul class="collapse">
@@ -406,30 +411,15 @@ window.Quarto = {
   <li><a href="#seleccionar-componentes-según-varianza-explicada" id="toc-seleccionar-componentes-según-varianza-explicada" class="nav-link" data-scroll-target="#seleccionar-componentes-según-varianza-explicada">Seleccionar componentes según varianza explicada</a></li>
   <li><a href="#implementación-segura-dentro-de-un-pipeline" id="toc-implementación-segura-dentro-de-un-pipeline" class="nav-link" data-scroll-target="#implementación-segura-dentro-de-un-pipeline">Implementación segura dentro de un pipeline</a></li>
   <li><a href="#inspeccionar-la-varianza-explicada" id="toc-inspeccionar-la-varianza-explicada" class="nav-link" data-scroll-target="#inspeccionar-la-varianza-explicada">Inspeccionar la varianza explicada</a></li>
-  <li><a href="#scree-plot" id="toc-scree-plot" class="nav-link" data-scroll-target="#scree-plot">Scree plot</a></li>
-  <li><a href="#varianza-explicada-acumulada-1" id="toc-varianza-explicada-acumulada-1" class="nav-link" data-scroll-target="#varianza-explicada-acumulada-1">Varianza explicada acumulada</a></li>
-  <li><a href="#visualizar-observaciones-con-dos-componentes" id="toc-visualizar-observaciones-con-dos-componentes" class="nav-link" data-scroll-target="#visualizar-observaciones-con-dos-componentes">Visualizar observaciones con dos componentes</a></li>
   <li><a href="#interpretar-los-loadings" id="toc-interpretar-los-loadings" class="nav-link" data-scroll-target="#interpretar-los-loadings">Interpretar los loadings</a></li>
-  <li><a href="#interpretación-de-resultados" id="toc-interpretación-de-resultados" class="nav-link" data-scroll-target="#interpretación-de-resultados">Interpretación de resultados</a></li>
-  <li><a href="#evaluación" id="toc-evaluación" class="nav-link" data-scroll-target="#evaluación">Evaluación</a></li>
-  <li><a href="#comparar-un-modelo-con-y-sin-pca" id="toc-comparar-un-modelo-con-y-sin-pca" class="nav-link" data-scroll-target="#comparar-un-modelo-con-y-sin-pca">Comparar un modelo con y sin PCA</a></li>
-  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
   <li><a href="#consideraciones-en-datos-clínicos" id="toc-consideraciones-en-datos-clínicos" class="nav-link" data-scroll-target="#consideraciones-en-datos-clínicos">Consideraciones en datos clínicos</a>
   <ul class="collapse">
   <li><a href="#mediciones-repetidas" id="toc-mediciones-repetidas" class="nav-link" data-scroll-target="#mediciones-repetidas">Mediciones repetidas</a></li>
-  <li><a href="#variables-con-significado-clínico-distinto" id="toc-variables-con-significado-clínico-distinto" class="nav-link" data-scroll-target="#variables-con-significado-clínico-distinto">Variables con significado clínico distinto</a></li>
   <li><a href="#valores-ausentes" id="toc-valores-ausentes" class="nav-link" data-scroll-target="#valores-ausentes">Valores ausentes</a></li>
   <li><a href="#diferencias-entre-centros" id="toc-diferencias-entre-centros" class="nav-link" data-scroll-target="#diferencias-entre-centros">Diferencias entre centros</a></li>
-  <li><a href="#interpretabilidad" id="toc-interpretabilidad" class="nav-link" data-scroll-target="#interpretabilidad">Interpretabilidad</a></li>
   </ul></li>
-  <li><a href="#comparación-con-otras-técnicas" id="toc-comparación-con-otras-técnicas" class="nav-link" data-scroll-target="#comparación-con-otras-técnicas">Comparación con otras técnicas</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
   <li><a href="#checklist-para-proyectos" id="toc-checklist-para-proyectos" class="nav-link" data-scroll-target="#checklist-para-proyectos">Checklist para proyectos</a></li>
-  <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
-  <ul class="collapse">
-  <li><a href="#documentación" id="toc-documentación" class="nav-link" data-scroll-target="#documentación">Documentación</a></li>
-  <li><a href="#material-del-máster" id="toc-material-del-máster" class="nav-link" data-scroll-target="#material-del-máster">Material del máster</a></li>
-  </ul></li>
-  <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
   </ul>
 </nav>
     </div>
@@ -455,24 +445,20 @@ window.Quarto = {
 </header>
 
 
-<section id="resumen-en-30-segundos" class="level2">
-<h2 data-anchor-id="resumen-en-30-segundos">Resumen en 30 segundos</h2>
-<p>Principal Component Analysis, o PCA, es una técnica de reducción de dimensionalidad que transforma un conjunto de variables numéricas correlacionadas en un conjunto más pequeño de componentes no correlacionados.</p>
-<p>Cada componente principal es una combinación lineal de las variables originales. Los componentes se ordenan según la cantidad de varianza que explican:</p>
-<ul>
-<li>El primer componente explica la mayor cantidad posible de varianza.</li>
-<li>El segundo explica la mayor cantidad posible de la varianza restante.</li>
-<li>Los componentes posteriores explican cantidades progresivamente menores.</li>
-</ul>
-<p>PCA se utiliza principalmente para:</p>
-<ul>
-<li>Reducir el número de variables.</li>
-<li>Visualizar datasets de alta dimensionalidad.</li>
-<li>Detectar patrones.</li>
-<li>Mitigar problemas de multicolinealidad.</li>
-<li>Crear variables de entrada para otros modelos.</li>
-</ul>
-</section>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>PCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.</p>
+<p>Cada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.</p>
+</div>
+</div>
 <section id="qué-problema-resuelve" class="level2">
 <h2 data-anchor-id="qué-problema-resuelve">¿Qué problema resuelve?</h2>
 <p>En muchos datasets existen numerosas variables que contienen información parcialmente redundante.</p>
@@ -485,18 +471,31 @@ window.Quarto = {
 <li>Perímetros corporales.</li>
 </ul>
 <p>Estas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.</p>
-<p>La técnica puede ser útil cuando:</p>
+<p>PCA puede utilizarse para:</p>
 <ul>
-<li>Hay muchas variables numéricas.</li>
-<li>Existen correlaciones entre variables.</li>
-<li>Se desea simplificar el dataset.</li>
-<li>Se quiere visualizar la estructura de los datos.</li>
-<li>Se quiere reducir el coste computacional de modelos posteriores.</li>
+<li>Reducir el número de variables.</li>
+<li>Visualizar datasets de alta dimensionalidad.</li>
+<li>Detectar patrones.</li>
+<li>Mitigar problemas de multicolinealidad.</li>
+<li>Crear variables de entrada para otros modelos.</li>
 </ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>PCA no selecciona variables originales. Crea variables nuevas llamadas <strong>componentes principales</strong>.</p>
+</div>
+</div>
 </section>
 <section id="intuición" class="level2">
 <h2 data-anchor-id="intuición">Intuición</h2>
-<p>Imagina que observas una nube de puntos con dos variables correlacionadas.</p>
+<p>Imagina una nube de puntos formada por dos variables correlacionadas.</p>
 <p>Aunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.</p>
 <p>PCA encuentra esa dirección y la convierte en el primer componente principal.</p>
 <p>El segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.</p>
@@ -539,12 +538,25 @@ PC_2 = w_{21}x_1 + w_{22}x_2 + \cdots + w_{2p}x_p
 <li>4 componentes: 91 %.</li>
 </ul>
 <p>En este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.</p>
+</div>
+</div>
 </section>
 </section>
 <section id="por-qué-es-importante-escalar" class="level2">
 <h2 data-anchor-id="por-qué-es-importante-escalar">¿Por qué es importante escalar?</h2>
 <p>PCA está influido por la escala de las variables.</p>
-<p>Imagina estas dos variables:</p>
+<p>Imagina estas variables:</p>
 <ul>
 <li>Edad, medida en años.</li>
 <li>Troponina, medida con valores pequeños.</li>
@@ -558,10 +570,23 @@ PC_2 = w_{21}x_1 + w_{22}x_2 + \cdots + w_{2p}x_p
 <li>Media igual a 0.</li>
 <li>Desviación estándar igual a 1.</li>
 </ul>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Regla práctica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Si las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.</p>
+</div>
+</div>
 </section>
 <section id="supuestos-y-condiciones" class="level2">
 <h2 data-anchor-id="supuestos-y-condiciones">Supuestos y condiciones</h2>
-<p>PCA no tiene los mismos supuestos que un modelo inferencial clásico, pero funciona mejor cuando:</p>
+<p>PCA funciona mejor cuando:</p>
 <ul>
 <li>Las variables son numéricas.</li>
 <li>Existen relaciones aproximadamente lineales.</li>
@@ -570,7 +595,6 @@ PC_2 = w_{21}x_1 + w_{22}x_2 + \cdots + w_{2p}x_p
 <li>Los valores extremos han sido revisados.</li>
 <li>Las escalas se han tratado adecuadamente.</li>
 </ul>
-<p>PCA puede aportar poco valor si las variables son casi independientes entre sí.</p>
 </section>
 <section id="cuándo-utilizar-pca" class="level2">
 <h2 data-anchor-id="cuándo-utilizar-pca">Cuándo utilizar PCA</h2>
@@ -594,9 +618,7 @@ PC_2 = w_{21}x_1 + w_{22}x_2 + \cdots + w_{2p}x_p
 <li>Tienes muy pocas variables.</li>
 <li>Los componentes son difíciles de justificar clínicamente.</li>
 <li>El objetivo es seleccionar variables originales, no transformarlas.</li>
-<li>La varianza no representa necesariamente información relevante para el problema.</li>
 </ul>
-<p>Un componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.</p>
 </section>
 <section id="flujo-de-trabajo-recomendado" class="level2">
 <h2 data-anchor-id="flujo-de-trabajo-recomendado">Flujo de trabajo recomendado</h2>
@@ -619,14 +641,13 @@ PC_2 = w_{21}x_1 + w_{22}x_2 + \cdots + w_{2p}x_p
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># X contiene únicamente variables numéricas</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>X_scaled <span class="op">=</span> StandardScaler().fit_transform(X)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>X_pca <span class="op">=</span> pca.fit_transform(X_scaled)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pca.explained_variance_ratio_)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>X_scaled <span class="op">=</span> StandardScaler().fit_transform(X)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>X_pca <span class="op">=</span> pca.fit_transform(X_scaled)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pca.explained_variance_ratio_)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="seleccionar-componentes-según-varianza-explicada" class="level2">
 <h2 data-anchor-id="seleccionar-componentes-según-varianza-explicada">Seleccionar componentes según varianza explicada</h2>
@@ -644,331 +665,104 @@ PC_2 = w_{21}x_1 + w_{22}x_2 + \cdots + w_{2p}x_p
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Varianza explicada acumulada:"</span>,</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    pca.explained_variance_ratio_.<span class="bu">sum</span>()</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Con:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>n_components<span class="op">=</span><span class="fl">0.95</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>PCA selecciona automáticamente el número mínimo de componentes necesario para explicar al menos el 95 % de la varianza.</p>
 </section>
 <section id="implementación-segura-dentro-de-un-pipeline" class="level2">
 <h2 data-anchor-id="implementación-segura-dentro-de-un-pipeline">Implementación segura dentro de un pipeline</h2>
-<p>Cuando PCA forma parte de un modelo predictivo, debe ajustarse únicamente con los datos de entrenamiento.</p>
-<p>La forma recomendada es utilizar un <code>Pipeline</code>.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>pipeline <span class="op">=</span> Pipeline(</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"imputer"</span>,</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            SimpleImputer(strategy<span class="op">=</span><span class="st">"median"</span>)</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"scaler"</span>,</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            StandardScaler()</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">"pca"</span>,</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>            PCA(n_components<span class="op">=</span><span class="fl">0.95</span>)</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>            <span class="st">"model"</span>,</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>            LogisticRegression(</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>                max_iter<span class="op">=</span><span class="dv">1000</span>,</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span></span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>pipeline.fit(X_train, y_train)</span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> pipeline.predict(X_test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Este pipeline evita ajustar la imputación, el escalado o PCA con información procedente del conjunto de prueba.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>pipeline <span class="op">=</span> Pipeline(</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"imputer"</span>, SimpleImputer(strategy<span class="op">=</span><span class="st">"median"</span>)),</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"scaler"</span>, StandardScaler()),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        (<span class="st">"pca"</span>, PCA(n_components<span class="op">=</span><span class="fl">0.95</span>)),</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"model"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            LogisticRegression(</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                max_iter<span class="op">=</span><span class="dv">1000</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>pipeline.fit(X_train, y_train)</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> pipeline.predict(X_test)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Error frecuente: data leakage
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>No ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.</p>
+<p>El pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.</p>
+</div>
+</div>
 </section>
 <section id="inspeccionar-la-varianza-explicada" class="level2">
 <h2 data-anchor-id="inspeccionar-la-varianza-explicada">Inspeccionar la varianza explicada</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>explained_variance <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"component"</span>: <span class="bu">range</span>(</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span>,</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            <span class="bu">len</span>(pca.explained_variance_ratio_) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"explained_variance_ratio"</span>:</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            pca.explained_variance_ratio_,</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cumulative_explained_variance"</span>:</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            pca.explained_variance_ratio_.cumsum()</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>display(explained_variance)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="scree-plot" class="level2">
-<h2 data-anchor-id="scree-plot">Scree plot</h2>
-<p>El <em>scree plot</em> muestra la varianza explicada por cada componente.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>explained_variance_ratio <span class="op">=</span> (</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    pca.explained_variance_ratio_</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>components <span class="op">=</span> <span class="bu">range</span>(</span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>,</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">len</span>(explained_variance_ratio) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    components,</span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    explained_variance_ratio,</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="st">"o"</span></span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Componente principal"</span>)</span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Proporción de varianza explicada"</span>)</span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Scree plot"</span>)</span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="varianza-explicada-acumulada-1" class="level2">
-<h2 data-anchor-id="varianza-explicada-acumulada-1">Varianza explicada acumulada</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>cumulative_variance <span class="op">=</span> np.cumsum(</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    pca.explained_variance_ratio_</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>components <span class="op">=</span> <span class="bu">range</span>(</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>,</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">len</span>(cumulative_variance) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    components,</span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    cumulative_variance,</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="st">"o"</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>plt.axhline(</span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="fl">0.95</span>,</span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    linestyle<span class="op">=</span><span class="st">"--"</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Número de componentes"</span>)</span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Varianza explicada acumulada"</span>)</span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Varianza explicada acumulada"</span>)</span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="visualizar-observaciones-con-dos-componentes" class="level2">
-<h2 data-anchor-id="visualizar-observaciones-con-dos-componentes">Visualizar observaciones con dos componentes</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>pca_df <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    X_pca[:, :<span class="dv">2</span>],</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[<span class="st">"PC1"</span>, <span class="st">"PC2"</span>]</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>plt.scatter(</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    pca_df[<span class="st">"PC1"</span>],</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    pca_df[<span class="st">"PC2"</span>],</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.7</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"PC1"</span>)</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"PC2"</span>)</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Observaciones proyectadas en los dos primeros componentes"</span>)</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Si existe una variable objetivo, puede utilizarse para distinguir visualmente los grupos.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>scatter <span class="op">=</span> plt.scatter(</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    pca_df[<span class="st">"PC1"</span>],</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    pca_df[<span class="st">"PC2"</span>],</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    c<span class="op">=</span>y,</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.7</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"PC1"</span>)</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"PC2"</span>)</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"PCA según la variable objetivo"</span>)</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>plt.colorbar(scatter)</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>explained_variance <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"component"</span>: <span class="bu">range</span>(</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            <span class="bu">len</span>(pca.explained_variance_ratio_) <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"explained_variance_ratio"</span>:</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>            pca.explained_variance_ratio_,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cumulative_explained_variance"</span>:</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            pca.explained_variance_ratio_.cumsum()</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>display(explained_variance)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="interpretar-los-loadings" class="level2">
 <h2 data-anchor-id="interpretar-los-loadings">Interpretar los loadings</h2>
-<p>Los <em>loadings</em> indican cuánto contribuye cada variable original a cada componente.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>loadings <span class="op">=</span> pd.DataFrame(</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    pca.components_.T,</span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    index<span class="op">=</span>X.columns,</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"PC</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span>,</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>            pca.n_components_ <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>display(loadings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>loadings <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    pca.components_.T,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    index<span class="op">=</span>X.columns,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"PC</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>            pca.n_components_ <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>display(loadings)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Un valor absoluto elevado indica que la variable tiene una contribución importante al componente.</p>
-<p>El signo indica la dirección de la relación:</p>
-<ul>
-<li>Loading positivo: la variable aumenta cuando aumenta el componente.</li>
-<li>Loading negativo: la variable disminuye cuando aumenta el componente.</li>
-</ul>
-<p>El signo global de un componente puede invertirse sin cambiar su significado matemático.</p>
-</section>
-<section id="interpretación-de-resultados" class="level2">
-<h2 data-anchor-id="interpretación-de-resultados">Interpretación de resultados</h2>
-<p>Al revisar un PCA conviene analizar:</p>
-<ul>
-<li>Número de componentes seleccionados.</li>
-<li>Varianza explicada individual.</li>
-<li>Varianza explicada acumulada.</li>
-<li>Variables con mayores loadings.</li>
-<li>Separación visual entre observaciones.</li>
-<li>Posibles valores extremos.</li>
-<li>Utilidad de los componentes en modelos posteriores.</li>
-</ul>
-<p>PCA no identifica automáticamente variables causales ni variables clínicamente importantes.</p>
-</section>
-<section id="evaluación" class="level2">
-<h2 data-anchor-id="evaluación">Evaluación</h2>
-<p>PCA no se evalúa con métricas de clasificación o regresión cuando se utiliza de forma exploratoria.</p>
-<p>Las principales evaluaciones son:</p>
-<ul>
-<li>Varianza explicada.</li>
-<li>Varianza explicada acumulada.</li>
-<li>Scree plot.</li>
-<li>Estabilidad de los componentes.</li>
-<li>Interpretabilidad de los loadings.</li>
-<li>Rendimiento del modelo posterior.</li>
-<li>Comparación con un pipeline sin PCA.</li>
-</ul>
-<p>Si PCA forma parte de un modelo predictivo, debe evaluarse el pipeline completo mediante validación cruzada.</p>
-</section>
-<section id="comparar-un-modelo-con-y-sin-pca" class="level2">
-<h2 data-anchor-id="comparar-un-modelo-con-y-sin-pca">Comparar un modelo con y sin PCA</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_val_score</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>pipeline_without_pca <span class="op">=</span> Pipeline(</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">"imputer"</span>,</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>            SimpleImputer(strategy<span class="op">=</span><span class="st">"median"</span>)</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"scaler"</span>,</span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            StandardScaler()</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">"model"</span>,</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>            LogisticRegression(</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>                max_iter<span class="op">=</span><span class="dv">1000</span>,</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>pipeline_with_pca <span class="op">=</span> Pipeline(</span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>            <span class="st">"imputer"</span>,</span>
-<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>            SimpleImputer(strategy<span class="op">=</span><span class="st">"median"</span>)</span>
-<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>            <span class="st">"scaler"</span>,</span>
-<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>            StandardScaler()</span>
-<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>            <span class="st">"pca"</span>,</span>
-<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>            PCA(n_components<span class="op">=</span><span class="fl">0.95</span>)</span>
-<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>        ),</span>
-<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>        (</span>
-<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>            <span class="st">"model"</span>,</span>
-<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>            LogisticRegression(</span>
-<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>                max_iter<span class="op">=</span><span class="dv">1000</span>,</span>
-<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span></span>
-<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>    ]</span>
-<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>scores_without_pca <span class="op">=</span> cross_val_score(</span>
-<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>    pipeline_without_pca,</span>
-<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>    X,</span>
-<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a>    y,</span>
-<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span><span class="dv">5</span>,</span>
-<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>    scoring<span class="op">=</span><span class="st">"roc_auc"</span></span>
-<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-60"><a href="#cb12-60" aria-hidden="true" tabindex="-1"></a>scores_with_pca <span class="op">=</span> cross_val_score(</span>
-<span id="cb12-61"><a href="#cb12-61" aria-hidden="true" tabindex="-1"></a>    pipeline_with_pca,</span>
-<span id="cb12-62"><a href="#cb12-62" aria-hidden="true" tabindex="-1"></a>    X,</span>
-<span id="cb12-63"><a href="#cb12-63" aria-hidden="true" tabindex="-1"></a>    y,</span>
-<span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span><span class="dv">5</span>,</span>
-<span id="cb12-65"><a href="#cb12-65" aria-hidden="true" tabindex="-1"></a>    scoring<span class="op">=</span><span class="st">"roc_auc"</span></span>
-<span id="cb12-66"><a href="#cb12-66" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-67"><a href="#cb12-67" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-68"><a href="#cb12-68" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
-<span id="cb12-69"><a href="#cb12-69" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ROC AUC sin PCA:"</span>,</span>
-<span id="cb12-70"><a href="#cb12-70" aria-hidden="true" tabindex="-1"></a>    scores_without_pca.mean()</span>
-<span id="cb12-71"><a href="#cb12-71" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb12-72"><a href="#cb12-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-73"><a href="#cb12-73" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
-<span id="cb12-74"><a href="#cb12-74" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ROC AUC con PCA:"</span>,</span>
-<span id="cb12-75"><a href="#cb12-75" aria-hidden="true" tabindex="-1"></a>    scores_with_pca.mean()</span>
-<span id="cb12-76"><a href="#cb12-76" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="errores-frecuentes" class="level2">
-<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
-<ul>
-<li>Aplicar PCA antes de separar entrenamiento y prueba.</li>
-<li>Escalar utilizando todo el dataset.</li>
-<li>No escalar variables con unidades diferentes.</li>
-<li>Aplicar PCA directamente a variables categóricas.</li>
-<li>Elegir componentes únicamente por una regla automática.</li>
-<li>Interpretar los componentes como variables clínicas reales.</li>
-<li>Pensar que más varianza explicada siempre implica mejor predicción.</li>
-<li>Utilizar PCA cuando la interpretabilidad de las variables originales es esencial.</li>
-<li>Ignorar valores extremos que dominan los componentes.</li>
-<li>Comparar modelos con particiones distintas.</li>
-</ul>
 </section>
 <section id="consideraciones-en-datos-clínicos" class="level2">
 <h2 data-anchor-id="consideraciones-en-datos-clínicos">Consideraciones en datos clínicos</h2>
-<p>En datos clínicos, PCA requiere precaución.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Aplicación clínica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>PCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.</p>
+</div>
+</div>
 <section id="mediciones-repetidas" class="level3">
 <h3 data-anchor-id="mediciones-repetidas">Mediciones repetidas</h3>
-<p>Si un paciente aparece varias veces, las observaciones no son independientes.</p>
-<p>La separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.</p>
-</section>
-<section id="variables-con-significado-clínico-distinto" class="level3">
-<h3 data-anchor-id="variables-con-significado-clínico-distinto">Variables con significado clínico distinto</h3>
-<p>Dos variables pueden estar correlacionadas estadísticamente, pero representar fenómenos clínicos diferentes.</p>
-<p>Reducirlas a un componente puede dificultar la interpretación.</p>
+<p>Si un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.</p>
 </section>
 <section id="valores-ausentes" class="level3">
 <h3 data-anchor-id="valores-ausentes">Valores ausentes</h3>
@@ -980,126 +774,46 @@ PC_2 = w_{21}x_1 + w_{22}x_2 + \cdots + w_{2p}x_p
 <li>El momento del seguimiento.</li>
 <li>La disponibilidad de recursos.</li>
 </ul>
-<p>La imputación debe incluirse dentro del pipeline.</p>
 </section>
 <section id="diferencias-entre-centros" class="level3">
 <h3 data-anchor-id="diferencias-entre-centros">Diferencias entre centros</h3>
-<p>Las variables pueden estar afectadas por:</p>
+<p>PCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:</p>
 <ul>
-<li>Equipos diferentes.</li>
-<li>Unidades distintas.</li>
-<li>Protocolos locales.</li>
-<li>Poblaciones diferentes.</li>
-<li>Métodos de laboratorio distintos.</li>
-</ul>
-<p>PCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes.</p>
-</section>
-<section id="interpretabilidad" class="level3">
-<h3 data-anchor-id="interpretabilidad">Interpretabilidad</h3>
-<p>Los componentes pueden ser difíciles de explicar a profesionales sanitarios.</p>
-<p>Si la interpretación clínica es prioritaria, puede ser preferible utilizar:</p>
-<ul>
-<li>Selección de variables.</li>
-<li>Regularización.</li>
-<li>Modelos interpretables.</li>
-<li>Agrupaciones clínicas definidas previamente.</li>
+<li>Equipos.</li>
+<li>Unidades.</li>
+<li>Protocolos.</li>
+<li>Poblaciones.</li>
+<li>Métodos de laboratorio.</li>
 </ul>
 </section>
 </section>
-<section id="comparación-con-otras-técnicas" class="level2">
-<h2 data-anchor-id="comparación-con-otras-técnicas">Comparación con otras técnicas</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Técnica</th>
-<th>Resultado</th>
-<th>Ventaja principal</th>
-<th>Limitación principal</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>PCA</td>
-<td>Componentes lineales</td>
-<td>Simple y eficiente</td>
-<td>Pierde interpretación directa</td>
-</tr>
-<tr class="even">
-<td>Selección de variables</td>
-<td>Variables originales</td>
-<td>Mantiene interpretabilidad</td>
-<td>Puede perder información conjunta</td>
-</tr>
-<tr class="odd">
-<td>t-SNE</td>
-<td>Representación de baja dimensión</td>
-<td>Buena visualización local</td>
-<td>No es ideal para pipelines predictivos</td>
-</tr>
-<tr class="even">
-<td>UMAP</td>
-<td>Representación no lineal</td>
-<td>Captura estructuras complejas</td>
-<td>Más sensible a hiperparámetros</td>
-</tr>
-<tr class="odd">
-<td>Autoencoder</td>
-<td>Representación aprendida</td>
-<td>Puede modelar relaciones no lineales</td>
-<td>Requiere más datos y complejidad</td>
-</tr>
-</tbody>
-</table>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>Aplicar PCA antes de separar entrenamiento y prueba.</li>
+<li>Escalar utilizando todo el dataset.</li>
+<li>No escalar variables con unidades diferentes.</li>
+<li>Aplicar PCA directamente a variables categóricas.</li>
+<li>Interpretar los componentes como variables clínicas reales.</li>
+<li>Pensar que más varianza explicada siempre implica mejor predicción.</li>
+<li>Ignorar valores extremos que dominan los componentes.</li>
+</ul>
 </section>
 <section id="checklist-para-proyectos" class="level2">
 <h2 data-anchor-id="checklist-para-proyectos">Checklist para proyectos</h2>
-<p>Antes de utilizar PCA, comprobar:</p>
 <ul class="task-list">
-<li><label><input type="checkbox">Las variables seleccionadas son numéricas.</label></li>
+<li><label><input type="checkbox">Las variables son numéricas.</label></li>
 <li><label><input type="checkbox">He revisado valores ausentes.</label></li>
 <li><label><input type="checkbox">He revisado valores extremos.</label></li>
 <li><label><input type="checkbox">He separado entrenamiento y prueba.</label></li>
 <li><label><input type="checkbox">La separación se ha realizado por paciente cuando corresponde.</label></li>
-<li><label><input type="checkbox">La imputación se ajusta únicamente con entrenamiento.</label></li>
-<li><label><input type="checkbox">El escalado se ajusta únicamente con entrenamiento.</label></li>
-<li><label><input type="checkbox">PCA se ajusta únicamente con entrenamiento.</label></li>
+<li><label><input type="checkbox">La imputación se ajusta solo con entrenamiento.</label></li>
+<li><label><input type="checkbox">El escalado se ajusta solo con entrenamiento.</label></li>
+<li><label><input type="checkbox">PCA se ajusta solo con entrenamiento.</label></li>
 <li><label><input type="checkbox">He revisado la varianza explicada.</label></li>
 <li><label><input type="checkbox">He revisado los loadings.</label></li>
-<li><label><input type="checkbox">He comparado el modelo con y sin PCA.</label></li>
 <li><label><input type="checkbox">He considerado la interpretabilidad clínica.</label></li>
-<li><label><input type="checkbox">He documentado el número de componentes elegido.</label></li>
 </ul>
-</section>
-<section id="recursos" class="level2">
-<h2 data-anchor-id="recursos">Recursos</h2>
-<section id="documentación" class="level3">
-<h3 data-anchor-id="documentación">Documentación</h3>
-<ul>
-<li>Documentación de <code>PCA</code> en scikit-learn.</li>
-<li>Documentación de <code>StandardScaler</code> en scikit-learn.</li>
-<li>Documentación de <code>Pipeline</code> en scikit-learn.</li>
-</ul>
-</section>
-<section id="material-del-máster" class="level3">
-<h3 data-anchor-id="material-del-máster">Material del máster</h3>
-<p>Añadir aquí:</p>
-<ul>
-<li>Nombre de la presentación.</li>
-<li>Número de diapositivas relevantes.</li>
-<li>Enlaces a apuntes de Notion.</li>
-<li>Ejercicios realizados durante la asignatura.</li>
-</ul>
-</section>
-</section>
-<section id="notas-personales" class="level2">
-<h2 data-anchor-id="notas-personales">Notas personales</h2>
-<p>Añade aquí tus propias notas, dudas, ejemplos o recordatorios sobre PCA.</p>
 
 
 </section>
