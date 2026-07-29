@@ -1,0 +1,619 @@
+---
+title: "Data leakage"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+El **data leakage** ocurre cuando el modelo utiliza información que no debería estar disponible en el momento real de hacer la predicción.
+
+Esto produce métricas artificialmente altas y modelos que parecen funcionar muy bien durante el desarrollo, pero fallan cuando se aplican a pacientes nuevos.
+:::
+
+## ¿Qué es el data leakage?
+
+El data leakage aparece cuando información del futuro, del conjunto de test o del desenlace entra directa o indirectamente en el proceso de entrenamiento.
+
+El modelo recibe una ventaja injusta.
+
+No aprende únicamente patrones generalizables: aprende información que en la práctica no estaría disponible.
+
+::: {.callout-note}
+## Idea clave
+
+Un modelo puede tener un ROC AUC excelente y, aun así, ser completamente inútil si existe data leakage.
+:::
+
+## Principales tipos de leakage
+
+### Target leakage
+
+Ocurre cuando una variable predictora contiene información relacionada directamente con el desenlace.
+
+Ejemplos:
+
+- Utilizar el tratamiento iniciado después del diagnóstico para predecir ese diagnóstico.
+- Utilizar una prueba solicitada como consecuencia del evento.
+- Utilizar la fecha de alta para predecir la duración del ingreso.
+- Utilizar una variable derivada del propio desenlace.
+- Utilizar información registrada después del momento de predicción.
+
+### Train-test contamination
+
+Ocurre cuando información del conjunto de test influye en el entrenamiento.
+
+Ejemplos:
+
+- Imputar antes de separar train y test.
+- Escalar antes del split.
+- Seleccionar variables con todo el dataset.
+- Ajustar PCA con todos los datos.
+- Balancear clases antes de separar.
+- Definir umbrales utilizando el test.
+
+### Leakage entre pacientes o episodios relacionados
+
+Ocurre cuando observaciones relacionadas aparecen en diferentes particiones.
+
+Ejemplos:
+
+- Varias visitas del mismo paciente en train y test.
+- Varias imágenes del mismo estudio en diferentes conjuntos.
+- Distintos ingresos del mismo paciente mezclados.
+- Mediciones repetidas de una misma muestra biológica.
+
+### Leakage temporal
+
+Ocurre cuando se utiliza información futura para predecir el pasado.
+
+Ejemplos:
+
+- Utilizar una analítica posterior al evento.
+- Calcular una media con observaciones futuras.
+- Entrenar con pacientes de 2025 y evaluar en pacientes de 2023.
+- Utilizar un diagnóstico confirmado posteriormente.
+
+## Ejemplo clínico
+
+Imagina un modelo que predice si un paciente desarrollará cardiotoxicidad durante el tratamiento.
+
+Podrían producir leakage variables como:
+
+- Inicio de carvedilol después de detectar disfunción.
+- Solicitud de una ecocardiografía adicional tras sospecha clínica.
+- Diagnóstico de cardiotoxicidad registrado después del evento.
+- Valores de FEVI recogidos tras el momento que se quiere predecir.
+- Marcadores calculados utilizando toda la trayectoria futura del paciente.
+
+::: {.callout-warning}
+## Pregunta esencial
+
+Para cada variable, pregunta:
+
+**¿Esta información estaría realmente disponible en el momento exacto en que quiero hacer la predicción?**
+:::
+
+## Ejemplo incorrecto: escalar antes del split
+
+```python
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+Aquí el escalador aprende la media y la desviación estándar utilizando también el conjunto de test.
+
+## Ejemplo correcto
+
+```python
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+
+X_test_scaled = scaler.transform(X_test)
+```
+
+## Ejemplo recomendado con pipeline
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(strategy="median")
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+pipeline.fit(X_train, y_train)
+
+y_pred = pipeline.predict(X_test)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+Todo lo que aprende parámetros a partir de los datos debe ajustarse únicamente con entrenamiento.
+
+Esto incluye imputación, escalado, selección de variables, PCA, encoding y balanceo.
+:::
+
+## Leakage en imputación
+
+### Incorrecto
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(strategy="median")
+
+X_imputed = imputer.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_imputed,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+### Correcto
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+imputer = SimpleImputer(strategy="median")
+
+X_train_imputed = imputer.fit_transform(X_train)
+
+X_test_imputed = imputer.transform(X_test)
+```
+
+## Leakage en selección de variables
+
+### Incorrecto
+
+```python
+from sklearn.feature_selection import SelectKBest
+
+selector = SelectKBest(k=10)
+
+X_selected = selector.fit_transform(X, y)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_selected,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+Aquí la selección de variables utiliza información del target de todo el dataset.
+
+### Correcto con pipeline
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.feature_selection import SelectKBest
+from sklearn.linear_model import LogisticRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "selector",
+            SelectKBest(k=10)
+        ),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+pipeline.fit(X_train, y_train)
+```
+
+## Leakage en PCA
+
+### Incorrecto
+
+```python
+from sklearn.decomposition import PCA
+
+pca = PCA(n_components=0.95)
+
+X_pca = pca.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_pca,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+### Correcto
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.linear_model import LogisticRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "pca",
+            PCA(n_components=0.95)
+        ),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+pipeline.fit(X_train, y_train)
+```
+
+## Leakage en balanceo de clases
+
+Técnicas como SMOTE deben aplicarse únicamente dentro del entrenamiento.
+
+### Incorrecto
+
+```python
+from imblearn.over_sampling import SMOTE
+
+smote = SMOTE(random_state=42)
+
+X_resampled, y_resampled = smote.fit_resample(X, y)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_resampled,
+    y_resampled,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+### Correcto
+
+```python
+from imblearn.pipeline import Pipeline
+from imblearn.over_sampling import SMOTE
+from sklearn.linear_model import LogisticRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "smote",
+            SMOTE(random_state=42)
+        ),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+pipeline.fit(X_train, y_train)
+```
+
+## Leakage por paciente
+
+Si un paciente tiene varias filas, no debe aparecer en train y test.
+
+### Comprobación básica
+
+```python
+train_patients = set(
+    df.loc[train_idx, "patient_id"]
+)
+
+test_patients = set(
+    df.loc[test_idx, "patient_id"]
+)
+
+overlap = train_patients.intersection(
+    test_patients
+)
+
+print(
+    f"Pacientes presentes en ambos conjuntos: {len(overlap)}"
+)
+```
+
+La salida correcta debería ser:
+
+```text
+Pacientes presentes en ambos conjuntos: 0
+```
+
+::: {.callout-caution}
+## Error frecuente
+
+Dividir por filas cuando existen varias observaciones por paciente puede generar métricas muy optimistas.
+:::
+
+## Leakage temporal
+
+Una variable puede ser perfectamente válida desde el punto de vista estadístico y, aun así, ser inválida temporalmente.
+
+Ejemplo:
+
+Quieres predecir cardiotoxicidad en la visita basal.
+
+No puedes utilizar:
+
+- Ecocardiografías posteriores.
+- Tratamientos iniciados tras el deterioro.
+- Biomarcadores recogidos después del evento.
+- Diagnósticos confirmados en seguimientos futuros.
+
+## Definir un tiempo índice
+
+En proyectos longitudinales conviene definir un **tiempo índice**.
+
+Es el momento exacto en el que se realiza la predicción.
+
+Por ejemplo:
+
+- Fecha de ingreso.
+- Inicio del tratamiento.
+- Primera valoración cardiovascular.
+- Día de cirugía.
+- Momento de alta.
+
+Todas las variables predictoras deben estar disponibles antes o en ese momento.
+
+## Ejemplo de filtrado temporal
+
+```python
+features_df = measurements.loc[
+    measurements["measurement_date"]
+    <= measurements["prediction_date"]
+].copy()
+```
+
+En proyectos reales, normalmente será necesario definir ventanas temporales específicas.
+
+## Variables sospechosas
+
+Algunas variables merecen especial revisión:
+
+- Fecha de alta.
+- Duración total del ingreso.
+- Diagnóstico final.
+- Tratamientos de rescate.
+- Variables de resultado.
+- Estado al final del seguimiento.
+- Pruebas solicitadas tras una sospecha clínica.
+- Variables calculadas usando toda la trayectoria.
+- Campos administrativos cerrados después del evento.
+
+## Leakage en datos derivados
+
+También puede aparecer en variables que parecen inocentes.
+
+Ejemplos:
+
+- Media de todas las analíticas del ingreso.
+- Máximo valor observado durante todo el seguimiento.
+- Número total de pruebas realizadas.
+- Número total de reingresos.
+- Última FEVI disponible.
+- Tiempo hasta el evento.
+
+Si estas variables usan información posterior al momento de predicción, producen leakage.
+
+## Cómo detectar data leakage
+
+### Revisar el proceso clínico
+
+Pregunta cuándo y por qué se genera cada variable.
+
+### Revisar las fechas
+
+Comprueba que las variables predictoras sean anteriores al tiempo índice.
+
+### Revisar el pipeline
+
+Verifica que todos los pasos se ajusten únicamente con entrenamiento.
+
+### Comparar resultados sospechosamente altos
+
+Un rendimiento casi perfecto en un problema complejo puede indicar leakage.
+
+### Revisar variables demasiado predictivas
+
+Una variable con poder predictivo extremo merece una revisión clínica y temporal.
+
+### Evaluar con una partición más realista
+
+Prueba:
+
+- Split por paciente.
+- Split temporal.
+- Split por centro.
+- Validación externa.
+
+## Señales de alarma
+
+::: {.callout-warning}
+## Posibles indicios de leakage
+
+- Accuracy o ROC AUC casi perfectos.
+- Gran caída del rendimiento en validación externa.
+- Variables administrativas entre las más importantes.
+- Rendimiento mucho peor al separar por paciente.
+- Rendimiento mucho peor con split temporal.
+- Variables disponibles solo después del desenlace.
+:::
+
+## Flujo recomendado
+
+1. Definir claramente el desenlace.
+2. Definir el momento de predicción.
+3. Definir la unidad de análisis.
+4. Identificar variables disponibles en ese momento.
+5. Separar train y test.
+6. Ajustar transformaciones solo con train.
+7. Mantener grupos relacionados juntos.
+8. Respetar el orden temporal.
+9. Evaluar con una estrategia realista.
+10. Revisar clínicamente las variables más importantes.
+
+## Consideraciones en datos clínicos
+
+### Múltiples visitas
+
+No mezclar visitas del mismo paciente entre train y test.
+
+### Intervenciones posteriores
+
+Los tratamientos iniciados como consecuencia del deterioro no deben utilizarse para predecir ese deterioro.
+
+### Frecuencia de medición
+
+Los pacientes más graves suelen tener más pruebas.
+
+El número de mediciones puede actuar como marcador indirecto de gravedad y producir leakage o sesgo.
+
+### Decisiones clínicas
+
+Una prueba puede haberse solicitado porque el clínico ya sospechaba el desenlace.
+
+Esto puede introducir información implícita sobre el target.
+
+### Validación multicéntrica
+
+Un modelo puede aprender:
+
+- El centro.
+- El protocolo local.
+- El dispositivo.
+- El sistema de registro.
+- La práctica clínica.
+
+Por eso, la validación por centro puede revelar problemas ocultos.
+
+## Tabla de ejemplos
+
+| Situación | ¿Hay leakage? | Motivo |
+|---|---:|---|
+| Escalar antes del split | Sí | Test influye en el escalado |
+| Imputar dentro de un pipeline | No | Se ajusta solo con train |
+| Varias visitas del paciente en train y test | Sí | El paciente aparece en ambos |
+| Split por paciente | No | Se mantienen grupos separados |
+| Utilizar tratamiento iniciado tras el evento | Sí | Información futura |
+| Utilizar edad basal | No | Disponible en el momento índice |
+| Ajustar hiperparámetros con test | Sí | Test participa en decisiones |
+| Evaluar una sola vez con test | No | Uso correcto del test |
+
+## Errores frecuentes
+
+- Pensar que leakage solo significa incluir el target.
+- Ajustar preprocesamiento antes del split.
+- Dividir por filas en datos longitudinales.
+- Utilizar variables posteriores al evento.
+- Ajustar hiperparámetros con el test.
+- Seleccionar variables con todo el dataset.
+- Aplicar SMOTE antes del split.
+- Ignorar fechas de medición.
+- Utilizar agregaciones calculadas con datos futuros.
+- No revisar variables administrativas.
+
+## Checklist para proyectos
+
+- [ ] He definido el desenlace.
+- [ ] He definido el momento exacto de predicción.
+- [ ] Todas las variables están disponibles en ese momento.
+- [ ] He separado train y test antes del preprocesamiento.
+- [ ] La imputación se ajusta solo con train.
+- [ ] El escalado se ajusta solo con train.
+- [ ] La selección de variables se ajusta solo con train.
+- [ ] PCA se ajusta solo con train.
+- [ ] El balanceo se aplica solo dentro de train.
+- [ ] No hay pacientes compartidos entre train y test.
+- [ ] He respetado el orden temporal.
+- [ ] No utilizo variables posteriores al evento.
+- [ ] No utilizo el test para elegir el modelo.
+- [ ] He revisado las variables más predictivas.
+- [ ] He considerado validación temporal o externa.
+
+## Recursos
+
+### Documentación
+
+- Pipelines de scikit-learn.
+- Cross-validation de scikit-learn.
+- Group-based cross-validation.
+- Pipelines de imbalanced-learn.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus propios ejemplos de leakage, dudas y recordatorios.
