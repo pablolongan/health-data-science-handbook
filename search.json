@@ -2204,6 +2204,881 @@
     ]
   },
   {
+    "objectID": "foundations/cross-validation.html",
+    "href": "foundations/cross-validation.html",
+    "title": "Validación cruzada",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nLa validación cruzada estima cómo generaliza un modelo utilizando varias particiones del dataset.\nLa estrategia debe respetar la estructura real de los datos:\n\nClases.\nPacientes.\nCentros.\nTiempo.\nEpisodios relacionados.\n\nNo siempre sirve un K-fold aleatorio.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#qué-es-la-validación-cruzada",
+    "href": "foundations/cross-validation.html#qué-es-la-validación-cruzada",
+    "title": "Validación cruzada",
+    "section": "¿Qué es la validación cruzada?",
+    "text": "¿Qué es la validación cruzada?\nLa validación cruzada divide el dataset en varios subconjuntos llamados folds.\nEn cada iteración:\n\nSe entrena el modelo con algunos folds.\nSe valida con el fold restante.\nSe repite el proceso.\nSe resumen las métricas.\n\nEl objetivo es obtener una estimación más estable que con un único split.\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nLa validación cruzada no sustituye al conjunto de test final.\nSirve para seleccionar y comparar modelos durante el desarrollo.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#k-fold-cross-validation",
+    "href": "foundations/cross-validation.html#k-fold-cross-validation",
+    "title": "Validación cruzada",
+    "section": "K-fold cross-validation",
+    "text": "K-fold cross-validation\nEn K-fold, el dataset se divide en \\(K\\) grupos.\nPor ejemplo, con 5 folds:\nIteración 1: Fold 1 validation, folds 2–5 train\nIteración 2: Fold 2 validation, folds 1, 3–5 train\nIteración 3: Fold 3 validation, folds 1–2, 4–5 train\nIteración 4: Fold 4 validation, folds 1–3, 5 train\nIteración 5: Fold 5 validation, folds 1–4 train",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#ejemplo-con-kfold",
+    "href": "foundations/cross-validation.html#ejemplo-con-kfold",
+    "title": "Validación cruzada",
+    "section": "Ejemplo con KFold",
+    "text": "Ejemplo con KFold\nfrom sklearn.model_selection import KFold\n\ncv = KFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=42\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#evaluar-un-modelo",
+    "href": "foundations/cross-validation.html#evaluar-un-modelo",
+    "title": "Validación cruzada",
+    "section": "Evaluar un modelo",
+    "text": "Evaluar un modelo\nfrom sklearn.model_selection import cross_val_score\n\nscores = cross_val_score(\n    estimator=model,\n    X=X,\n    y=y,\n    cv=cv,\n    scoring=\"roc_auc\"\n)\n\nprint(\n    \"Scores:\",\n    scores\n)\n\nprint(\n    \"Mean:\",\n    scores.mean()\n)\n\nprint(\n    \"Standard deviation:\",\n    scores.std()\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#cuándo-utilizar-kfold",
+    "href": "foundations/cross-validation.html#cuándo-utilizar-kfold",
+    "title": "Validación cruzada",
+    "section": "Cuándo utilizar KFold",
+    "text": "Cuándo utilizar KFold\nPuede ser adecuado cuando:\n\nLas observaciones son independientes.\nNo hay estructura temporal.\nNo hay varias filas del mismo paciente.\nEl target no está muy desbalanceado.\nLa distribución es relativamente homogénea.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#stratified-k-fold",
+    "href": "foundations/cross-validation.html#stratified-k-fold",
+    "title": "Validación cruzada",
+    "section": "Stratified K-fold",
+    "text": "Stratified K-fold\nStratified K-fold mantiene aproximadamente la proporción de clases en cada fold.\nfrom sklearn.model_selection import StratifiedKFold\n\ncv = StratifiedKFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=42\n)\nEs especialmente útil en clasificación.\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nEn clasificación desbalanceada, suele ser preferible StratifiedKFold frente a KFold.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#ejemplo-con-varias-métricas",
+    "href": "foundations/cross-validation.html#ejemplo-con-varias-métricas",
+    "title": "Validación cruzada",
+    "section": "Ejemplo con varias métricas",
+    "text": "Ejemplo con varias métricas\nfrom sklearn.model_selection import cross_validate\n\nscoring = {\n    \"roc_auc\": \"roc_auc\",\n    \"average_precision\": \"average_precision\",\n    \"balanced_accuracy\": \"balanced_accuracy\",\n    \"f1\": \"f1\"\n}\n\nscores = cross_validate(\n    estimator=model,\n    X=X,\n    y=y,\n    cv=cv,\n    scoring=scoring,\n    return_train_score=True\n)\n\nprint(\n    scores\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#revisar-overfitting-entre-folds",
+    "href": "foundations/cross-validation.html#revisar-overfitting-entre-folds",
+    "title": "Validación cruzada",
+    "section": "Revisar overfitting entre folds",
+    "text": "Revisar overfitting entre folds\nimport pandas as pd\n\nresults = pd.DataFrame(\n    {\n        \"train_roc_auc\": scores[\n            \"train_roc_auc\"\n        ],\n        \"validation_roc_auc\": scores[\n            \"test_roc_auc\"\n        ]\n    }\n)\n\ndisplay(results)\nUna diferencia grande y repetida puede indicar overfitting.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#group-k-fold",
+    "href": "foundations/cross-validation.html#group-k-fold",
+    "title": "Validación cruzada",
+    "section": "Group K-fold",
+    "text": "Group K-fold\nGroup K-fold mantiene todos los registros de un mismo grupo dentro del mismo fold.\nEsto es esencial cuando hay observaciones relacionadas.\nEjemplos de grupo:\n\nPaciente.\nFamilia.\nCentro.\nProfesional.\nDispositivo.\nEpisodio.\n\nfrom sklearn.model_selection import GroupKFold\n\ncv = GroupKFold(\n    n_splits=5\n)\nscores = cross_val_score(\n    estimator=model,\n    X=X,\n    y=y,\n    groups=df[\"patient_id\"],\n    cv=cv,\n    scoring=\"roc_auc\"\n)\n\n\n\n\n\n\nWarningData leakage por paciente\n\n\n\nSi un paciente tiene varias visitas, no debe aparecer en train y validation al mismo tiempo.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#groupshufflesplit",
+    "href": "foundations/cross-validation.html#groupshufflesplit",
+    "title": "Validación cruzada",
+    "section": "GroupShuffleSplit",
+    "text": "GroupShuffleSplit\nPermite realizar particiones aleatorias respetando grupos.\nfrom sklearn.model_selection import GroupShuffleSplit\n\nsplitter = GroupShuffleSplit(\n    n_splits=1,\n    test_size=0.20,\n    random_state=42\n)\n\ntrain_index, test_index = next(\n    splitter.split(\n        X,\n        y,\n        groups=df[\"patient_id\"]\n    )\n)\n\nX_train = X.iloc[\n    train_index\n]\n\nX_test = X.iloc[\n    test_index\n]\n\ny_train = y.iloc[\n    train_index\n]\n\ny_test = y.iloc[\n    test_index\n]",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#stratified-group-k-fold",
+    "href": "foundations/cross-validation.html#stratified-group-k-fold",
+    "title": "Validación cruzada",
+    "section": "Stratified Group K-fold",
+    "text": "Stratified Group K-fold\nCombina:\n\nEstratificación por clase.\nSeparación por grupos.\n\nfrom sklearn.model_selection import StratifiedGroupKFold\n\ncv = StratifiedGroupKFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=42\n)\nscores = cross_val_score(\n    estimator=model,\n    X=X,\n    y=y,\n    groups=df[\"patient_id\"],\n    cv=cv,\n    scoring=\"roc_auc\"\n)\nPuede ser útil cuando:\n\nHay varias filas por paciente.\nEl evento es poco frecuente.\nSe quiere mantener un balance razonable entre folds.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#limitaciones-de-la-estratificación-por-grupos",
+    "href": "foundations/cross-validation.html#limitaciones-de-la-estratificación-por-grupos",
+    "title": "Validación cruzada",
+    "section": "Limitaciones de la estratificación por grupos",
+    "text": "Limitaciones de la estratificación por grupos\nPuede ser difícil mantener proporciones idénticas si:\n\nHay pocos grupos.\nAlgunos grupos son muy grandes.\nLos eventos están concentrados en pocos pacientes.\nHay pocos positivos.\n\nEn ese caso, conviene revisar manualmente cada fold.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#inspeccionar-folds",
+    "href": "foundations/cross-validation.html#inspeccionar-folds",
+    "title": "Validación cruzada",
+    "section": "Inspeccionar folds",
+    "text": "Inspeccionar folds\nfor fold, (\n    train_index,\n    validation_index\n) in enumerate(\n    cv.split(\n        X,\n        y,\n        groups=df[\"patient_id\"]\n    ),\n    start=1\n):\n\n    y_train_fold = y.iloc[\n        train_index\n    ]\n\n    y_validation_fold = y.iloc[\n        validation_index\n    ]\n\n    print(\n        f\"Fold {fold}\"\n    )\n\n    print(\n        \"Train positive rate:\",\n        y_train_fold.mean()\n    )\n\n    print(\n        \"Validation positive rate:\",\n        y_validation_fold.mean()\n    )",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#validación-temporal",
+    "href": "foundations/cross-validation.html#validación-temporal",
+    "title": "Validación cruzada",
+    "section": "Validación temporal",
+    "text": "Validación temporal\nEn datos temporales no debe entrenarse con el futuro para predecir el pasado.\nUna partición adecuada puede ser:\nTrain: 2018–2022\nValidation: 2023\nTest: 2024",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#timeseriessplit",
+    "href": "foundations/cross-validation.html#timeseriessplit",
+    "title": "Validación cruzada",
+    "section": "TimeSeriesSplit",
+    "text": "TimeSeriesSplit\nfrom sklearn.model_selection import TimeSeriesSplit\n\ncv = TimeSeriesSplit(\n    n_splits=5\n)\nscores = cross_val_score(\n    estimator=model,\n    X=X_sorted,\n    y=y_sorted,\n    cv=cv,\n    scoring=\"neg_mean_absolute_error\"\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#estructura-de-timeseriessplit",
+    "href": "foundations/cross-validation.html#estructura-de-timeseriessplit",
+    "title": "Validación cruzada",
+    "section": "Estructura de TimeSeriesSplit",
+    "text": "Estructura de TimeSeriesSplit\nFold 1:\nTrain      Validation\n[ 1 2 ]    [ 3 ]\n\nFold 2:\nTrain      Validation\n[ 1 2 3 ]  [ 4 ]\n\nFold 3:\nTrain      Validation\n[ 1 2 3 4 ] [ 5 ]\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nTimeSeriesSplit respeta el orden de las filas, por lo que el dataset debe estar correctamente ordenado por tiempo.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#gap-temporal",
+    "href": "foundations/cross-validation.html#gap-temporal",
+    "title": "Validación cruzada",
+    "section": "Gap temporal",
+    "text": "Gap temporal\nA veces conviene dejar un espacio entre train y validation.\ncv = TimeSeriesSplit(\n    n_splits=5,\n    gap=30\n)\nEsto puede ser útil cuando:\n\nExiste solapamiento entre ventanas.\nLas observaciones cercanas son muy parecidas.\nSe quiere evitar contaminación temporal.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#validación-temporal-manual",
+    "href": "foundations/cross-validation.html#validación-temporal-manual",
+    "title": "Validación cruzada",
+    "section": "Validación temporal manual",
+    "text": "Validación temporal manual\ntrain_mask = (\n    df[\"date\"] &lt; \"2023-01-01\"\n)\n\nvalidation_mask = (\n    (df[\"date\"] &gt;= \"2023-01-01\")\n    & (df[\"date\"] &lt; \"2024-01-01\")\n)\n\ntest_mask = (\n    df[\"date\"] &gt;= \"2024-01-01\"\n)\nX_train = X.loc[\n    train_mask\n]\n\nX_validation = X.loc[\n    validation_mask\n]\n\nX_test = X.loc[\n    test_mask\n]",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#validación-por-centro",
+    "href": "foundations/cross-validation.html#validación-por-centro",
+    "title": "Validación cruzada",
+    "section": "Validación por centro",
+    "text": "Validación por centro\nEn datos multicéntricos puede validarse dejando un centro fuera.\nEjemplo:\nTrain:\nBarcelona + Helsinki\n\nValidation externa:\nCoimbra",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#leave-one-group-out",
+    "href": "foundations/cross-validation.html#leave-one-group-out",
+    "title": "Validación cruzada",
+    "section": "Leave-One-Group-Out",
+    "text": "Leave-One-Group-Out\nfrom sklearn.model_selection import LeaveOneGroupOut\n\ncv = LeaveOneGroupOut()\nscores = cross_val_score(\n    estimator=model,\n    X=X,\n    y=y,\n    groups=df[\"center\"],\n    cv=cv,\n    scoring=\"roc_auc\"\n)\nCada iteración deja un grupo completo como validation.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#inspeccionar-centro-dejado-fuera",
+    "href": "foundations/cross-validation.html#inspeccionar-centro-dejado-fuera",
+    "title": "Validación cruzada",
+    "section": "Inspeccionar centro dejado fuera",
+    "text": "Inspeccionar centro dejado fuera\nfor train_index, validation_index in cv.split(\n    X,\n    y,\n    groups=df[\"center\"]\n):\n\n    validation_centers = (\n        df.iloc[\n            validation_index\n        ][\"center\"]\n        .unique()\n    )\n\n    print(\n        validation_centers\n    )\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nLa validación por centro evalúa transportabilidad mejor que un split aleatorio dentro de los mismos centros.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#leave-one-group-out-por-paciente",
+    "href": "foundations/cross-validation.html#leave-one-group-out-por-paciente",
+    "title": "Validación cruzada",
+    "section": "Leave-One-Group-Out por paciente",
+    "text": "Leave-One-Group-Out por paciente\nPuede utilizarse cuando hay muy pocos pacientes, aunque suele ser costoso.\ncv = LeaveOneGroupOut()\n\nscores = cross_val_score(\n    estimator=model,\n    X=X,\n    y=y,\n    groups=df[\"patient_id\"],\n    cv=cv,\n    scoring=\"neg_mean_absolute_error\"\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#repeated-k-fold",
+    "href": "foundations/cross-validation.html#repeated-k-fold",
+    "title": "Validación cruzada",
+    "section": "Repeated K-fold",
+    "text": "Repeated K-fold\nRepeated K-fold repite el proceso con diferentes particiones.\nfrom sklearn.model_selection import RepeatedKFold\n\ncv = RepeatedKFold(\n    n_splits=5,\n    n_repeats=10,\n    random_state=42\n)\nPuede ofrecer una estimación más estable, pero aumenta el coste computacional.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#repeated-stratified-k-fold",
+    "href": "foundations/cross-validation.html#repeated-stratified-k-fold",
+    "title": "Validación cruzada",
+    "section": "Repeated Stratified K-fold",
+    "text": "Repeated Stratified K-fold\nfrom sklearn.model_selection import RepeatedStratifiedKFold\n\ncv = RepeatedStratifiedKFold(\n    n_splits=5,\n    n_repeats=10,\n    random_state=42\n)\nEs útil en clasificación con pocos datos.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#nested-cross-validation",
+    "href": "foundations/cross-validation.html#nested-cross-validation",
+    "title": "Validación cruzada",
+    "section": "Nested cross-validation",
+    "text": "Nested cross-validation\nNested cross-validation separa:\n\nUn bucle interno para elegir hiperparámetros.\nUn bucle externo para estimar rendimiento.\n\nOuter fold:\n    Train externo\n        │\n        └── Inner cross-validation\n                └── Selección de hiperparámetros\n\n    Validation externa\n        └── Evaluación del mejor modelo interno\n\n\n\n\n\n\nImportantVentaja\n\n\n\nNested cross-validation reduce el optimismo producido al evaluar el mismo proceso utilizado para seleccionar hiperparámetros.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#ejemplo-de-nested-cross-validation",
+    "href": "foundations/cross-validation.html#ejemplo-de-nested-cross-validation",
+    "title": "Validación cruzada",
+    "section": "Ejemplo de nested cross-validation",
+    "text": "Ejemplo de nested cross-validation\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.model_selection import GridSearchCV\nfrom sklearn.model_selection import cross_val_score\n\ninner_cv = StratifiedKFold(\n    n_splits=4,\n    shuffle=True,\n    random_state=42\n)\n\nouter_cv = StratifiedKFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=123\n)\n\nparam_grid = {\n    \"classifier__C\": [\n        0.01,\n        0.1,\n        1,\n        10\n    ]\n}\n\nsearch = GridSearchCV(\n    estimator=model,\n    param_grid=param_grid,\n    cv=inner_cv,\n    scoring=\"roc_auc\",\n    n_jobs=-1\n)\n\nnested_scores = cross_val_score(\n    estimator=search,\n    X=X,\n    y=y,\n    cv=outer_cv,\n    scoring=\"roc_auc\",\n    n_jobs=-1\n)\n\nprint(\n    nested_scores\n)\n\nprint(\n    nested_scores.mean()\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#nested-cross-validation-con-grupos",
+    "href": "foundations/cross-validation.html#nested-cross-validation-con-grupos",
+    "title": "Validación cruzada",
+    "section": "Nested cross-validation con grupos",
+    "text": "Nested cross-validation con grupos\nLos grupos deben respetarse tanto en el bucle interno como en el externo.\nEsto requiere una implementación cuidadosa.\nfrom sklearn.model_selection import GroupKFold\n\nouter_cv = GroupKFold(\n    n_splits=5\n)\n\ninner_cv = GroupKFold(\n    n_splits=4\n)\nEn muchos casos conviene implementar el bucle manualmente para pasar los grupos correctos.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#ejemplo-conceptual-manual",
+    "href": "foundations/cross-validation.html#ejemplo-conceptual-manual",
+    "title": "Validación cruzada",
+    "section": "Ejemplo conceptual manual",
+    "text": "Ejemplo conceptual manual\nouter_scores = []\n\nfor train_index, validation_index in outer_cv.split(\n    X,\n    y,\n    groups=groups\n):\n\n    X_train_outer = X.iloc[\n        train_index\n    ]\n\n    y_train_outer = y.iloc[\n        train_index\n    ]\n\n    groups_train_outer = groups.iloc[\n        train_index\n    ]\n\n    X_validation_outer = X.iloc[\n        validation_index\n    ]\n\n    y_validation_outer = y.iloc[\n        validation_index\n    ]\n\n    search.fit(\n        X_train_outer,\n        y_train_outer,\n        groups=groups_train_outer\n    )\n\n    score = search.score(\n        X_validation_outer,\n        y_validation_outer\n    )\n\n    outer_scores.append(\n        score\n    )",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#pipeline-dentro-de-validación-cruzada",
+    "href": "foundations/cross-validation.html#pipeline-dentro-de-validación-cruzada",
+    "title": "Validación cruzada",
+    "section": "Pipeline dentro de validación cruzada",
+    "text": "Pipeline dentro de validación cruzada\nTodo el preprocesamiento debe estar dentro del pipeline.\nscores = cross_val_score(\n    estimator=full_pipeline,\n    X=X,\n    y=y,\n    cv=cv,\n    scoring=\"roc_auc\"\n)\nEsto garantiza que en cada fold se ajustan únicamente con train:\n\nImputación.\nEscalado.\nEncoding.\nPCA.\nSelección de variables.\nBalanceo.\nModelo.\n\n\n\n\n\n\n\nWarningError frecuente\n\n\n\nNo preproceses todo el dataset antes de hacer cross-validation.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#ejemplo-incorrecto",
+    "href": "foundations/cross-validation.html#ejemplo-incorrecto",
+    "title": "Validación cruzada",
+    "section": "Ejemplo incorrecto",
+    "text": "Ejemplo incorrecto\nX_scaled = scaler.fit_transform(\n    X\n)\n\nscores = cross_val_score(\n    model,\n    X_scaled,\n    y,\n    cv=5\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#ejemplo-correcto",
+    "href": "foundations/cross-validation.html#ejemplo-correcto",
+    "title": "Validación cruzada",
+    "section": "Ejemplo correcto",
+    "text": "Ejemplo correcto\npipeline = Pipeline(\n    steps=[\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000\n            )\n        )\n    ]\n)\n\nscores = cross_val_score(\n    pipeline,\n    X,\n    y,\n    cv=5\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#selección-de-variables-dentro-del-fold",
+    "href": "foundations/cross-validation.html#selección-de-variables-dentro-del-fold",
+    "title": "Validación cruzada",
+    "section": "Selección de variables dentro del fold",
+    "text": "Selección de variables dentro del fold\nLa selección de variables debe realizarse dentro del pipeline.\nfrom sklearn.feature_selection import SelectKBest\nfrom sklearn.feature_selection import f_classif\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"selector\",\n            SelectKBest(\n                score_func=f_classif,\n                k=20\n            )\n        ),\n        (\n            \"classifier\",\n            LogisticRegression(\n                max_iter=1000\n            )\n        )\n    ]\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#smote-dentro-del-fold",
+    "href": "foundations/cross-validation.html#smote-dentro-del-fold",
+    "title": "Validación cruzada",
+    "section": "SMOTE dentro del fold",
+    "text": "SMOTE dentro del fold\nfrom imblearn.pipeline import Pipeline\nfrom imblearn.over_sampling import SMOTE\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"smote\",\n            SMOTE(\n                random_state=42\n            )\n        ),\n        (\n            \"classifier\",\n            LogisticRegression(\n                max_iter=1000\n            )\n        )\n    ]\n)\nSMOTE se aplicará únicamente a la parte de entrenamiento de cada fold.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#número-de-folds",
+    "href": "foundations/cross-validation.html#número-de-folds",
+    "title": "Validación cruzada",
+    "section": "Número de folds",
+    "text": "Número de folds\nValores habituales:\n\n5 folds.\n10 folds.\n\n\nMás folds\nVentajas:\n\nMás datos para entrenar en cada iteración.\n\nLimitaciones:\n\nMayor coste.\nValidaciones más pequeñas.\nMayor inestabilidad si hay pocos eventos.\n\n\n\nMenos folds\nVentajas:\n\nMenor coste.\nValidaciones más grandes.\n\nLimitaciones:\n\nMenos iteraciones.\nMayor sesgo en la estimación.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#pocos-eventos",
+    "href": "foundations/cross-validation.html#pocos-eventos",
+    "title": "Validación cruzada",
+    "section": "Pocos eventos",
+    "text": "Pocos eventos\nSi hay pocos eventos positivos:\n\nReducir el número de folds.\nUtilizar estratificación.\nRevisar eventos por fold.\nConsiderar validación repetida.\nReportar alta incertidumbre.\n\n\n\n\n\n\n\nCautionRegla práctica\n\n\n\nCada fold de validation debería contener suficientes eventos para calcular métricas de forma estable.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#reproducibilidad",
+    "href": "foundations/cross-validation.html#reproducibilidad",
+    "title": "Validación cruzada",
+    "section": "Reproducibilidad",
+    "text": "Reproducibilidad\nCuando hay aleatoriedad, define random_state.\ncv = StratifiedKFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=42\n)\nSin embargo, no conviene confiar únicamente en una única semilla.\nPuede revisarse la estabilidad con varias repeticiones.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#guardar-índices-de-los-folds",
+    "href": "foundations/cross-validation.html#guardar-índices-de-los-folds",
+    "title": "Validación cruzada",
+    "section": "Guardar índices de los folds",
+    "text": "Guardar índices de los folds\nfolds = []\n\nfor fold, (\n    train_index,\n    validation_index\n) in enumerate(\n    cv.split(\n        X,\n        y\n    ),\n    start=1\n):\n\n    folds.append(\n        {\n            \"fold\": fold,\n            \"train_index\": train_index,\n            \"validation_index\": validation_index\n        }\n    )\nEsto facilita:\n\nReproducibilidad.\nAuditoría.\nComparación entre modelos.\nUso de los mismos folds.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#comparar-modelos-con-los-mismos-folds",
+    "href": "foundations/cross-validation.html#comparar-modelos-con-los-mismos-folds",
+    "title": "Validación cruzada",
+    "section": "Comparar modelos con los mismos folds",
+    "text": "Comparar modelos con los mismos folds\nmodels = {\n    \"logistic\": logistic_pipeline,\n    \"random_forest\": random_forest_pipeline\n}\n\nresults = {}\n\nfor name, estimator in models.items():\n\n    scores = cross_val_score(\n        estimator=estimator,\n        X=X,\n        y=y,\n        cv=cv,\n        scoring=\"roc_auc\"\n    )\n\n    results[name] = scores\nNo debe cambiarse el split entre modelos.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#resumen-de-resultados",
+    "href": "foundations/cross-validation.html#resumen-de-resultados",
+    "title": "Validación cruzada",
+    "section": "Resumen de resultados",
+    "text": "Resumen de resultados\nimport pandas as pd\n\nresults_df = pd.DataFrame(\n    results\n)\n\ndisplay(\n    results_df\n)\n\ndisplay(\n    results_df.agg(\n        [\n            \"mean\",\n            \"std\",\n            \"min\",\n            \"max\"\n        ]\n    )\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#intervalos-de-confianza-aproximados",
+    "href": "foundations/cross-validation.html#intervalos-de-confianza-aproximados",
+    "title": "Validación cruzada",
+    "section": "Intervalos de confianza aproximados",
+    "text": "Intervalos de confianza aproximados\nimport numpy as np\n\nmean_score = scores.mean()\n\nstandard_error = (\n    scores.std(\n        ddof=1\n    )\n    / np.sqrt(\n        len(scores)\n    )\n)\n\nlower = (\n    mean_score\n    - 1.96 * standard_error\n)\n\nupper = (\n    mean_score\n    + 1.96 * standard_error\n)\nEsta aproximación debe interpretarse con cautela porque los folds no son completamente independientes.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#bootstrap-frente-a-cross-validation",
+    "href": "foundations/cross-validation.html#bootstrap-frente-a-cross-validation",
+    "title": "Validación cruzada",
+    "section": "Bootstrap frente a cross-validation",
+    "text": "Bootstrap frente a cross-validation\n\nCross-validation\nÚtil para:\n\nComparar modelos.\nSeleccionar hiperparámetros.\nEstimar generalización.\n\n\n\nBootstrap\nÚtil para:\n\nEstimar incertidumbre.\nCalcular intervalos de confianza.\nEvaluar estabilidad.\n\nPueden ser técnicas complementarias.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#validación-externa-final",
+    "href": "foundations/cross-validation.html#validación-externa-final",
+    "title": "Validación cruzada",
+    "section": "Validación externa final",
+    "text": "Validación externa final\nAunque se utilice cross-validation, sigue siendo importante disponer de:\n\nTest temporal.\nTest por centro.\nCohorte externa.\nValidación prospectiva.\n\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nLa validación cruzada interna no demuestra que un modelo funcione en otro hospital.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#tabla-de-decisión",
+    "href": "foundations/cross-validation.html#tabla-de-decisión",
+    "title": "Validación cruzada",
+    "section": "Tabla de decisión",
+    "text": "Tabla de decisión\n\n\n\nSituación\nEstrategia\n\n\n\n\nRegresión con observaciones independientes\nKFold\n\n\nClasificación\nStratifiedKFold\n\n\nVarias filas por paciente\nGroupKFold\n\n\nVarias filas por paciente y desbalance\nStratifiedGroupKFold\n\n\nDatos temporales\nTimeSeriesSplit o split temporal\n\n\nValidación por centro\nLeaveOneGroupOut\n\n\nAjuste intensivo de hiperparámetros\nNested cross-validation\n\n\nPocos datos\nRepeated cross-validation",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#errores-frecuentes",
+    "href": "foundations/cross-validation.html#errores-frecuentes",
+    "title": "Validación cruzada",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nUsar K-fold aleatorio con datos temporales.\nMezclar visitas del mismo paciente.\nAjustar preprocesamiento antes de cross-validation.\nAplicar SMOTE antes del split.\nSeleccionar variables con todo el dataset.\nComparar modelos con folds distintos.\nNo revisar el número de eventos por fold.\nAjustar hiperparámetros y reportar el mismo score sin nested CV.\nConfundir validación interna con externa.\nUtilizar el test dentro de la validación cruzada.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#flujo-recomendado",
+    "href": "foundations/cross-validation.html#flujo-recomendado",
+    "title": "Validación cruzada",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nIdentificar la unidad de análisis.\nRevisar dependencias entre observaciones.\nRevisar estructura temporal.\nRevisar centros y grupos.\nElegir el tipo de validación.\nDefinir los folds.\nIntegrar preprocesamiento en pipeline.\nEvaluar varias métricas.\nRevisar variabilidad.\nAjustar hiperparámetros internamente.\nComparar modelos con los mismos folds.\nEvaluar finalmente en test externo o temporal.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#checklist-para-proyectos",
+    "href": "foundations/cross-validation.html#checklist-para-proyectos",
+    "title": "Validación cruzada",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe definido la unidad de análisis.\nHe comprobado si hay varias filas por paciente.\nHe revisado la estructura temporal.\nHe revisado centros o grupos.\nHe elegido el splitter adecuado.\nHe revisado el balance por fold.\nHe revisado eventos por fold.\nEl preprocesamiento está dentro del pipeline.\nLa selección de variables está dentro del pipeline.\nEl balanceo está dentro del pipeline.\nLos modelos usan los mismos folds.\nHe reportado media y variabilidad.\nHe considerado nested cross-validation.\nHe mantenido un test final separado.\nHe considerado validación externa.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#recursos",
+    "href": "foundations/cross-validation.html#recursos",
+    "title": "Validación cruzada",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\nKFold.\nStratifiedKFold.\nGroupKFold.\nStratifiedGroupKFold.\nTimeSeriesSplit.\nLeaveOneGroupOut.\ncross_val_score.\ncross_validate.\nGridSearchCV.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "foundations/cross-validation.html#notas-personales",
+    "href": "foundations/cross-validation.html#notas-personales",
+    "title": "Validación cruzada",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus estrategias de validación, dudas y ejemplos habituales.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Validación cruzada"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html",
+    "href": "dimensionality-reduction/pca.html",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nPCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.\nCada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#qué-problema-resuelve",
+    "href": "dimensionality-reduction/pca.html#qué-problema-resuelve",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "¿Qué problema resuelve?",
+    "text": "¿Qué problema resuelve?\nEn muchos datasets existen numerosas variables que contienen información parcialmente redundante.\nPor ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:\n\nPeso.\nAltura.\nÍndice de masa corporal.\nSuperficie corporal.\nPerímetros corporales.\n\nEstas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.\nPCA puede utilizarse para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nPCA no selecciona variables originales. Crea variables nuevas llamadas componentes principales.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#intuición",
+    "href": "dimensionality-reduction/pca.html#intuición",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Intuición",
+    "text": "Intuición\nImagina una nube de puntos formada por dos variables correlacionadas.\nAunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.\nPCA encuentra esa dirección y la convierte en el primer componente principal.\nEl segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.\nDe este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#fundamentos-teóricos",
+    "href": "dimensionality-reduction/pca.html#fundamentos-teóricos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Fundamentos teóricos",
+    "text": "Fundamentos teóricos\n\nComponentes principales\nCada componente principal es una combinación lineal de las variables originales.\nPara un dataset con variables \\(x_1, x_2, \\ldots, x_p\\), el primer componente puede expresarse como:\n\\[\nPC_1 = w_{11}x_1 + w_{12}x_2 + \\cdots + w_{1p}x_p\n\\]\nEl segundo componente se expresa como:\n\\[\nPC_2 = w_{21}x_1 + w_{22}x_2 + \\cdots + w_{2p}x_p\n\\]\nLos coeficientes \\(w\\) se denominan pesos o loadings.\n\n\nVarianza explicada\nCada componente explica una parte de la varianza total del dataset.\nLa proporción de varianza explicada por el componente \\(j\\) puede expresarse como:\n\\[\n\\text{Explained variance ratio}_j =\n\\frac{\\lambda_j}\n{\\sum_{k=1}^{p}\\lambda_k}\n\\]\ndonde \\(\\lambda_j\\) es el autovalor asociado al componente \\(j\\).\n\n\nVarianza explicada acumulada\nLa varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.\nPor ejemplo:\n\n1 componente: 45 %.\n2 componentes: 68 %.\n3 componentes: 82 %.\n4 componentes: 91 %.\n\nEn este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.\n\n\n\n\n\n\nWarningImportante\n\n\n\nUn componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
+    "href": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "¿Por qué es importante escalar?",
+    "text": "¿Por qué es importante escalar?\nPCA está influido por la escala de las variables.\nImagina estas variables:\n\nEdad, medida en años.\nTroponina, medida con valores pequeños.\nPresión arterial, medida en mmHg.\n\nUna variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.\nPor eso, antes de aplicar PCA suele utilizarse:\nStandardScaler()\nEl escalado transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
+    "href": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Supuestos y condiciones",
+    "text": "Supuestos y condiciones\nPCA funciona mejor cuando:\n\nLas variables son numéricas.\nExisten relaciones aproximadamente lineales.\nLas variables contienen varianza informativa.\nHay correlación entre algunas variables.\nLos valores extremos han sido revisados.\nLas escalas se han tratado adecuadamente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
+    "href": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Cuándo utilizar PCA",
+    "text": "Cuándo utilizar PCA\nPCA puede ser adecuado cuando:\n\nTienes muchas variables numéricas correlacionadas.\nQuieres reducir el número de variables.\nQuieres visualizar observaciones en dos o tres dimensiones.\nQuieres reducir multicolinealidad.\nQuieres comprimir información antes de otro modelo.\nQuieres explorar patrones latentes.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
+    "href": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Cuándo no utilizar PCA",
+    "text": "Cuándo no utilizar PCA\nPCA puede no ser adecuado cuando:\n\nNecesitas interpretar directamente cada variable original.\nLas relaciones entre variables son principalmente no lineales.\nLa mayoría de las variables son categóricas.\nTienes muy pocas variables.\nLos componentes son difíciles de justificar clínicamente.\nEl objetivo es seleccionar variables originales, no transformarlas.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
+    "href": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Flujo de trabajo recomendado",
+    "text": "Flujo de trabajo recomendado\n\nSeleccionar únicamente variables numéricas relevantes.\nRevisar valores ausentes.\nRevisar valores extremos.\nSeparar entrenamiento y prueba si PCA forma parte de un modelo predictivo.\nImputar valores ausentes utilizando solo entrenamiento.\nEscalar las variables utilizando solo entrenamiento.\nAjustar PCA utilizando solo entrenamiento.\nElegir el número de componentes.\nTransformar entrenamiento y prueba.\nInterpretar la varianza explicada y los loadings.\nEvaluar el impacto en el modelo posterior.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#código-mínimo",
+    "href": "dimensionality-reduction/pca.html#código-mínimo",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Código mínimo",
+    "text": "Código mínimo\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(pca.explained_variance_ratio_)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
+    "href": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Seleccionar componentes según varianza explicada",
+    "text": "Seleccionar componentes según varianza explicada\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(f\"Número de componentes: {pca.n_components_}\")\nprint(\n    \"Varianza explicada acumulada:\",\n    pca.explained_variance_ratio_.sum()\n)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
+    "href": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Implementación segura dentro de un pipeline",
+    "text": "Implementación segura dentro de un pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\"imputer\", SimpleImputer(strategy=\"median\")),\n        (\"scaler\", StandardScaler()),\n        (\"pca\", PCA(n_components=0.95)),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nCautionError frecuente: data leakage\n\n\n\nNo ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.\nEl pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
+    "href": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Inspeccionar la varianza explicada",
+    "text": "Inspeccionar la varianza explicada\nimport pandas as pd\n\nexplained_variance = pd.DataFrame(\n    {\n        \"component\": range(\n            1,\n            len(pca.explained_variance_ratio_) + 1\n        ),\n        \"explained_variance_ratio\":\n            pca.explained_variance_ratio_,\n        \"cumulative_explained_variance\":\n            pca.explained_variance_ratio_.cumsum()\n    }\n)\n\ndisplay(explained_variance)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#interpretar-los-loadings",
+    "href": "dimensionality-reduction/pca.html#interpretar-los-loadings",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Interpretar los loadings",
+    "text": "Interpretar los loadings\nimport pandas as pd\n\nloadings = pd.DataFrame(\n    pca.components_.T,\n    index=X.columns,\n    columns=[\n        f\"PC{i}\"\n        for i in range(\n            1,\n            pca.n_components_ + 1\n        )\n    ]\n)\n\ndisplay(loadings)\nUn valor absoluto elevado indica que la variable tiene una contribución importante al componente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
+    "href": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Consideraciones en datos clínicos",
+    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nPCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.\n\n\n\nMediciones repetidas\nSi un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.\n\n\nValores ausentes\nLa ausencia de una prueba puede estar relacionada con:\n\nLa gravedad.\nLa indicación clínica.\nEl centro.\nEl momento del seguimiento.\nLa disponibilidad de recursos.\n\n\n\nDiferencias entre centros\nPCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:\n\nEquipos.\nUnidades.\nProtocolos.\nPoblaciones.\nMétodos de laboratorio.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#errores-frecuentes",
+    "href": "dimensionality-reduction/pca.html#errores-frecuentes",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nAplicar PCA antes de separar entrenamiento y prueba.\nEscalar utilizando todo el dataset.\nNo escalar variables con unidades diferentes.\nAplicar PCA directamente a variables categóricas.\nInterpretar los componentes como variables clínicas reales.\nPensar que más varianza explicada siempre implica mejor predicción.\nIgnorar valores extremos que dominan los componentes.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#checklist-para-proyectos",
+    "href": "dimensionality-reduction/pca.html#checklist-para-proyectos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nLas variables son numéricas.\nHe revisado valores ausentes.\nHe revisado valores extremos.\nHe separado entrenamiento y prueba.\nLa separación se ha realizado por paciente cuando corresponde.\nLa imputación se ajusta solo con entrenamiento.\nEl escalado se ajusta solo con entrenamiento.\nPCA se ajusta solo con entrenamiento.\nHe revisado la varianza explicada.\nHe revisado los loadings.\nHe considerado la interpretabilidad clínica.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "deep-learning/index.html",
+    "href": "deep-learning/index.html",
+    "title": "Deep learning",
+    "section": "",
+    "text": "Esta sección reunirá los fundamentos y modelos de deep learning que se añadirán durante el próximo curso.",
+    "crumbs": [
+      "Inicio",
+      "Deep learning",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "deep-learning/index.html#contenidos-previstos",
+    "href": "deep-learning/index.html#contenidos-previstos",
+    "title": "Deep learning",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Deep learning",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "Sobre el proyecto",
+    "section": "",
+    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
+    "crumbs": [
+      "Inicio",
+      "Sobre el proyecto"
+    ]
+  },
+  {
+    "objectID": "code-recipes/index.html",
+    "href": "code-recipes/index.html",
+    "title": "Recetario de código",
+    "section": "",
+    "text": "Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.",
+    "crumbs": [
+      "Inicio",
+      "Recetario de código",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "code-recipes/index.html#contenidos-previstos",
+    "href": "code-recipes/index.html#contenidos-previstos",
+    "title": "Recetario de código",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Recetario de código",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/index.html",
+    "href": "dimensionality-reduction/index.html",
+    "title": "Reducción de dimensionalidad",
+    "section": "",
+    "text": "Esta sección reúne métodos para reducir el número de variables conservando la mayor cantidad posible de información.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/index.html#contenidos-previstos",
+    "href": "dimensionality-reduction/index.html#contenidos-previstos",
+    "title": "Reducción de dimensionalidad",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "Introducción"
+    ]
+  },
+  {
     "objectID": "foundations/classification-metrics.html",
     "href": "foundations/classification-metrics.html",
     "title": "Métricas de clasificación",
@@ -2861,293 +3736,6 @@
       "Inicio",
       "Fundamentos",
       "Métricas de clasificación"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/index.html",
-    "href": "dimensionality-reduction/index.html",
-    "title": "Reducción de dimensionalidad",
-    "section": "",
-    "text": "Esta sección reúne métodos para reducir el número de variables conservando la mayor cantidad posible de información.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/index.html#contenidos-previstos",
-    "href": "dimensionality-reduction/index.html#contenidos-previstos",
-    "title": "Reducción de dimensionalidad",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "code-recipes/index.html",
-    "href": "code-recipes/index.html",
-    "title": "Recetario de código",
-    "section": "",
-    "text": "Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.",
-    "crumbs": [
-      "Inicio",
-      "Recetario de código",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "code-recipes/index.html#contenidos-previstos",
-    "href": "code-recipes/index.html#contenidos-previstos",
-    "title": "Recetario de código",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Recetario de código",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "Sobre el proyecto",
-    "section": "",
-    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
-    "crumbs": [
-      "Inicio",
-      "Sobre el proyecto"
-    ]
-  },
-  {
-    "objectID": "deep-learning/index.html",
-    "href": "deep-learning/index.html",
-    "title": "Deep learning",
-    "section": "",
-    "text": "Esta sección reunirá los fundamentos y modelos de deep learning que se añadirán durante el próximo curso.",
-    "crumbs": [
-      "Inicio",
-      "Deep learning",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "deep-learning/index.html#contenidos-previstos",
-    "href": "deep-learning/index.html#contenidos-previstos",
-    "title": "Deep learning",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Deep learning",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html",
-    "href": "dimensionality-reduction/pca.html",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "",
-    "text": "TipResumen en 30 segundos\n\n\n\nPCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.\nCada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#qué-problema-resuelve",
-    "href": "dimensionality-reduction/pca.html#qué-problema-resuelve",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "¿Qué problema resuelve?",
-    "text": "¿Qué problema resuelve?\nEn muchos datasets existen numerosas variables que contienen información parcialmente redundante.\nPor ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:\n\nPeso.\nAltura.\nÍndice de masa corporal.\nSuperficie corporal.\nPerímetros corporales.\n\nEstas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.\nPCA puede utilizarse para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nPCA no selecciona variables originales. Crea variables nuevas llamadas componentes principales.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#intuición",
-    "href": "dimensionality-reduction/pca.html#intuición",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Intuición",
-    "text": "Intuición\nImagina una nube de puntos formada por dos variables correlacionadas.\nAunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.\nPCA encuentra esa dirección y la convierte en el primer componente principal.\nEl segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.\nDe este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#fundamentos-teóricos",
-    "href": "dimensionality-reduction/pca.html#fundamentos-teóricos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Fundamentos teóricos",
-    "text": "Fundamentos teóricos\n\nComponentes principales\nCada componente principal es una combinación lineal de las variables originales.\nPara un dataset con variables \\(x_1, x_2, \\ldots, x_p\\), el primer componente puede expresarse como:\n\\[\nPC_1 = w_{11}x_1 + w_{12}x_2 + \\cdots + w_{1p}x_p\n\\]\nEl segundo componente se expresa como:\n\\[\nPC_2 = w_{21}x_1 + w_{22}x_2 + \\cdots + w_{2p}x_p\n\\]\nLos coeficientes \\(w\\) se denominan pesos o loadings.\n\n\nVarianza explicada\nCada componente explica una parte de la varianza total del dataset.\nLa proporción de varianza explicada por el componente \\(j\\) puede expresarse como:\n\\[\n\\text{Explained variance ratio}_j =\n\\frac{\\lambda_j}\n{\\sum_{k=1}^{p}\\lambda_k}\n\\]\ndonde \\(\\lambda_j\\) es el autovalor asociado al componente \\(j\\).\n\n\nVarianza explicada acumulada\nLa varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.\nPor ejemplo:\n\n1 componente: 45 %.\n2 componentes: 68 %.\n3 componentes: 82 %.\n4 componentes: 91 %.\n\nEn este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.\n\n\n\n\n\n\nWarningImportante\n\n\n\nUn componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
-    "href": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "¿Por qué es importante escalar?",
-    "text": "¿Por qué es importante escalar?\nPCA está influido por la escala de las variables.\nImagina estas variables:\n\nEdad, medida en años.\nTroponina, medida con valores pequeños.\nPresión arterial, medida en mmHg.\n\nUna variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.\nPor eso, antes de aplicar PCA suele utilizarse:\nStandardScaler()\nEl escalado transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
-    "href": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Supuestos y condiciones",
-    "text": "Supuestos y condiciones\nPCA funciona mejor cuando:\n\nLas variables son numéricas.\nExisten relaciones aproximadamente lineales.\nLas variables contienen varianza informativa.\nHay correlación entre algunas variables.\nLos valores extremos han sido revisados.\nLas escalas se han tratado adecuadamente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
-    "href": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Cuándo utilizar PCA",
-    "text": "Cuándo utilizar PCA\nPCA puede ser adecuado cuando:\n\nTienes muchas variables numéricas correlacionadas.\nQuieres reducir el número de variables.\nQuieres visualizar observaciones en dos o tres dimensiones.\nQuieres reducir multicolinealidad.\nQuieres comprimir información antes de otro modelo.\nQuieres explorar patrones latentes.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
-    "href": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Cuándo no utilizar PCA",
-    "text": "Cuándo no utilizar PCA\nPCA puede no ser adecuado cuando:\n\nNecesitas interpretar directamente cada variable original.\nLas relaciones entre variables son principalmente no lineales.\nLa mayoría de las variables son categóricas.\nTienes muy pocas variables.\nLos componentes son difíciles de justificar clínicamente.\nEl objetivo es seleccionar variables originales, no transformarlas.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
-    "href": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Flujo de trabajo recomendado",
-    "text": "Flujo de trabajo recomendado\n\nSeleccionar únicamente variables numéricas relevantes.\nRevisar valores ausentes.\nRevisar valores extremos.\nSeparar entrenamiento y prueba si PCA forma parte de un modelo predictivo.\nImputar valores ausentes utilizando solo entrenamiento.\nEscalar las variables utilizando solo entrenamiento.\nAjustar PCA utilizando solo entrenamiento.\nElegir el número de componentes.\nTransformar entrenamiento y prueba.\nInterpretar la varianza explicada y los loadings.\nEvaluar el impacto en el modelo posterior.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#código-mínimo",
-    "href": "dimensionality-reduction/pca.html#código-mínimo",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Código mínimo",
-    "text": "Código mínimo\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(pca.explained_variance_ratio_)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
-    "href": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Seleccionar componentes según varianza explicada",
-    "text": "Seleccionar componentes según varianza explicada\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(f\"Número de componentes: {pca.n_components_}\")\nprint(\n    \"Varianza explicada acumulada:\",\n    pca.explained_variance_ratio_.sum()\n)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
-    "href": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Implementación segura dentro de un pipeline",
-    "text": "Implementación segura dentro de un pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\"imputer\", SimpleImputer(strategy=\"median\")),\n        (\"scaler\", StandardScaler()),\n        (\"pca\", PCA(n_components=0.95)),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nCautionError frecuente: data leakage\n\n\n\nNo ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.\nEl pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
-    "href": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Inspeccionar la varianza explicada",
-    "text": "Inspeccionar la varianza explicada\nimport pandas as pd\n\nexplained_variance = pd.DataFrame(\n    {\n        \"component\": range(\n            1,\n            len(pca.explained_variance_ratio_) + 1\n        ),\n        \"explained_variance_ratio\":\n            pca.explained_variance_ratio_,\n        \"cumulative_explained_variance\":\n            pca.explained_variance_ratio_.cumsum()\n    }\n)\n\ndisplay(explained_variance)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#interpretar-los-loadings",
-    "href": "dimensionality-reduction/pca.html#interpretar-los-loadings",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Interpretar los loadings",
-    "text": "Interpretar los loadings\nimport pandas as pd\n\nloadings = pd.DataFrame(\n    pca.components_.T,\n    index=X.columns,\n    columns=[\n        f\"PC{i}\"\n        for i in range(\n            1,\n            pca.n_components_ + 1\n        )\n    ]\n)\n\ndisplay(loadings)\nUn valor absoluto elevado indica que la variable tiene una contribución importante al componente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
-    "href": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Consideraciones en datos clínicos",
-    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nPCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.\n\n\n\nMediciones repetidas\nSi un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.\n\n\nValores ausentes\nLa ausencia de una prueba puede estar relacionada con:\n\nLa gravedad.\nLa indicación clínica.\nEl centro.\nEl momento del seguimiento.\nLa disponibilidad de recursos.\n\n\n\nDiferencias entre centros\nPCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:\n\nEquipos.\nUnidades.\nProtocolos.\nPoblaciones.\nMétodos de laboratorio.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#errores-frecuentes",
-    "href": "dimensionality-reduction/pca.html#errores-frecuentes",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nAplicar PCA antes de separar entrenamiento y prueba.\nEscalar utilizando todo el dataset.\nNo escalar variables con unidades diferentes.\nAplicar PCA directamente a variables categóricas.\nInterpretar los componentes como variables clínicas reales.\nPensar que más varianza explicada siempre implica mejor predicción.\nIgnorar valores extremos que dominan los componentes.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#checklist-para-proyectos",
-    "href": "dimensionality-reduction/pca.html#checklist-para-proyectos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Checklist para proyectos",
-    "text": "Checklist para proyectos\n\nLas variables son numéricas.\nHe revisado valores ausentes.\nHe revisado valores extremos.\nHe separado entrenamiento y prueba.\nLa separación se ha realizado por paciente cuando corresponde.\nLa imputación se ajusta solo con entrenamiento.\nEl escalado se ajusta solo con entrenamiento.\nPCA se ajusta solo con entrenamiento.\nHe revisado la varianza explicada.\nHe revisado los loadings.\nHe considerado la interpretabilidad clínica.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
     ]
   },
   {
