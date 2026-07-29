@@ -1580,961 +1580,626 @@
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html",
-    "href": "foundations/model-evaluation.html",
-    "title": "Evaluación de modelos",
+    "objectID": "foundations/regression-metrics.html",
+    "href": "foundations/regression-metrics.html",
+    "title": "Métricas de regresión",
     "section": "",
-    "text": "TipResumen en 30 segundos\n\n\n\nEvaluar un modelo significa estimar cómo funcionará con datos nuevos.\nNo basta con obtener una métrica alta en entrenamiento. Hay que comprobar:\n\nGeneralización.\nOverfitting.\nUnderfitting.\nComparación con un baseline.\nEstabilidad.\nCalibración.\nUtilidad clínica.\nValidación externa.",
+    "text": "TipResumen en 30 segundos\n\n\n\nLas métricas de regresión evalúan cuánto se alejan las predicciones de los valores reales.\nLas más habituales son:\n\nMAE.\nMSE.\nRMSE.\n\\(R^2\\).\nMediana del error absoluto.\nMAPE.\n\nCada una penaliza los errores de forma distinta y responde a una pregunta diferente.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#qué-significa-que-un-modelo-funcione-bien",
-    "href": "foundations/model-evaluation.html#qué-significa-que-un-modelo-funcione-bien",
-    "title": "Evaluación de modelos",
-    "section": "¿Qué significa que un modelo funcione bien?",
-    "text": "¿Qué significa que un modelo funcione bien?\nUn modelo puede considerarse útil cuando:\n\nMantiene un buen rendimiento en datos no vistos.\nSupera a una estrategia baseline.\nEs estable entre particiones.\nTiene métricas adecuadas para el problema.\nProduce predicciones interpretables.\nEstá bien calibrado.\nAporta valor clínico o operativo.\nGeneraliza a otras poblaciones o centros.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nUna buena métrica no garantiza un buen modelo.\nTambién importan la validez del diseño, la ausencia de leakage, la calibración y la utilidad real.",
+    "objectID": "foundations/regression-metrics.html#qué-evalúa-un-modelo-de-regresión",
+    "href": "foundations/regression-metrics.html#qué-evalúa-un-modelo-de-regresión",
+    "title": "Métricas de regresión",
+    "section": "¿Qué evalúa un modelo de regresión?",
+    "text": "¿Qué evalúa un modelo de regresión?\nUn modelo de regresión predice una variable numérica continua.\nEjemplos:\n\nDías de ingreso.\nEdad.\nPresión arterial.\nFracción de eyección.\nCoste hospitalario.\nTiempo hasta un evento.\nValor de un biomarcador.\n\nLa predicción puede escribirse como:\n\\[\n\\hat{y}_i\n\\]\ny el valor real como:\n\\[\ny_i\n\\]\nEl error individual es:\n\\[\ne_i = y_i - \\hat{y}_i\n\\]\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nUna métrica resume los errores, pero no muestra por sí sola cómo se distribuyen ni en qué pacientes ocurren.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#generalización",
-    "href": "foundations/model-evaluation.html#generalización",
-    "title": "Evaluación de modelos",
-    "section": "Generalización",
-    "text": "Generalización\nLa generalización es la capacidad del modelo para mantener su rendimiento en observaciones nuevas.\nEl objetivo no es memorizar el dataset de entrenamiento, sino aprender patrones que se repitan en datos futuros.\nUn modelo que generaliza bien:\n\nFunciona en test.\nMantiene resultados en validación cruzada.\nTolera pequeñas variaciones en los datos.\nNo depende de observaciones concretas.\nNo utiliza información futura.",
+    "objectID": "foundations/regression-metrics.html#error-absoluto",
+    "href": "foundations/regression-metrics.html#error-absoluto",
+    "title": "Métricas de regresión",
+    "section": "Error absoluto",
+    "text": "Error absoluto\nEl error absoluto de una observación es:\n\\[\n|y_i - \\hat{y}_i|\n\\]\nEjemplo:\nValor real: 10 días\nPredicción: 7 días\nError absoluto: 3 días\nNo importa si el modelo se queda por encima o por debajo.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#rendimiento-en-train-y-test",
-    "href": "foundations/model-evaluation.html#rendimiento-en-train-y-test",
-    "title": "Evaluación de modelos",
-    "section": "Rendimiento en train y test",
-    "text": "Rendimiento en train y test\nPuede compararse el rendimiento en entrenamiento y test.\ntrain_score = model.score(\n    X_train,\n    y_train\n)\n\ntest_score = model.score(\n    X_test,\n    y_test\n)\n\nprint(\n    f\"Train score: {train_score:.3f}\"\n)\n\nprint(\n    f\"Test score: {test_score:.3f}\"\n)\nUna diferencia grande entre train y test puede indicar overfitting.",
+    "objectID": "foundations/regression-metrics.html#mae",
+    "href": "foundations/regression-metrics.html#mae",
+    "title": "Métricas de regresión",
+    "section": "MAE",
+    "text": "MAE\nMAE significa mean absolute error.\n\\[\nMAE =\n\\frac{1}{n}\n\\sum_{i=1}^{n}\n|y_i - \\hat{y}_i|\n\\]\nfrom sklearn.metrics import mean_absolute_error\n\nmae = mean_absolute_error(\n    y_test,\n    y_pred\n)\n\nprint(\n    f\"MAE: {mae:.3f}\"\n)",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#overfitting",
-    "href": "foundations/model-evaluation.html#overfitting",
-    "title": "Evaluación de modelos",
-    "section": "Overfitting",
-    "text": "Overfitting\nEl overfitting ocurre cuando el modelo aprende demasiado bien los detalles del entrenamiento, incluyendo ruido y patrones no generalizables.\nSeñales habituales:\n\nRendimiento muy alto en train.\nRendimiento claramente inferior en validation o test.\nGran variabilidad entre folds.\nModelo muy complejo.\nMuchas variables respecto al número de observaciones.\nMétricas muy sensibles al split.\n\n\n\n\n\n\n\nWarningSeñal de alarma\n\n\n\nUn modelo casi perfecto en un problema clínico complejo merece una revisión cuidadosa de leakage y diseño.",
+    "objectID": "foundations/regression-metrics.html#interpretación",
+    "href": "foundations/regression-metrics.html#interpretación",
+    "title": "Métricas de regresión",
+    "section": "Interpretación",
+    "text": "Interpretación\nSi el MAE es 2.5 días:\nEn promedio, las predicciones se alejan 2.5 días del valor real.\nVentajas:\n\nFácil de interpretar.\nMantiene las unidades originales.\nMenos sensible a outliers que MSE y RMSE.\n\nLimitaciones:\n\nTrata todos los errores de forma lineal.\nNo distingue sobreestimación y subestimación.\nPuede ocultar errores extremos.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#causas-frecuentes-de-overfitting",
-    "href": "foundations/model-evaluation.html#causas-frecuentes-de-overfitting",
-    "title": "Evaluación de modelos",
-    "section": "Causas frecuentes de overfitting",
-    "text": "Causas frecuentes de overfitting\n\nDemasiadas variables.\nMuy pocos pacientes.\nModelo excesivamente flexible.\nAjuste repetido de hiperparámetros.\nSelección de variables con todo el dataset.\nUso repetido del test.\nClases muy desbalanceadas.\nRuido en el target.\nObservaciones relacionadas entre train y test.",
+    "objectID": "foundations/regression-metrics.html#mse",
+    "href": "foundations/regression-metrics.html#mse",
+    "title": "Métricas de regresión",
+    "section": "MSE",
+    "text": "MSE\nMSE significa mean squared error.\n\\[\nMSE =\n\\frac{1}{n}\n\\sum_{i=1}^{n}\n(y_i - \\hat{y}_i)^2\n\\]\nfrom sklearn.metrics import mean_squared_error\n\nmse = mean_squared_error(\n    y_test,\n    y_pred\n)\n\nprint(\n    f\"MSE: {mse:.3f}\"\n)",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#cómo-reducir-overfitting",
-    "href": "foundations/model-evaluation.html#cómo-reducir-overfitting",
-    "title": "Evaluación de modelos",
-    "section": "Cómo reducir overfitting",
-    "text": "Cómo reducir overfitting\n\nSimplificar el modelo.\nAplicar regularización.\nReducir variables.\nAumentar datos.\nUtilizar validación cruzada.\nAplicar early stopping.\nControlar profundidad en árboles.\nUtilizar bagging.\nRevisar leakage.\nComparar con modelos simples.",
+    "objectID": "foundations/regression-metrics.html#interpretación-1",
+    "href": "foundations/regression-metrics.html#interpretación-1",
+    "title": "Métricas de regresión",
+    "section": "Interpretación",
+    "text": "Interpretación\nMSE eleva los errores al cuadrado.\nEsto significa que los errores grandes tienen mucho más peso.\nEjemplo:\nError de 2 → 4\nError de 5 → 25\nError de 10 → 100\n\n\n\n\n\n\nWarningImportante\n\n\n\nMSE no está en las mismas unidades que el target.\nSi el target se mide en días, MSE se expresa en días cuadrados.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#underfitting",
-    "href": "foundations/model-evaluation.html#underfitting",
-    "title": "Evaluación de modelos",
-    "section": "Underfitting",
-    "text": "Underfitting\nEl underfitting ocurre cuando el modelo es demasiado simple para capturar el patrón real.\nSeñales:\n\nRendimiento bajo en train.\nRendimiento bajo en validation.\nErrores sistemáticos.\nModelo incapaz de representar relaciones importantes.",
+    "objectID": "foundations/regression-metrics.html#rmse",
+    "href": "foundations/regression-metrics.html#rmse",
+    "title": "Métricas de regresión",
+    "section": "RMSE",
+    "text": "RMSE\nRMSE es la raíz cuadrada del MSE.\n\\[\nRMSE =\n\\sqrt{\n\\frac{1}{n}\n\\sum_{i=1}^{n}\n(y_i - \\hat{y}_i)^2\n}\n\\]\nfrom sklearn.metrics import root_mean_squared_error\n\nrmse = root_mean_squared_error(\n    y_test,\n    y_pred\n)\n\nprint(\n    f\"RMSE: {rmse:.3f}\"\n)\nEn versiones anteriores también puede calcularse así:\nfrom sklearn.metrics import mean_squared_error\n\nrmse = mean_squared_error(\n    y_test,\n    y_pred,\n    squared=False\n)",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#causas-frecuentes-de-underfitting",
-    "href": "foundations/model-evaluation.html#causas-frecuentes-de-underfitting",
-    "title": "Evaluación de modelos",
-    "section": "Causas frecuentes de underfitting",
-    "text": "Causas frecuentes de underfitting\n\nModelo demasiado simple.\nVariables poco informativas.\nPreprocesamiento inadecuado.\nRegularización excesiva.\nPocas épocas de entrenamiento.\nHiperparámetros demasiado restrictivos.\nRelaciones no lineales modeladas de forma lineal.",
+    "objectID": "foundations/regression-metrics.html#interpretación-2",
+    "href": "foundations/regression-metrics.html#interpretación-2",
+    "title": "Métricas de regresión",
+    "section": "Interpretación",
+    "text": "Interpretación\nRMSE vuelve a estar en las unidades originales.\nSi RMSE es 4 días, los errores grandes están teniendo un peso importante.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#comparación-conceptual",
-    "href": "foundations/model-evaluation.html#comparación-conceptual",
-    "title": "Evaluación de modelos",
-    "section": "Comparación conceptual",
-    "text": "Comparación conceptual\n\n\n\nSituación\nTrain\nValidation/Test\nInterpretación\n\n\n\n\nUnderfitting\nBajo\nBajo\nModelo demasiado simple\n\n\nBuen ajuste\nAlto\nSimilar\nBuena generalización\n\n\nOverfitting\nMuy alto\nMucho menor\nModelo memoriza train",
+    "objectID": "foundations/regression-metrics.html#mae-frente-a-rmse",
+    "href": "foundations/regression-metrics.html#mae-frente-a-rmse",
+    "title": "Métricas de regresión",
+    "section": "MAE frente a RMSE",
+    "text": "MAE frente a RMSE\n\n\n\nMétrica\nPenalización\nSensibilidad a outliers\nUnidades\n\n\n\n\nMAE\nLineal\nMenor\nOriginales\n\n\nRMSE\nCuadrática\nMayor\nOriginales\n\n\nMSE\nCuadrática\nMayor\nAl cuadrado\n\n\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi RMSE es mucho mayor que MAE, probablemente existen algunos errores grandes.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#curvas-de-aprendizaje",
-    "href": "foundations/model-evaluation.html#curvas-de-aprendizaje",
-    "title": "Evaluación de modelos",
-    "section": "Curvas de aprendizaje",
-    "text": "Curvas de aprendizaje\nLas curvas de aprendizaje muestran cómo cambia el rendimiento al aumentar el tamaño del entrenamiento.\nfrom sklearn.model_selection import learning_curve\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ntrain_sizes, train_scores, validation_scores = (\n    learning_curve(\n        estimator=model,\n        X=X,\n        y=y,\n        cv=5,\n        scoring=\"roc_auc\",\n        train_sizes=np.linspace(\n            0.1,\n            1.0,\n            5\n        )\n    )\n)\n\ntrain_mean = train_scores.mean(\n    axis=1\n)\n\nvalidation_mean = validation_scores.mean(\n    axis=1\n)\n\nplt.figure(figsize=(8, 5))\n\nplt.plot(\n    train_sizes,\n    train_mean,\n    marker=\"o\",\n    label=\"Train\"\n)\n\nplt.plot(\n    train_sizes,\n    validation_mean,\n    marker=\"o\",\n    label=\"Validation\"\n)\n\nplt.xlabel(\"Tamaño de entrenamiento\")\nplt.ylabel(\"ROC AUC\")\nplt.title(\"Curva de aprendizaje\")\nplt.legend()\n\nplt.show()",
+    "objectID": "foundations/regression-metrics.html#mediana-del-error-absoluto",
+    "href": "foundations/regression-metrics.html#mediana-del-error-absoluto",
+    "title": "Métricas de regresión",
+    "section": "Mediana del error absoluto",
+    "text": "Mediana del error absoluto\nLa mediana del error absoluto es más robusta frente a outliers.\nfrom sklearn.metrics import median_absolute_error\n\nmedian_ae = median_absolute_error(\n    y_test,\n    y_pred\n)\n\nprint(\n    f\"Median AE: \"\n    f\"{median_ae:.3f}\"\n)\nPuede ser útil cuando:\n\nLa distribución de errores es asimétrica.\nExisten casos extremos.\nSe quiere describir el error típico.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#interpretar-curvas-de-aprendizaje",
-    "href": "foundations/model-evaluation.html#interpretar-curvas-de-aprendizaje",
-    "title": "Evaluación de modelos",
-    "section": "Interpretar curvas de aprendizaje",
-    "text": "Interpretar curvas de aprendizaje\n\nOverfitting\n\nTrain alto.\nValidation más bajo.\nSeparación persistente.\n\n\n\nUnderfitting\n\nTrain bajo.\nValidation bajo.\nAmbas curvas cercanas.\n\n\n\nFalta de datos\n\nTrain alto.\nValidation mejora al aumentar la muestra.\nLa diferencia disminuye progresivamente.",
+    "objectID": "foundations/regression-metrics.html#r2",
+    "href": "foundations/regression-metrics.html#r2",
+    "title": "Métricas de regresión",
+    "section": "\\(R^2\\)",
+    "text": "\\(R^2\\)\n\\(R^2\\) mide qué proporción de la variabilidad del target explica el modelo respecto a predecir siempre la media.\n\\[\nR^2 =\n1 -\n\\frac{\n\\sum (y_i - \\hat{y}_i)^2\n}{\n\\sum (y_i - \\bar{y})^2\n}\n\\]\nfrom sklearn.metrics import r2_score\n\nr2 = r2_score(\n    y_test,\n    y_pred\n)\n\nprint(\n    f\"R²: {r2:.3f}\"\n)",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#baseline",
-    "href": "foundations/model-evaluation.html#baseline",
-    "title": "Evaluación de modelos",
-    "section": "Baseline",
-    "text": "Baseline\nUn baseline es una referencia mínima que el modelo debería superar.\nEjemplos:\n\nPredecir siempre la clase mayoritaria.\nPredecir la media.\nPredecir la mediana.\nUsar una regla clínica simple.\nUtilizar una regresión logística básica.\nMantener el último valor observado.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nNunca evalúes un modelo sin compararlo con al menos un baseline.",
+    "objectID": "foundations/regression-metrics.html#interpretación-de-r2",
+    "href": "foundations/regression-metrics.html#interpretación-de-r2",
+    "title": "Métricas de regresión",
+    "section": "Interpretación de \\(R^2\\)",
+    "text": "Interpretación de \\(R^2\\)\nValores habituales:\n\n\\(R^2 = 1\\): ajuste perfecto.\n\\(R^2 = 0\\): similar a predecir la media.\n\\(R^2 &lt; 0\\): peor que predecir la media.\n\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nUn \\(R^2\\) alto no garantiza errores clínicamente pequeños.\nPuede haber buen ajuste relativo y errores absolutos poco aceptables.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#baseline-de-clasificación",
-    "href": "foundations/model-evaluation.html#baseline-de-clasificación",
-    "title": "Evaluación de modelos",
-    "section": "Baseline de clasificación",
-    "text": "Baseline de clasificación\nfrom sklearn.dummy import DummyClassifier\n\nbaseline = DummyClassifier(\n    strategy=\"most_frequent\"\n)\n\nbaseline.fit(\n    X_train,\n    y_train\n)\n\ny_pred_baseline = baseline.predict(\n    X_test\n)\nOtras estrategias:\nDummyClassifier(\n    strategy=\"stratified\",\n    random_state=42\n)\nDummyClassifier(\n    strategy=\"prior\"\n)",
+    "objectID": "foundations/regression-metrics.html#r2-ajustado",
+    "href": "foundations/regression-metrics.html#r2-ajustado",
+    "title": "Métricas de regresión",
+    "section": "\\(R^2\\) ajustado",
+    "text": "\\(R^2\\) ajustado\nEl \\(R^2\\) ajustado penaliza la inclusión de variables adicionales.\n\\[\nR^2_{adj}\n=\n1 -\n(1-R^2)\n\\frac{n-1}{n-p-1}\n\\]\ndonde:\n\n\\(n\\) es el número de observaciones.\n\\(p\\) es el número de predictores.\n\nn = len(y_test)\n\np = X_test.shape[1]\n\nadjusted_r2 = (\n    1\n    - (1 - r2)\n    * (n - 1)\n    / (n - p - 1)\n)\n\nprint(\n    f\"Adjusted R²: \"\n    f\"{adjusted_r2:.3f}\"\n)\nEs especialmente relevante en modelos lineales explicativos.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#baseline-de-regresión",
-    "href": "foundations/model-evaluation.html#baseline-de-regresión",
-    "title": "Evaluación de modelos",
+    "objectID": "foundations/regression-metrics.html#mape",
+    "href": "foundations/regression-metrics.html#mape",
+    "title": "Métricas de regresión",
+    "section": "MAPE",
+    "text": "MAPE\nMAPE significa mean absolute percentage error.\n\\[\nMAPE =\n\\frac{100}{n}\n\\sum_{i=1}^{n}\n\\left|\n\\frac{y_i-\\hat{y}_i}{y_i}\n\\right|\n\\]\nfrom sklearn.metrics import mean_absolute_percentage_error\n\nmape = mean_absolute_percentage_error(\n    y_test,\n    y_pred\n)\n\nprint(\n    f\"MAPE: {mape:.3f}\"\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#limitaciones-de-mape",
+    "href": "foundations/regression-metrics.html#limitaciones-de-mape",
+    "title": "Métricas de regresión",
+    "section": "Limitaciones de MAPE",
+    "text": "Limitaciones de MAPE\nMAPE presenta problemas cuando:\n\nHay valores reales iguales a 0.\nHay valores muy cercanos a 0.\nEl target puede ser negativo.\nSe comparan poblaciones con escalas diferentes.\n\n\n\n\n\n\n\nWarningImportante\n\n\n\nMAPE puede volverse inestable o engañoso cuando el target contiene ceros o valores muy pequeños.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#smape",
+    "href": "foundations/regression-metrics.html#smape",
+    "title": "Métricas de regresión",
+    "section": "SMAPE",
+    "text": "SMAPE\nSMAPE intenta reducir algunos problemas de MAPE.\n\\[\nSMAPE =\n\\frac{100}{n}\n\\sum_{i=1}^{n}\n\\frac{\n|y_i - \\hat{y}_i|\n}{\n\\left(\n|y_i| + |\\hat{y}_i|\n\\right)/2\n}\n\\]\nimport numpy as np\n\nsmape = (\n    100\n    * np.mean(\n        2\n        * np.abs(\n            y_test - y_pred\n        )\n        / (\n            np.abs(y_test)\n            + np.abs(y_pred)\n        )\n    )\n)\nTambién requiere cautela cuando ambos valores están cerca de 0.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#error-medio",
+    "href": "foundations/regression-metrics.html#error-medio",
+    "title": "Métricas de regresión",
+    "section": "Error medio",
+    "text": "Error medio\nEl error medio conserva el signo.\n\\[\nME =\n\\frac{1}{n}\n\\sum_{i=1}^{n}\n(y_i - \\hat{y}_i)\n\\]\nmean_error = (\n    y_test - y_pred\n).mean()\n\nprint(\n    f\"Mean error: \"\n    f\"{mean_error:.3f}\"\n)\nInterpretación:\n\nPositivo: el modelo tiende a infraestimar.\nNegativo: el modelo tiende a sobreestimar.\nCercano a 0: no implica ausencia de errores.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#residuos",
+    "href": "foundations/regression-metrics.html#residuos",
+    "title": "Métricas de regresión",
+    "section": "Residuos",
+    "text": "Residuos\nLos residuos son:\n\\[\ne_i = y_i - \\hat{y}_i\n\\]\nresiduals = (\n    y_test - y_pred\n)\nAnalizarlos ayuda a detectar:\n\nSesgo.\nNo linealidad.\nHeterocedasticidad.\nOutliers.\nSubgrupos mal representados.\nCambios temporales.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#gráfico-de-valores-reales-y-predichos",
+    "href": "foundations/regression-metrics.html#gráfico-de-valores-reales-y-predichos",
+    "title": "Métricas de regresión",
+    "section": "Gráfico de valores reales y predichos",
+    "text": "Gráfico de valores reales y predichos\nimport matplotlib.pyplot as plt\n\nplt.figure(figsize=(7, 6))\n\nplt.scatter(\n    y_test,\n    y_pred\n)\n\nminimum = min(\n    y_test.min(),\n    y_pred.min()\n)\n\nmaximum = max(\n    y_test.max(),\n    y_pred.max()\n)\n\nplt.plot(\n    [minimum, maximum],\n    [minimum, maximum],\n    linestyle=\"--\"\n)\n\nplt.xlabel(\"Valor real\")\nplt.ylabel(\"Valor predicho\")\nplt.title(\"Valores reales vs predichos\")\n\nplt.show()\nLos puntos cercanos a la diagonal indican predicciones más precisas.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#gráfico-de-residuos",
+    "href": "foundations/regression-metrics.html#gráfico-de-residuos",
+    "title": "Métricas de regresión",
+    "section": "Gráfico de residuos",
+    "text": "Gráfico de residuos\nimport matplotlib.pyplot as plt\n\nplt.figure(figsize=(8, 5))\n\nplt.scatter(\n    y_pred,\n    residuals\n)\n\nplt.axhline(\n    0,\n    linestyle=\"--\"\n)\n\nplt.xlabel(\"Valor predicho\")\nplt.ylabel(\"Residuo\")\nplt.title(\"Residuos vs predicciones\")\n\nplt.show()\nUn patrón aleatorio alrededor de 0 es deseable.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#señales-problemáticas-en-residuos",
+    "href": "foundations/regression-metrics.html#señales-problemáticas-en-residuos",
+    "title": "Métricas de regresión",
+    "section": "Señales problemáticas en residuos",
+    "text": "Señales problemáticas en residuos\n\nForma curva\nPuede indicar una relación no lineal no capturada.\n\n\nForma de embudo\nPuede indicar heterocedasticidad.\n\n\nDesplazamiento respecto a 0\nPuede indicar sesgo sistemático.\n\n\nPuntos muy alejados\nPueden indicar outliers o pacientes mal predichos.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#heterocedasticidad",
+    "href": "foundations/regression-metrics.html#heterocedasticidad",
+    "title": "Métricas de regresión",
+    "section": "Heterocedasticidad",
+    "text": "Heterocedasticidad\nLa heterocedasticidad aparece cuando la variabilidad de los errores cambia según el nivel de la predicción.\nEjemplo:\n\nErrores pequeños en estancias cortas.\nErrores grandes en estancias largas.\n\nPuede afectar especialmente a:\n\nInferencia en regresión lineal.\nIntervalos de confianza.\nInterpretación de coeficientes.\n\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nEn duración de estancia, suele ser frecuente que los pacientes con ingresos largos tengan errores mucho mayores.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#distribución-de-residuos",
+    "href": "foundations/regression-metrics.html#distribución-de-residuos",
+    "title": "Métricas de regresión",
+    "section": "Distribución de residuos",
+    "text": "Distribución de residuos\nimport matplotlib.pyplot as plt\n\nplt.figure(figsize=(8, 5))\n\nplt.hist(\n    residuals,\n    bins=30\n)\n\nplt.xlabel(\"Residuo\")\nplt.ylabel(\"Frecuencia\")\nplt.title(\"Distribución de residuos\")\n\nplt.show()",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#q-q-plot",
+    "href": "foundations/regression-metrics.html#q-q-plot",
+    "title": "Métricas de regresión",
+    "section": "Q-Q plot",
+    "text": "Q-Q plot\nimport scipy.stats as stats\nimport matplotlib.pyplot as plt\n\nstats.probplot(\n    residuals,\n    dist=\"norm\",\n    plot=plt\n)\n\nplt.title(\"Q-Q plot de residuos\")\nplt.show()\nLa normalidad de residuos es especialmente relevante para inferencia clásica, no siempre para predicción pura.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#baseline-de-regresión",
+    "href": "foundations/regression-metrics.html#baseline-de-regresión",
+    "title": "Métricas de regresión",
     "section": "Baseline de regresión",
-    "text": "Baseline de regresión\nfrom sklearn.dummy import DummyRegressor\n\nbaseline = DummyRegressor(\n    strategy=\"mean\"\n)\n\nbaseline.fit(\n    X_train,\n    y_train\n)\n\ny_pred_baseline = baseline.predict(\n    X_test\n)\nTambién puede usarse:\nDummyRegressor(\n    strategy=\"median\"\n)",
+    "text": "Baseline de regresión\nUn modelo debe compararse con una referencia simple.\nfrom sklearn.dummy import DummyRegressor\n\nbaseline = DummyRegressor(\n    strategy=\"mean\"\n)\n\nbaseline.fit(\n    X_train,\n    y_train\n)\n\ny_pred_baseline = baseline.predict(\n    X_test\n)",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#modelo-simple-como-baseline",
-    "href": "foundations/model-evaluation.html#modelo-simple-como-baseline",
-    "title": "Evaluación de modelos",
-    "section": "Modelo simple como baseline",
-    "text": "Modelo simple como baseline\nEn clasificación clínica, una regresión logística básica puede ser un buen baseline.\nfrom sklearn.linear_model import LogisticRegression\n\nbaseline_model = LogisticRegression(\n    max_iter=1000,\n    random_state=42\n)\n\nbaseline_model.fit(\n    X_train,\n    y_train\n)\nUn modelo complejo debería demostrar una mejora clara y estable respecto a esta referencia.",
+    "objectID": "foundations/regression-metrics.html#evaluar-el-baseline",
+    "href": "foundations/regression-metrics.html#evaluar-el-baseline",
+    "title": "Métricas de regresión",
+    "section": "Evaluar el baseline",
+    "text": "Evaluar el baseline\nbaseline_mae = mean_absolute_error(\n    y_test,\n    y_pred_baseline\n)\n\nbaseline_rmse = root_mean_squared_error(\n    y_test,\n    y_pred_baseline\n)\n\nbaseline_r2 = r2_score(\n    y_test,\n    y_pred_baseline\n)\n\nprint(\n    baseline_mae,\n    baseline_rmse,\n    baseline_r2\n)",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#métrica-adecuada",
-    "href": "foundations/model-evaluation.html#métrica-adecuada",
-    "title": "Evaluación de modelos",
-    "section": "Métrica adecuada",
-    "text": "Métrica adecuada\nLa métrica debe depender del problema.\n\nClasificación\nPosibles métricas:\n\nAccuracy.\nSensibilidad.\nEspecificidad.\nPrecision.\nRecall.\nF1-score.\nROC AUC.\nPR AUC.\nBrier score.\nLog loss.\n\n\n\nRegresión\nPosibles métricas:\n\nMAE.\nMSE.\nRMSE.\n\\(R^2\\).\nMediana del error absoluto.\nError relativo.\n\n\n\n\n\n\n\nWarningImportante\n\n\n\nLa métrica más popular no siempre es la más útil.\nEn clases desbalanceadas, accuracy puede ser engañosa.",
+    "objectID": "foundations/regression-metrics.html#comparación-con-baseline",
+    "href": "foundations/regression-metrics.html#comparación-con-baseline",
+    "title": "Métricas de regresión",
+    "section": "Comparación con baseline",
+    "text": "Comparación con baseline\nresults = {\n    \"baseline\": {\n        \"mae\": baseline_mae,\n        \"rmse\": baseline_rmse,\n        \"r2\": baseline_r2\n    },\n    \"model\": {\n        \"mae\": mae,\n        \"rmse\": rmse,\n        \"r2\": r2\n    }\n}\n\nprint(results)\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nUn modelo complejo debe mejorar de forma clara y estable respecto a un baseline sencillo.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#métricas-discriminativas-y-calibración",
-    "href": "foundations/model-evaluation.html#métricas-discriminativas-y-calibración",
-    "title": "Evaluación de modelos",
-    "section": "Métricas discriminativas y calibración",
-    "text": "Métricas discriminativas y calibración\nUn modelo puede discriminar bien y estar mal calibrado.\n\nDiscriminación\nMide si el modelo ordena correctamente pacientes de mayor y menor riesgo.\nEjemplos:\n\nROC AUC.\nPR AUC.\n\n\n\nCalibración\nMide si las probabilidades predichas se corresponden con las frecuencias reales.\nEjemplo:\n\nEntre pacientes con riesgo predicho del 20 %, aproximadamente un 20 % debería presentar el evento.",
+    "objectID": "foundations/regression-metrics.html#baseline-clínico",
+    "href": "foundations/regression-metrics.html#baseline-clínico",
+    "title": "Métricas de regresión",
+    "section": "Baseline clínico",
+    "text": "Baseline clínico\nAdemás de DummyRegressor, puede utilizarse:\n\nÚltimo valor observado.\nValor basal.\nMedia del centro.\nMediana histórica.\nRegla clínica existente.\nModelo lineal simple.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#calibración-visual",
-    "href": "foundations/model-evaluation.html#calibración-visual",
-    "title": "Evaluación de modelos",
-    "section": "Calibración visual",
-    "text": "Calibración visual\nfrom sklearn.calibration import calibration_curve\nimport matplotlib.pyplot as plt\n\nprob_true, prob_pred = calibration_curve(\n    y_test,\n    y_probability,\n    n_bins=10\n)\n\nplt.figure(figsize=(6, 6))\n\nplt.plot(\n    prob_pred,\n    prob_true,\n    marker=\"o\"\n)\n\nplt.plot(\n    [0, 1],\n    [0, 1],\n    linestyle=\"--\"\n)\n\nplt.xlabel(\"Probabilidad predicha\")\nplt.ylabel(\"Frecuencia observada\")\nplt.title(\"Curva de calibración\")\n\nplt.show()",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#brier-score",
-    "href": "foundations/model-evaluation.html#brier-score",
-    "title": "Evaluación de modelos",
-    "section": "Brier score",
-    "text": "Brier score\nfrom sklearn.metrics import brier_score_loss\n\nbrier = brier_score_loss(\n    y_test,\n    y_probability\n)\n\nprint(\n    f\"Brier score: {brier:.3f}\"\n)\nValores menores indican mejor precisión probabilística.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#umbral-de-clasificación",
-    "href": "foundations/model-evaluation.html#umbral-de-clasificación",
-    "title": "Evaluación de modelos",
-    "section": "Umbral de clasificación",
-    "text": "Umbral de clasificación\nMuchos modelos producen probabilidades.\nLa clase final depende de un umbral.\nthreshold = 0.50\n\ny_pred = (\n    y_probability &gt;= threshold\n).astype(int)\nCambiar el umbral modifica:\n\nSensibilidad.\nEspecificidad.\nPrecision.\nRecall.\nNúmero de falsos positivos.\nNúmero de falsos negativos.\n\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nEl umbral debería elegirse según las consecuencias clínicas de cada tipo de error, no solo por conveniencia estadística.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#falsos-positivos-y-falsos-negativos",
-    "href": "foundations/model-evaluation.html#falsos-positivos-y-falsos-negativos",
-    "title": "Evaluación de modelos",
-    "section": "Falsos positivos y falsos negativos",
-    "text": "Falsos positivos y falsos negativos\n\nFalso positivo\nEl modelo predice evento, pero el evento no ocurre.\nPuede provocar:\n\nPruebas adicionales.\nAnsiedad.\nCostes.\nTratamientos innecesarios.\n\n\n\nFalso negativo\nEl modelo predice ausencia de evento, pero el evento ocurre.\nPuede provocar:\n\nRetraso diagnóstico.\nFalta de monitorización.\nOmisión de tratamiento.\nDaño clínico.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#evaluación-interna",
-    "href": "foundations/model-evaluation.html#evaluación-interna",
-    "title": "Evaluación de modelos",
-    "section": "Evaluación interna",
-    "text": "Evaluación interna\nLa evaluación interna utiliza datos de la misma fuente general que el entrenamiento.\nEjemplos:\n\nHoldout.\nK-fold cross-validation.\nBootstrap.\nValidación cruzada repetida.\n\nPermite estimar rendimiento dentro del mismo contexto.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#evaluación-externa",
-    "href": "foundations/model-evaluation.html#evaluación-externa",
-    "title": "Evaluación de modelos",
-    "section": "Evaluación externa",
-    "text": "Evaluación externa\nLa evaluación externa utiliza datos distintos.\nPuede ser:\n\nOtro centro.\nOtro país.\nOtro periodo.\nOtra población.\nOtro sistema de información.\n\n\n\n\n\n\n\nImportantValidez externa\n\n\n\nUn modelo puede funcionar bien internamente y fallar en otro centro debido a diferencias de población, protocolo o registro.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#evaluación-temporal",
-    "href": "foundations/model-evaluation.html#evaluación-temporal",
-    "title": "Evaluación de modelos",
-    "section": "Evaluación temporal",
-    "text": "Evaluación temporal\nUna evaluación temporal entrena con datos antiguos y prueba con datos más recientes.\nEjemplo:\nTrain: 2018–2023\nValidation: 2024\nTest: 2025\nEsto ayuda a detectar:\n\nData drift.\nCambios en protocolos.\nNuevos tratamientos.\nCambios en población.\nCambios en sistemas de información.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#evaluación-por-centro",
-    "href": "foundations/model-evaluation.html#evaluación-por-centro",
-    "title": "Evaluación de modelos",
-    "section": "Evaluación por centro",
-    "text": "Evaluación por centro\nEn estudios multicéntricos puede entrenarse con unos centros y evaluar en otro.\nEjemplo:\nTrain: Barcelona + Helsinki\nTest externo: Coimbra\nEsto evalúa transportabilidad.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#estabilidad-del-rendimiento",
-    "href": "foundations/model-evaluation.html#estabilidad-del-rendimiento",
-    "title": "Evaluación de modelos",
-    "section": "Estabilidad del rendimiento",
-    "text": "Estabilidad del rendimiento\nNo basta con una media.\nTambién conviene revisar:\n\nDesviación estándar.\nIntervalos de confianza.\nDistribución entre folds.\nRendimiento por subgrupo.\nRendimiento por centro.\nRendimiento por periodo.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#validación-cruzada",
-    "href": "foundations/model-evaluation.html#validación-cruzada",
-    "title": "Evaluación de modelos",
+    "objectID": "foundations/regression-metrics.html#validación-cruzada",
+    "href": "foundations/regression-metrics.html#validación-cruzada",
+    "title": "Métricas de regresión",
     "section": "Validación cruzada",
-    "text": "Validación cruzada\nfrom sklearn.model_selection import cross_validate\n\nscores = cross_validate(\n    estimator=model,\n    X=X,\n    y=y,\n    cv=5,\n    scoring=[\n        \"roc_auc\",\n        \"accuracy\"\n    ],\n    return_train_score=True\n)\n\nprint(\n    scores\n)",
+    "text": "Validación cruzada\nfrom sklearn.model_selection import cross_validate\n\nscoring = {\n    \"mae\": \"neg_mean_absolute_error\",\n    \"rmse\": \"neg_root_mean_squared_error\",\n    \"r2\": \"r2\"\n}\n\nscores = cross_validate(\n    estimator=model,\n    X=X,\n    y=y,\n    cv=5,\n    scoring=scoring\n)\nScikit-learn devuelve algunas métricas de error con signo negativo porque su sistema de selección maximiza puntuaciones.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#comparar-train-y-validation-en-cross-validation",
-    "href": "foundations/model-evaluation.html#comparar-train-y-validation-en-cross-validation",
-    "title": "Evaluación de modelos",
-    "section": "Comparar train y validation en cross-validation",
-    "text": "Comparar train y validation en cross-validation\ntrain_auc = scores[\n    \"train_roc_auc\"\n]\n\nvalidation_auc = scores[\n    \"test_roc_auc\"\n]\n\nprint(\n    \"Train mean:\",\n    train_auc.mean()\n)\n\nprint(\n    \"Validation mean:\",\n    validation_auc.mean()\n)",
+    "objectID": "foundations/regression-metrics.html#convertir-errores-a-positivos",
+    "href": "foundations/regression-metrics.html#convertir-errores-a-positivos",
+    "title": "Métricas de regresión",
+    "section": "Convertir errores a positivos",
+    "text": "Convertir errores a positivos\nimport pandas as pd\n\nresults = pd.DataFrame(\n    {\n        \"mae\": -scores[\"test_mae\"],\n        \"rmse\": -scores[\"test_rmse\"],\n        \"r2\": scores[\"test_r2\"]\n    }\n)\n\ndisplay(\n    results\n)",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#intervalos-de-confianza",
-    "href": "foundations/model-evaluation.html#intervalos-de-confianza",
-    "title": "Evaluación de modelos",
-    "section": "Intervalos de confianza",
-    "text": "Intervalos de confianza\nUna aproximación simple puede calcularse con bootstrap.\nimport numpy as np\nfrom sklearn.metrics import roc_auc_score\n\nrng = np.random.default_rng(42)\n\nbootstrap_scores = []\n\nfor _ in range(1000):\n\n    indices = rng.integers(\n        0,\n        len(y_test),\n        len(y_test)\n    )\n\n    y_boot = y_test.iloc[\n        indices\n    ]\n\n    p_boot = y_probability[\n        indices\n    ]\n\n    if y_boot.nunique() &lt; 2:\n        continue\n\n    score = roc_auc_score(\n        y_boot,\n        p_boot\n    )\n\n    bootstrap_scores.append(\n        score\n    )\n\nlower = np.percentile(\n    bootstrap_scores,\n    2.5\n)\n\nupper = np.percentile(\n    bootstrap_scores,\n    97.5\n)\n\nprint(\n    f\"95% CI: \"\n    f\"{lower:.3f}–{upper:.3f}\"\n)",
+    "objectID": "foundations/regression-metrics.html#resumen-de-validación-cruzada",
+    "href": "foundations/regression-metrics.html#resumen-de-validación-cruzada",
+    "title": "Métricas de regresión",
+    "section": "Resumen de validación cruzada",
+    "text": "Resumen de validación cruzada\ndisplay(\n    results.agg(\n        [\n            \"mean\",\n            \"std\",\n            \"min\",\n            \"max\"\n        ]\n    )\n)",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#comparar-modelos-correctamente",
-    "href": "foundations/model-evaluation.html#comparar-modelos-correctamente",
-    "title": "Evaluación de modelos",
+    "objectID": "foundations/regression-metrics.html#intervalos-de-confianza-con-bootstrap",
+    "href": "foundations/regression-metrics.html#intervalos-de-confianza-con-bootstrap",
+    "title": "Métricas de regresión",
+    "section": "Intervalos de confianza con bootstrap",
+    "text": "Intervalos de confianza con bootstrap\nimport numpy as np\nfrom sklearn.metrics import mean_absolute_error\n\nrng = np.random.default_rng(42)\n\nbootstrap_mae = []\n\nfor _ in range(1000):\n\n    indices = rng.integers(\n        0,\n        len(y_test),\n        len(y_test)\n    )\n\n    score = mean_absolute_error(\n        y_test.iloc[indices],\n        y_pred[indices]\n    )\n\n    bootstrap_mae.append(\n        score\n    )\n\nlower = np.percentile(\n    bootstrap_mae,\n    2.5\n)\n\nupper = np.percentile(\n    bootstrap_mae,\n    97.5\n)\n\nprint(\n    f\"MAE 95% CI: \"\n    f\"{lower:.3f}–{upper:.3f}\"\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#métricas-por-subgrupos",
+    "href": "foundations/regression-metrics.html#métricas-por-subgrupos",
+    "title": "Métricas de regresión",
+    "section": "Métricas por subgrupos",
+    "text": "Métricas por subgrupos\nPuede ser importante evaluar por:\n\nCentro.\nSexo.\nEdad.\nDiagnóstico.\nGravedad.\nPeriodo temporal.\n\nimport pandas as pd\n\nevaluation_df = pd.DataFrame(\n    {\n        \"y_true\": y_test,\n        \"y_pred\": y_pred,\n        \"center\": X_test[\"center\"]\n    }\n)\n\nsubgroup_results = (\n    evaluation_df\n    .groupby(\"center\")\n    .apply(\n        lambda group: pd.Series(\n            {\n                \"n\": len(group),\n                \"mae\": mean_absolute_error(\n                    group[\"y_true\"],\n                    group[\"y_pred\"]\n                ),\n                \"rmse\": root_mean_squared_error(\n                    group[\"y_true\"],\n                    group[\"y_pred\"]\n                )\n            }\n        )\n    )\n)\n\ndisplay(subgroup_results)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#métricas-por-rango-del-target",
+    "href": "foundations/regression-metrics.html#métricas-por-rango-del-target",
+    "title": "Métricas de regresión",
+    "section": "Métricas por rango del target",
+    "text": "Métricas por rango del target\nUn modelo puede funcionar mejor en valores bajos que en valores altos.\nevaluation_df[\"target_group\"] = pd.cut(\n    evaluation_df[\"y_true\"],\n    bins=[\n        -float(\"inf\"),\n        5,\n        10,\n        20,\n        float(\"inf\")\n    ],\n    labels=[\n        \"≤5\",\n        \"6–10\",\n        \"11–20\",\n        \"&gt;20\"\n    ]\n)\nperformance_by_range = (\n    evaluation_df\n    .groupby(\n        \"target_group\",\n        observed=False\n    )\n    .apply(\n        lambda group: pd.Series(\n            {\n                \"n\": len(group),\n                \"mae\": mean_absolute_error(\n                    group[\"y_true\"],\n                    group[\"y_pred\"]\n                )\n            }\n        )\n    )\n)\n\ndisplay(performance_by_range)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#error-relativo",
+    "href": "foundations/regression-metrics.html#error-relativo",
+    "title": "Métricas de regresión",
+    "section": "Error relativo",
+    "text": "Error relativo\nPuede ser útil cuando la importancia del error depende de la magnitud real.\nrelative_error = (\n    np.abs(\n        y_test - y_pred\n    )\n    / np.abs(y_test)\n)\nDebe evitarse o adaptarse si hay ceros.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#error-dentro-de-un-margen-clínico",
+    "href": "foundations/regression-metrics.html#error-dentro-de-un-margen-clínico",
+    "title": "Métricas de regresión",
+    "section": "Error dentro de un margen clínico",
+    "text": "Error dentro de un margen clínico\nA veces interesa saber qué proporción de predicciones queda dentro de un margen aceptable.\nmargin = 2\n\nwithin_margin = (\n    np.abs(\n        y_test - y_pred\n    )\n    &lt;= margin\n)\n\npercentage_within_margin = (\n    within_margin.mean()\n    * 100\n)\n\nprint(\n    f\"Predicciones dentro de \"\n    f\"±{margin}: \"\n    f\"{percentage_within_margin:.1f}%\"\n)\n\n\n\n\n\n\nNoteInterpretación clínica\n\n\n\nUna métrica como “porcentaje dentro de ±2 días” puede ser más comprensible que un valor abstracto de \\(R^2\\).",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#métricas-asimétricas",
+    "href": "foundations/regression-metrics.html#métricas-asimétricas",
+    "title": "Métricas de regresión",
+    "section": "Métricas asimétricas",
+    "text": "Métricas asimétricas\nEn algunos problemas, sobreestimar y subestimar no tienen el mismo coste.\nEjemplo:\n\nInfraestimar una estancia puede causar falta de camas.\nSobreestimarla puede reservar recursos innecesarios.\n\nPuede definirse una pérdida personalizada.\nimport numpy as np\n\nerrors = y_test - y_pred\n\nasymmetric_loss = np.where(\n    errors &gt; 0,\n    2 * np.abs(errors),\n    np.abs(errors)\n).mean()",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#transformación-del-target",
+    "href": "foundations/regression-metrics.html#transformación-del-target",
+    "title": "Métricas de regresión",
+    "section": "Transformación del target",
+    "text": "Transformación del target\nEn targets muy sesgados puede utilizarse logaritmo.\nimport numpy as np\n\ny_train_log = np.log1p(\n    y_train\n)\nDespués, las predicciones deben volver a la escala original.\ny_pred_log = model.predict(\n    X_test\n)\n\ny_pred_original = np.expm1(\n    y_pred_log\n)\n\n\n\n\n\n\nWarningImportante\n\n\n\nLas métricas deben calcularse en una escala clínicamente interpretable, normalmente la escala original.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#intervalos-de-predicción",
+    "href": "foundations/regression-metrics.html#intervalos-de-predicción",
+    "title": "Métricas de regresión",
+    "section": "Intervalos de predicción",
+    "text": "Intervalos de predicción\nUna predicción puntual no expresa incertidumbre.\nEjemplo:\nPredicción: 8 días\nIntervalo de predicción: 5–14 días\nLos intervalos pueden ser más útiles para la toma de decisiones.\nMétodos posibles:\n\nRegresión cuantílica.\nBootstrap.\nConformal prediction.\nModelos bayesianos.\nModelos probabilísticos.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#regresión-cuantílica",
+    "href": "foundations/regression-metrics.html#regresión-cuantílica",
+    "title": "Métricas de regresión",
+    "section": "Regresión cuantílica",
+    "text": "Regresión cuantílica\nfrom sklearn.ensemble import GradientBoostingRegressor\n\nlower_model = GradientBoostingRegressor(\n    loss=\"quantile\",\n    alpha=0.05,\n    random_state=42\n)\n\nmedian_model = GradientBoostingRegressor(\n    loss=\"quantile\",\n    alpha=0.50,\n    random_state=42\n)\n\nupper_model = GradientBoostingRegressor(\n    loss=\"quantile\",\n    alpha=0.95,\n    random_state=42\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Métricas de regresión"
+    ]
+  },
+  {
+    "objectID": "foundations/regression-metrics.html#comparar-modelos-correctamente",
+    "href": "foundations/regression-metrics.html#comparar-modelos-correctamente",
+    "title": "Métricas de regresión",
     "section": "Comparar modelos correctamente",
-    "text": "Comparar modelos correctamente\nLos modelos deben compararse usando:\n\nEl mismo split.\nLos mismos folds.\nEl mismo preprocesamiento base.\nLa misma métrica.\nLa misma definición del target.\nEl mismo momento de predicción.\n\n\n\n\n\n\n\nCautionError frecuente\n\n\n\nComparar métricas obtenidas con particiones distintas puede atribuir al modelo diferencias que en realidad se deben al split.",
+    "text": "Comparar modelos correctamente\nLos modelos deben compararse usando:\n\nEl mismo split.\nLos mismos folds.\nLas mismas variables.\nEl mismo pipeline.\nLa misma escala del target.\nLas mismas métricas.\nEl mismo baseline.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#complejidad-frente-a-utilidad",
-    "href": "foundations/model-evaluation.html#complejidad-frente-a-utilidad",
-    "title": "Evaluación de modelos",
-    "section": "Complejidad frente a utilidad",
-    "text": "Complejidad frente a utilidad\nUn modelo complejo no es necesariamente mejor.\nPuede tener:\n\nLigera mejora estadística.\nMenor interpretabilidad.\nMayor coste.\nMayor riesgo de overfitting.\nMás dificultad de mantenimiento.\n\nLa mejora debe ser relevante, estable y útil.",
+    "objectID": "foundations/regression-metrics.html#interpretación-clínica-1",
+    "href": "foundations/regression-metrics.html#interpretación-clínica-1",
+    "title": "Métricas de regresión",
+    "section": "Interpretación clínica",
+    "text": "Interpretación clínica\n\n\n\n\n\n\nImportantPregunta central\n\n\n\n¿Un error de esta magnitud cambia una decisión clínica u operativa?\n\n\nEjemplo en duración de estancia:\n\nMAE de 0.5 días puede ser excelente.\nMAE de 3 días puede ser aceptable o inútil según el uso.\nRMSE alto puede indicar fallos importantes en ingresos largos.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#utilidad-clínica",
-    "href": "foundations/model-evaluation.html#utilidad-clínica",
-    "title": "Evaluación de modelos",
-    "section": "Utilidad clínica",
-    "text": "Utilidad clínica\nLa utilidad clínica depende de:\n\nQué decisión se tomará.\nEn qué momento.\nPara qué pacientes.\nQué coste tienen los errores.\nQué recursos requiere.\nSi cambia la práctica actual.",
+    "objectID": "foundations/regression-metrics.html#buen-ajuste-estadístico-frente-a-utilidad",
+    "href": "foundations/regression-metrics.html#buen-ajuste-estadístico-frente-a-utilidad",
+    "title": "Métricas de regresión",
+    "section": "Buen ajuste estadístico frente a utilidad",
+    "text": "Buen ajuste estadístico frente a utilidad\nUn modelo puede tener:\n\n\\(R^2\\) alto.\nErrores clínicamente inaceptables.\n\nTambién puede tener:\n\n\\(R^2\\) moderado.\nError suficientemente pequeño para apoyar una decisión.\n\nLa utilidad depende del contexto.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#impacto-clínico",
-    "href": "foundations/model-evaluation.html#impacto-clínico",
-    "title": "Evaluación de modelos",
-    "section": "Impacto clínico",
-    "text": "Impacto clínico\nUn modelo puede tener buen rendimiento y no mejorar la atención.\nPara demostrar impacto pueden ser necesarios:\n\nEstudios prospectivos.\nEvaluación de workflow.\nEstudios de implementación.\nAnálisis de costes.\nEvaluación de resultados clínicos.",
+    "objectID": "foundations/regression-metrics.html#tabla-comparativa",
+    "href": "foundations/regression-metrics.html#tabla-comparativa",
+    "title": "Métricas de regresión",
+    "section": "Tabla comparativa",
+    "text": "Tabla comparativa\n\n\n\nMétrica\nUnidades\nPenaliza outliers\nInterpretación\n\n\n\n\nMAE\nOriginales\nModerada\nError medio absoluto\n\n\nMSE\nAl cuadrado\nAlta\nPenaliza errores grandes\n\n\nRMSE\nOriginales\nAlta\nError con peso en extremos\n\n\nMedian AE\nOriginales\nBaja\nError típico robusto\n\n\n\\(R^2\\)\nSin unidades\nIndirecta\nVarianza explicada\n\n\nMAPE\nPorcentaje\nVariable\nError relativo\n\n\nMean error\nOriginales\nBaja\nSesgo de dirección",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#rendimiento-por-subgrupos",
-    "href": "foundations/model-evaluation.html#rendimiento-por-subgrupos",
-    "title": "Evaluación de modelos",
-    "section": "Rendimiento por subgrupos",
-    "text": "Rendimiento por subgrupos\nConviene revisar posibles diferencias por:\n\nEdad.\nSexo.\nCentro.\nDiagnóstico.\nGrupo étnico cuando sea pertinente y legalmente adecuado.\nNivel socioeconómico.\nPeriodo temporal.\nGravedad.\n\nfor center in X_test[\"center\"].unique():\n\n    mask = (\n        X_test[\"center\"] == center\n    )\n\n    subgroup_score = roc_auc_score(\n        y_test.loc[mask],\n        y_probability[mask]\n    )\n\n    print(\n        center,\n        subgroup_score\n    )\nDebe comprobarse que cada subgrupo tenga suficientes eventos.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#data-drift",
-    "href": "foundations/model-evaluation.html#data-drift",
-    "title": "Evaluación de modelos",
-    "section": "Data drift",
-    "text": "Data drift\nEl data drift ocurre cuando cambia la distribución de las variables.\nEjemplos:\n\nNueva tecnología.\nCambio de protocolo.\nNueva población.\nCambio en criterios diagnósticos.\nNuevos tratamientos.\n\nPuede producir una caída de rendimiento.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#concept-drift",
-    "href": "foundations/model-evaluation.html#concept-drift",
-    "title": "Evaluación de modelos",
-    "section": "Concept drift",
-    "text": "Concept drift\nEl concept drift ocurre cuando cambia la relación entre variables y target.\nEjemplo:\n\nUn tratamiento nuevo modifica el riesgo de evento para determinados pacientes.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#qué-reportar",
-    "href": "foundations/model-evaluation.html#qué-reportar",
-    "title": "Evaluación de modelos",
-    "section": "Qué reportar",
-    "text": "Qué reportar\nUn informe de evaluación debería incluir:\n\nDefinición de cohorte.\nDefinición del target.\nMomento de predicción.\nEstrategia de split.\nTamaños de train, validation y test.\nNúmero de eventos.\nMétricas principales.\nIntervalos de confianza.\nCalibración.\nBaseline.\nRendimiento por subgrupos.\nLimitaciones.\nValidación externa si existe.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Evaluación de modelos"
-    ]
-  },
-  {
-    "objectID": "foundations/model-evaluation.html#errores-frecuentes",
-    "href": "foundations/model-evaluation.html#errores-frecuentes",
-    "title": "Evaluación de modelos",
+    "objectID": "foundations/regression-metrics.html#errores-frecuentes",
+    "href": "foundations/regression-metrics.html#errores-frecuentes",
+    "title": "Métricas de regresión",
     "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nEvaluar solo en train.\nUtilizar test para elegir el modelo.\nNo comparar con baseline.\nReportar solo una métrica.\nIgnorar calibración.\nNo reportar intervalos de confianza.\nComparar modelos con splits distintos.\nIgnorar subgrupos.\nConfundir rendimiento interno con validez externa.\nElegir umbral sin criterio clínico.\nNo revisar leakage cuando el rendimiento es extremo.",
+    "text": "Errores frecuentes\n\nReportar solo \\(R^2\\).\nNo comparar con baseline.\nInterpretar MSE en unidades originales.\nUsar MAPE con ceros.\nNo analizar residuos.\nIgnorar heterocedasticidad.\nNo revisar errores extremos.\nCalcular métricas solo en train.\nComparar modelos con splits distintos.\nEvaluar en escala logarítmica sin volver a la original.\nNo revisar subgrupos.\nNo definir un margen clínicamente aceptable.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#flujo-recomendado",
-    "href": "foundations/model-evaluation.html#flujo-recomendado",
-    "title": "Evaluación de modelos",
+    "objectID": "foundations/regression-metrics.html#flujo-recomendado",
+    "href": "foundations/regression-metrics.html#flujo-recomendado",
+    "title": "Métricas de regresión",
     "section": "Flujo recomendado",
-    "text": "Flujo recomendado\n\nDefinir la pregunta clínica.\nDefinir target y momento de predicción.\nElegir la estrategia de validación.\nDefinir un baseline.\nSeleccionar métricas.\nComparar train y validation.\nRevisar overfitting y underfitting.\nEvaluar calibración.\nAnalizar subgrupos.\nEvaluar una vez con test.\nReportar incertidumbre.\nConsiderar validación externa.",
+    "text": "Flujo recomendado\n\nDefinir la unidad del target.\nDefinir qué error es clínicamente relevante.\nElegir un baseline.\nSeleccionar MAE y RMSE como métricas básicas.\nAñadir \\(R^2\\) como medida relativa.\nAnalizar residuos.\nRevisar outliers.\nEvaluar subgrupos.\nCalcular incertidumbre.\nComparar con un margen clínico.\nEvaluar una vez en test.\nReportar limitaciones.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#checklist-para-proyectos",
-    "href": "foundations/model-evaluation.html#checklist-para-proyectos",
-    "title": "Evaluación de modelos",
+    "objectID": "foundations/regression-metrics.html#checklist-para-proyectos",
+    "href": "foundations/regression-metrics.html#checklist-para-proyectos",
+    "title": "Métricas de regresión",
     "section": "Checklist para proyectos",
-    "text": "Checklist para proyectos\n\nHe definido qué significa un buen modelo.\nHe definido un baseline.\nHe elegido métricas adecuadas.\nHe comparado train y validation.\nHe revisado overfitting.\nHe revisado underfitting.\nHe mantenido el test sin tocar.\nHe evaluado calibración.\nHe revisado umbrales.\nHe reportado incertidumbre.\nHe evaluado subgrupos.\nHe considerado drift.\nHe considerado validación externa.\nHe evaluado utilidad clínica.\nHe documentado todas las decisiones.",
+    "text": "Checklist para proyectos\n\nHe definido la unidad del target.\nHe creado un baseline.\nHe calculado MAE.\nHe calculado RMSE.\nHe calculado \\(R^2\\).\nHe comparado MAE y RMSE.\nHe analizado residuos.\nHe revisado heterocedasticidad.\nHe revisado errores extremos.\nHe evitado MAPE si existen ceros.\nHe evaluado subgrupos.\nHe reportado incertidumbre.\nHe definido un margen clínico.\nHe comparado modelos con el mismo split.\nHe interpretado los resultados clínicamente.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#recursos",
-    "href": "foundations/model-evaluation.html#recursos",
-    "title": "Evaluación de modelos",
+    "objectID": "foundations/regression-metrics.html#recursos",
+    "href": "foundations/regression-metrics.html#recursos",
+    "title": "Métricas de regresión",
     "section": "Recursos",
-    "text": "Recursos\n\nDocumentación\n\nMétricas de scikit-learn.\nCurvas de aprendizaje de scikit-learn.\nCalibración de probabilidades.\nDummyClassifier.\nDummyRegressor.\nValidación cruzada.\nBootstrap.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "text": "Recursos\n\nDocumentación\n\nMétricas de regresión de scikit-learn.\nDummyRegressor.\nGráficos de residuos.\nBootstrap.\nRegresión cuantílica.\nConformal prediction.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/model-evaluation.html#notas-personales",
-    "href": "foundations/model-evaluation.html#notas-personales",
-    "title": "Evaluación de modelos",
+    "objectID": "foundations/regression-metrics.html#notas-personales",
+    "href": "foundations/regression-metrics.html#notas-personales",
+    "title": "Métricas de regresión",
     "section": "Notas personales",
-    "text": "Notas personales\nAñade aquí tus propias dudas, ejemplos y criterios de evaluación.",
+    "text": "Notas personales\nAñade aquí tus propios ejemplos, márgenes clínicos y métricas preferidas.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Evaluación de modelos"
+      "Métricas de regresión"
     ]
   },
   {
-    "objectID": "foundations/data-exploration.html",
-    "href": "foundations/data-exploration.html",
-    "title": "Exploratory data analysis (EDA)",
+    "objectID": "foundations/index.html",
+    "href": "foundations/index.html",
+    "title": "Fundamentos",
     "section": "",
-    "text": "La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.",
+    "text": "Esta sección reúne los conceptos y procedimientos necesarios antes de entrenar modelos de machine learning.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#resumen",
-    "href": "foundations/data-exploration.html#resumen",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "",
-    "text": "La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#objetivos-principales",
-    "href": "foundations/data-exploration.html#objetivos-principales",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Objetivos principales",
-    "text": "Objetivos principales\n\nComprender qué representa cada fila y cada columna.\nIdentificar los tipos de variables.\nDetectar valores ausentes.\nEstudiar la distribución de las variables.\nLocalizar valores extremos o potencialmente erróneos.\nAnalizar relaciones entre variables.\nDetectar posibles problemas de calidad de datos.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#checklist-inicial",
-    "href": "foundations/data-exploration.html#checklist-inicial",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Checklist inicial",
-    "text": "Checklist inicial\nAntes de entrenar un modelo, conviene responder:\n\n¿Cuál es la unidad de análisis?\n¿Cuántas observaciones hay?\n¿Existen observaciones duplicadas?\n¿Qué variable queremos predecir?\n¿Qué variables son numéricas?\n¿Qué variables son categóricas?\n¿Hay valores ausentes?\n¿Existen valores imposibles?\n¿Puede haber información futura o data leakage?",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#código-básico",
-    "href": "foundations/data-exploration.html#código-básico",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Código básico",
-    "text": "Código básico\nimport pandas as pd\n\ndf = pd.read_csv(\"datos.csv\")\n\nprint(f\"Dimensiones del dataset: {df.shape}\")\n\ndisplay(df.head())\n\ndf.info()\n\ndisplay(df.describe(include=\"all\").T)",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#valores-ausentes",
-    "href": "foundations/data-exploration.html#valores-ausentes",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Valores ausentes",
-    "text": "Valores ausentes\nmissing_summary = (\n    df.isna()\n    .sum()\n    .to_frame(\"missing_count\")\n    .assign(\n        missing_percentage=lambda x:\n        100 * x[\"missing_count\"] / len(df)\n    )\n    .sort_values(\n        \"missing_percentage\",\n        ascending=False\n    )\n)\n\ndisplay(missing_summary)",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#filas-duplicadas",
-    "href": "foundations/data-exploration.html#filas-duplicadas",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Filas duplicadas",
-    "text": "Filas duplicadas\nn_duplicates = df.duplicated().sum()\n\nprint(f\"Número de filas duplicadas: {n_duplicates}\")",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#tipos-de-variables",
-    "href": "foundations/data-exploration.html#tipos-de-variables",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Tipos de variables",
-    "text": "Tipos de variables\nvariable_types = (\n    df.dtypes\n    .astype(str)\n    .to_frame(\"data_type\")\n)\n\ndisplay(variable_types)",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#número-de-valores-únicos",
-    "href": "foundations/data-exploration.html#número-de-valores-únicos",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Número de valores únicos",
-    "text": "Número de valores únicos\nunique_values = (\n    df.nunique(dropna=False)\n    .to_frame(\"unique_values\")\n    .sort_values(\n        \"unique_values\",\n        ascending=True\n    )\n)\n\ndisplay(unique_values)",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#variables-numéricas-y-categóricas",
-    "href": "foundations/data-exploration.html#variables-numéricas-y-categóricas",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Variables numéricas y categóricas",
-    "text": "Variables numéricas y categóricas\nnumeric_columns = df.select_dtypes(\n    include=\"number\"\n).columns.tolist()\n\ncategorical_columns = df.select_dtypes(\n    include=[\"object\", \"category\", \"bool\"]\n).columns.tolist()\n\nprint(\"Variables numéricas:\")\nprint(numeric_columns)\n\nprint(\"\\nVariables categóricas:\")\nprint(categorical_columns)",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#consideraciones-en-datos-clínicos",
-    "href": "foundations/data-exploration.html#consideraciones-en-datos-clínicos",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Consideraciones en datos clínicos",
-    "text": "Consideraciones en datos clínicos\nEn datos sanitarios, un valor ausente no siempre significa que la información se haya perdido. Puede indicar que:\n\nLa prueba no estaba clínicamente indicada.\nEl paciente no acudió a la visita.\nEl dato se registró en otro sistema.\nLa prueba se realizó, pero no se importó correctamente.\nEl procedimiento no estaba disponible en ese momento.\nLa ausencia del dato está relacionada con el estado clínico del paciente.\nEl profesional decidió no solicitar la prueba porque ya disponía de información suficiente.\n\nPor este motivo, el mecanismo que genera los valores ausentes debe investigarse antes de eliminarlos o imputarlos.\nTambién es importante revisar:\n\nValores clínicamente imposibles.\nDiferencias de unidades entre centros.\nCambios en los métodos de medición.\nDuplicados asociados a distintas visitas.\nFechas incoherentes.\nVariables registradas después del desenlace.\nInformación que pueda producir data leakage.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#buenas-prácticas",
-    "href": "foundations/data-exploration.html#buenas-prácticas",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Buenas prácticas",
-    "text": "Buenas prácticas\nAntes de comenzar el modelado:\n\nComprender qué representa cada fila.\nIdentificar la variable objetivo.\nRevisar la calidad de las variables predictoras.\nDetectar duplicados y valores imposibles.\nAnalizar los valores ausentes.\nComprobar la distribución de las variables.\nSeparar los datos de entrenamiento y prueba antes de ajustar transformaciones.\nEvitar utilizar información futura para predecir eventos pasados.\nDocumentar todas las decisiones de limpieza y transformación.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "foundations/data-exploration.html#errores-frecuentes",
-    "href": "foundations/data-exploration.html#errores-frecuentes",
-    "title": "Exploratory data analysis (EDA)",
-    "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nEmpezar a entrenar modelos sin comprender el dataset.\nEliminar todos los valores ausentes automáticamente.\nConsiderar todos los valores extremos como errores.\nUtilizar identificadores de pacientes como variables predictoras.\nIncluir variables registradas después del desenlace.\nCalcular transformaciones utilizando todo el dataset antes de separar entrenamiento y prueba.\nInterpretar una correlación como una relación causal.",
-    "crumbs": [
-      "Inicio",
-      "Fundamentos",
-      "Exploratory data analysis (EDA)"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html",
-    "href": "dimensionality-reduction/pca.html",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "",
-    "text": "TipResumen en 30 segundos\n\n\n\nPCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.\nCada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#qué-problema-resuelve",
-    "href": "dimensionality-reduction/pca.html#qué-problema-resuelve",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "¿Qué problema resuelve?",
-    "text": "¿Qué problema resuelve?\nEn muchos datasets existen numerosas variables que contienen información parcialmente redundante.\nPor ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:\n\nPeso.\nAltura.\nÍndice de masa corporal.\nSuperficie corporal.\nPerímetros corporales.\n\nEstas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.\nPCA puede utilizarse para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nPCA no selecciona variables originales. Crea variables nuevas llamadas componentes principales.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#intuición",
-    "href": "dimensionality-reduction/pca.html#intuición",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Intuición",
-    "text": "Intuición\nImagina una nube de puntos formada por dos variables correlacionadas.\nAunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.\nPCA encuentra esa dirección y la convierte en el primer componente principal.\nEl segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.\nDe este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#fundamentos-teóricos",
-    "href": "dimensionality-reduction/pca.html#fundamentos-teóricos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Fundamentos teóricos",
-    "text": "Fundamentos teóricos\n\nComponentes principales\nCada componente principal es una combinación lineal de las variables originales.\nPara un dataset con variables \\(x_1, x_2, \\ldots, x_p\\), el primer componente puede expresarse como:\n\\[\nPC_1 = w_{11}x_1 + w_{12}x_2 + \\cdots + w_{1p}x_p\n\\]\nEl segundo componente se expresa como:\n\\[\nPC_2 = w_{21}x_1 + w_{22}x_2 + \\cdots + w_{2p}x_p\n\\]\nLos coeficientes \\(w\\) se denominan pesos o loadings.\n\n\nVarianza explicada\nCada componente explica una parte de la varianza total del dataset.\nLa proporción de varianza explicada por el componente \\(j\\) puede expresarse como:\n\\[\n\\text{Explained variance ratio}_j =\n\\frac{\\lambda_j}\n{\\sum_{k=1}^{p}\\lambda_k}\n\\]\ndonde \\(\\lambda_j\\) es el autovalor asociado al componente \\(j\\).\n\n\nVarianza explicada acumulada\nLa varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.\nPor ejemplo:\n\n1 componente: 45 %.\n2 componentes: 68 %.\n3 componentes: 82 %.\n4 componentes: 91 %.\n\nEn este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.\n\n\n\n\n\n\nWarningImportante\n\n\n\nUn componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
-    "href": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "¿Por qué es importante escalar?",
-    "text": "¿Por qué es importante escalar?\nPCA está influido por la escala de las variables.\nImagina estas variables:\n\nEdad, medida en años.\nTroponina, medida con valores pequeños.\nPresión arterial, medida en mmHg.\n\nUna variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.\nPor eso, antes de aplicar PCA suele utilizarse:\nStandardScaler()\nEl escalado transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
-    "href": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Supuestos y condiciones",
-    "text": "Supuestos y condiciones\nPCA funciona mejor cuando:\n\nLas variables son numéricas.\nExisten relaciones aproximadamente lineales.\nLas variables contienen varianza informativa.\nHay correlación entre algunas variables.\nLos valores extremos han sido revisados.\nLas escalas se han tratado adecuadamente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
-    "href": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Cuándo utilizar PCA",
-    "text": "Cuándo utilizar PCA\nPCA puede ser adecuado cuando:\n\nTienes muchas variables numéricas correlacionadas.\nQuieres reducir el número de variables.\nQuieres visualizar observaciones en dos o tres dimensiones.\nQuieres reducir multicolinealidad.\nQuieres comprimir información antes de otro modelo.\nQuieres explorar patrones latentes.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
-    "href": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Cuándo no utilizar PCA",
-    "text": "Cuándo no utilizar PCA\nPCA puede no ser adecuado cuando:\n\nNecesitas interpretar directamente cada variable original.\nLas relaciones entre variables son principalmente no lineales.\nLa mayoría de las variables son categóricas.\nTienes muy pocas variables.\nLos componentes son difíciles de justificar clínicamente.\nEl objetivo es seleccionar variables originales, no transformarlas.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
-    "href": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Flujo de trabajo recomendado",
-    "text": "Flujo de trabajo recomendado\n\nSeleccionar únicamente variables numéricas relevantes.\nRevisar valores ausentes.\nRevisar valores extremos.\nSeparar entrenamiento y prueba si PCA forma parte de un modelo predictivo.\nImputar valores ausentes utilizando solo entrenamiento.\nEscalar las variables utilizando solo entrenamiento.\nAjustar PCA utilizando solo entrenamiento.\nElegir el número de componentes.\nTransformar entrenamiento y prueba.\nInterpretar la varianza explicada y los loadings.\nEvaluar el impacto en el modelo posterior.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#código-mínimo",
-    "href": "dimensionality-reduction/pca.html#código-mínimo",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Código mínimo",
-    "text": "Código mínimo\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(pca.explained_variance_ratio_)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
-    "href": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Seleccionar componentes según varianza explicada",
-    "text": "Seleccionar componentes según varianza explicada\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(f\"Número de componentes: {pca.n_components_}\")\nprint(\n    \"Varianza explicada acumulada:\",\n    pca.explained_variance_ratio_.sum()\n)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
-    "href": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Implementación segura dentro de un pipeline",
-    "text": "Implementación segura dentro de un pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\"imputer\", SimpleImputer(strategy=\"median\")),\n        (\"scaler\", StandardScaler()),\n        (\"pca\", PCA(n_components=0.95)),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nCautionError frecuente: data leakage\n\n\n\nNo ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.\nEl pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
-    "href": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Inspeccionar la varianza explicada",
-    "text": "Inspeccionar la varianza explicada\nimport pandas as pd\n\nexplained_variance = pd.DataFrame(\n    {\n        \"component\": range(\n            1,\n            len(pca.explained_variance_ratio_) + 1\n        ),\n        \"explained_variance_ratio\":\n            pca.explained_variance_ratio_,\n        \"cumulative_explained_variance\":\n            pca.explained_variance_ratio_.cumsum()\n    }\n)\n\ndisplay(explained_variance)",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#interpretar-los-loadings",
-    "href": "dimensionality-reduction/pca.html#interpretar-los-loadings",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Interpretar los loadings",
-    "text": "Interpretar los loadings\nimport pandas as pd\n\nloadings = pd.DataFrame(\n    pca.components_.T,\n    index=X.columns,\n    columns=[\n        f\"PC{i}\"\n        for i in range(\n            1,\n            pca.n_components_ + 1\n        )\n    ]\n)\n\ndisplay(loadings)\nUn valor absoluto elevado indica que la variable tiene una contribución importante al componente.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
-    "href": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Consideraciones en datos clínicos",
-    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nPCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.\n\n\n\nMediciones repetidas\nSi un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.\n\n\nValores ausentes\nLa ausencia de una prueba puede estar relacionada con:\n\nLa gravedad.\nLa indicación clínica.\nEl centro.\nEl momento del seguimiento.\nLa disponibilidad de recursos.\n\n\n\nDiferencias entre centros\nPCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:\n\nEquipos.\nUnidades.\nProtocolos.\nPoblaciones.\nMétodos de laboratorio.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#errores-frecuentes",
-    "href": "dimensionality-reduction/pca.html#errores-frecuentes",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nAplicar PCA antes de separar entrenamiento y prueba.\nEscalar utilizando todo el dataset.\nNo escalar variables con unidades diferentes.\nAplicar PCA directamente a variables categóricas.\nInterpretar los componentes como variables clínicas reales.\nPensar que más varianza explicada siempre implica mejor predicción.\nIgnorar valores extremos que dominan los componentes.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/pca.html#checklist-para-proyectos",
-    "href": "dimensionality-reduction/pca.html#checklist-para-proyectos",
-    "title": "Principal Component Analysis (PCA)",
-    "section": "Checklist para proyectos",
-    "text": "Checklist para proyectos\n\nLas variables son numéricas.\nHe revisado valores ausentes.\nHe revisado valores extremos.\nHe separado entrenamiento y prueba.\nLa separación se ha realizado por paciente cuando corresponde.\nLa imputación se ajusta solo con entrenamiento.\nEl escalado se ajusta solo con entrenamiento.\nPCA se ajusta solo con entrenamiento.\nHe revisado la varianza explicada.\nHe revisado los loadings.\nHe considerado la interpretabilidad clínica.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "PCA"
-    ]
-  },
-  {
-    "objectID": "deep-learning/index.html",
-    "href": "deep-learning/index.html",
-    "title": "Deep learning",
-    "section": "",
-    "text": "Esta sección reunirá los fundamentos y modelos de deep learning que se añadirán durante el próximo curso.",
-    "crumbs": [
-      "Inicio",
-      "Deep learning",
       "Introducción"
     ]
   },
   {
-    "objectID": "deep-learning/index.html#contenidos-previstos",
-    "href": "deep-learning/index.html#contenidos-previstos",
-    "title": "Deep learning",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "objectID": "foundations/index.html#contenidos",
+    "href": "foundations/index.html#contenidos",
+    "title": "Fundamentos",
+    "section": "Contenidos",
+    "text": "Contenidos\n\nExploración de datos\nPreparación y limpieza de datos\nValores ausentes\nCodificación de variables categóricas\nEscalado y normalización\nSeparación entre entrenamiento, validación y prueba\nEvaluación de modelos\nPrevención de data leakage",
     "crumbs": [
       "Inicio",
-      "Deep learning",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "Sobre el proyecto",
-    "section": "",
-    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
-    "crumbs": [
-      "Inicio",
-      "Sobre el proyecto"
-    ]
-  },
-  {
-    "objectID": "code-recipes/index.html",
-    "href": "code-recipes/index.html",
-    "title": "Recetario de código",
-    "section": "",
-    "text": "Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.",
-    "crumbs": [
-      "Inicio",
-      "Recetario de código",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "code-recipes/index.html#contenidos-previstos",
-    "href": "code-recipes/index.html#contenidos-previstos",
-    "title": "Recetario de código",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Recetario de código",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/index.html",
-    "href": "dimensionality-reduction/index.html",
-    "title": "Reducción de dimensionalidad",
-    "section": "",
-    "text": "Esta sección reúne métodos para reducir el número de variables conservando la mayor cantidad posible de información.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
-      "Introducción"
-    ]
-  },
-  {
-    "objectID": "dimensionality-reduction/index.html#contenidos-previstos",
-    "href": "dimensionality-reduction/index.html#contenidos-previstos",
-    "title": "Reducción de dimensionalidad",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
-    "crumbs": [
-      "Inicio",
-      "Reducción de dimensionalidad",
+      "Fundamentos",
       "Introducción"
     ]
   },
@@ -3199,27 +2864,962 @@
     ]
   },
   {
-    "objectID": "foundations/index.html",
-    "href": "foundations/index.html",
-    "title": "Fundamentos",
+    "objectID": "dimensionality-reduction/index.html",
+    "href": "dimensionality-reduction/index.html",
+    "title": "Reducción de dimensionalidad",
     "section": "",
-    "text": "Esta sección reúne los conceptos y procedimientos necesarios antes de entrenar modelos de machine learning.",
+    "text": "Esta sección reúne métodos para reducir el número de variables conservando la mayor cantidad posible de información.",
     "crumbs": [
       "Inicio",
-      "Fundamentos",
+      "Reducción de dimensionalidad",
       "Introducción"
     ]
   },
   {
-    "objectID": "foundations/index.html#contenidos",
-    "href": "foundations/index.html#contenidos",
-    "title": "Fundamentos",
-    "section": "Contenidos",
-    "text": "Contenidos\n\nExploración de datos\nPreparación y limpieza de datos\nValores ausentes\nCodificación de variables categóricas\nEscalado y normalización\nSeparación entre entrenamiento, validación y prueba\nEvaluación de modelos\nPrevención de data leakage",
+    "objectID": "dimensionality-reduction/index.html#contenidos-previstos",
+    "href": "dimensionality-reduction/index.html#contenidos-previstos",
+    "title": "Reducción de dimensionalidad",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "code-recipes/index.html",
+    "href": "code-recipes/index.html",
+    "title": "Recetario de código",
+    "section": "",
+    "text": "Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.",
+    "crumbs": [
+      "Inicio",
+      "Recetario de código",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "code-recipes/index.html#contenidos-previstos",
+    "href": "code-recipes/index.html#contenidos-previstos",
+    "title": "Recetario de código",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Recetario de código",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "Sobre el proyecto",
+    "section": "",
+    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
+    "crumbs": [
+      "Inicio",
+      "Sobre el proyecto"
+    ]
+  },
+  {
+    "objectID": "deep-learning/index.html",
+    "href": "deep-learning/index.html",
+    "title": "Deep learning",
+    "section": "",
+    "text": "Esta sección reunirá los fundamentos y modelos de deep learning que se añadirán durante el próximo curso.",
+    "crumbs": [
+      "Inicio",
+      "Deep learning",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "deep-learning/index.html#contenidos-previstos",
+    "href": "deep-learning/index.html#contenidos-previstos",
+    "title": "Deep learning",
+    "section": "Contenidos previstos",
+    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Deep learning",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html",
+    "href": "dimensionality-reduction/pca.html",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nPCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.\nCada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#qué-problema-resuelve",
+    "href": "dimensionality-reduction/pca.html#qué-problema-resuelve",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "¿Qué problema resuelve?",
+    "text": "¿Qué problema resuelve?\nEn muchos datasets existen numerosas variables que contienen información parcialmente redundante.\nPor ejemplo, en un dataset clínico pueden existir medidas relacionadas entre sí:\n\nPeso.\nAltura.\nÍndice de masa corporal.\nSuperficie corporal.\nPerímetros corporales.\n\nEstas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.\nPCA puede utilizarse para:\n\nReducir el número de variables.\nVisualizar datasets de alta dimensionalidad.\nDetectar patrones.\nMitigar problemas de multicolinealidad.\nCrear variables de entrada para otros modelos.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nPCA no selecciona variables originales. Crea variables nuevas llamadas componentes principales.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#intuición",
+    "href": "dimensionality-reduction/pca.html#intuición",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Intuición",
+    "text": "Intuición\nImagina una nube de puntos formada por dos variables correlacionadas.\nAunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.\nPCA encuentra esa dirección y la convierte en el primer componente principal.\nEl segundo componente se coloca perpendicularmente al primero y captura la variabilidad restante.\nDe este modo, PCA cambia el sistema de coordenadas original por uno nuevo que intenta representar los datos de forma más eficiente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#fundamentos-teóricos",
+    "href": "dimensionality-reduction/pca.html#fundamentos-teóricos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Fundamentos teóricos",
+    "text": "Fundamentos teóricos\n\nComponentes principales\nCada componente principal es una combinación lineal de las variables originales.\nPara un dataset con variables \\(x_1, x_2, \\ldots, x_p\\), el primer componente puede expresarse como:\n\\[\nPC_1 = w_{11}x_1 + w_{12}x_2 + \\cdots + w_{1p}x_p\n\\]\nEl segundo componente se expresa como:\n\\[\nPC_2 = w_{21}x_1 + w_{22}x_2 + \\cdots + w_{2p}x_p\n\\]\nLos coeficientes \\(w\\) se denominan pesos o loadings.\n\n\nVarianza explicada\nCada componente explica una parte de la varianza total del dataset.\nLa proporción de varianza explicada por el componente \\(j\\) puede expresarse como:\n\\[\n\\text{Explained variance ratio}_j =\n\\frac{\\lambda_j}\n{\\sum_{k=1}^{p}\\lambda_k}\n\\]\ndonde \\(\\lambda_j\\) es el autovalor asociado al componente \\(j\\).\n\n\nVarianza explicada acumulada\nLa varianza explicada acumulada indica cuánta información se conserva utilizando los primeros componentes.\nPor ejemplo:\n\n1 componente: 45 %.\n2 componentes: 68 %.\n3 componentes: 82 %.\n4 componentes: 91 %.\n\nEn este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.\n\n\n\n\n\n\nWarningImportante\n\n\n\nUn componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
+    "href": "dimensionality-reduction/pca.html#por-qué-es-importante-escalar",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "¿Por qué es importante escalar?",
+    "text": "¿Por qué es importante escalar?\nPCA está influido por la escala de las variables.\nImagina estas variables:\n\nEdad, medida en años.\nTroponina, medida con valores pequeños.\nPresión arterial, medida en mmHg.\n\nUna variable con valores numéricamente mayores puede dominar el análisis aunque no sea clínicamente más importante.\nPor eso, antes de aplicar PCA suele utilizarse:\nStandardScaler()\nEl escalado transforma cada variable para que tenga aproximadamente:\n\nMedia igual a 0.\nDesviación estándar igual a 1.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nSi las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
+    "href": "dimensionality-reduction/pca.html#supuestos-y-condiciones",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Supuestos y condiciones",
+    "text": "Supuestos y condiciones\nPCA funciona mejor cuando:\n\nLas variables son numéricas.\nExisten relaciones aproximadamente lineales.\nLas variables contienen varianza informativa.\nHay correlación entre algunas variables.\nLos valores extremos han sido revisados.\nLas escalas se han tratado adecuadamente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
+    "href": "dimensionality-reduction/pca.html#cuándo-utilizar-pca",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Cuándo utilizar PCA",
+    "text": "Cuándo utilizar PCA\nPCA puede ser adecuado cuando:\n\nTienes muchas variables numéricas correlacionadas.\nQuieres reducir el número de variables.\nQuieres visualizar observaciones en dos o tres dimensiones.\nQuieres reducir multicolinealidad.\nQuieres comprimir información antes de otro modelo.\nQuieres explorar patrones latentes.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
+    "href": "dimensionality-reduction/pca.html#cuándo-no-utilizar-pca",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Cuándo no utilizar PCA",
+    "text": "Cuándo no utilizar PCA\nPCA puede no ser adecuado cuando:\n\nNecesitas interpretar directamente cada variable original.\nLas relaciones entre variables son principalmente no lineales.\nLa mayoría de las variables son categóricas.\nTienes muy pocas variables.\nLos componentes son difíciles de justificar clínicamente.\nEl objetivo es seleccionar variables originales, no transformarlas.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
+    "href": "dimensionality-reduction/pca.html#flujo-de-trabajo-recomendado",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Flujo de trabajo recomendado",
+    "text": "Flujo de trabajo recomendado\n\nSeleccionar únicamente variables numéricas relevantes.\nRevisar valores ausentes.\nRevisar valores extremos.\nSeparar entrenamiento y prueba si PCA forma parte de un modelo predictivo.\nImputar valores ausentes utilizando solo entrenamiento.\nEscalar las variables utilizando solo entrenamiento.\nAjustar PCA utilizando solo entrenamiento.\nElegir el número de componentes.\nTransformar entrenamiento y prueba.\nInterpretar la varianza explicada y los loadings.\nEvaluar el impacto en el modelo posterior.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#código-mínimo",
+    "href": "dimensionality-reduction/pca.html#código-mínimo",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Código mínimo",
+    "text": "Código mínimo\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=2)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(pca.explained_variance_ratio_)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
+    "href": "dimensionality-reduction/pca.html#seleccionar-componentes-según-varianza-explicada",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Seleccionar componentes según varianza explicada",
+    "text": "Seleccionar componentes según varianza explicada\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\n\nX_scaled = StandardScaler().fit_transform(X)\n\npca = PCA(n_components=0.95)\n\nX_pca = pca.fit_transform(X_scaled)\n\nprint(f\"Número de componentes: {pca.n_components_}\")\nprint(\n    \"Varianza explicada acumulada:\",\n    pca.explained_variance_ratio_.sum()\n)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
+    "href": "dimensionality-reduction/pca.html#implementación-segura-dentro-de-un-pipeline",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Implementación segura dentro de un pipeline",
+    "text": "Implementación segura dentro de un pipeline\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\"imputer\", SimpleImputer(strategy=\"median\")),\n        (\"scaler\", StandardScaler()),\n        (\"pca\", PCA(n_components=0.95)),\n        (\n            \"model\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)\n\npipeline.fit(X_train, y_train)\n\ny_pred = pipeline.predict(X_test)\n\n\n\n\n\n\nCautionError frecuente: data leakage\n\n\n\nNo ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.\nEl pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
+    "href": "dimensionality-reduction/pca.html#inspeccionar-la-varianza-explicada",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Inspeccionar la varianza explicada",
+    "text": "Inspeccionar la varianza explicada\nimport pandas as pd\n\nexplained_variance = pd.DataFrame(\n    {\n        \"component\": range(\n            1,\n            len(pca.explained_variance_ratio_) + 1\n        ),\n        \"explained_variance_ratio\":\n            pca.explained_variance_ratio_,\n        \"cumulative_explained_variance\":\n            pca.explained_variance_ratio_.cumsum()\n    }\n)\n\ndisplay(explained_variance)",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#interpretar-los-loadings",
+    "href": "dimensionality-reduction/pca.html#interpretar-los-loadings",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Interpretar los loadings",
+    "text": "Interpretar los loadings\nimport pandas as pd\n\nloadings = pd.DataFrame(\n    pca.components_.T,\n    index=X.columns,\n    columns=[\n        f\"PC{i}\"\n        for i in range(\n            1,\n            pca.n_components_ + 1\n        )\n    ]\n)\n\ndisplay(loadings)\nUn valor absoluto elevado indica que la variable tiene una contribución importante al componente.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
+    "href": "dimensionality-reduction/pca.html#consideraciones-en-datos-clínicos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Consideraciones en datos clínicos",
+    "text": "Consideraciones en datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nPCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.\n\n\n\nMediciones repetidas\nSi un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.\n\n\nValores ausentes\nLa ausencia de una prueba puede estar relacionada con:\n\nLa gravedad.\nLa indicación clínica.\nEl centro.\nEl momento del seguimiento.\nLa disponibilidad de recursos.\n\n\n\nDiferencias entre centros\nPCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:\n\nEquipos.\nUnidades.\nProtocolos.\nPoblaciones.\nMétodos de laboratorio.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#errores-frecuentes",
+    "href": "dimensionality-reduction/pca.html#errores-frecuentes",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nAplicar PCA antes de separar entrenamiento y prueba.\nEscalar utilizando todo el dataset.\nNo escalar variables con unidades diferentes.\nAplicar PCA directamente a variables categóricas.\nInterpretar los componentes como variables clínicas reales.\nPensar que más varianza explicada siempre implica mejor predicción.\nIgnorar valores extremos que dominan los componentes.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "dimensionality-reduction/pca.html#checklist-para-proyectos",
+    "href": "dimensionality-reduction/pca.html#checklist-para-proyectos",
+    "title": "Principal Component Analysis (PCA)",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nLas variables son numéricas.\nHe revisado valores ausentes.\nHe revisado valores extremos.\nHe separado entrenamiento y prueba.\nLa separación se ha realizado por paciente cuando corresponde.\nLa imputación se ajusta solo con entrenamiento.\nEl escalado se ajusta solo con entrenamiento.\nPCA se ajusta solo con entrenamiento.\nHe revisado la varianza explicada.\nHe revisado los loadings.\nHe considerado la interpretabilidad clínica.",
+    "crumbs": [
+      "Inicio",
+      "Reducción de dimensionalidad",
+      "PCA"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html",
+    "href": "foundations/data-exploration.html",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "",
+    "text": "La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.",
     "crumbs": [
       "Inicio",
       "Fundamentos",
-      "Introducción"
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#resumen",
+    "href": "foundations/data-exploration.html#resumen",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "",
+    "text": "La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#objetivos-principales",
+    "href": "foundations/data-exploration.html#objetivos-principales",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Objetivos principales",
+    "text": "Objetivos principales\n\nComprender qué representa cada fila y cada columna.\nIdentificar los tipos de variables.\nDetectar valores ausentes.\nEstudiar la distribución de las variables.\nLocalizar valores extremos o potencialmente erróneos.\nAnalizar relaciones entre variables.\nDetectar posibles problemas de calidad de datos.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#checklist-inicial",
+    "href": "foundations/data-exploration.html#checklist-inicial",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Checklist inicial",
+    "text": "Checklist inicial\nAntes de entrenar un modelo, conviene responder:\n\n¿Cuál es la unidad de análisis?\n¿Cuántas observaciones hay?\n¿Existen observaciones duplicadas?\n¿Qué variable queremos predecir?\n¿Qué variables son numéricas?\n¿Qué variables son categóricas?\n¿Hay valores ausentes?\n¿Existen valores imposibles?\n¿Puede haber información futura o data leakage?",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#código-básico",
+    "href": "foundations/data-exploration.html#código-básico",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Código básico",
+    "text": "Código básico\nimport pandas as pd\n\ndf = pd.read_csv(\"datos.csv\")\n\nprint(f\"Dimensiones del dataset: {df.shape}\")\n\ndisplay(df.head())\n\ndf.info()\n\ndisplay(df.describe(include=\"all\").T)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#valores-ausentes",
+    "href": "foundations/data-exploration.html#valores-ausentes",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Valores ausentes",
+    "text": "Valores ausentes\nmissing_summary = (\n    df.isna()\n    .sum()\n    .to_frame(\"missing_count\")\n    .assign(\n        missing_percentage=lambda x:\n        100 * x[\"missing_count\"] / len(df)\n    )\n    .sort_values(\n        \"missing_percentage\",\n        ascending=False\n    )\n)\n\ndisplay(missing_summary)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#filas-duplicadas",
+    "href": "foundations/data-exploration.html#filas-duplicadas",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Filas duplicadas",
+    "text": "Filas duplicadas\nn_duplicates = df.duplicated().sum()\n\nprint(f\"Número de filas duplicadas: {n_duplicates}\")",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#tipos-de-variables",
+    "href": "foundations/data-exploration.html#tipos-de-variables",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Tipos de variables",
+    "text": "Tipos de variables\nvariable_types = (\n    df.dtypes\n    .astype(str)\n    .to_frame(\"data_type\")\n)\n\ndisplay(variable_types)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#número-de-valores-únicos",
+    "href": "foundations/data-exploration.html#número-de-valores-únicos",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Número de valores únicos",
+    "text": "Número de valores únicos\nunique_values = (\n    df.nunique(dropna=False)\n    .to_frame(\"unique_values\")\n    .sort_values(\n        \"unique_values\",\n        ascending=True\n    )\n)\n\ndisplay(unique_values)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#variables-numéricas-y-categóricas",
+    "href": "foundations/data-exploration.html#variables-numéricas-y-categóricas",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Variables numéricas y categóricas",
+    "text": "Variables numéricas y categóricas\nnumeric_columns = df.select_dtypes(\n    include=\"number\"\n).columns.tolist()\n\ncategorical_columns = df.select_dtypes(\n    include=[\"object\", \"category\", \"bool\"]\n).columns.tolist()\n\nprint(\"Variables numéricas:\")\nprint(numeric_columns)\n\nprint(\"\\nVariables categóricas:\")\nprint(categorical_columns)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#consideraciones-en-datos-clínicos",
+    "href": "foundations/data-exploration.html#consideraciones-en-datos-clínicos",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Consideraciones en datos clínicos",
+    "text": "Consideraciones en datos clínicos\nEn datos sanitarios, un valor ausente no siempre significa que la información se haya perdido. Puede indicar que:\n\nLa prueba no estaba clínicamente indicada.\nEl paciente no acudió a la visita.\nEl dato se registró en otro sistema.\nLa prueba se realizó, pero no se importó correctamente.\nEl procedimiento no estaba disponible en ese momento.\nLa ausencia del dato está relacionada con el estado clínico del paciente.\nEl profesional decidió no solicitar la prueba porque ya disponía de información suficiente.\n\nPor este motivo, el mecanismo que genera los valores ausentes debe investigarse antes de eliminarlos o imputarlos.\nTambién es importante revisar:\n\nValores clínicamente imposibles.\nDiferencias de unidades entre centros.\nCambios en los métodos de medición.\nDuplicados asociados a distintas visitas.\nFechas incoherentes.\nVariables registradas después del desenlace.\nInformación que pueda producir data leakage.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#buenas-prácticas",
+    "href": "foundations/data-exploration.html#buenas-prácticas",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Buenas prácticas",
+    "text": "Buenas prácticas\nAntes de comenzar el modelado:\n\nComprender qué representa cada fila.\nIdentificar la variable objetivo.\nRevisar la calidad de las variables predictoras.\nDetectar duplicados y valores imposibles.\nAnalizar los valores ausentes.\nComprobar la distribución de las variables.\nSeparar los datos de entrenamiento y prueba antes de ajustar transformaciones.\nEvitar utilizar información futura para predecir eventos pasados.\nDocumentar todas las decisiones de limpieza y transformación.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#errores-frecuentes",
+    "href": "foundations/data-exploration.html#errores-frecuentes",
+    "title": "Exploratory data analysis (EDA)",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nEmpezar a entrenar modelos sin comprender el dataset.\nEliminar todos los valores ausentes automáticamente.\nConsiderar todos los valores extremos como errores.\nUtilizar identificadores de pacientes como variables predictoras.\nIncluir variables registradas después del desenlace.\nCalcular transformaciones utilizando todo el dataset antes de separar entrenamiento y prueba.\nInterpretar una correlación como una relación causal.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploratory data analysis (EDA)"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html",
+    "href": "foundations/model-evaluation.html",
+    "title": "Evaluación de modelos",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nEvaluar un modelo significa estimar cómo funcionará con datos nuevos.\nNo basta con obtener una métrica alta en entrenamiento. Hay que comprobar:\n\nGeneralización.\nOverfitting.\nUnderfitting.\nComparación con un baseline.\nEstabilidad.\nCalibración.\nUtilidad clínica.\nValidación externa.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#qué-significa-que-un-modelo-funcione-bien",
+    "href": "foundations/model-evaluation.html#qué-significa-que-un-modelo-funcione-bien",
+    "title": "Evaluación de modelos",
+    "section": "¿Qué significa que un modelo funcione bien?",
+    "text": "¿Qué significa que un modelo funcione bien?\nUn modelo puede considerarse útil cuando:\n\nMantiene un buen rendimiento en datos no vistos.\nSupera a una estrategia baseline.\nEs estable entre particiones.\nTiene métricas adecuadas para el problema.\nProduce predicciones interpretables.\nEstá bien calibrado.\nAporta valor clínico o operativo.\nGeneraliza a otras poblaciones o centros.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nUna buena métrica no garantiza un buen modelo.\nTambién importan la validez del diseño, la ausencia de leakage, la calibración y la utilidad real.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#generalización",
+    "href": "foundations/model-evaluation.html#generalización",
+    "title": "Evaluación de modelos",
+    "section": "Generalización",
+    "text": "Generalización\nLa generalización es la capacidad del modelo para mantener su rendimiento en observaciones nuevas.\nEl objetivo no es memorizar el dataset de entrenamiento, sino aprender patrones que se repitan en datos futuros.\nUn modelo que generaliza bien:\n\nFunciona en test.\nMantiene resultados en validación cruzada.\nTolera pequeñas variaciones en los datos.\nNo depende de observaciones concretas.\nNo utiliza información futura.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#rendimiento-en-train-y-test",
+    "href": "foundations/model-evaluation.html#rendimiento-en-train-y-test",
+    "title": "Evaluación de modelos",
+    "section": "Rendimiento en train y test",
+    "text": "Rendimiento en train y test\nPuede compararse el rendimiento en entrenamiento y test.\ntrain_score = model.score(\n    X_train,\n    y_train\n)\n\ntest_score = model.score(\n    X_test,\n    y_test\n)\n\nprint(\n    f\"Train score: {train_score:.3f}\"\n)\n\nprint(\n    f\"Test score: {test_score:.3f}\"\n)\nUna diferencia grande entre train y test puede indicar overfitting.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#overfitting",
+    "href": "foundations/model-evaluation.html#overfitting",
+    "title": "Evaluación de modelos",
+    "section": "Overfitting",
+    "text": "Overfitting\nEl overfitting ocurre cuando el modelo aprende demasiado bien los detalles del entrenamiento, incluyendo ruido y patrones no generalizables.\nSeñales habituales:\n\nRendimiento muy alto en train.\nRendimiento claramente inferior en validation o test.\nGran variabilidad entre folds.\nModelo muy complejo.\nMuchas variables respecto al número de observaciones.\nMétricas muy sensibles al split.\n\n\n\n\n\n\n\nWarningSeñal de alarma\n\n\n\nUn modelo casi perfecto en un problema clínico complejo merece una revisión cuidadosa de leakage y diseño.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#causas-frecuentes-de-overfitting",
+    "href": "foundations/model-evaluation.html#causas-frecuentes-de-overfitting",
+    "title": "Evaluación de modelos",
+    "section": "Causas frecuentes de overfitting",
+    "text": "Causas frecuentes de overfitting\n\nDemasiadas variables.\nMuy pocos pacientes.\nModelo excesivamente flexible.\nAjuste repetido de hiperparámetros.\nSelección de variables con todo el dataset.\nUso repetido del test.\nClases muy desbalanceadas.\nRuido en el target.\nObservaciones relacionadas entre train y test.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#cómo-reducir-overfitting",
+    "href": "foundations/model-evaluation.html#cómo-reducir-overfitting",
+    "title": "Evaluación de modelos",
+    "section": "Cómo reducir overfitting",
+    "text": "Cómo reducir overfitting\n\nSimplificar el modelo.\nAplicar regularización.\nReducir variables.\nAumentar datos.\nUtilizar validación cruzada.\nAplicar early stopping.\nControlar profundidad en árboles.\nUtilizar bagging.\nRevisar leakage.\nComparar con modelos simples.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#underfitting",
+    "href": "foundations/model-evaluation.html#underfitting",
+    "title": "Evaluación de modelos",
+    "section": "Underfitting",
+    "text": "Underfitting\nEl underfitting ocurre cuando el modelo es demasiado simple para capturar el patrón real.\nSeñales:\n\nRendimiento bajo en train.\nRendimiento bajo en validation.\nErrores sistemáticos.\nModelo incapaz de representar relaciones importantes.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#causas-frecuentes-de-underfitting",
+    "href": "foundations/model-evaluation.html#causas-frecuentes-de-underfitting",
+    "title": "Evaluación de modelos",
+    "section": "Causas frecuentes de underfitting",
+    "text": "Causas frecuentes de underfitting\n\nModelo demasiado simple.\nVariables poco informativas.\nPreprocesamiento inadecuado.\nRegularización excesiva.\nPocas épocas de entrenamiento.\nHiperparámetros demasiado restrictivos.\nRelaciones no lineales modeladas de forma lineal.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#comparación-conceptual",
+    "href": "foundations/model-evaluation.html#comparación-conceptual",
+    "title": "Evaluación de modelos",
+    "section": "Comparación conceptual",
+    "text": "Comparación conceptual\n\n\n\nSituación\nTrain\nValidation/Test\nInterpretación\n\n\n\n\nUnderfitting\nBajo\nBajo\nModelo demasiado simple\n\n\nBuen ajuste\nAlto\nSimilar\nBuena generalización\n\n\nOverfitting\nMuy alto\nMucho menor\nModelo memoriza train",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#curvas-de-aprendizaje",
+    "href": "foundations/model-evaluation.html#curvas-de-aprendizaje",
+    "title": "Evaluación de modelos",
+    "section": "Curvas de aprendizaje",
+    "text": "Curvas de aprendizaje\nLas curvas de aprendizaje muestran cómo cambia el rendimiento al aumentar el tamaño del entrenamiento.\nfrom sklearn.model_selection import learning_curve\nimport matplotlib.pyplot as plt\nimport numpy as np\n\ntrain_sizes, train_scores, validation_scores = (\n    learning_curve(\n        estimator=model,\n        X=X,\n        y=y,\n        cv=5,\n        scoring=\"roc_auc\",\n        train_sizes=np.linspace(\n            0.1,\n            1.0,\n            5\n        )\n    )\n)\n\ntrain_mean = train_scores.mean(\n    axis=1\n)\n\nvalidation_mean = validation_scores.mean(\n    axis=1\n)\n\nplt.figure(figsize=(8, 5))\n\nplt.plot(\n    train_sizes,\n    train_mean,\n    marker=\"o\",\n    label=\"Train\"\n)\n\nplt.plot(\n    train_sizes,\n    validation_mean,\n    marker=\"o\",\n    label=\"Validation\"\n)\n\nplt.xlabel(\"Tamaño de entrenamiento\")\nplt.ylabel(\"ROC AUC\")\nplt.title(\"Curva de aprendizaje\")\nplt.legend()\n\nplt.show()",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#interpretar-curvas-de-aprendizaje",
+    "href": "foundations/model-evaluation.html#interpretar-curvas-de-aprendizaje",
+    "title": "Evaluación de modelos",
+    "section": "Interpretar curvas de aprendizaje",
+    "text": "Interpretar curvas de aprendizaje\n\nOverfitting\n\nTrain alto.\nValidation más bajo.\nSeparación persistente.\n\n\n\nUnderfitting\n\nTrain bajo.\nValidation bajo.\nAmbas curvas cercanas.\n\n\n\nFalta de datos\n\nTrain alto.\nValidation mejora al aumentar la muestra.\nLa diferencia disminuye progresivamente.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#baseline",
+    "href": "foundations/model-evaluation.html#baseline",
+    "title": "Evaluación de modelos",
+    "section": "Baseline",
+    "text": "Baseline\nUn baseline es una referencia mínima que el modelo debería superar.\nEjemplos:\n\nPredecir siempre la clase mayoritaria.\nPredecir la media.\nPredecir la mediana.\nUsar una regla clínica simple.\nUtilizar una regresión logística básica.\nMantener el último valor observado.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nNunca evalúes un modelo sin compararlo con al menos un baseline.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#baseline-de-clasificación",
+    "href": "foundations/model-evaluation.html#baseline-de-clasificación",
+    "title": "Evaluación de modelos",
+    "section": "Baseline de clasificación",
+    "text": "Baseline de clasificación\nfrom sklearn.dummy import DummyClassifier\n\nbaseline = DummyClassifier(\n    strategy=\"most_frequent\"\n)\n\nbaseline.fit(\n    X_train,\n    y_train\n)\n\ny_pred_baseline = baseline.predict(\n    X_test\n)\nOtras estrategias:\nDummyClassifier(\n    strategy=\"stratified\",\n    random_state=42\n)\nDummyClassifier(\n    strategy=\"prior\"\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#baseline-de-regresión",
+    "href": "foundations/model-evaluation.html#baseline-de-regresión",
+    "title": "Evaluación de modelos",
+    "section": "Baseline de regresión",
+    "text": "Baseline de regresión\nfrom sklearn.dummy import DummyRegressor\n\nbaseline = DummyRegressor(\n    strategy=\"mean\"\n)\n\nbaseline.fit(\n    X_train,\n    y_train\n)\n\ny_pred_baseline = baseline.predict(\n    X_test\n)\nTambién puede usarse:\nDummyRegressor(\n    strategy=\"median\"\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#modelo-simple-como-baseline",
+    "href": "foundations/model-evaluation.html#modelo-simple-como-baseline",
+    "title": "Evaluación de modelos",
+    "section": "Modelo simple como baseline",
+    "text": "Modelo simple como baseline\nEn clasificación clínica, una regresión logística básica puede ser un buen baseline.\nfrom sklearn.linear_model import LogisticRegression\n\nbaseline_model = LogisticRegression(\n    max_iter=1000,\n    random_state=42\n)\n\nbaseline_model.fit(\n    X_train,\n    y_train\n)\nUn modelo complejo debería demostrar una mejora clara y estable respecto a esta referencia.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#métrica-adecuada",
+    "href": "foundations/model-evaluation.html#métrica-adecuada",
+    "title": "Evaluación de modelos",
+    "section": "Métrica adecuada",
+    "text": "Métrica adecuada\nLa métrica debe depender del problema.\n\nClasificación\nPosibles métricas:\n\nAccuracy.\nSensibilidad.\nEspecificidad.\nPrecision.\nRecall.\nF1-score.\nROC AUC.\nPR AUC.\nBrier score.\nLog loss.\n\n\n\nRegresión\nPosibles métricas:\n\nMAE.\nMSE.\nRMSE.\n\\(R^2\\).\nMediana del error absoluto.\nError relativo.\n\n\n\n\n\n\n\nWarningImportante\n\n\n\nLa métrica más popular no siempre es la más útil.\nEn clases desbalanceadas, accuracy puede ser engañosa.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#métricas-discriminativas-y-calibración",
+    "href": "foundations/model-evaluation.html#métricas-discriminativas-y-calibración",
+    "title": "Evaluación de modelos",
+    "section": "Métricas discriminativas y calibración",
+    "text": "Métricas discriminativas y calibración\nUn modelo puede discriminar bien y estar mal calibrado.\n\nDiscriminación\nMide si el modelo ordena correctamente pacientes de mayor y menor riesgo.\nEjemplos:\n\nROC AUC.\nPR AUC.\n\n\n\nCalibración\nMide si las probabilidades predichas se corresponden con las frecuencias reales.\nEjemplo:\n\nEntre pacientes con riesgo predicho del 20 %, aproximadamente un 20 % debería presentar el evento.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#calibración-visual",
+    "href": "foundations/model-evaluation.html#calibración-visual",
+    "title": "Evaluación de modelos",
+    "section": "Calibración visual",
+    "text": "Calibración visual\nfrom sklearn.calibration import calibration_curve\nimport matplotlib.pyplot as plt\n\nprob_true, prob_pred = calibration_curve(\n    y_test,\n    y_probability,\n    n_bins=10\n)\n\nplt.figure(figsize=(6, 6))\n\nplt.plot(\n    prob_pred,\n    prob_true,\n    marker=\"o\"\n)\n\nplt.plot(\n    [0, 1],\n    [0, 1],\n    linestyle=\"--\"\n)\n\nplt.xlabel(\"Probabilidad predicha\")\nplt.ylabel(\"Frecuencia observada\")\nplt.title(\"Curva de calibración\")\n\nplt.show()",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#brier-score",
+    "href": "foundations/model-evaluation.html#brier-score",
+    "title": "Evaluación de modelos",
+    "section": "Brier score",
+    "text": "Brier score\nfrom sklearn.metrics import brier_score_loss\n\nbrier = brier_score_loss(\n    y_test,\n    y_probability\n)\n\nprint(\n    f\"Brier score: {brier:.3f}\"\n)\nValores menores indican mejor precisión probabilística.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#umbral-de-clasificación",
+    "href": "foundations/model-evaluation.html#umbral-de-clasificación",
+    "title": "Evaluación de modelos",
+    "section": "Umbral de clasificación",
+    "text": "Umbral de clasificación\nMuchos modelos producen probabilidades.\nLa clase final depende de un umbral.\nthreshold = 0.50\n\ny_pred = (\n    y_probability &gt;= threshold\n).astype(int)\nCambiar el umbral modifica:\n\nSensibilidad.\nEspecificidad.\nPrecision.\nRecall.\nNúmero de falsos positivos.\nNúmero de falsos negativos.\n\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nEl umbral debería elegirse según las consecuencias clínicas de cada tipo de error, no solo por conveniencia estadística.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#falsos-positivos-y-falsos-negativos",
+    "href": "foundations/model-evaluation.html#falsos-positivos-y-falsos-negativos",
+    "title": "Evaluación de modelos",
+    "section": "Falsos positivos y falsos negativos",
+    "text": "Falsos positivos y falsos negativos\n\nFalso positivo\nEl modelo predice evento, pero el evento no ocurre.\nPuede provocar:\n\nPruebas adicionales.\nAnsiedad.\nCostes.\nTratamientos innecesarios.\n\n\n\nFalso negativo\nEl modelo predice ausencia de evento, pero el evento ocurre.\nPuede provocar:\n\nRetraso diagnóstico.\nFalta de monitorización.\nOmisión de tratamiento.\nDaño clínico.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#evaluación-interna",
+    "href": "foundations/model-evaluation.html#evaluación-interna",
+    "title": "Evaluación de modelos",
+    "section": "Evaluación interna",
+    "text": "Evaluación interna\nLa evaluación interna utiliza datos de la misma fuente general que el entrenamiento.\nEjemplos:\n\nHoldout.\nK-fold cross-validation.\nBootstrap.\nValidación cruzada repetida.\n\nPermite estimar rendimiento dentro del mismo contexto.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#evaluación-externa",
+    "href": "foundations/model-evaluation.html#evaluación-externa",
+    "title": "Evaluación de modelos",
+    "section": "Evaluación externa",
+    "text": "Evaluación externa\nLa evaluación externa utiliza datos distintos.\nPuede ser:\n\nOtro centro.\nOtro país.\nOtro periodo.\nOtra población.\nOtro sistema de información.\n\n\n\n\n\n\n\nImportantValidez externa\n\n\n\nUn modelo puede funcionar bien internamente y fallar en otro centro debido a diferencias de población, protocolo o registro.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#evaluación-temporal",
+    "href": "foundations/model-evaluation.html#evaluación-temporal",
+    "title": "Evaluación de modelos",
+    "section": "Evaluación temporal",
+    "text": "Evaluación temporal\nUna evaluación temporal entrena con datos antiguos y prueba con datos más recientes.\nEjemplo:\nTrain: 2018–2023\nValidation: 2024\nTest: 2025\nEsto ayuda a detectar:\n\nData drift.\nCambios en protocolos.\nNuevos tratamientos.\nCambios en población.\nCambios en sistemas de información.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#evaluación-por-centro",
+    "href": "foundations/model-evaluation.html#evaluación-por-centro",
+    "title": "Evaluación de modelos",
+    "section": "Evaluación por centro",
+    "text": "Evaluación por centro\nEn estudios multicéntricos puede entrenarse con unos centros y evaluar en otro.\nEjemplo:\nTrain: Barcelona + Helsinki\nTest externo: Coimbra\nEsto evalúa transportabilidad.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#estabilidad-del-rendimiento",
+    "href": "foundations/model-evaluation.html#estabilidad-del-rendimiento",
+    "title": "Evaluación de modelos",
+    "section": "Estabilidad del rendimiento",
+    "text": "Estabilidad del rendimiento\nNo basta con una media.\nTambién conviene revisar:\n\nDesviación estándar.\nIntervalos de confianza.\nDistribución entre folds.\nRendimiento por subgrupo.\nRendimiento por centro.\nRendimiento por periodo.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#validación-cruzada",
+    "href": "foundations/model-evaluation.html#validación-cruzada",
+    "title": "Evaluación de modelos",
+    "section": "Validación cruzada",
+    "text": "Validación cruzada\nfrom sklearn.model_selection import cross_validate\n\nscores = cross_validate(\n    estimator=model,\n    X=X,\n    y=y,\n    cv=5,\n    scoring=[\n        \"roc_auc\",\n        \"accuracy\"\n    ],\n    return_train_score=True\n)\n\nprint(\n    scores\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#comparar-train-y-validation-en-cross-validation",
+    "href": "foundations/model-evaluation.html#comparar-train-y-validation-en-cross-validation",
+    "title": "Evaluación de modelos",
+    "section": "Comparar train y validation en cross-validation",
+    "text": "Comparar train y validation en cross-validation\ntrain_auc = scores[\n    \"train_roc_auc\"\n]\n\nvalidation_auc = scores[\n    \"test_roc_auc\"\n]\n\nprint(\n    \"Train mean:\",\n    train_auc.mean()\n)\n\nprint(\n    \"Validation mean:\",\n    validation_auc.mean()\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#intervalos-de-confianza",
+    "href": "foundations/model-evaluation.html#intervalos-de-confianza",
+    "title": "Evaluación de modelos",
+    "section": "Intervalos de confianza",
+    "text": "Intervalos de confianza\nUna aproximación simple puede calcularse con bootstrap.\nimport numpy as np\nfrom sklearn.metrics import roc_auc_score\n\nrng = np.random.default_rng(42)\n\nbootstrap_scores = []\n\nfor _ in range(1000):\n\n    indices = rng.integers(\n        0,\n        len(y_test),\n        len(y_test)\n    )\n\n    y_boot = y_test.iloc[\n        indices\n    ]\n\n    p_boot = y_probability[\n        indices\n    ]\n\n    if y_boot.nunique() &lt; 2:\n        continue\n\n    score = roc_auc_score(\n        y_boot,\n        p_boot\n    )\n\n    bootstrap_scores.append(\n        score\n    )\n\nlower = np.percentile(\n    bootstrap_scores,\n    2.5\n)\n\nupper = np.percentile(\n    bootstrap_scores,\n    97.5\n)\n\nprint(\n    f\"95% CI: \"\n    f\"{lower:.3f}–{upper:.3f}\"\n)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#comparar-modelos-correctamente",
+    "href": "foundations/model-evaluation.html#comparar-modelos-correctamente",
+    "title": "Evaluación de modelos",
+    "section": "Comparar modelos correctamente",
+    "text": "Comparar modelos correctamente\nLos modelos deben compararse usando:\n\nEl mismo split.\nLos mismos folds.\nEl mismo preprocesamiento base.\nLa misma métrica.\nLa misma definición del target.\nEl mismo momento de predicción.\n\n\n\n\n\n\n\nCautionError frecuente\n\n\n\nComparar métricas obtenidas con particiones distintas puede atribuir al modelo diferencias que en realidad se deben al split.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#complejidad-frente-a-utilidad",
+    "href": "foundations/model-evaluation.html#complejidad-frente-a-utilidad",
+    "title": "Evaluación de modelos",
+    "section": "Complejidad frente a utilidad",
+    "text": "Complejidad frente a utilidad\nUn modelo complejo no es necesariamente mejor.\nPuede tener:\n\nLigera mejora estadística.\nMenor interpretabilidad.\nMayor coste.\nMayor riesgo de overfitting.\nMás dificultad de mantenimiento.\n\nLa mejora debe ser relevante, estable y útil.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#utilidad-clínica",
+    "href": "foundations/model-evaluation.html#utilidad-clínica",
+    "title": "Evaluación de modelos",
+    "section": "Utilidad clínica",
+    "text": "Utilidad clínica\nLa utilidad clínica depende de:\n\nQué decisión se tomará.\nEn qué momento.\nPara qué pacientes.\nQué coste tienen los errores.\nQué recursos requiere.\nSi cambia la práctica actual.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#impacto-clínico",
+    "href": "foundations/model-evaluation.html#impacto-clínico",
+    "title": "Evaluación de modelos",
+    "section": "Impacto clínico",
+    "text": "Impacto clínico\nUn modelo puede tener buen rendimiento y no mejorar la atención.\nPara demostrar impacto pueden ser necesarios:\n\nEstudios prospectivos.\nEvaluación de workflow.\nEstudios de implementación.\nAnálisis de costes.\nEvaluación de resultados clínicos.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#rendimiento-por-subgrupos",
+    "href": "foundations/model-evaluation.html#rendimiento-por-subgrupos",
+    "title": "Evaluación de modelos",
+    "section": "Rendimiento por subgrupos",
+    "text": "Rendimiento por subgrupos\nConviene revisar posibles diferencias por:\n\nEdad.\nSexo.\nCentro.\nDiagnóstico.\nGrupo étnico cuando sea pertinente y legalmente adecuado.\nNivel socioeconómico.\nPeriodo temporal.\nGravedad.\n\nfor center in X_test[\"center\"].unique():\n\n    mask = (\n        X_test[\"center\"] == center\n    )\n\n    subgroup_score = roc_auc_score(\n        y_test.loc[mask],\n        y_probability[mask]\n    )\n\n    print(\n        center,\n        subgroup_score\n    )\nDebe comprobarse que cada subgrupo tenga suficientes eventos.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#data-drift",
+    "href": "foundations/model-evaluation.html#data-drift",
+    "title": "Evaluación de modelos",
+    "section": "Data drift",
+    "text": "Data drift\nEl data drift ocurre cuando cambia la distribución de las variables.\nEjemplos:\n\nNueva tecnología.\nCambio de protocolo.\nNueva población.\nCambio en criterios diagnósticos.\nNuevos tratamientos.\n\nPuede producir una caída de rendimiento.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#concept-drift",
+    "href": "foundations/model-evaluation.html#concept-drift",
+    "title": "Evaluación de modelos",
+    "section": "Concept drift",
+    "text": "Concept drift\nEl concept drift ocurre cuando cambia la relación entre variables y target.\nEjemplo:\n\nUn tratamiento nuevo modifica el riesgo de evento para determinados pacientes.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#qué-reportar",
+    "href": "foundations/model-evaluation.html#qué-reportar",
+    "title": "Evaluación de modelos",
+    "section": "Qué reportar",
+    "text": "Qué reportar\nUn informe de evaluación debería incluir:\n\nDefinición de cohorte.\nDefinición del target.\nMomento de predicción.\nEstrategia de split.\nTamaños de train, validation y test.\nNúmero de eventos.\nMétricas principales.\nIntervalos de confianza.\nCalibración.\nBaseline.\nRendimiento por subgrupos.\nLimitaciones.\nValidación externa si existe.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#errores-frecuentes",
+    "href": "foundations/model-evaluation.html#errores-frecuentes",
+    "title": "Evaluación de modelos",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nEvaluar solo en train.\nUtilizar test para elegir el modelo.\nNo comparar con baseline.\nReportar solo una métrica.\nIgnorar calibración.\nNo reportar intervalos de confianza.\nComparar modelos con splits distintos.\nIgnorar subgrupos.\nConfundir rendimiento interno con validez externa.\nElegir umbral sin criterio clínico.\nNo revisar leakage cuando el rendimiento es extremo.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#flujo-recomendado",
+    "href": "foundations/model-evaluation.html#flujo-recomendado",
+    "title": "Evaluación de modelos",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nDefinir la pregunta clínica.\nDefinir target y momento de predicción.\nElegir la estrategia de validación.\nDefinir un baseline.\nSeleccionar métricas.\nComparar train y validation.\nRevisar overfitting y underfitting.\nEvaluar calibración.\nAnalizar subgrupos.\nEvaluar una vez con test.\nReportar incertidumbre.\nConsiderar validación externa.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#checklist-para-proyectos",
+    "href": "foundations/model-evaluation.html#checklist-para-proyectos",
+    "title": "Evaluación de modelos",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe definido qué significa un buen modelo.\nHe definido un baseline.\nHe elegido métricas adecuadas.\nHe comparado train y validation.\nHe revisado overfitting.\nHe revisado underfitting.\nHe mantenido el test sin tocar.\nHe evaluado calibración.\nHe revisado umbrales.\nHe reportado incertidumbre.\nHe evaluado subgrupos.\nHe considerado drift.\nHe considerado validación externa.\nHe evaluado utilidad clínica.\nHe documentado todas las decisiones.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#recursos",
+    "href": "foundations/model-evaluation.html#recursos",
+    "title": "Evaluación de modelos",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\nMétricas de scikit-learn.\nCurvas de aprendizaje de scikit-learn.\nCalibración de probabilidades.\nDummyClassifier.\nDummyRegressor.\nValidación cruzada.\nBootstrap.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
+    ]
+  },
+  {
+    "objectID": "foundations/model-evaluation.html#notas-personales",
+    "href": "foundations/model-evaluation.html#notas-personales",
+    "title": "Evaluación de modelos",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus propias dudas, ejemplos y criterios de evaluación.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Evaluación de modelos"
     ]
   },
   {
