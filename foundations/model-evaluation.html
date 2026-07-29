@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Evaluación de modelos – Health Data Science Handbook</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-2aa33e8751edae3f9b77d048c1294c38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Health Data Science Handbook</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
+<span class="menu-text">Inicio</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> 
+<span class="menu-text">Sobre el proyecto</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../foundations/index.html"> 
+<span class="menu-text">Fundamentos</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../foundations/index.html">Fundamentos</a></li><li class="breadcrumb-item"><a href="../foundations/model-evaluation.html">Evaluación de modelos</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Inicio</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../about.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Sobre el proyecto</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/data-exploration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory data analysis (EDA)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/model-evaluation.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Evaluación de modelos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Preprocesamiento</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/train-test-split.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Train, validation and test</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/data-leakage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data leakage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/missing-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Valores ausentes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/scaling-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Escalado y normalización</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/categorical-encoding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variables categóricas y encoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/outliers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Outliers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/pipelines-columntransformer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pipelines y ColumnTransformer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Reducción de dimensionalidad</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/pca.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PCA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje no supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Series temporales</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Deep learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Guías de proyectos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../project-guides/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Recetario de código</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#qué-significa-que-un-modelo-funcione-bien" id="toc-qué-significa-que-un-modelo-funcione-bien" class="nav-link active" data-scroll-target="#qué-significa-que-un-modelo-funcione-bien">¿Qué significa que un modelo funcione bien?</a></li>
+  <li><a href="#generalización" id="toc-generalización" class="nav-link" data-scroll-target="#generalización">Generalización</a></li>
+  <li><a href="#rendimiento-en-train-y-test" id="toc-rendimiento-en-train-y-test" class="nav-link" data-scroll-target="#rendimiento-en-train-y-test">Rendimiento en train y test</a></li>
+  <li><a href="#overfitting" id="toc-overfitting" class="nav-link" data-scroll-target="#overfitting">Overfitting</a></li>
+  <li><a href="#causas-frecuentes-de-overfitting" id="toc-causas-frecuentes-de-overfitting" class="nav-link" data-scroll-target="#causas-frecuentes-de-overfitting">Causas frecuentes de overfitting</a></li>
+  <li><a href="#cómo-reducir-overfitting" id="toc-cómo-reducir-overfitting" class="nav-link" data-scroll-target="#cómo-reducir-overfitting">Cómo reducir overfitting</a></li>
+  <li><a href="#underfitting" id="toc-underfitting" class="nav-link" data-scroll-target="#underfitting">Underfitting</a></li>
+  <li><a href="#causas-frecuentes-de-underfitting" id="toc-causas-frecuentes-de-underfitting" class="nav-link" data-scroll-target="#causas-frecuentes-de-underfitting">Causas frecuentes de underfitting</a></li>
+  <li><a href="#comparación-conceptual" id="toc-comparación-conceptual" class="nav-link" data-scroll-target="#comparación-conceptual">Comparación conceptual</a></li>
+  <li><a href="#curvas-de-aprendizaje" id="toc-curvas-de-aprendizaje" class="nav-link" data-scroll-target="#curvas-de-aprendizaje">Curvas de aprendizaje</a></li>
+  <li><a href="#interpretar-curvas-de-aprendizaje" id="toc-interpretar-curvas-de-aprendizaje" class="nav-link" data-scroll-target="#interpretar-curvas-de-aprendizaje">Interpretar curvas de aprendizaje</a>
+  <ul class="collapse">
+  <li><a href="#overfitting-1" id="toc-overfitting-1" class="nav-link" data-scroll-target="#overfitting-1">Overfitting</a></li>
+  <li><a href="#underfitting-1" id="toc-underfitting-1" class="nav-link" data-scroll-target="#underfitting-1">Underfitting</a></li>
+  <li><a href="#falta-de-datos" id="toc-falta-de-datos" class="nav-link" data-scroll-target="#falta-de-datos">Falta de datos</a></li>
+  </ul></li>
+  <li><a href="#baseline" id="toc-baseline" class="nav-link" data-scroll-target="#baseline">Baseline</a></li>
+  <li><a href="#baseline-de-clasificación" id="toc-baseline-de-clasificación" class="nav-link" data-scroll-target="#baseline-de-clasificación">Baseline de clasificación</a></li>
+  <li><a href="#baseline-de-regresión" id="toc-baseline-de-regresión" class="nav-link" data-scroll-target="#baseline-de-regresión">Baseline de regresión</a></li>
+  <li><a href="#modelo-simple-como-baseline" id="toc-modelo-simple-como-baseline" class="nav-link" data-scroll-target="#modelo-simple-como-baseline">Modelo simple como baseline</a></li>
+  <li><a href="#métrica-adecuada" id="toc-métrica-adecuada" class="nav-link" data-scroll-target="#métrica-adecuada">Métrica adecuada</a>
+  <ul class="collapse">
+  <li><a href="#clasificación" id="toc-clasificación" class="nav-link" data-scroll-target="#clasificación">Clasificación</a></li>
+  <li><a href="#regresión" id="toc-regresión" class="nav-link" data-scroll-target="#regresión">Regresión</a></li>
+  </ul></li>
+  <li><a href="#métricas-discriminativas-y-calibración" id="toc-métricas-discriminativas-y-calibración" class="nav-link" data-scroll-target="#métricas-discriminativas-y-calibración">Métricas discriminativas y calibración</a>
+  <ul class="collapse">
+  <li><a href="#discriminación" id="toc-discriminación" class="nav-link" data-scroll-target="#discriminación">Discriminación</a></li>
+  <li><a href="#calibración" id="toc-calibración" class="nav-link" data-scroll-target="#calibración">Calibración</a></li>
+  </ul></li>
+  <li><a href="#calibración-visual" id="toc-calibración-visual" class="nav-link" data-scroll-target="#calibración-visual">Calibración visual</a></li>
+  <li><a href="#brier-score" id="toc-brier-score" class="nav-link" data-scroll-target="#brier-score">Brier score</a></li>
+  <li><a href="#umbral-de-clasificación" id="toc-umbral-de-clasificación" class="nav-link" data-scroll-target="#umbral-de-clasificación">Umbral de clasificación</a></li>
+  <li><a href="#falsos-positivos-y-falsos-negativos" id="toc-falsos-positivos-y-falsos-negativos" class="nav-link" data-scroll-target="#falsos-positivos-y-falsos-negativos">Falsos positivos y falsos negativos</a>
+  <ul class="collapse">
+  <li><a href="#falso-positivo" id="toc-falso-positivo" class="nav-link" data-scroll-target="#falso-positivo">Falso positivo</a></li>
+  <li><a href="#falso-negativo" id="toc-falso-negativo" class="nav-link" data-scroll-target="#falso-negativo">Falso negativo</a></li>
+  </ul></li>
+  <li><a href="#evaluación-interna" id="toc-evaluación-interna" class="nav-link" data-scroll-target="#evaluación-interna">Evaluación interna</a></li>
+  <li><a href="#evaluación-externa" id="toc-evaluación-externa" class="nav-link" data-scroll-target="#evaluación-externa">Evaluación externa</a></li>
+  <li><a href="#evaluación-temporal" id="toc-evaluación-temporal" class="nav-link" data-scroll-target="#evaluación-temporal">Evaluación temporal</a></li>
+  <li><a href="#evaluación-por-centro" id="toc-evaluación-por-centro" class="nav-link" data-scroll-target="#evaluación-por-centro">Evaluación por centro</a></li>
+  <li><a href="#estabilidad-del-rendimiento" id="toc-estabilidad-del-rendimiento" class="nav-link" data-scroll-target="#estabilidad-del-rendimiento">Estabilidad del rendimiento</a></li>
+  <li><a href="#validación-cruzada" id="toc-validación-cruzada" class="nav-link" data-scroll-target="#validación-cruzada">Validación cruzada</a></li>
+  <li><a href="#comparar-train-y-validation-en-cross-validation" id="toc-comparar-train-y-validation-en-cross-validation" class="nav-link" data-scroll-target="#comparar-train-y-validation-en-cross-validation">Comparar train y validation en cross-validation</a></li>
+  <li><a href="#intervalos-de-confianza" id="toc-intervalos-de-confianza" class="nav-link" data-scroll-target="#intervalos-de-confianza">Intervalos de confianza</a></li>
+  <li><a href="#comparar-modelos-correctamente" id="toc-comparar-modelos-correctamente" class="nav-link" data-scroll-target="#comparar-modelos-correctamente">Comparar modelos correctamente</a></li>
+  <li><a href="#complejidad-frente-a-utilidad" id="toc-complejidad-frente-a-utilidad" class="nav-link" data-scroll-target="#complejidad-frente-a-utilidad">Complejidad frente a utilidad</a></li>
+  <li><a href="#utilidad-clínica" id="toc-utilidad-clínica" class="nav-link" data-scroll-target="#utilidad-clínica">Utilidad clínica</a></li>
+  <li><a href="#impacto-clínico" id="toc-impacto-clínico" class="nav-link" data-scroll-target="#impacto-clínico">Impacto clínico</a></li>
+  <li><a href="#rendimiento-por-subgrupos" id="toc-rendimiento-por-subgrupos" class="nav-link" data-scroll-target="#rendimiento-por-subgrupos">Rendimiento por subgrupos</a></li>
+  <li><a href="#data-drift" id="toc-data-drift" class="nav-link" data-scroll-target="#data-drift">Data drift</a></li>
+  <li><a href="#concept-drift" id="toc-concept-drift" class="nav-link" data-scroll-target="#concept-drift">Concept drift</a></li>
+  <li><a href="#qué-reportar" id="toc-qué-reportar" class="nav-link" data-scroll-target="#qué-reportar">Qué reportar</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#checklist-para-proyectos" id="toc-checklist-para-proyectos" class="nav-link" data-scroll-target="#checklist-para-proyectos">Checklist para proyectos</a></li>
+  <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
+  <ul class="collapse">
+  <li><a href="#documentación" id="toc-documentación" class="nav-link" data-scroll-target="#documentación">Documentación</a></li>
+  <li><a href="#material-del-máster" id="toc-material-del-máster" class="nav-link" data-scroll-target="#material-del-máster">Material del máster</a></li>
+  </ul></li>
+  <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../foundations/index.html">Fundamentos</a></li><li class="breadcrumb-item"><a href="../foundations/model-evaluation.html">Evaluación de modelos</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Evaluación de modelos</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Evaluar un modelo significa estimar cómo funcionará con datos nuevos.</p>
+<p>No basta con obtener una métrica alta en entrenamiento. Hay que comprobar:</p>
+<ul>
+<li>Generalización.</li>
+<li>Overfitting.</li>
+<li>Underfitting.</li>
+<li>Comparación con un baseline.</li>
+<li>Estabilidad.</li>
+<li>Calibración.</li>
+<li>Utilidad clínica.</li>
+<li>Validación externa.</li>
+</ul>
+</div>
+</div>
+<section id="qué-significa-que-un-modelo-funcione-bien" class="level2">
+<h2 data-anchor-id="qué-significa-que-un-modelo-funcione-bien">¿Qué significa que un modelo funcione bien?</h2>
+<p>Un modelo puede considerarse útil cuando:</p>
+<ul>
+<li>Mantiene un buen rendimiento en datos no vistos.</li>
+<li>Supera a una estrategia baseline.</li>
+<li>Es estable entre particiones.</li>
+<li>Tiene métricas adecuadas para el problema.</li>
+<li>Produce predicciones interpretables.</li>
+<li>Está bien calibrado.</li>
+<li>Aporta valor clínico o operativo.</li>
+<li>Generaliza a otras poblaciones o centros.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Una buena métrica no garantiza un buen modelo.</p>
+<p>También importan la validez del diseño, la ausencia de leakage, la calibración y la utilidad real.</p>
+</div>
+</div>
+</section>
+<section id="generalización" class="level2">
+<h2 data-anchor-id="generalización">Generalización</h2>
+<p>La generalización es la capacidad del modelo para mantener su rendimiento en observaciones nuevas.</p>
+<p>El objetivo no es memorizar el dataset de entrenamiento, sino aprender patrones que se repitan en datos futuros.</p>
+<p>Un modelo que generaliza bien:</p>
+<ul>
+<li>Funciona en test.</li>
+<li>Mantiene resultados en validación cruzada.</li>
+<li>Tolera pequeñas variaciones en los datos.</li>
+<li>No depende de observaciones concretas.</li>
+<li>No utiliza información futura.</li>
+</ul>
+</section>
+<section id="rendimiento-en-train-y-test" class="level2">
+<h2 data-anchor-id="rendimiento-en-train-y-test">Rendimiento en train y test</h2>
+<p>Puede compararse el rendimiento en entrenamiento y test.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>train_score <span class="op">=</span> model.score(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    X_train,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    y_train</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>test_score <span class="op">=</span> model.score(</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    X_test,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    y_test</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Train score: </span><span class="sc">{</span>train_score<span class="sc">:.3f}</span><span class="ss">"</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Test score: </span><span class="sc">{</span>test_score<span class="sc">:.3f}</span><span class="ss">"</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Una diferencia grande entre train y test puede indicar overfitting.</p>
+</section>
+<section id="overfitting" class="level2">
+<h2 data-anchor-id="overfitting">Overfitting</h2>
+<p>El overfitting ocurre cuando el modelo aprende demasiado bien los detalles del entrenamiento, incluyendo ruido y patrones no generalizables.</p>
+<p>Señales habituales:</p>
+<ul>
+<li>Rendimiento muy alto en train.</li>
+<li>Rendimiento claramente inferior en validation o test.</li>
+<li>Gran variabilidad entre folds.</li>
+<li>Modelo muy complejo.</li>
+<li>Muchas variables respecto al número de observaciones.</li>
+<li>Métricas muy sensibles al split.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Señal de alarma
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un modelo casi perfecto en un problema clínico complejo merece una revisión cuidadosa de leakage y diseño.</p>
+</div>
+</div>
+</section>
+<section id="causas-frecuentes-de-overfitting" class="level2">
+<h2 data-anchor-id="causas-frecuentes-de-overfitting">Causas frecuentes de overfitting</h2>
+<ul>
+<li>Demasiadas variables.</li>
+<li>Muy pocos pacientes.</li>
+<li>Modelo excesivamente flexible.</li>
+<li>Ajuste repetido de hiperparámetros.</li>
+<li>Selección de variables con todo el dataset.</li>
+<li>Uso repetido del test.</li>
+<li>Clases muy desbalanceadas.</li>
+<li>Ruido en el target.</li>
+<li>Observaciones relacionadas entre train y test.</li>
+</ul>
+</section>
+<section id="cómo-reducir-overfitting" class="level2">
+<h2 data-anchor-id="cómo-reducir-overfitting">Cómo reducir overfitting</h2>
+<ul>
+<li>Simplificar el modelo.</li>
+<li>Aplicar regularización.</li>
+<li>Reducir variables.</li>
+<li>Aumentar datos.</li>
+<li>Utilizar validación cruzada.</li>
+<li>Aplicar early stopping.</li>
+<li>Controlar profundidad en árboles.</li>
+<li>Utilizar bagging.</li>
+<li>Revisar leakage.</li>
+<li>Comparar con modelos simples.</li>
+</ul>
+</section>
+<section id="underfitting" class="level2">
+<h2 data-anchor-id="underfitting">Underfitting</h2>
+<p>El underfitting ocurre cuando el modelo es demasiado simple para capturar el patrón real.</p>
+<p>Señales:</p>
+<ul>
+<li>Rendimiento bajo en train.</li>
+<li>Rendimiento bajo en validation.</li>
+<li>Errores sistemáticos.</li>
+<li>Modelo incapaz de representar relaciones importantes.</li>
+</ul>
+</section>
+<section id="causas-frecuentes-de-underfitting" class="level2">
+<h2 data-anchor-id="causas-frecuentes-de-underfitting">Causas frecuentes de underfitting</h2>
+<ul>
+<li>Modelo demasiado simple.</li>
+<li>Variables poco informativas.</li>
+<li>Preprocesamiento inadecuado.</li>
+<li>Regularización excesiva.</li>
+<li>Pocas épocas de entrenamiento.</li>
+<li>Hiperparámetros demasiado restrictivos.</li>
+<li>Relaciones no lineales modeladas de forma lineal.</li>
+</ul>
+</section>
+<section id="comparación-conceptual" class="level2">
+<h2 data-anchor-id="comparación-conceptual">Comparación conceptual</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Situación</th>
+<th style="text-align: right;">Train</th>
+<th style="text-align: right;">Validation/Test</th>
+<th>Interpretación</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Underfitting</td>
+<td style="text-align: right;">Bajo</td>
+<td style="text-align: right;">Bajo</td>
+<td>Modelo demasiado simple</td>
+</tr>
+<tr class="even">
+<td>Buen ajuste</td>
+<td style="text-align: right;">Alto</td>
+<td style="text-align: right;">Similar</td>
+<td>Buena generalización</td>
+</tr>
+<tr class="odd">
+<td>Overfitting</td>
+<td style="text-align: right;">Muy alto</td>
+<td style="text-align: right;">Mucho menor</td>
+<td>Modelo memoriza train</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="curvas-de-aprendizaje" class="level2">
+<h2 data-anchor-id="curvas-de-aprendizaje">Curvas de aprendizaje</h2>
+<p>Las curvas de aprendizaje muestran cómo cambia el rendimiento al aumentar el tamaño del entrenamiento.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> learning_curve</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>train_sizes, train_scores, validation_scores <span class="op">=</span> (</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    learning_curve(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        estimator<span class="op">=</span>model,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        X<span class="op">=</span>X,</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        y<span class="op">=</span>y,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        cv<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        scoring<span class="op">=</span><span class="st">"roc_auc"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>        train_sizes<span class="op">=</span>np.linspace(</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.1</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>            <span class="fl">1.0</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>            <span class="dv">5</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>train_mean <span class="op">=</span> train_scores.mean(</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    axis<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>validation_mean <span class="op">=</span> validation_scores.mean(</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    axis<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    train_sizes,</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    train_mean,</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="st">"o"</span>,</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"Train"</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    train_sizes,</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    validation_mean,</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="st">"o"</span>,</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"Validation"</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Tamaño de entrenamiento"</span>)</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"ROC AUC"</span>)</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Curva de aprendizaje"</span>)</span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretar-curvas-de-aprendizaje" class="level2">
+<h2 data-anchor-id="interpretar-curvas-de-aprendizaje">Interpretar curvas de aprendizaje</h2>
+<section id="overfitting-1" class="level3">
+<h3 data-anchor-id="overfitting-1">Overfitting</h3>
+<ul>
+<li>Train alto.</li>
+<li>Validation más bajo.</li>
+<li>Separación persistente.</li>
+</ul>
+</section>
+<section id="underfitting-1" class="level3">
+<h3 data-anchor-id="underfitting-1">Underfitting</h3>
+<ul>
+<li>Train bajo.</li>
+<li>Validation bajo.</li>
+<li>Ambas curvas cercanas.</li>
+</ul>
+</section>
+<section id="falta-de-datos" class="level3">
+<h3 data-anchor-id="falta-de-datos">Falta de datos</h3>
+<ul>
+<li>Train alto.</li>
+<li>Validation mejora al aumentar la muestra.</li>
+<li>La diferencia disminuye progresivamente.</li>
+</ul>
+</section>
+</section>
+<section id="baseline" class="level2">
+<h2 data-anchor-id="baseline">Baseline</h2>
+<p>Un baseline es una referencia mínima que el modelo debería superar.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Predecir siempre la clase mayoritaria.</li>
+<li>Predecir la media.</li>
+<li>Predecir la mediana.</li>
+<li>Usar una regla clínica simple.</li>
+<li>Utilizar una regresión logística básica.</li>
+<li>Mantener el último valor observado.</li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Regla práctica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Nunca evalúes un modelo sin compararlo con al menos un baseline.</p>
+</div>
+</div>
+</section>
+<section id="baseline-de-clasificación" class="level2">
+<h2 data-anchor-id="baseline-de-clasificación">Baseline de clasificación</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.dummy <span class="im">import</span> DummyClassifier</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> DummyClassifier(</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    strategy<span class="op">=</span><span class="st">"most_frequent"</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>baseline.fit(</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    X_train,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    y_train</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>y_pred_baseline <span class="op">=</span> baseline.predict(</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    X_test</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Otras estrategias:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>DummyClassifier(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    strategy<span class="op">=</span><span class="st">"stratified"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>DummyClassifier(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    strategy<span class="op">=</span><span class="st">"prior"</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="baseline-de-regresión" class="level2">
+<h2 data-anchor-id="baseline-de-regresión">Baseline de regresión</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.dummy <span class="im">import</span> DummyRegressor</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> DummyRegressor(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    strategy<span class="op">=</span><span class="st">"mean"</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>baseline.fit(</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    X_train,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    y_train</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>y_pred_baseline <span class="op">=</span> baseline.predict(</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    X_test</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>También puede usarse:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>DummyRegressor(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    strategy<span class="op">=</span><span class="st">"median"</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="modelo-simple-como-baseline" class="level2">
+<h2 data-anchor-id="modelo-simple-como-baseline">Modelo simple como baseline</h2>
+<p>En clasificación clínica, una regresión logística básica puede ser un buen baseline.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>baseline_model <span class="op">=</span> LogisticRegression(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    max_iter<span class="op">=</span><span class="dv">1000</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>baseline_model.fit(</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    X_train,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    y_train</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Un modelo complejo debería demostrar una mejora clara y estable respecto a esta referencia.</p>
+</section>
+<section id="métrica-adecuada" class="level2">
+<h2 data-anchor-id="métrica-adecuada">Métrica adecuada</h2>
+<p>La métrica debe depender del problema.</p>
+<section id="clasificación" class="level3">
+<h3 data-anchor-id="clasificación">Clasificación</h3>
+<p>Posibles métricas:</p>
+<ul>
+<li>Accuracy.</li>
+<li>Sensibilidad.</li>
+<li>Especificidad.</li>
+<li>Precision.</li>
+<li>Recall.</li>
+<li>F1-score.</li>
+<li>ROC AUC.</li>
+<li>PR AUC.</li>
+<li>Brier score.</li>
+<li>Log loss.</li>
+</ul>
+</section>
+<section id="regresión" class="level3">
+<h3 data-anchor-id="regresión">Regresión</h3>
+<p>Posibles métricas:</p>
+<ul>
+<li>MAE.</li>
+<li>MSE.</li>
+<li>RMSE.</li>
+<li><span class="math inline">\(R^2\)</span>.</li>
+<li>Mediana del error absoluto.</li>
+<li>Error relativo.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>La métrica más popular no siempre es la más útil.</p>
+<p>En clases desbalanceadas, accuracy puede ser engañosa.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="métricas-discriminativas-y-calibración" class="level2">
+<h2 data-anchor-id="métricas-discriminativas-y-calibración">Métricas discriminativas y calibración</h2>
+<p>Un modelo puede discriminar bien y estar mal calibrado.</p>
+<section id="discriminación" class="level3">
+<h3 data-anchor-id="discriminación">Discriminación</h3>
+<p>Mide si el modelo ordena correctamente pacientes de mayor y menor riesgo.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>ROC AUC.</li>
+<li>PR AUC.</li>
+</ul>
+</section>
+<section id="calibración" class="level3">
+<h3 data-anchor-id="calibración">Calibración</h3>
+<p>Mide si las probabilidades predichas se corresponden con las frecuencias reales.</p>
+<p>Ejemplo:</p>
+<ul>
+<li>Entre pacientes con riesgo predicho del 20 %, aproximadamente un 20 % debería presentar el evento.</li>
+</ul>
+</section>
+</section>
+<section id="calibración-visual" class="level2">
+<h2 data-anchor-id="calibración-visual">Calibración visual</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.calibration <span class="im">import</span> calibration_curve</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>prob_true, prob_pred <span class="op">=</span> calibration_curve(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    y_test,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    y_probability,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    n_bins<span class="op">=</span><span class="dv">10</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">6</span>, <span class="dv">6</span>))</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    prob_pred,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    prob_true,</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="st">"o"</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">1</span>],</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>, <span class="dv">1</span>],</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    linestyle<span class="op">=</span><span class="st">"--"</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Probabilidad predicha"</span>)</span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Frecuencia observada"</span>)</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Curva de calibración"</span>)</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="brier-score" class="level2">
+<h2 data-anchor-id="brier-score">Brier score</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> brier_score_loss</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>brier <span class="op">=</span> brier_score_loss(</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    y_test,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    y_probability</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"Brier score: </span><span class="sc">{</span>brier<span class="sc">:.3f}</span><span class="ss">"</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Valores menores indican mejor precisión probabilística.</p>
+</section>
+<section id="umbral-de-clasificación" class="level2">
+<h2 data-anchor-id="umbral-de-clasificación">Umbral de clasificación</h2>
+<p>Muchos modelos producen probabilidades.</p>
+<p>La clase final depende de un umbral.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> <span class="fl">0.50</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> (</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    y_probability <span class="op">&gt;=</span> threshold</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>).astype(<span class="bu">int</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cambiar el umbral modifica:</p>
+<ul>
+<li>Sensibilidad.</li>
+<li>Especificidad.</li>
+<li>Precision.</li>
+<li>Recall.</li>
+<li>Número de falsos positivos.</li>
+<li>Número de falsos negativos.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Aplicación clínica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El umbral debería elegirse según las consecuencias clínicas de cada tipo de error, no solo por conveniencia estadística.</p>
+</div>
+</div>
+</section>
+<section id="falsos-positivos-y-falsos-negativos" class="level2">
+<h2 data-anchor-id="falsos-positivos-y-falsos-negativos">Falsos positivos y falsos negativos</h2>
+<section id="falso-positivo" class="level3">
+<h3 data-anchor-id="falso-positivo">Falso positivo</h3>
+<p>El modelo predice evento, pero el evento no ocurre.</p>
+<p>Puede provocar:</p>
+<ul>
+<li>Pruebas adicionales.</li>
+<li>Ansiedad.</li>
+<li>Costes.</li>
+<li>Tratamientos innecesarios.</li>
+</ul>
+</section>
+<section id="falso-negativo" class="level3">
+<h3 data-anchor-id="falso-negativo">Falso negativo</h3>
+<p>El modelo predice ausencia de evento, pero el evento ocurre.</p>
+<p>Puede provocar:</p>
+<ul>
+<li>Retraso diagnóstico.</li>
+<li>Falta de monitorización.</li>
+<li>Omisión de tratamiento.</li>
+<li>Daño clínico.</li>
+</ul>
+</section>
+</section>
+<section id="evaluación-interna" class="level2">
+<h2 data-anchor-id="evaluación-interna">Evaluación interna</h2>
+<p>La evaluación interna utiliza datos de la misma fuente general que el entrenamiento.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Holdout.</li>
+<li>K-fold cross-validation.</li>
+<li>Bootstrap.</li>
+<li>Validación cruzada repetida.</li>
+</ul>
+<p>Permite estimar rendimiento dentro del mismo contexto.</p>
+</section>
+<section id="evaluación-externa" class="level2">
+<h2 data-anchor-id="evaluación-externa">Evaluación externa</h2>
+<p>La evaluación externa utiliza datos distintos.</p>
+<p>Puede ser:</p>
+<ul>
+<li>Otro centro.</li>
+<li>Otro país.</li>
+<li>Otro periodo.</li>
+<li>Otra población.</li>
+<li>Otro sistema de información.</li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Validez externa
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un modelo puede funcionar bien internamente y fallar en otro centro debido a diferencias de población, protocolo o registro.</p>
+</div>
+</div>
+</section>
+<section id="evaluación-temporal" class="level2">
+<h2 data-anchor-id="evaluación-temporal">Evaluación temporal</h2>
+<p>Una evaluación temporal entrena con datos antiguos y prueba con datos más recientes.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Train: 2018–2023
+Validation: 2024
+Test: 2025</code></pre>
+<p>Esto ayuda a detectar:</p>
+<ul>
+<li>Data drift.</li>
+<li>Cambios en protocolos.</li>
+<li>Nuevos tratamientos.</li>
+<li>Cambios en población.</li>
+<li>Cambios en sistemas de información.</li>
+</ul>
+</section>
+<section id="evaluación-por-centro" class="level2">
+<h2 data-anchor-id="evaluación-por-centro">Evaluación por centro</h2>
+<p>En estudios multicéntricos puede entrenarse con unos centros y evaluar en otro.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Train: Barcelona + Helsinki
+Test externo: Coimbra</code></pre>
+<p>Esto evalúa transportabilidad.</p>
+</section>
+<section id="estabilidad-del-rendimiento" class="level2">
+<h2 data-anchor-id="estabilidad-del-rendimiento">Estabilidad del rendimiento</h2>
+<p>No basta con una media.</p>
+<p>También conviene revisar:</p>
+<ul>
+<li>Desviación estándar.</li>
+<li>Intervalos de confianza.</li>
+<li>Distribución entre folds.</li>
+<li>Rendimiento por subgrupo.</li>
+<li>Rendimiento por centro.</li>
+<li>Rendimiento por periodo.</li>
+</ul>
+</section>
+<section id="validación-cruzada" class="level2">
+<h2 data-anchor-id="validación-cruzada">Validación cruzada</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_validate</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> cross_validate(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    estimator<span class="op">=</span>model,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    X<span class="op">=</span>X,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>y,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    scoring<span class="op">=</span>[</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"roc_auc"</span>,</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"accuracy"</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    return_train_score<span class="op">=</span><span class="va">True</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    scores</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="comparar-train-y-validation-en-cross-validation" class="level2">
+<h2 data-anchor-id="comparar-train-y-validation-en-cross-validation">Comparar train y validation en cross-validation</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>train_auc <span class="op">=</span> scores[</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"train_roc_auc"</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>validation_auc <span class="op">=</span> scores[</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"test_roc_auc"</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Train mean:"</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    train_auc.mean()</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Validation mean:"</span>,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    validation_auc.mean()</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="intervalos-de-confianza" class="level2">
+<h2 data-anchor-id="intervalos-de-confianza">Intervalos de confianza</h2>
+<p>Una aproximación simple puede calcularse con bootstrap.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(<span class="dv">42</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>bootstrap_scores <span class="op">=</span> []</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1000</span>):</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    indices <span class="op">=</span> rng.integers(</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        <span class="dv">0</span>,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">len</span>(y_test),</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">len</span>(y_test)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>    y_boot <span class="op">=</span> y_test.iloc[</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>        indices</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    p_boot <span class="op">=</span> y_probability[</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>        indices</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> y_boot.nunique() <span class="op">&lt;</span> <span class="dv">2</span>:</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">continue</span></span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    score <span class="op">=</span> roc_auc_score(</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>        y_boot,</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>        p_boot</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    bootstrap_scores.append(</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>        score</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>lower <span class="op">=</span> np.percentile(</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>    bootstrap_scores,</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>    <span class="fl">2.5</span></span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>upper <span class="op">=</span> np.percentile(</span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>    bootstrap_scores,</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>    <span class="fl">97.5</span></span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"95% CI: "</span></span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"</span><span class="sc">{</span>lower<span class="sc">:.3f}</span><span class="ss">–</span><span class="sc">{</span>upper<span class="sc">:.3f}</span><span class="ss">"</span></span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="comparar-modelos-correctamente" class="level2">
+<h2 data-anchor-id="comparar-modelos-correctamente">Comparar modelos correctamente</h2>
+<p>Los modelos deben compararse usando:</p>
+<ul>
+<li>El mismo split.</li>
+<li>Los mismos folds.</li>
+<li>El mismo preprocesamiento base.</li>
+<li>La misma métrica.</li>
+<li>La misma definición del target.</li>
+<li>El mismo momento de predicción.</li>
+</ul>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Error frecuente
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Comparar métricas obtenidas con particiones distintas puede atribuir al modelo diferencias que en realidad se deben al split.</p>
+</div>
+</div>
+</section>
+<section id="complejidad-frente-a-utilidad" class="level2">
+<h2 data-anchor-id="complejidad-frente-a-utilidad">Complejidad frente a utilidad</h2>
+<p>Un modelo complejo no es necesariamente mejor.</p>
+<p>Puede tener:</p>
+<ul>
+<li>Ligera mejora estadística.</li>
+<li>Menor interpretabilidad.</li>
+<li>Mayor coste.</li>
+<li>Mayor riesgo de overfitting.</li>
+<li>Más dificultad de mantenimiento.</li>
+</ul>
+<p>La mejora debe ser relevante, estable y útil.</p>
+</section>
+<section id="utilidad-clínica" class="level2">
+<h2 data-anchor-id="utilidad-clínica">Utilidad clínica</h2>
+<p>La utilidad clínica depende de:</p>
+<ul>
+<li>Qué decisión se tomará.</li>
+<li>En qué momento.</li>
+<li>Para qué pacientes.</li>
+<li>Qué coste tienen los errores.</li>
+<li>Qué recursos requiere.</li>
+<li>Si cambia la práctica actual.</li>
+</ul>
+</section>
+<section id="impacto-clínico" class="level2">
+<h2 data-anchor-id="impacto-clínico">Impacto clínico</h2>
+<p>Un modelo puede tener buen rendimiento y no mejorar la atención.</p>
+<p>Para demostrar impacto pueden ser necesarios:</p>
+<ul>
+<li>Estudios prospectivos.</li>
+<li>Evaluación de workflow.</li>
+<li>Estudios de implementación.</li>
+<li>Análisis de costes.</li>
+<li>Evaluación de resultados clínicos.</li>
+</ul>
+</section>
+<section id="rendimiento-por-subgrupos" class="level2">
+<h2 data-anchor-id="rendimiento-por-subgrupos">Rendimiento por subgrupos</h2>
+<p>Conviene revisar posibles diferencias por:</p>
+<ul>
+<li>Edad.</li>
+<li>Sexo.</li>
+<li>Centro.</li>
+<li>Diagnóstico.</li>
+<li>Grupo étnico cuando sea pertinente y legalmente adecuado.</li>
+<li>Nivel socioeconómico.</li>
+<li>Periodo temporal.</li>
+<li>Gravedad.</li>
+</ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> center <span class="kw">in</span> X_test[<span class="st">"center"</span>].unique():</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> (</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        X_test[<span class="st">"center"</span>] <span class="op">==</span> center</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    subgroup_score <span class="op">=</span> roc_auc_score(</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        y_test.loc[mask],</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        y_probability[mask]</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>        center,</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>        subgroup_score</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Debe comprobarse que cada subgrupo tenga suficientes eventos.</p>
+</section>
+<section id="data-drift" class="level2">
+<h2 data-anchor-id="data-drift">Data drift</h2>
+<p>El data drift ocurre cuando cambia la distribución de las variables.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Nueva tecnología.</li>
+<li>Cambio de protocolo.</li>
+<li>Nueva población.</li>
+<li>Cambio en criterios diagnósticos.</li>
+<li>Nuevos tratamientos.</li>
+</ul>
+<p>Puede producir una caída de rendimiento.</p>
+</section>
+<section id="concept-drift" class="level2">
+<h2 data-anchor-id="concept-drift">Concept drift</h2>
+<p>El concept drift ocurre cuando cambia la relación entre variables y target.</p>
+<p>Ejemplo:</p>
+<ul>
+<li>Un tratamiento nuevo modifica el riesgo de evento para determinados pacientes.</li>
+</ul>
+</section>
+<section id="qué-reportar" class="level2">
+<h2 data-anchor-id="qué-reportar">Qué reportar</h2>
+<p>Un informe de evaluación debería incluir:</p>
+<ul>
+<li>Definición de cohorte.</li>
+<li>Definición del target.</li>
+<li>Momento de predicción.</li>
+<li>Estrategia de split.</li>
+<li>Tamaños de train, validation y test.</li>
+<li>Número de eventos.</li>
+<li>Métricas principales.</li>
+<li>Intervalos de confianza.</li>
+<li>Calibración.</li>
+<li>Baseline.</li>
+<li>Rendimiento por subgrupos.</li>
+<li>Limitaciones.</li>
+<li>Validación externa si existe.</li>
+</ul>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>Evaluar solo en train.</li>
+<li>Utilizar test para elegir el modelo.</li>
+<li>No comparar con baseline.</li>
+<li>Reportar solo una métrica.</li>
+<li>Ignorar calibración.</li>
+<li>No reportar intervalos de confianza.</li>
+<li>Comparar modelos con splits distintos.</li>
+<li>Ignorar subgrupos.</li>
+<li>Confundir rendimiento interno con validez externa.</li>
+<li>Elegir umbral sin criterio clínico.</li>
+<li>No revisar leakage cuando el rendimiento es extremo.</li>
+</ul>
+</section>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Definir la pregunta clínica.</li>
+<li>Definir target y momento de predicción.</li>
+<li>Elegir la estrategia de validación.</li>
+<li>Definir un baseline.</li>
+<li>Seleccionar métricas.</li>
+<li>Comparar train y validation.</li>
+<li>Revisar overfitting y underfitting.</li>
+<li>Evaluar calibración.</li>
+<li>Analizar subgrupos.</li>
+<li>Evaluar una vez con test.</li>
+<li>Reportar incertidumbre.</li>
+<li>Considerar validación externa.</li>
+</ol>
+</section>
+<section id="checklist-para-proyectos" class="level2">
+<h2 data-anchor-id="checklist-para-proyectos">Checklist para proyectos</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">He definido qué significa un buen modelo.</label></li>
+<li><label><input type="checkbox">He definido un baseline.</label></li>
+<li><label><input type="checkbox">He elegido métricas adecuadas.</label></li>
+<li><label><input type="checkbox">He comparado train y validation.</label></li>
+<li><label><input type="checkbox">He revisado overfitting.</label></li>
+<li><label><input type="checkbox">He revisado underfitting.</label></li>
+<li><label><input type="checkbox">He mantenido el test sin tocar.</label></li>
+<li><label><input type="checkbox">He evaluado calibración.</label></li>
+<li><label><input type="checkbox">He revisado umbrales.</label></li>
+<li><label><input type="checkbox">He reportado incertidumbre.</label></li>
+<li><label><input type="checkbox">He evaluado subgrupos.</label></li>
+<li><label><input type="checkbox">He considerado drift.</label></li>
+<li><label><input type="checkbox">He considerado validación externa.</label></li>
+<li><label><input type="checkbox">He evaluado utilidad clínica.</label></li>
+<li><label><input type="checkbox">He documentado todas las decisiones.</label></li>
+</ul>
+</section>
+<section id="recursos" class="level2">
+<h2 data-anchor-id="recursos">Recursos</h2>
+<section id="documentación" class="level3">
+<h3 data-anchor-id="documentación">Documentación</h3>
+<ul>
+<li>Métricas de scikit-learn.</li>
+<li>Curvas de aprendizaje de scikit-learn.</li>
+<li>Calibración de probabilidades.</li>
+<li>DummyClassifier.</li>
+<li>DummyRegressor.</li>
+<li>Validación cruzada.</li>
+<li>Bootstrap.</li>
+</ul>
+</section>
+<section id="material-del-máster" class="level3">
+<h3 data-anchor-id="material-del-máster">Material del máster</h3>
+<p>Añadir aquí:</p>
+<ul>
+<li>Presentación correspondiente.</li>
+<li>Diapositivas relevantes.</li>
+<li>Ejercicios realizados.</li>
+<li>Apuntes de Notion.</li>
+</ul>
+</section>
+</section>
+<section id="notas-personales" class="level2">
+<h2 data-anchor-id="notas-personales">Notas personales</h2>
+<p>Añade aquí tus propias dudas, ejemplos y criterios de evaluación.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/pablolongan\.github\.io\/health-data-science-handbook\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
