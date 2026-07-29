@@ -1,0 +1,915 @@
+---
+title: "Métodos wrapper"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Los métodos wrapper evalúan subconjuntos de variables entrenando repetidamente un modelo.
+
+A diferencia de los métodos filter, tienen en cuenta cómo funcionan las variables dentro de un modelo concreto.
+
+Los más habituales son:
+
+- Recursive Feature Elimination.
+- RFECV.
+- Sequential Feature Selection.
+- Forward selection.
+- Backward selection.
+:::
+
+## ¿Qué son los métodos wrapper?
+
+Los métodos wrapper utilizan el rendimiento de un modelo para decidir qué variables conservar.
+
+El proceso general es:
+
+```text
+Subconjunto de variables
+        │
+        ▼
+Entrenar modelo
+        │
+        ▼
+Evaluar rendimiento
+        │
+        ▼
+Modificar subconjunto
+        │
+        ▼
+Repetir
+```
+
+::: {.callout-note}
+## Idea clave
+
+Los métodos wrapper pueden capturar mejor la relación entre variables y modelo, pero son más costosos computacionalmente.
+:::
+
+## Ventajas
+
+- Consideran el modelo final.
+- Pueden capturar interacciones.
+- Evalúan subconjuntos completos.
+- Pueden mejorar interpretabilidad.
+- Permiten buscar un número adecuado de variables.
+
+## Limitaciones
+
+- Requieren entrenar muchos modelos.
+- Pueden ser lentos.
+- Pueden sobreajustar si la selección no se valida correctamente.
+- El resultado depende del estimador.
+- Pueden ser inestables con muestras pequeñas.
+
+## Recursive Feature Elimination
+
+RFE significa Recursive Feature Elimination.
+
+Funciona así:
+
+1. Entrena el modelo con todas las variables.
+2. Calcula importancia o coeficientes.
+3. Elimina las variables menos importantes.
+4. Repite el proceso.
+5. Se detiene al alcanzar el número deseado.
+
+## Ejemplo con regresión logística
+
+```python
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LogisticRegression
+
+estimator = LogisticRegression(
+    max_iter=1000,
+    random_state=42
+)
+
+selector = RFE(
+    estimator=estimator,
+    n_features_to_select=10,
+    step=1
+)
+
+selector.fit(
+    X_train,
+    y_train
+)
+```
+
+## Obtener variables seleccionadas
+
+```python
+selected_features = [
+    feature
+    for feature, selected
+    in zip(
+        X_train.columns,
+        selector.support_
+    )
+    if selected
+]
+
+print(
+    selected_features
+)
+```
+
+## Ranking de variables
+
+```python
+import pandas as pd
+
+ranking = pd.DataFrame(
+    {
+        "feature": X_train.columns,
+        "selected": selector.support_,
+        "ranking": selector.ranking_
+    }
+).sort_values(
+    [
+        "selected",
+        "ranking"
+    ],
+    ascending=[
+        False,
+        True
+    ]
+)
+
+display(
+    ranking
+)
+```
+
+Las variables seleccionadas tienen:
+
+```text
+ranking = 1
+```
+
+## Parámetro step
+
+`step` controla cuántas variables se eliminan en cada iteración.
+
+```python
+selector = RFE(
+    estimator=estimator,
+    n_features_to_select=10,
+    step=5
+)
+```
+
+Un `step` mayor:
+
+- Reduce el coste.
+- Hace la búsqueda menos fina.
+
+## Estimadores compatibles
+
+RFE necesita un estimador que exponga:
+
+- `coef_`.
+- `feature_importances_`.
+
+Ejemplos:
+
+- Regresión logística.
+- Regresión lineal.
+- SVM lineal.
+- Árboles.
+- Random forest.
+- Gradient boosting.
+
+## RFE con pipeline
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "selector",
+            RFE(
+                estimator=LogisticRegression(
+                    max_iter=1000,
+                    random_state=42
+                ),
+                n_features_to_select=10
+            )
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## RFECV
+
+RFECV combina RFE con validación cruzada.
+
+Selecciona automáticamente el número de variables.
+
+```python
+from sklearn.feature_selection import RFECV
+from sklearn.model_selection import StratifiedKFold
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+selector = RFECV(
+    estimator=LogisticRegression(
+        max_iter=1000,
+        random_state=42
+    ),
+    step=1,
+    cv=cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+```
+
+```python
+selector.fit(
+    X_train,
+    y_train
+)
+```
+
+## Número óptimo de variables
+
+```python
+print(
+    selector.n_features_
+)
+```
+
+## Variables seleccionadas
+
+```python
+selected_features = (
+    X_train.columns[
+        selector.support_
+    ]
+    .tolist()
+)
+
+print(
+    selected_features
+)
+```
+
+## Rendimiento por número de variables
+
+```python
+import pandas as pd
+
+cv_results = pd.DataFrame(
+    selector.cv_results_
+)
+
+display(
+    cv_results.head()
+)
+```
+
+## Visualizar RFECV
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 5))
+
+plt.plot(
+    range(
+        1,
+        len(
+            selector.cv_results_[
+                "mean_test_score"
+            ]
+        ) + 1
+    ),
+    selector.cv_results_[
+        "mean_test_score"
+    ]
+)
+
+plt.xlabel(
+    "Número de variables"
+)
+
+plt.ylabel(
+    "ROC AUC medio"
+)
+
+plt.title(
+    "RFECV"
+)
+
+plt.show()
+```
+
+::: {.callout-warning}
+## Importante
+
+RFECV es costoso porque ejecuta validación cruzada para muchos subconjuntos.
+:::
+
+## Nested cross-validation con RFECV
+
+Si se usa RFECV para seleccionar variables, el rendimiento final debería evaluarse en un bucle externo.
+
+```text
+Outer CV:
+    Train externo
+        │
+        └── RFECV interno
+
+    Validation externa
+        └── Evaluación final
+```
+
+Esto reduce el optimismo.
+
+## Sequential Feature Selection
+
+Sequential Feature Selection añade o elimina variables progresivamente.
+
+```python
+from sklearn.feature_selection import SequentialFeatureSelector
+from sklearn.linear_model import LogisticRegression
+
+estimator = LogisticRegression(
+    max_iter=1000,
+    random_state=42
+)
+```
+
+## Forward selection
+
+Empieza sin variables y añade progresivamente las más útiles.
+
+```python
+selector = SequentialFeatureSelector(
+    estimator=estimator,
+    n_features_to_select=10,
+    direction="forward",
+    scoring="roc_auc",
+    cv=5,
+    n_jobs=-1
+)
+
+selector.fit(
+    X_train,
+    y_train
+)
+```
+
+## Backward selection
+
+Empieza con todas las variables y elimina progresivamente las menos útiles.
+
+```python
+selector = SequentialFeatureSelector(
+    estimator=estimator,
+    n_features_to_select=10,
+    direction="backward",
+    scoring="roc_auc",
+    cv=5,
+    n_jobs=-1
+)
+```
+
+## Obtener variables seleccionadas
+
+```python
+selected_features = (
+    X_train.columns[
+        selector.get_support()
+    ]
+    .tolist()
+)
+
+print(
+    selected_features
+)
+```
+
+## Forward frente a backward
+
+| Estrategia | Inicio | Acción | Coste habitual |
+|---|---|---|---|
+| Forward | Ninguna variable | Añade variables | Menor con muchas variables |
+| Backward | Todas las variables | Elimina variables | Mayor con muchas variables |
+
+## Cuándo usar forward selection
+
+Puede ser útil cuando:
+
+- Hay muchas variables.
+- Se espera un modelo pequeño.
+- Entrenar el modelo es costoso.
+- Se busca una selección progresiva.
+
+## Cuándo usar backward selection
+
+Puede ser útil cuando:
+
+- Hay pocas o moderadas variables.
+- Se quiere partir del modelo completo.
+- Las interacciones entre variables pueden ser importantes.
+
+## Ajustar el número de variables
+
+```python
+selector = SequentialFeatureSelector(
+    estimator=estimator,
+    n_features_to_select="auto",
+    direction="forward",
+    scoring="roc_auc",
+    cv=5,
+    tol=0.001
+)
+```
+
+`tol` puede detener la selección cuando la mejora es muy pequeña.
+
+## Wrapper dentro de pipeline
+
+```python
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "selector",
+            SequentialFeatureSelector(
+                estimator=LogisticRegression(
+                    max_iter=1000,
+                    random_state=42
+                ),
+                n_features_to_select=10,
+                direction="forward",
+                scoring="roc_auc",
+                cv=5,
+                n_jobs=-1
+            )
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Validación cruzada externa
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import StratifiedKFold
+
+outer_cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=123
+)
+
+scores = cross_val_score(
+    estimator=pipeline,
+    X=X,
+    y=y,
+    cv=outer_cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+print(
+    scores.mean()
+)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+Si la selección usa validación interna, evalúa el pipeline completo con validación externa.
+:::
+
+## GridSearchCV y número de variables
+
+```python
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    "selector__n_features_to_select": [
+        5,
+        10,
+        15,
+        20
+    ]
+}
+
+search = GridSearchCV(
+    estimator=pipeline,
+    param_grid=param_grid,
+    cv=5,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+search.fit(
+    X_train,
+    y_train
+)
+```
+
+## Comparar con un modelo sin selección
+
+```python
+pipeline_without_selection = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+```python
+scores_without = cross_val_score(
+    pipeline_without_selection,
+    X,
+    y,
+    cv=outer_cv,
+    scoring="roc_auc"
+)
+
+scores_with = cross_val_score(
+    pipeline,
+    X,
+    y,
+    cv=outer_cv,
+    scoring="roc_auc"
+)
+```
+
+## Comparar complejidad
+
+No solo importa la métrica.
+
+También conviene comparar:
+
+- Número de variables.
+- Tiempo de entrenamiento.
+- Estabilidad.
+- Interpretabilidad.
+- Coste clínico.
+- Rendimiento.
+
+## Estabilidad de la selección
+
+Puede revisarse la frecuencia con que una variable aparece seleccionada.
+
+```python
+from collections import Counter
+from sklearn.base import clone
+
+selection_frequency = Counter()
+
+for train_index, validation_index in outer_cv.split(
+    X,
+    y
+):
+
+    X_train_fold = X.iloc[
+        train_index
+    ]
+
+    y_train_fold = y.iloc[
+        train_index
+    ]
+
+    fitted_pipeline = clone(
+        pipeline
+    )
+
+    fitted_pipeline.fit(
+        X_train_fold,
+        y_train_fold
+    )
+
+    preprocessor_fold = (
+        fitted_pipeline
+        .named_steps["preprocessor"]
+    )
+
+    selector_fold = (
+        fitted_pipeline
+        .named_steps["selector"]
+    )
+
+    feature_names_fold = (
+        preprocessor_fold
+        .get_feature_names_out()
+    )
+
+    selected_fold = (
+        feature_names_fold[
+            selector_fold.get_support()
+        ]
+    )
+
+    selection_frequency.update(
+        selected_fold
+    )
+```
+
+## Visualizar estabilidad
+
+```python
+import pandas as pd
+
+stability = pd.DataFrame(
+    selection_frequency.items(),
+    columns=[
+        "feature",
+        "selection_count"
+    ]
+).sort_values(
+    "selection_count",
+    ascending=False
+)
+
+display(
+    stability
+)
+```
+
+## Dependencia del estimador
+
+La selección puede cambiar según el modelo.
+
+Ejemplo:
+
+```text
+RFE con regresión logística
+≠
+RFE con random forest
+```
+
+Esto ocurre porque cada modelo representa relaciones distintas.
+
+::: {.callout-note}
+## Interpretación
+
+Una variable seleccionada por un método wrapper es útil para ese estimador concreto, no necesariamente de forma universal.
+:::
+
+## Wrapper con variables categóricas
+
+Después de one-hot encoding, una variable categórica puede convertirse en muchas columnas.
+
+El selector puede conservar unas categorías y eliminar otras.
+
+Esto puede dificultar la interpretación.
+
+Opciones:
+
+- Aceptar selección por columna.
+- Agrupar categorías.
+- Usar selección por grupos.
+- Mantener categorías clínicamente relevantes.
+
+## Coste computacional
+
+El coste aumenta con:
+
+- Número de variables.
+- Número de folds.
+- Número de hiperparámetros.
+- Complejidad del modelo.
+- Número de iteraciones.
+- Repeticiones.
+
+## Estrategia para muchas variables
+
+Puede utilizarse un enfoque en dos etapas:
+
+```text
+Filter method
+      │
+      ▼
+Reducir de 1000 a 100 variables
+      │
+      ▼
+Wrapper method
+      │
+      ▼
+Seleccionar 10–20 variables
+```
+
+Esto reduce mucho el coste.
+
+## Métodos wrapper y muestras pequeñas
+
+Con pocos datos pueden seleccionar variables por azar.
+
+Conviene:
+
+- Usar validación repetida.
+- Revisar estabilidad.
+- Limitar el número de variables.
+- Comparar con selección clínica.
+- Reportar incertidumbre.
+
+## Variables obligatorias
+
+Algunas variables pueden mantenerse independientemente de la selección.
+
+Ejemplos:
+
+- Edad.
+- Sexo.
+- Centro.
+- Tratamiento.
+- Variables de ajuste clínico.
+
+Scikit-learn no siempre gestiona esto directamente, por lo que puede requerirse una estrategia personalizada.
+
+## Interacciones
+
+Los métodos wrapper pueden detectar conjuntos útiles de variables.
+
+Sin embargo, si el modelo no representa interacciones, el selector tampoco las detectará correctamente.
+
+## Data leakage
+
+La selección wrapper debe ocurrir:
+
+- Después del split.
+- Dentro de cross-validation.
+- Dentro del pipeline.
+
+## Ejemplo incorrecto
+
+```python
+selector.fit(
+    X,
+    y
+)
+
+X_selected = selector.transform(
+    X
+)
+
+scores = cross_val_score(
+    model,
+    X_selected,
+    y,
+    cv=5
+)
+```
+
+## Ejemplo correcto
+
+```python
+pipeline = Pipeline(
+    steps=[
+        (
+            "selector",
+            selector
+        ),
+        (
+            "model",
+            model
+        )
+    ]
+)
+
+scores = cross_val_score(
+    pipeline,
+    X,
+    y,
+    cv=5
+)
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Un método wrapper puede seleccionar una variable costosa porque mejora ligeramente la métrica.
+
+Eso no implica que deba incluirse en el modelo final.
+:::
+
+Debe revisarse:
+
+- Disponibilidad.
+- Invasividad.
+- Coste.
+- Tiempo.
+- Reproducibilidad.
+- Accesibilidad en otros centros.
+
+## Tabla comparativa
+
+| Método | Dirección | Selección de número | Coste |
+|---|---|---|---|
+| RFE | Elimina | Fijo | Alto |
+| RFECV | Elimina | Automático con CV | Muy alto |
+| Forward selection | Añade | Fijo o automático | Alto |
+| Backward selection | Elimina | Fijo o automático | Muy alto |
+
+## Errores frecuentes
+
+- Ejecutar RFE antes de cross-validation.
+- Utilizar RFECV sin evaluación externa.
+- No comparar con el modelo completo.
+- Ignorar el coste computacional.
+- Asumir que la selección es estable.
+- Cambiar el estimador y mantener las mismas variables sin validar.
+- Seleccionar categorías one-hot sin revisar coherencia.
+- Elegir demasiadas variables.
+- No considerar coste clínico.
+- Interpretar selección como causalidad.
+
+## Flujo recomendado
+
+1. Reducir variables irrelevantes.
+2. Elegir un estimador.
+3. Elegir dirección de búsqueda.
+4. Definir métrica.
+5. Integrar selección en pipeline.
+6. Usar validación interna.
+7. Evaluar con validación externa.
+8. Comparar con modelo sin selección.
+9. Revisar estabilidad.
+10. Revisar coste computacional.
+11. Revisar utilidad clínica.
+12. Documentar variables finales.
+
+## Checklist para proyectos
+
+- [ ] He elegido un estimador adecuado.
+- [ ] La selección está dentro del pipeline.
+- [ ] He definido la métrica.
+- [ ] He utilizado validación interna.
+- [ ] He evaluado el pipeline externamente.
+- [ ] He comparado con el modelo completo.
+- [ ] He revisado estabilidad.
+- [ ] He revisado tiempo de ejecución.
+- [ ] He considerado variables obligatorias.
+- [ ] He revisado categorías one-hot.
+- [ ] He considerado coste clínico.
+- [ ] He documentado la selección.
+
+## Recursos
+
+### Documentación
+
+- `RFE`.
+- `RFECV`.
+- `SequentialFeatureSelector`.
+- `GridSearchCV`.
+- `Pipeline`.
+- Nested cross-validation.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus estrategias wrapper, tiempos de ejecución y comparaciones habituales.
