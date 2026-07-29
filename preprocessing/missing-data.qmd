@@ -1,0 +1,789 @@
+---
+title: "Valores ausentes"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Los valores ausentes no son solo un problema técnico: pueden contener información sobre cómo se ha recogido el dato.
+
+Antes de imputar o eliminar observaciones, hay que investigar:
+
+- Cuánto falta.
+- En qué variables.
+- En qué pacientes o centros.
+- En qué momento del proceso clínico.
+- Por qué puede faltar.
+:::
+
+## ¿Qué significa que falte un dato?
+
+Un valor ausente puede aparecer por motivos muy distintos:
+
+- La prueba no estaba indicada.
+- El paciente no acudió.
+- El profesional no registró el dato.
+- El valor existe en otro sistema.
+- Hubo un error de integración.
+- La prueba no estaba disponible.
+- El dato se perdió.
+- El valor no aplica.
+- La ausencia está relacionada con la gravedad.
+
+::: {.callout-note}
+## Idea clave
+
+No todos los valores ausentes significan lo mismo.
+
+Dos celdas vacías pueden tener causas completamente diferentes.
+:::
+
+## Tipos de mecanismos de ausencia
+
+### MCAR: Missing Completely At Random
+
+La probabilidad de que falte un dato no depende ni de variables observadas ni de variables no observadas.
+
+Ejemplo:
+
+- Una muestra se pierde por un fallo aleatorio de laboratorio.
+
+MCAR es una situación poco frecuente en datos clínicos reales.
+
+### MAR: Missing At Random
+
+La probabilidad de ausencia depende de variables observadas.
+
+Ejemplo:
+
+- En pacientes de menor edad se solicita menos una determinada prueba.
+- Un centro registra una variable con menos frecuencia que otro.
+
+La ausencia puede explicarse parcialmente con información disponible.
+
+### MNAR: Missing Not At Random
+
+La probabilidad de ausencia depende del propio valor ausente o de información no observada.
+
+Ejemplo:
+
+- Los pacientes más graves no pueden completar una prueba funcional.
+- Una prueba invasiva solo se solicita cuando la sospecha clínica es alta.
+
+::: {.callout-warning}
+## Importante
+
+En datos sanitarios, MNAR es frecuente y difícil de tratar.
+
+Imputar automáticamente puede ocultar un mecanismo clínicamente relevante.
+:::
+
+## Explorar valores ausentes
+
+## Resumen por variable
+
+```python
+missing_summary = (
+    df.isna()
+    .sum()
+    .to_frame("missing_count")
+    .assign(
+        missing_percentage=lambda x:
+        100 * x["missing_count"] / len(df)
+    )
+    .sort_values(
+        "missing_percentage",
+        ascending=False
+    )
+)
+
+display(missing_summary)
+```
+
+## Variables con algún valor ausente
+
+```python
+variables_with_missing = missing_summary.loc[
+    missing_summary["missing_count"] > 0
+]
+
+display(variables_with_missing)
+```
+
+## Número de valores ausentes por fila
+
+```python
+df["missing_count_row"] = df.isna().sum(axis=1)
+
+display(
+    df["missing_count_row"]
+    .value_counts()
+    .sort_index()
+)
+```
+
+## Porcentaje de filas completas
+
+```python
+complete_rows_percentage = (
+    df.notna().all(axis=1).mean() * 100
+)
+
+print(
+    f"Filas completas: "
+    f"{complete_rows_percentage:.2f}%"
+)
+```
+
+## Visualizar patrones de ausencia
+
+```python
+import matplotlib.pyplot as plt
+
+missing_percentage = (
+    df.isna()
+    .mean()
+    .sort_values(ascending=False)
+    * 100
+)
+
+missing_percentage = missing_percentage[
+    missing_percentage > 0
+]
+
+plt.figure(figsize=(10, 6))
+
+missing_percentage.plot(
+    kind="bar"
+)
+
+plt.ylabel("Porcentaje de valores ausentes")
+plt.xlabel("Variable")
+plt.title("Valores ausentes por variable")
+
+plt.tight_layout()
+plt.show()
+```
+
+## Ausencia por grupos
+
+Es importante comprobar si los valores ausentes se concentran en determinados grupos.
+
+```python
+missing_by_center = (
+    df.groupby("center")["troponin"]
+    .apply(lambda x: x.isna().mean() * 100)
+    .sort_values(ascending=False)
+)
+
+display(missing_by_center)
+```
+
+También puede explorarse por:
+
+- Centro.
+- Sexo.
+- Edad.
+- Año.
+- Tipo de visita.
+- Diagnóstico.
+- Gravedad.
+- Grupo de tratamiento.
+
+## ¿Eliminar o imputar?
+
+No existe una única respuesta.
+
+La decisión depende de:
+
+- Porcentaje de ausencia.
+- Importancia clínica de la variable.
+- Mecanismo de ausencia.
+- Tamaño del dataset.
+- Tipo de modelo.
+- Posibilidad de recuperar el dato.
+- Riesgo de sesgo.
+
+## Eliminar filas
+
+Puede ser razonable cuando:
+
+- El porcentaje de filas afectadas es pequeño.
+- La ausencia es aproximadamente aleatoria.
+- El dataset es suficientemente grande.
+- La variable no es central.
+
+```python
+df_complete = df.dropna()
+```
+
+::: {.callout-caution}
+## Riesgo
+
+Eliminar filas puede reducir mucho la muestra y cambiar la población analizada.
+:::
+
+## Eliminar columnas
+
+Puede considerarse cuando:
+
+- La variable tiene un porcentaje muy alto de ausencia.
+- No es clínicamente esencial.
+- No puede recuperarse.
+- No aporta suficiente valor.
+
+```python
+columns_to_drop = [
+    "variable_a",
+    "variable_b"
+]
+
+df_reduced = df.drop(
+    columns=columns_to_drop
+)
+```
+
+No debería usarse un umbral automático sin revisión clínica.
+
+## Imputación simple
+
+### Media
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="mean"
+)
+
+X_imputed = imputer.fit_transform(X)
+```
+
+Puede verse afectada por outliers.
+
+### Mediana
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+X_imputed = imputer.fit_transform(X)
+```
+
+Suele ser más robusta para variables sesgadas.
+
+### Moda
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="most_frequent"
+)
+
+X_imputed = imputer.fit_transform(X)
+```
+
+Puede utilizarse para variables categóricas.
+
+### Valor constante
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="constant",
+    fill_value="Missing"
+)
+
+X_imputed = imputer.fit_transform(X)
+```
+
+Puede ser útil cuando la ausencia tiene significado propio.
+
+## Indicador de ausencia
+
+A veces conviene crear una variable adicional que indique si el dato faltaba.
+
+```python
+df["troponin_missing"] = (
+    df["troponin"].isna().astype(int)
+)
+```
+
+También puede hacerse desde `SimpleImputer`.
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="median",
+    add_indicator=True
+)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+El indicador de ausencia puede ser útil cuando el hecho de que una prueba no se haya realizado contiene información clínica.
+:::
+
+## Imputación con KNN
+
+`KNNImputer` estima el valor a partir de observaciones similares.
+
+```python
+from sklearn.impute import KNNImputer
+
+imputer = KNNImputer(
+    n_neighbors=5
+)
+
+X_imputed = imputer.fit_transform(X)
+```
+
+Ventajas:
+
+- Tiene en cuenta relaciones entre variables.
+- Puede capturar patrones locales.
+
+Limitaciones:
+
+- Es sensible al escalado.
+- Puede ser costosa.
+- Puede funcionar mal con muchas variables.
+- No resuelve MNAR.
+
+## IterativeImputer
+
+Estima cada variable ausente usando otras variables.
+
+```python
+from sklearn.experimental import enable_iterative_imputer
+from sklearn.impute import IterativeImputer
+
+imputer = IterativeImputer(
+    random_state=42
+)
+
+X_imputed = imputer.fit_transform(X)
+```
+
+Puede ser más flexible, pero requiere más cuidado y validación.
+
+## Imputación múltiple
+
+La imputación múltiple genera varios datasets imputados.
+
+La idea es reflejar la incertidumbre de los valores ausentes.
+
+Proceso general:
+
+1. Crear varias imputaciones.
+2. Analizar cada dataset.
+3. Combinar los resultados.
+
+Es especialmente relevante en análisis inferenciales.
+
+## Imputación dentro de un pipeline
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median",
+                add_indicator=True
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+pipeline.fit(
+    X_train,
+    y_train
+)
+
+y_pred = pipeline.predict(
+    X_test
+)
+```
+
+::: {.callout-caution}
+## Error frecuente: imputar antes del split
+
+La imputación debe ajustarse únicamente con train.
+
+Si se ajusta con todo el dataset, el conjunto de test influye en el entrenamiento.
+:::
+
+## Ejemplo incorrecto
+
+```python
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split
+
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+X_imputed = imputer.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_imputed,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+## Ejemplo correcto
+
+```python
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+X_train_imputed = imputer.fit_transform(
+    X_train
+)
+
+X_test_imputed = imputer.transform(
+    X_test
+)
+```
+
+## Variables numéricas y categóricas
+
+La estrategia puede ser distinta según el tipo de variable.
+
+```python
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+
+numeric_features = [
+    "age",
+    "weight",
+    "troponin"
+]
+
+categorical_features = [
+    "sex",
+    "center"
+]
+
+numeric_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        )
+    ]
+)
+
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="most_frequent"
+            )
+        )
+    ]
+)
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ]
+)
+```
+
+## Comparar estrategias de imputación
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+
+strategies = [
+    "mean",
+    "median",
+    "most_frequent"
+]
+
+results = {}
+
+for strategy in strategies:
+    pipeline = Pipeline(
+        steps=[
+            (
+                "imputer",
+                SimpleImputer(
+                    strategy=strategy
+                )
+            ),
+            (
+                "model",
+                LogisticRegression(
+                    max_iter=1000,
+                    random_state=42
+                )
+            )
+        ]
+    )
+
+    scores = cross_val_score(
+        pipeline,
+        X,
+        y,
+        cv=5,
+        scoring="roc_auc"
+    )
+
+    results[strategy] = scores.mean()
+
+print(results)
+```
+
+## Consideraciones en datos clínicos
+
+::: {.callout-note}
+## Aplicación clínica
+
+La ausencia de una prueba puede reflejar una decisión clínica.
+
+Por ejemplo, no medir troponina puede significar:
+
+- Que no había sospecha.
+- Que el paciente estaba estable.
+- Que el centro no la mide de rutina.
+- Que la prueba no estaba disponible.
+:::
+
+### Diferencias entre centros
+
+Los porcentajes de ausencia pueden variar por:
+
+- Protocolos.
+- Recursos.
+- Sistemas de información.
+- Práctica clínica.
+- Periodos temporales.
+
+### Datos longitudinales
+
+En datos repetidos, puede ser relevante distinguir entre:
+
+- Nunca medido.
+- Medido antes.
+- Medido después.
+- Medido en otra visita.
+
+### No confundir cero con ausencia
+
+Un valor de `0` puede ser real.
+
+No debe sustituirse automáticamente por `NaN`.
+
+### Fechas ausentes
+
+Las fechas pueden requerir reglas específicas.
+
+Por ejemplo:
+
+- Fecha de prueba ausente.
+- Fecha parcial.
+- Fecha incoherente.
+- Fecha de imputación no válida clínicamente.
+
+## Estrategias que requieren cautela
+
+### Forward fill
+
+```python
+df["value_filled"] = (
+    df.groupby("patient_id")["value"]
+    .ffill()
+)
+```
+
+Solo debe usarse si tiene sentido clínico asumir que el valor previo sigue siendo válido.
+
+### Backward fill
+
+```python
+df["value_filled"] = (
+    df.groupby("patient_id")["value"]
+    .bfill()
+)
+```
+
+Puede introducir información futura y generar data leakage.
+
+::: {.callout-warning}
+## Importante
+
+El backward fill puede usar valores posteriores al momento de predicción.
+
+En proyectos predictivos longitudinales, esto puede ser leakage.
+:::
+
+## Cómo evaluar una imputación
+
+No basta con comprobar que ya no hay `NaN`.
+
+Conviene evaluar:
+
+- Distribución antes y después.
+- Cambios en medias y varianzas.
+- Relación con otras variables.
+- Impacto en el modelo.
+- Estabilidad entre folds.
+- Coherencia clínica.
+
+## Comparar distribuciones
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 5))
+
+df["troponin"].dropna().plot(
+    kind="hist",
+    alpha=0.5,
+    label="Original"
+)
+
+df["troponin_imputed"].plot(
+    kind="hist",
+    alpha=0.5,
+    label="Imputada"
+)
+
+plt.legend()
+plt.title("Distribución antes y después de imputar")
+
+plt.show()
+```
+
+## Errores frecuentes
+
+- Imputar antes del split.
+- Usar media en variables muy sesgadas.
+- Imputar categóricas con valores numéricos arbitrarios.
+- Eliminar filas sin revisar el sesgo.
+- Usar backward fill con información futura.
+- Confundir cero con ausencia.
+- Ignorar diferencias por centro.
+- No crear indicadores de ausencia cuando son informativos.
+- Elegir una estrategia solo porque mejora una métrica.
+- No documentar qué variables se imputaron.
+
+## Tabla comparativa
+
+| Estrategia | Ventaja | Limitación | Uso típico |
+|---|---|---|---|
+| Eliminar filas | Simple | Reduce muestra | Poca ausencia |
+| Eliminar columnas | Simplifica | Pierde variables | Ausencia muy alta |
+| Media | Fácil | Sensible a outliers | Variables simétricas |
+| Mediana | Robusta | Reduce variabilidad | Variables sesgadas |
+| Moda | Simple | Puede sobrerrepresentar categorías | Categóricas |
+| Constante | Mantiene ausencia explícita | Puede crear artefactos | Categorías |
+| KNN | Usa similitud | Costosa y sensible al escalado | Datos moderados |
+| Iterativa | Usa relaciones multivariables | Más compleja | Datos estructurados |
+| Imputación múltiple | Representa incertidumbre | Mayor complejidad | Inferencia |
+
+## Flujo recomendado
+
+1. Identificar variables con valores ausentes.
+2. Cuantificar el porcentaje.
+3. Revisar patrones por grupo.
+4. Investigar la causa clínica.
+5. Definir el mecanismo probable.
+6. Separar train y test.
+7. Elegir estrategia por tipo de variable.
+8. Ajustar imputación solo con train.
+9. Evaluar impacto.
+10. Documentar decisiones.
+
+## Checklist para proyectos
+
+- [ ] He cuantificado la ausencia por variable.
+- [ ] He revisado la ausencia por paciente.
+- [ ] He revisado diferencias por centro.
+- [ ] He investigado la causa clínica.
+- [ ] He considerado MCAR, MAR y MNAR.
+- [ ] He separado train y test antes de imputar.
+- [ ] La imputación se ajusta solo con train.
+- [ ] He diferenciado variables numéricas y categóricas.
+- [ ] He considerado indicadores de ausencia.
+- [ ] He revisado el riesgo de leakage temporal.
+- [ ] He comparado distribuciones antes y después.
+- [ ] He evaluado el impacto en el modelo.
+- [ ] He documentado la estrategia.
+
+## Recursos
+
+### Documentación
+
+- `SimpleImputer` de scikit-learn.
+- `KNNImputer` de scikit-learn.
+- `IterativeImputer` de scikit-learn.
+- `ColumnTransformer` de scikit-learn.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus propios ejemplos, dudas y decisiones habituales.
