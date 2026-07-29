@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Sobre el proyecto – Health Data Science Handbook</title>
+<title>Nombre de la técnica – Health Data Science Handbook</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,25 +26,60 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js" type="module"></script>
-<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-2aa33e8751edae3f9b77d048c1294c38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-2aa33e8751edae3f9b77d048c1294c38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -73,8 +108,37 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="styles.css">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
 </head>
 
 <body class="nav-sidebar docked nav-fixed quarto-light">
@@ -84,7 +148,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">Health Data Science Handbook</span>
     </a>
   </div>
@@ -95,15 +159,15 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
 <span class="menu-text">Inicio</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./about.html"> 
+    <a class="nav-link" href="../about.html"> 
 <span class="menu-text">Sobre el proyecto</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./foundations/index.html"> 
+    <a class="nav-link" href="../foundations/index.html"> 
 <span class="menu-text">Fundamentos</span></a>
   </li>  
 </ul>
@@ -117,7 +181,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./about.html">Sobre el proyecto</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Nombre de la técnica</li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -139,13 +203,13 @@ ul.task-list li input[type="checkbox"] {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Inicio</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./about.html" class="sidebar-item-text sidebar-link active">
+  <a href="../about.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Sobre el proyecto</span></a>
   </div>
 </li>
@@ -160,13 +224,13 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./foundations/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../foundations/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./foundations/data-exploration.html" class="sidebar-item-text sidebar-link">
+  <a href="../foundations/data-exploration.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Exploratory data analysis (EDA)</span></a>
   </div>
 </li>
@@ -183,7 +247,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./preprocessing/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../preprocessing/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -200,13 +264,13 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./dimensionality-reduction/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../dimensionality-reduction/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./dimensionality-reduction/pca.html" class="sidebar-item-text sidebar-link">
+  <a href="../dimensionality-reduction/pca.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">PCA</span></a>
   </div>
 </li>
@@ -223,7 +287,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./supervised-learning/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../supervised-learning/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -240,7 +304,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./unsupervised-learning/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../unsupervised-learning/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -257,7 +321,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./time-series/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../time-series/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -274,7 +338,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./deep-learning/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -291,7 +355,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./project-guides/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../project-guides/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -308,7 +372,7 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./code-recipes/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -319,15 +383,49 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#resumen-en-30-segundos" id="toc-resumen-en-30-segundos" class="nav-link active" data-scroll-target="#resumen-en-30-segundos">Resumen en 30 segundos</a></li>
+  <li><a href="#qué-problema-resuelve" id="toc-qué-problema-resuelve" class="nav-link" data-scroll-target="#qué-problema-resuelve">¿Qué problema resuelve?</a></li>
+  <li><a href="#intuición" id="toc-intuición" class="nav-link" data-scroll-target="#intuición">Intuición</a></li>
+  <li><a href="#fundamentos-teóricos" id="toc-fundamentos-teóricos" class="nav-link" data-scroll-target="#fundamentos-teóricos">Fundamentos teóricos</a>
+  <ul class="collapse">
+  <li><a href="#conceptos-principales" id="toc-conceptos-principales" class="nav-link" data-scroll-target="#conceptos-principales">Conceptos principales</a></li>
+  <li><a href="#formulación-matemática" id="toc-formulación-matemática" class="nav-link" data-scroll-target="#formulación-matemática">Formulación matemática</a></li>
+  <li><a href="#hiperparámetros-principales" id="toc-hiperparámetros-principales" class="nav-link" data-scroll-target="#hiperparámetros-principales">Hiperparámetros principales</a></li>
+  </ul></li>
+  <li><a href="#supuestos" id="toc-supuestos" class="nav-link" data-scroll-target="#supuestos">Supuestos</a></li>
+  <li><a href="#cuándo-utilizarla" id="toc-cuándo-utilizarla" class="nav-link" data-scroll-target="#cuándo-utilizarla">Cuándo utilizarla</a></li>
+  <li><a href="#cuándo-no-utilizarla" id="toc-cuándo-no-utilizarla" class="nav-link" data-scroll-target="#cuándo-no-utilizarla">Cuándo no utilizarla</a></li>
+  <li><a href="#flujo-de-trabajo-recomendado" id="toc-flujo-de-trabajo-recomendado" class="nav-link" data-scroll-target="#flujo-de-trabajo-recomendado">Flujo de trabajo recomendado</a></li>
+  <li><a href="#código-mínimo" id="toc-código-mínimo" class="nav-link" data-scroll-target="#código-mínimo">Código mínimo</a></li>
+  <li><a href="#implementación-completa" id="toc-implementación-completa" class="nav-link" data-scroll-target="#implementación-completa">Implementación completa</a></li>
+  <li><a href="#interpretación-de-resultados" id="toc-interpretación-de-resultados" class="nav-link" data-scroll-target="#interpretación-de-resultados">Interpretación de resultados</a></li>
+  <li><a href="#evaluación" id="toc-evaluación" class="nav-link" data-scroll-target="#evaluación">Evaluación</a></li>
+  <li><a href="#visualizaciones-recomendadas" id="toc-visualizaciones-recomendadas" class="nav-link" data-scroll-target="#visualizaciones-recomendadas">Visualizaciones recomendadas</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#consideraciones-en-datos-clínicos" id="toc-consideraciones-en-datos-clínicos" class="nav-link" data-scroll-target="#consideraciones-en-datos-clínicos">Consideraciones en datos clínicos</a></li>
+  <li><a href="#comparación-con-otras-técnicas" id="toc-comparación-con-otras-técnicas" class="nav-link" data-scroll-target="#comparación-con-otras-técnicas">Comparación con otras técnicas</a></li>
+  <li><a href="#checklist-para-proyectos" id="toc-checklist-para-proyectos" class="nav-link" data-scroll-target="#checklist-para-proyectos">Checklist para proyectos</a></li>
+  <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
+  <ul class="collapse">
+  <li><a href="#documentación" id="toc-documentación" class="nav-link" data-scroll-target="#documentación">Documentación</a></li>
+  <li><a href="#libros-y-artículos" id="toc-libros-y-artículos" class="nav-link" data-scroll-target="#libros-y-artículos">Libros y artículos</a></li>
+  <li><a href="#material-del-máster" id="toc-material-del-máster" class="nav-link" data-scroll-target="#material-del-máster">Material del máster</a></li>
+  </ul></li>
+  <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Sobre el proyecto</h1>
+<h1 class="title">Nombre de la técnica</h1>
 </div>
 
 
@@ -344,10 +442,280 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Esta web forma parte de mi aprendizaje en Health Data Science.</p>
-<p>Aquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.</p>
+<section id="resumen-en-30-segundos" class="level2">
+<h2 data-anchor-id="resumen-en-30-segundos">Resumen en 30 segundos</h2>
+<p>Escribe aquí una explicación breve de la técnica: qué hace, qué problema resuelve y cuál es su idea principal.</p>
+</section>
+<section id="qué-problema-resuelve" class="level2">
+<h2 data-anchor-id="qué-problema-resuelve">¿Qué problema resuelve?</h2>
+<p>Describe el tipo de problema para el que se utiliza esta técnica.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Reducir dimensionalidad.</li>
+<li>Clasificar observaciones.</li>
+<li>Predecir una variable continua.</li>
+<li>Agrupar observaciones.</li>
+<li>Analizar datos longitudinales.</li>
+<li>Modelar una serie temporal.</li>
+</ul>
+</section>
+<section id="intuición" class="level2">
+<h2 data-anchor-id="intuición">Intuición</h2>
+<p>Explica la técnica con lenguaje sencillo, evitando fórmulas al principio.</p>
+<p>Puedes utilizar:</p>
+<ul>
+<li>Una analogía.</li>
+<li>Un ejemplo clínico.</li>
+<li>Una representación visual.</li>
+<li>Una comparación con otra técnica.</li>
+</ul>
+</section>
+<section id="fundamentos-teóricos" class="level2">
+<h2 data-anchor-id="fundamentos-teóricos">Fundamentos teóricos</h2>
+<p>Explica aquí los conceptos teóricos necesarios para comprender la técnica.</p>
+<section id="conceptos-principales" class="level3">
+<h3 data-anchor-id="conceptos-principales">Conceptos principales</h3>
+<ul>
+<li>Concepto 1.</li>
+<li>Concepto 2.</li>
+<li>Concepto 3.</li>
+</ul>
+</section>
+<section id="formulación-matemática" class="level3">
+<h3 data-anchor-id="formulación-matemática">Formulación matemática</h3>
+<p>Añade aquí las fórmulas importantes utilizando notación matemática de Quarto.</p>
+<p>Por ejemplo:</p>
+<p><span class="math display">\[
+y = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p
+\]</span></p>
+</section>
+<section id="hiperparámetros-principales" class="level3">
+<h3 data-anchor-id="hiperparámetros-principales">Hiperparámetros principales</h3>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Hiperparámetro</th>
+<th>Descripción</th>
+<th>Efecto</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>parameter_1</code></td>
+<td>Descripción</td>
+<td>Efecto sobre el modelo</td>
+</tr>
+<tr class="even">
+<td><code>parameter_2</code></td>
+<td>Descripción</td>
+<td>Efecto sobre el modelo</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="supuestos" class="level2">
+<h2 data-anchor-id="supuestos">Supuestos</h2>
+<p>Enumera los supuestos de la técnica y explica por qué son importantes.</p>
+<ul>
+<li>Supuesto 1.</li>
+<li>Supuesto 2.</li>
+<li>Supuesto 3.</li>
+</ul>
+</section>
+<section id="cuándo-utilizarla" class="level2">
+<h2 data-anchor-id="cuándo-utilizarla">Cuándo utilizarla</h2>
+<p>Esta técnica puede ser adecuada cuando:</p>
+<ul>
+<li>Situación 1.</li>
+<li>Situación 2.</li>
+<li>Situación 3.</li>
+</ul>
+</section>
+<section id="cuándo-no-utilizarla" class="level2">
+<h2 data-anchor-id="cuándo-no-utilizarla">Cuándo no utilizarla</h2>
+<p>Esta técnica puede no ser adecuada cuando:</p>
+<ul>
+<li>Situación 1.</li>
+<li>Situación 2.</li>
+<li>Situación 3.</li>
+</ul>
+</section>
+<section id="flujo-de-trabajo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-de-trabajo-recomendado">Flujo de trabajo recomendado</h2>
+<ol type="1">
+<li>Comprender el problema.</li>
+<li>Seleccionar las variables.</li>
+<li>Separar entrenamiento y prueba.</li>
+<li>Preparar los datos.</li>
+<li>Ajustar la técnica o el modelo.</li>
+<li>Evaluar los resultados.</li>
+<li>Interpretar los resultados.</li>
+<li>Documentar las decisiones.</li>
+</ol>
+</section>
+<section id="código-mínimo" class="level2">
+<h2 data-anchor-id="código-mínimo">Código mínimo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Importar las librerías necesarias</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Preparar los datos</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Crear la técnica o modelo</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajustar</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Obtener resultados</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="implementación-completa" class="level2">
+<h2 data-anchor-id="implementación-completa">Implementación completa</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Añadir aquí una implementación completa y reproducible.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Incluir:</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># - imports;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># - preparación de datos;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># - pipeline;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># - validación;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># - evaluación;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># - interpretación.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación-de-resultados" class="level2">
+<h2 data-anchor-id="interpretación-de-resultados">Interpretación de resultados</h2>
+<p>Explica:</p>
+<ul>
+<li>Qué devuelve el método.</li>
+<li>Qué valores deben revisarse.</li>
+<li>Cómo interpretar los resultados.</li>
+<li>Qué conclusiones se pueden extraer.</li>
+<li>Qué conclusiones no se pueden extraer.</li>
+</ul>
+</section>
+<section id="evaluación" class="level2">
+<h2 data-anchor-id="evaluación">Evaluación</h2>
+<p>Describe cómo comprobar si la técnica ha funcionado correctamente.</p>
+<p>Incluye, cuando corresponda:</p>
+<ul>
+<li>Métricas.</li>
+<li>Validación cruzada.</li>
+<li>Diagnósticos.</li>
+<li>Gráficos.</li>
+<li>Comparación con un modelo baseline.</li>
+</ul>
+</section>
+<section id="visualizaciones-recomendadas" class="level2">
+<h2 data-anchor-id="visualizaciones-recomendadas">Visualizaciones recomendadas</h2>
+<p>Incluye aquí los gráficos más útiles para interpretar la técnica.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Distribuciones.</li>
+<li>Matrices de correlación.</li>
+<li>Curvas de aprendizaje.</li>
+<li>Matrices de confusión.</li>
+<li>Gráficos de residuos.</li>
+<li>Varianza explicada.</li>
+<li>Visualización de clusters.</li>
+</ul>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>Error frecuente 1.</li>
+<li>Error frecuente 2.</li>
+<li>Error frecuente 3.</li>
+<li>Error frecuente 4.</li>
+</ul>
+</section>
+<section id="consideraciones-en-datos-clínicos" class="level2">
+<h2 data-anchor-id="consideraciones-en-datos-clínicos">Consideraciones en datos clínicos</h2>
+<p>Explica los aspectos específicos que deben tenerse en cuenta en datos sanitarios.</p>
+<p>Por ejemplo:</p>
+<ul>
+<li>Datos ausentes no aleatorios.</li>
+<li>Mediciones repetidas por paciente.</li>
+<li>Diferencias entre centros.</li>
+<li>Cambios en protocolos clínicos.</li>
+<li>Variables recogidas después del desenlace.</li>
+<li>Data leakage.</li>
+<li>Desbalanceo de clases.</li>
+<li>Necesidad de validación externa.</li>
+<li>Interpretabilidad clínica.</li>
+</ul>
+</section>
+<section id="comparación-con-otras-técnicas" class="level2">
+<h2 data-anchor-id="comparación-con-otras-técnicas">Comparación con otras técnicas</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Técnica</th>
+<th>Ventajas</th>
+<th>Limitaciones</th>
+<th>Cuándo elegirla</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Técnica actual</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Alternativa 1</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Alternativa 2</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="checklist-para-proyectos" class="level2">
+<h2 data-anchor-id="checklist-para-proyectos">Checklist para proyectos</h2>
+<p>Antes de utilizar esta técnica, comprobar:</p>
+<ul class="task-list">
+<li><label><input type="checkbox">Entiendo qué problema resuelve.</label></li>
+<li><label><input type="checkbox">He revisado sus supuestos.</label></li>
+<li><label><input type="checkbox">He separado entrenamiento y prueba correctamente.</label></li>
+<li><label><input type="checkbox">El preprocesamiento se ajusta únicamente con entrenamiento.</label></li>
+<li><label><input type="checkbox">He elegido métricas adecuadas.</label></li>
+<li><label><input type="checkbox">He comparado con un baseline.</label></li>
+<li><label><input type="checkbox">He revisado posibles fuentes de data leakage.</label></li>
+<li><label><input type="checkbox">Sé interpretar los resultados.</label></li>
+<li><label><input type="checkbox">He documentado las decisiones.</label></li>
+<li><label><input type="checkbox">He considerado la utilidad clínica.</label></li>
+</ul>
+</section>
+<section id="recursos" class="level2">
+<h2 data-anchor-id="recursos">Recursos</h2>
+<section id="documentación" class="level3">
+<h3 data-anchor-id="documentación">Documentación</h3>
+<ul>
+<li>Añadir documentación oficial.</li>
+</ul>
+</section>
+<section id="libros-y-artículos" class="level3">
+<h3 data-anchor-id="libros-y-artículos">Libros y artículos</h3>
+<ul>
+<li>Añadir referencias bibliográficas.</li>
+</ul>
+</section>
+<section id="material-del-máster" class="level3">
+<h3 data-anchor-id="material-del-máster">Material del máster</h3>
+<ul>
+<li>Añadir el nombre de las diapositivas o apuntes utilizados.</li>
+</ul>
+</section>
+</section>
+<section id="notas-personales" class="level2">
+<h2 data-anchor-id="notas-personales">Notas personales</h2>
+<p>Añade aquí tus propias notas, dudas, ejemplos o recordatorios.</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
