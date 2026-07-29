@@ -1,0 +1,954 @@
+---
+title: "Métodos embedded"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Los métodos embedded realizan la selección de variables durante el entrenamiento del modelo.
+
+A diferencia de los métodos filter y wrapper:
+
+- Utilizan el propio modelo.
+- Suelen ser más eficientes que los wrapper.
+- Pueden capturar relaciones específicas del estimador.
+- El resultado depende del modelo elegido.
+
+Ejemplos:
+
+- Lasso.
+- Elastic Net.
+- Árboles de decisión.
+- Random forest.
+- Gradient boosting.
+- `SelectFromModel`.
+:::
+
+## ¿Qué son los métodos embedded?
+
+Los métodos embedded integran la selección dentro del entrenamiento.
+
+El modelo aprende:
+
+- Qué variables utilizar.
+- Qué importancia asignarles.
+- Qué coeficientes reducir.
+- Qué variables ignorar.
+
+```text
+Datos
+  │
+  ▼
+Modelo con mecanismo de selección
+  │
+  ▼
+Importancias o coeficientes
+  │
+  ▼
+Variables seleccionadas
+```
+
+::: {.callout-note}
+## Idea clave
+
+La selección embedded está ligada al modelo que la produce.
+:::
+
+## Ventajas
+
+- Menor coste que muchos métodos wrapper.
+- Consideran el modelo final.
+- Pueden manejar muchas variables.
+- Se integran fácilmente en pipelines.
+- Pueden mejorar interpretabilidad.
+- Permiten selección y entrenamiento de forma conjunta.
+
+## Limitaciones
+
+- El resultado depende del estimador.
+- Las importancias pueden ser inestables.
+- Las variables correlacionadas pueden repartirse la importancia.
+- Feature importance no implica causalidad.
+- No siempre producen una selección clara.
+
+## Selección con coeficientes
+
+Los modelos lineales asignan un coeficiente a cada variable.
+
+```python
+from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression(
+    penalty="l1",
+    solver="liblinear",
+    C=1.0,
+    max_iter=1000,
+    random_state=42
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+Con penalización L1, algunos coeficientes pueden quedar exactamente en 0.
+
+## Obtener coeficientes
+
+```python
+import pandas as pd
+
+coefficients = pd.DataFrame(
+    {
+        "feature": feature_names,
+        "coefficient": model.coef_[0]
+    }
+)
+
+coefficients["absolute_coefficient"] = (
+    coefficients["coefficient"]
+    .abs()
+)
+
+coefficients = coefficients.sort_values(
+    "absolute_coefficient",
+    ascending=False
+)
+
+display(
+    coefficients
+)
+```
+
+## Variables seleccionadas
+
+```python
+selected_features = (
+    coefficients.loc[
+        coefficients["coefficient"] != 0,
+        "feature"
+    ]
+    .tolist()
+)
+
+print(
+    selected_features
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+Los coeficientes solo son comparables si las variables están en escalas compatibles.
+:::
+
+## SelectFromModel
+
+`SelectFromModel` selecciona variables a partir de coeficientes o importancias.
+
+```python
+from sklearn.feature_selection import SelectFromModel
+from sklearn.linear_model import LogisticRegression
+
+selector = SelectFromModel(
+    estimator=LogisticRegression(
+        penalty="l1",
+        solver="liblinear",
+        C=1.0,
+        max_iter=1000,
+        random_state=42
+    ),
+    threshold="median"
+)
+
+X_selected = selector.fit_transform(
+    X_train,
+    y_train
+)
+```
+
+## Umbrales disponibles
+
+Ejemplos:
+
+```python
+threshold="mean"
+```
+
+```python
+threshold="median"
+```
+
+```python
+threshold="1.25*mean"
+```
+
+```python
+threshold=0.01
+```
+
+El umbral determina qué variables se conservan.
+
+## Obtener variables seleccionadas
+
+```python
+selector.fit(
+    X_train,
+    y_train
+)
+
+selected_mask = (
+    selector.get_support()
+)
+
+selected_features = [
+    feature
+    for feature, selected
+    in zip(
+        feature_names,
+        selected_mask
+    )
+    if selected
+]
+
+print(
+    selected_features
+)
+```
+
+## SelectFromModel dentro de pipeline
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "selector",
+            SelectFromModel(
+                estimator=LogisticRegression(
+                    penalty="l1",
+                    solver="liblinear",
+                    C=1.0,
+                    max_iter=1000,
+                    random_state=42
+                ),
+                threshold="median"
+            )
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Ajustar el umbral
+
+```python
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    "selector__threshold": [
+        "mean",
+        "median",
+        "1.25*mean"
+    ],
+    "selector__estimator__C": [
+        0.01,
+        0.1,
+        1,
+        10
+    ]
+}
+```
+
+```python
+search = GridSearchCV(
+    estimator=pipeline,
+    param_grid=param_grid,
+    cv=5,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+search.fit(
+    X_train,
+    y_train
+)
+```
+
+## Árboles de decisión
+
+Los árboles pueden asignar importancia a las variables.
+
+```python
+from sklearn.tree import DecisionTreeClassifier
+
+tree = DecisionTreeClassifier(
+    max_depth=4,
+    random_state=42
+)
+
+tree.fit(
+    X_train,
+    y_train
+)
+```
+
+## Importancia en árboles
+
+```python
+importance = pd.DataFrame(
+    {
+        "feature": feature_names,
+        "importance": tree.feature_importances_
+    }
+).sort_values(
+    "importance",
+    ascending=False
+)
+
+display(
+    importance
+)
+```
+
+## SelectFromModel con árbol
+
+```python
+selector = SelectFromModel(
+    estimator=DecisionTreeClassifier(
+        max_depth=4,
+        random_state=42
+    ),
+    threshold="median"
+)
+```
+
+## Random forest
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+forest = RandomForestClassifier(
+    n_estimators=500,
+    random_state=42,
+    n_jobs=-1
+)
+
+forest.fit(
+    X_train,
+    y_train
+)
+```
+
+## Importancias de random forest
+
+```python
+importance = pd.DataFrame(
+    {
+        "feature": feature_names,
+        "importance": forest.feature_importances_
+    }
+).sort_values(
+    "importance",
+    ascending=False
+)
+
+display(
+    importance.head(20)
+)
+```
+
+## Limitaciones de impurity-based importance
+
+Las importancias basadas en impureza pueden favorecer:
+
+- Variables continuas.
+- Variables con muchas categorías.
+- Variables con muchos puntos de corte posibles.
+
+::: {.callout-caution}
+## Precaución
+
+La importancia de árboles no debe interpretarse como relevancia clínica absoluta.
+:::
+
+## Permutation importance
+
+Permutation importance mide cuánto empeora el modelo al desordenar una variable.
+
+```python
+from sklearn.inspection import permutation_importance
+
+result = permutation_importance(
+    estimator=forest,
+    X=X_validation,
+    y=y_validation,
+    scoring="roc_auc",
+    n_repeats=20,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+## Resumir permutation importance
+
+```python
+permutation_results = pd.DataFrame(
+    {
+        "feature": feature_names,
+        "importance_mean": result.importances_mean,
+        "importance_std": result.importances_std
+    }
+).sort_values(
+    "importance_mean",
+    ascending=False
+)
+
+display(
+    permutation_results
+)
+```
+
+## Interpretación
+
+Una importancia alta significa que al desordenar esa variable, el rendimiento empeora.
+
+Ventajas:
+
+- Puede aplicarse a cualquier modelo.
+- Evalúa impacto sobre una métrica.
+- Suele ser más intuitiva que impurity importance.
+
+Limitaciones:
+
+- Es costosa.
+- Puede ser inestable.
+- Variables correlacionadas pueden ocultarse entre sí.
+- Depende del conjunto de evaluación.
+
+## Permutation importance y leakage
+
+Debe calcularse en:
+
+- Validation.
+- Test final solo para interpretación final.
+- Folds externos.
+
+No debe utilizarse repetidamente sobre test para seleccionar variables.
+
+::: {.callout-warning}
+## Importante
+
+Usar permutation importance en test para decidir qué variables conservar convierte el test en parte del entrenamiento.
+:::
+
+## Variables correlacionadas
+
+Cuando dos variables aportan información similar:
+
+- Ambas pueden parecer poco importantes individualmente.
+- El modelo puede repartir su importancia.
+- Una puede sustituir a la otra.
+
+Ejemplo:
+
+```text
+Peso
+Superficie corporal
+```
+
+Si se permuta una, la otra puede mantener el rendimiento.
+
+## Agrupar variables correlacionadas
+
+Puede ser útil revisar:
+
+- Correlación.
+- Importancia conjunta.
+- Selección por grupos.
+- Estabilidad entre folds.
+- Significado clínico.
+
+## Importancia basada en coeficientes
+
+En modelos lineales:
+
+- El signo indica dirección.
+- La magnitud depende de la escala.
+- La regularización modifica los coeficientes.
+
+```python
+coefficient_table = pd.DataFrame(
+    {
+        "feature": feature_names,
+        "coefficient": classifier.coef_[0]
+    }
+)
+```
+
+## Odds ratios
+
+En regresión logística:
+
+$$
+OR = e^{\beta}
+$$
+
+```python
+import numpy as np
+
+coefficient_table["odds_ratio"] = np.exp(
+    coefficient_table["coefficient"]
+)
+```
+
+::: {.callout-note}
+## Interpretación clínica
+
+Un odds ratio solo es interpretable si se comprende la unidad de cambio de la variable.
+:::
+
+## Regularización L1 como embedded method
+
+L1 puede dejar coeficientes en 0.
+
+```python
+from sklearn.linear_model import LogisticRegression
+
+lasso_logistic = LogisticRegression(
+    penalty="l1",
+    solver="liblinear",
+    C=0.1,
+    max_iter=1000,
+    random_state=42
+)
+```
+
+Un valor menor de `C` implica mayor regularización.
+
+## Elastic Net
+
+Elastic Net combina L1 y L2.
+
+```python
+model = LogisticRegression(
+    penalty="elasticnet",
+    solver="saga",
+    l1_ratio=0.5,
+    C=1.0,
+    max_iter=5000,
+    random_state=42
+)
+```
+
+Puede ser útil cuando:
+
+- Hay muchas variables.
+- Existen grupos de variables correlacionadas.
+- Se quiere selección y estabilidad.
+
+## Gradient boosting
+
+Los modelos boosting también generan importancias.
+
+```python
+from sklearn.ensemble import GradientBoostingClassifier
+
+model = GradientBoostingClassifier(
+    random_state=42
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+## XGBoost, LightGBM y CatBoost
+
+Estos modelos ofrecen distintas definiciones de importancia:
+
+- Gain.
+- Split count.
+- Cover.
+- Permutation importance.
+- SHAP values.
+
+Cada definición responde a una pregunta distinta.
+
+## SHAP y selección de variables
+
+SHAP puede utilizarse para interpretar contribuciones.
+
+Sin embargo:
+
+- Es costoso.
+- Puede ser sensible al background dataset.
+- Variables correlacionadas complican la interpretación.
+- No debería usarse como única regla de selección.
+
+## Estabilidad entre folds
+
+Una variable puede parecer importante solo en algunos folds.
+
+```python
+from collections import Counter
+from sklearn.base import clone
+
+selection_frequency = Counter()
+
+for train_index, validation_index in cv.split(
+    X,
+    y
+):
+
+    X_train_fold = X.iloc[
+        train_index
+    ]
+
+    y_train_fold = y.iloc[
+        train_index
+    ]
+
+    fitted_pipeline = clone(
+        pipeline
+    )
+
+    fitted_pipeline.fit(
+        X_train_fold,
+        y_train_fold
+    )
+
+    selector_fold = (
+        fitted_pipeline
+        .named_steps["selector"]
+    )
+
+    feature_names_fold = (
+        fitted_pipeline
+        .named_steps["preprocessor"]
+        .get_feature_names_out()
+    )
+
+    selected_features_fold = (
+        feature_names_fold[
+            selector_fold.get_support()
+        ]
+    )
+
+    selection_frequency.update(
+        selected_features_fold
+    )
+```
+
+## Visualizar frecuencia de selección
+
+```python
+stability = pd.DataFrame(
+    selection_frequency.items(),
+    columns=[
+        "feature",
+        "selection_count"
+    ]
+).sort_values(
+    "selection_count",
+    ascending=False
+)
+
+display(
+    stability
+)
+```
+
+## Embedded methods y one-hot encoding
+
+Una variable categórica puede convertirse en varias columnas.
+
+Ejemplo:
+
+```text
+center_Barcelona
+center_Helsinki
+center_Coimbra
+```
+
+El modelo puede seleccionar algunas categorías y no otras.
+
+Esto puede dificultar:
+
+- Interpretación.
+- Reutilización.
+- Coherencia clínica.
+
+## Selección por grupos
+
+En algunos casos conviene seleccionar todas las columnas derivadas de una variable original como un grupo.
+
+Esto requiere:
+
+- Group lasso.
+- Transformadores personalizados.
+- Selección previa por variable original.
+- Agrupación clínica.
+
+## Importancia y causalidad
+
+::: {.callout-warning}
+## Importante
+
+Una variable importante para predecir no es necesariamente causal.
+:::
+
+Puede ser:
+
+- Un marcador.
+- Un proxy.
+- Una consecuencia.
+- Un indicador del centro.
+- Una variable asociada al workflow.
+
+## Importancia y disponibilidad
+
+Una variable muy importante puede ser poco útil si:
+
+- No está disponible en tiempo real.
+- Se obtiene después del evento.
+- Es costosa.
+- Es invasiva.
+- No existe en otros centros.
+
+## Comparar modelos con y sin selección
+
+```python
+scores_without_selection = cross_val_score(
+    pipeline_without_selection,
+    X,
+    y,
+    cv=cv,
+    scoring="roc_auc"
+)
+
+scores_with_selection = cross_val_score(
+    pipeline_with_selection,
+    X,
+    y,
+    cv=cv,
+    scoring="roc_auc"
+)
+```
+
+Debe compararse:
+
+- Métrica media.
+- Variabilidad.
+- Número de variables.
+- Tiempo de entrenamiento.
+- Interpretabilidad.
+- Estabilidad.
+
+## Selección embedded en regresión
+
+```python
+from sklearn.linear_model import Lasso
+from sklearn.feature_selection import SelectFromModel
+
+selector = SelectFromModel(
+    estimator=Lasso(
+        alpha=0.01,
+        random_state=42
+    )
+)
+```
+
+## Ridge no selecciona exactamente
+
+Ridge reduce coeficientes, pero normalmente no los lleva a 0.
+
+Por tanto:
+
+- Ayuda a regularizar.
+- No suele producir selección directa.
+- Puede utilizarse con umbrales, pero con cautela.
+
+## Random forest y selección
+
+```python
+selector = SelectFromModel(
+    estimator=RandomForestClassifier(
+        n_estimators=500,
+        random_state=42,
+        n_jobs=-1
+    ),
+    threshold="median"
+)
+```
+
+## Pipeline completo
+
+```python
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "selector",
+            SelectFromModel(
+                estimator=RandomForestClassifier(
+                    n_estimators=300,
+                    random_state=42,
+                    n_jobs=-1
+                ),
+                threshold="median"
+            )
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Ajustar estimador y umbral
+
+```python
+param_grid = {
+    "selector__threshold": [
+        "mean",
+        "median"
+    ],
+    "selector__estimator__max_depth": [
+        3,
+        5,
+        None
+    ],
+    "classifier__C": [
+        0.1,
+        1,
+        10
+    ]
+}
+```
+
+## Nested cross-validation
+
+Si se ajustan:
+
+- Umbral.
+- Penalización.
+- Número de variables.
+- Hiperparámetros.
+
+conviene utilizar nested cross-validation.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Una variable puede ser importante porque identifica un centro, una práctica clínica o un patrón de registro, no porque represente biología.
+:::
+
+Debe revisarse:
+
+- Significado.
+- Disponibilidad.
+- Momento de medición.
+- Coste.
+- Generalización.
+- Posible leakage.
+
+## Tabla comparativa
+
+| Método | Mecanismo | Ventaja | Limitación |
+|---|---|---|---|
+| L1 | Coeficientes a 0 | Selección clara | Inestable con correlación |
+| Elastic Net | L1 + L2 | Más estable | Requiere ajustar dos penalizaciones |
+| Árboles | Importancia por divisiones | No lineal | Sesgo hacia variables con muchos cortes |
+| Permutation importance | Caída de rendimiento | Modelo agnóstico | Costosa y sensible a correlación |
+| SelectFromModel | Umbral sobre importancia | Fácil de integrar | Depende del estimador |
+
+## Errores frecuentes
+
+- Interpretar importancia como causalidad.
+- Comparar coeficientes sin escalar.
+- Seleccionar variables antes del split.
+- Ajustar el umbral con test.
+- Confiar solo en impurity importance.
+- Ignorar variables correlacionadas.
+- No revisar estabilidad.
+- Seleccionar categorías one-hot sin contexto.
+- No comparar con el modelo completo.
+- Ignorar disponibilidad clínica.
+
+## Flujo recomendado
+
+1. Elegir un estimador adecuado.
+2. Integrarlo en un pipeline.
+3. Definir umbral o penalización.
+4. Ajustar hiperparámetros con validation.
+5. Evaluar con cross-validation externa.
+6. Comparar con modelo sin selección.
+7. Revisar estabilidad.
+8. Revisar variables correlacionadas.
+9. Evaluar permutation importance.
+10. Revisar significado clínico.
+11. Revisar disponibilidad.
+12. Documentar variables finales.
+
+## Checklist para proyectos
+
+- [ ] He elegido un estimador adecuado.
+- [ ] He escalado cuando corresponde.
+- [ ] La selección está dentro del pipeline.
+- [ ] He ajustado el umbral con validation.
+- [ ] He comparado con todas las variables.
+- [ ] He revisado estabilidad.
+- [ ] He revisado correlaciones.
+- [ ] He considerado permutation importance.
+- [ ] No interpreto importancia como causalidad.
+- [ ] He revisado disponibilidad clínica.
+- [ ] He evitado data leakage.
+- [ ] He documentado variables finales.
+
+## Recursos
+
+### Documentación
+
+- `SelectFromModel`.
+- `LogisticRegression` con L1 y Elastic Net.
+- `Lasso`.
+- Feature importance en árboles.
+- `permutation_importance`.
+- SHAP.
+- Nested cross-validation.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus métodos embedded, comparaciones y variables seleccionadas.
