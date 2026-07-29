@@ -1,0 +1,213 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Health Data Science Handbook",
+    "section": "",
+    "text": "Esta web es mi manual personal de consulta sobre:\n\nMachine learning\nDeep learning\nEstadística\nSeries temporales\nAnálisis de datos clínicos\n\nEl objetivo es reunir explicaciones teóricas, ejemplos prácticos y código reutilizable para futuros proyectos.",
+    "crumbs": [
+      "Inicio"
+    ]
+  },
+  {
+    "objectID": "index.html#bienvenido",
+    "href": "index.html#bienvenido",
+    "title": "Health Data Science Handbook",
+    "section": "",
+    "text": "Esta web es mi manual personal de consulta sobre:\n\nMachine learning\nDeep learning\nEstadística\nSeries temporales\nAnálisis de datos clínicos\n\nEl objetivo es reunir explicaciones teóricas, ejemplos prácticos y código reutilizable para futuros proyectos.",
+    "crumbs": [
+      "Inicio"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html",
+    "href": "foundations/data-exploration.html",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.\n\n\n\n\nComprender qué representa cada fila y cada columna.\nIdentificar los tipos de variables.\nDetectar valores ausentes.\nEstudiar la distribución de las variables.\nLocalizar valores extremos o potencialmente erróneos.\nAnalizar relaciones entre variables.\nDetectar posibles problemas de calidad de datos.\n\n\n\n\nAntes de entrenar un modelo, conviene responder:\n\n¿Cuál es la unidad de análisis?\n¿Cuántas observaciones hay?\n¿Existen observaciones duplicadas?\n¿Qué variable queremos predecir?\n¿Qué variables son numéricas?\n¿Qué variables son categóricas?\n¿Hay valores ausentes?\n¿Existen valores imposibles?\n¿Puede haber información futura o data leakage?\n\n\n\n\nimport pandas as pd\n\ndf = pd.read_csv(\"datos.csv\")\n\nprint(f\"Dimensiones del dataset: {df.shape}\")\n\ndisplay(df.head())\n\ndf.info()\n\ndisplay(df.describe(include=\"all\").T)\n\n\n\nmissing_summary = (\n    df.isna()\n    .sum()\n    .to_frame(\"missing_count\")\n    .assign(\n        missing_percentage=lambda x:\n        100 * x[\"missing_count\"] / len(df)\n    )\n    .sort_values(\n        \"missing_percentage\",\n        ascending=False\n    )\n)\n\ndisplay(missing_summary)\n\n\n\nn_duplicates = df.duplicated().sum()\n\nprint(f\"Número de filas duplicadas: {n_duplicates}\")\n\n\n\nvariable_types = (\n    df.dtypes\n    .astype(str)\n    .to_frame(\"data_type\")\n)\n\ndisplay(variable_types)\n\n\n\nunique_values = (\n    df.nunique(dropna=False)\n    .to_frame(\"unique_values\")\n    .sort_values(\n        \"unique_values\",\n        ascending=True\n    )\n)\n\ndisplay(unique_values)\n\n\n\nnumeric_columns = df.select_dtypes(\n    include=\"number\"\n).columns.tolist()\n\ncategorical_columns = df.select_dtypes(\n    include=[\"object\", \"category\", \"bool\"]\n).columns.tolist()\n\nprint(\"Variables numéricas:\")\nprint(numeric_columns)\n\nprint(\"\\nVariables categóricas:\")\nprint(categorical_columns)\n\n\n\nEn datos sanitarios, un valor ausente no siempre significa que la información se haya perdido. Puede indicar que:\n\nLa prueba no estaba clínicamente indicada.\nEl paciente no acudió a la visita.\nEl dato se registró en otro sistema.\nLa prueba se realizó, pero no se importó correctamente.\nEl procedimiento no estaba disponible en ese momento.\nLa ausencia del dato está relacionada con el estado clínico del paciente.\nEl profesional decidió no solicitar la prueba porque ya disponía de información suficiente.\n\nPor este motivo, el mecanismo que genera los valores ausentes debe investigarse antes de eliminarlos o imputarlos.\nTambién es importante revisar:\n\nValores clínicamente imposibles.\nDiferencias de unidades entre centros.\nCambios en los métodos de medición.\nDuplicados asociados a distintas visitas.\nFechas incoherentes.\nVariables registradas después del desenlace.\nInformación que pueda producir data leakage.\n\n\n\n\nAntes de comenzar el modelado:\n\nComprender qué representa cada fila.\nIdentificar la variable objetivo.\nRevisar la calidad de las variables predictoras.\nDetectar duplicados y valores imposibles.\nAnalizar los valores ausentes.\nComprobar la distribución de las variables.\nSeparar los datos de entrenamiento y prueba antes de ajustar transformaciones.\nEvitar utilizar información futura para predecir eventos pasados.\nDocumentar todas las decisiones de limpieza y transformación.\n\n\n\n\n\nEmpezar a entrenar modelos sin comprender el dataset.\nEliminar todos los valores ausentes automáticamente.\nConsiderar todos los valores extremos como errores.\nUtilizar identificadores de pacientes como variables predictoras.\nIncluir variables registradas después del desenlace.\nCalcular transformaciones utilizando todo el dataset antes de separar entrenamiento y prueba.\nInterpretar una correlación como una relación causal.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#resumen",
+    "href": "foundations/data-exploration.html#resumen",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "La exploración de datos es el proceso inicial mediante el cual estudiamos la estructura, calidad y distribución de un conjunto de datos antes de aplicar técnicas estadísticas o modelos de machine learning.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#objetivos-principales",
+    "href": "foundations/data-exploration.html#objetivos-principales",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "Comprender qué representa cada fila y cada columna.\nIdentificar los tipos de variables.\nDetectar valores ausentes.\nEstudiar la distribución de las variables.\nLocalizar valores extremos o potencialmente erróneos.\nAnalizar relaciones entre variables.\nDetectar posibles problemas de calidad de datos.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#checklist-inicial",
+    "href": "foundations/data-exploration.html#checklist-inicial",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "Antes de entrenar un modelo, conviene responder:\n\n¿Cuál es la unidad de análisis?\n¿Cuántas observaciones hay?\n¿Existen observaciones duplicadas?\n¿Qué variable queremos predecir?\n¿Qué variables son numéricas?\n¿Qué variables son categóricas?\n¿Hay valores ausentes?\n¿Existen valores imposibles?\n¿Puede haber información futura o data leakage?",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#código-básico",
+    "href": "foundations/data-exploration.html#código-básico",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "import pandas as pd\n\ndf = pd.read_csv(\"datos.csv\")\n\nprint(f\"Dimensiones del dataset: {df.shape}\")\n\ndisplay(df.head())\n\ndf.info()\n\ndisplay(df.describe(include=\"all\").T)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#valores-ausentes",
+    "href": "foundations/data-exploration.html#valores-ausentes",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "missing_summary = (\n    df.isna()\n    .sum()\n    .to_frame(\"missing_count\")\n    .assign(\n        missing_percentage=lambda x:\n        100 * x[\"missing_count\"] / len(df)\n    )\n    .sort_values(\n        \"missing_percentage\",\n        ascending=False\n    )\n)\n\ndisplay(missing_summary)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#filas-duplicadas",
+    "href": "foundations/data-exploration.html#filas-duplicadas",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "n_duplicates = df.duplicated().sum()\n\nprint(f\"Número de filas duplicadas: {n_duplicates}\")",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#tipos-de-variables",
+    "href": "foundations/data-exploration.html#tipos-de-variables",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "variable_types = (\n    df.dtypes\n    .astype(str)\n    .to_frame(\"data_type\")\n)\n\ndisplay(variable_types)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#número-de-valores-únicos",
+    "href": "foundations/data-exploration.html#número-de-valores-únicos",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "unique_values = (\n    df.nunique(dropna=False)\n    .to_frame(\"unique_values\")\n    .sort_values(\n        \"unique_values\",\n        ascending=True\n    )\n)\n\ndisplay(unique_values)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#variables-numéricas-y-categóricas",
+    "href": "foundations/data-exploration.html#variables-numéricas-y-categóricas",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "numeric_columns = df.select_dtypes(\n    include=\"number\"\n).columns.tolist()\n\ncategorical_columns = df.select_dtypes(\n    include=[\"object\", \"category\", \"bool\"]\n).columns.tolist()\n\nprint(\"Variables numéricas:\")\nprint(numeric_columns)\n\nprint(\"\\nVariables categóricas:\")\nprint(categorical_columns)",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#consideraciones-en-datos-clínicos",
+    "href": "foundations/data-exploration.html#consideraciones-en-datos-clínicos",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "En datos sanitarios, un valor ausente no siempre significa que la información se haya perdido. Puede indicar que:\n\nLa prueba no estaba clínicamente indicada.\nEl paciente no acudió a la visita.\nEl dato se registró en otro sistema.\nLa prueba se realizó, pero no se importó correctamente.\nEl procedimiento no estaba disponible en ese momento.\nLa ausencia del dato está relacionada con el estado clínico del paciente.\nEl profesional decidió no solicitar la prueba porque ya disponía de información suficiente.\n\nPor este motivo, el mecanismo que genera los valores ausentes debe investigarse antes de eliminarlos o imputarlos.\nTambién es importante revisar:\n\nValores clínicamente imposibles.\nDiferencias de unidades entre centros.\nCambios en los métodos de medición.\nDuplicados asociados a distintas visitas.\nFechas incoherentes.\nVariables registradas después del desenlace.\nInformación que pueda producir data leakage.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#buenas-prácticas",
+    "href": "foundations/data-exploration.html#buenas-prácticas",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "Antes de comenzar el modelado:\n\nComprender qué representa cada fila.\nIdentificar la variable objetivo.\nRevisar la calidad de las variables predictoras.\nDetectar duplicados y valores imposibles.\nAnalizar los valores ausentes.\nComprobar la distribución de las variables.\nSeparar los datos de entrenamiento y prueba antes de ajustar transformaciones.\nEvitar utilizar información futura para predecir eventos pasados.\nDocumentar todas las decisiones de limpieza y transformación.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "foundations/data-exploration.html#errores-frecuentes",
+    "href": "foundations/data-exploration.html#errores-frecuentes",
+    "title": "Exploración de datos",
+    "section": "",
+    "text": "Empezar a entrenar modelos sin comprender el dataset.\nEliminar todos los valores ausentes automáticamente.\nConsiderar todos los valores extremos como errores.\nUtilizar identificadores de pacientes como variables predictoras.\nIncluir variables registradas después del desenlace.\nCalcular transformaciones utilizando todo el dataset antes de separar entrenamiento y prueba.\nInterpretar una correlación como una relación causal.",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Exploración de datos"
+    ]
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "Sobre el proyecto",
+    "section": "",
+    "text": "Esta web forma parte de mi aprendizaje en Health Data Science.\nAquí iré organizando los contenidos estudiados durante el máster, junto con ejemplos reproducibles, buenas prácticas y plantillas de código.",
+    "crumbs": [
+      "Inicio",
+      "Sobre el proyecto"
+    ]
+  },
+  {
+    "objectID": "foundations/index.html",
+    "href": "foundations/index.html",
+    "title": "Fundamentos",
+    "section": "",
+    "text": "Esta sección reúne los conceptos y procedimientos necesarios antes de entrenar modelos de machine learning.\n\n\n\nExploración de datos\nPreparación y limpieza de datos\nValores ausentes\nCodificación de variables categóricas\nEscalado y normalización\nSeparación entre entrenamiento, validación y prueba\nEvaluación de modelos\nPrevención de data leakage",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "foundations/index.html#contenidos",
+    "href": "foundations/index.html#contenidos",
+    "title": "Fundamentos",
+    "section": "",
+    "text": "Exploración de datos\nPreparación y limpieza de datos\nValores ausentes\nCodificación de variables categóricas\nEscalado y normalización\nSeparación entre entrenamiento, validación y prueba\nEvaluación de modelos\nPrevención de data leakage",
+    "crumbs": [
+      "Inicio",
+      "Fundamentos",
+      "Introducción"
+    ]
+  }
+]
