@@ -2,23 +2,13 @@
 title: "Principal Component Analysis (PCA)"
 ---
 
+::: {.callout-tip}
 ## Resumen en 30 segundos
 
-Principal Component Analysis, o PCA, es una técnica de reducción de dimensionalidad que transforma un conjunto de variables numéricas correlacionadas en un conjunto más pequeño de componentes no correlacionados.
+PCA es una técnica de reducción de dimensionalidad que transforma varias variables numéricas correlacionadas en un conjunto menor de componentes no correlacionados.
 
-Cada componente principal es una combinación lineal de las variables originales. Los componentes se ordenan según la cantidad de varianza que explican:
-
-- El primer componente explica la mayor cantidad posible de varianza.
-- El segundo explica la mayor cantidad posible de la varianza restante.
-- Los componentes posteriores explican cantidades progresivamente menores.
-
-PCA se utiliza principalmente para:
-
-- Reducir el número de variables.
-- Visualizar datasets de alta dimensionalidad.
-- Detectar patrones.
-- Mitigar problemas de multicolinealidad.
-- Crear variables de entrada para otros modelos.
+Cada componente es una combinación lineal de las variables originales y se ordena según la cantidad de varianza que explica.
+:::
 
 ## ¿Qué problema resuelve?
 
@@ -34,17 +24,23 @@ Por ejemplo, en un dataset clínico pueden existir medidas relacionadas entre s�
 
 Estas variables no son idénticas, pero pueden estar correlacionadas. PCA intenta resumir parte de esa información en un número menor de componentes.
 
-La técnica puede ser útil cuando:
+PCA puede utilizarse para:
 
-- Hay muchas variables numéricas.
-- Existen correlaciones entre variables.
-- Se desea simplificar el dataset.
-- Se quiere visualizar la estructura de los datos.
-- Se quiere reducir el coste computacional de modelos posteriores.
+- Reducir el número de variables.
+- Visualizar datasets de alta dimensionalidad.
+- Detectar patrones.
+- Mitigar problemas de multicolinealidad.
+- Crear variables de entrada para otros modelos.
+
+::: {.callout-note}
+## Idea clave
+
+PCA no selecciona variables originales. Crea variables nuevas llamadas **componentes principales**.
+:::
 
 ## Intuición
 
-Imagina que observas una nube de puntos con dos variables correlacionadas.
+Imagina una nube de puntos formada por dos variables correlacionadas.
 
 Aunque el dataset tenga dos ejes originales, la mayor parte de la variabilidad puede concentrarse en una dirección diagonal.
 
@@ -101,11 +97,17 @@ Por ejemplo:
 
 En este caso, seleccionar cuatro componentes conservaría aproximadamente el 91 % de la varianza total.
 
+::: {.callout-warning}
+## Importante
+
+Un componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.
+:::
+
 ## ¿Por qué es importante escalar?
 
 PCA está influido por la escala de las variables.
 
-Imagina estas dos variables:
+Imagina estas variables:
 
 - Edad, medida en años.
 - Troponina, medida con valores pequeños.
@@ -124,9 +126,15 @@ El escalado transforma cada variable para que tenga aproximadamente:
 - Media igual a 0.
 - Desviación estándar igual a 1.
 
+::: {.callout-important}
+## Regla práctica
+
+Si las variables están medidas en escalas o unidades diferentes, escala antes de aplicar PCA.
+:::
+
 ## Supuestos y condiciones
 
-PCA no tiene los mismos supuestos que un modelo inferencial clásico, pero funciona mejor cuando:
+PCA funciona mejor cuando:
 
 - Las variables son numéricas.
 - Existen relaciones aproximadamente lineales.
@@ -134,8 +142,6 @@ PCA no tiene los mismos supuestos que un modelo inferencial clásico, pero funci
 - Hay correlación entre algunas variables.
 - Los valores extremos han sido revisados.
 - Las escalas se han tratado adecuadamente.
-
-PCA puede aportar poco valor si las variables son casi independientes entre sí.
 
 ## Cuándo utilizar PCA
 
@@ -158,9 +164,6 @@ PCA puede no ser adecuado cuando:
 - Tienes muy pocas variables.
 - Los componentes son difíciles de justificar clínicamente.
 - El objetivo es seleccionar variables originales, no transformarlas.
-- La varianza no representa necesariamente información relevante para el problema.
-
-Un componente que explica mucha varianza no tiene por qué ser el componente más útil para predecir un desenlace clínico.
 
 ## Flujo de trabajo recomendado
 
@@ -182,7 +185,6 @@ Un componente que explica mucha varianza no tiene por qué ser el componente má
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
-# X contiene únicamente variables numéricas
 X_scaled = StandardScaler().fit_transform(X)
 
 pca = PCA(n_components=2)
@@ -211,19 +213,7 @@ print(
 )
 ```
 
-Con:
-
-```python
-n_components=0.95
-```
-
-PCA selecciona automáticamente el número mínimo de componentes necesario para explicar al menos el 95 % de la varianza.
-
 ## Implementación segura dentro de un pipeline
-
-Cuando PCA forma parte de un modelo predictivo, debe ajustarse únicamente con los datos de entrenamiento.
-
-La forma recomendada es utilizar un `Pipeline`.
 
 ```python
 from sklearn.pipeline import Pipeline
@@ -234,18 +224,9 @@ from sklearn.linear_model import LogisticRegression
 
 pipeline = Pipeline(
     steps=[
-        (
-            "imputer",
-            SimpleImputer(strategy="median")
-        ),
-        (
-            "scaler",
-            StandardScaler()
-        ),
-        (
-            "pca",
-            PCA(n_components=0.95)
-        ),
+        ("imputer", SimpleImputer(strategy="median")),
+        ("scaler", StandardScaler()),
+        ("pca", PCA(n_components=0.95)),
         (
             "model",
             LogisticRegression(
@@ -261,7 +242,13 @@ pipeline.fit(X_train, y_train)
 y_pred = pipeline.predict(X_test)
 ```
 
-Este pipeline evita ajustar la imputación, el escalado o PCA con información procedente del conjunto de prueba.
+::: {.callout-caution}
+## Error frecuente: data leakage
+
+No ajustes el imputador, el escalador ni PCA con todo el dataset antes de separar entrenamiento y prueba.
+
+El pipeline ayuda a evitar que la información del conjunto de prueba influya en el entrenamiento.
+:::
 
 ## Inspeccionar la varianza explicada
 
@@ -284,122 +271,7 @@ explained_variance = pd.DataFrame(
 display(explained_variance)
 ```
 
-## Scree plot
-
-El *scree plot* muestra la varianza explicada por cada componente.
-
-```python
-import matplotlib.pyplot as plt
-
-explained_variance_ratio = (
-    pca.explained_variance_ratio_
-)
-
-components = range(
-    1,
-    len(explained_variance_ratio) + 1
-)
-
-plt.figure(figsize=(8, 5))
-
-plt.plot(
-    components,
-    explained_variance_ratio,
-    marker="o"
-)
-
-plt.xlabel("Componente principal")
-plt.ylabel("Proporción de varianza explicada")
-plt.title("Scree plot")
-
-plt.show()
-```
-
-## Varianza explicada acumulada
-
-```python
-import numpy as np
-import matplotlib.pyplot as plt
-
-cumulative_variance = np.cumsum(
-    pca.explained_variance_ratio_
-)
-
-components = range(
-    1,
-    len(cumulative_variance) + 1
-)
-
-plt.figure(figsize=(8, 5))
-
-plt.plot(
-    components,
-    cumulative_variance,
-    marker="o"
-)
-
-plt.axhline(
-    y=0.95,
-    linestyle="--"
-)
-
-plt.xlabel("Número de componentes")
-plt.ylabel("Varianza explicada acumulada")
-plt.title("Varianza explicada acumulada")
-
-plt.show()
-```
-
-## Visualizar observaciones con dos componentes
-
-```python
-import pandas as pd
-import matplotlib.pyplot as plt
-
-pca_df = pd.DataFrame(
-    X_pca[:, :2],
-    columns=["PC1", "PC2"]
-)
-
-plt.figure(figsize=(8, 6))
-
-plt.scatter(
-    pca_df["PC1"],
-    pca_df["PC2"],
-    alpha=0.7
-)
-
-plt.xlabel("PC1")
-plt.ylabel("PC2")
-plt.title("Observaciones proyectadas en los dos primeros componentes")
-
-plt.show()
-```
-
-Si existe una variable objetivo, puede utilizarse para distinguir visualmente los grupos.
-
-```python
-plt.figure(figsize=(8, 6))
-
-scatter = plt.scatter(
-    pca_df["PC1"],
-    pca_df["PC2"],
-    c=y,
-    alpha=0.7
-)
-
-plt.xlabel("PC1")
-plt.ylabel("PC2")
-plt.title("PCA según la variable objetivo")
-
-plt.colorbar(scatter)
-
-plt.show()
-```
-
 ## Interpretar los loadings
-
-Los *loadings* indican cuánto contribuye cada variable original a cada componente.
 
 ```python
 import pandas as pd
@@ -421,152 +293,17 @@ display(loadings)
 
 Un valor absoluto elevado indica que la variable tiene una contribución importante al componente.
 
-El signo indica la dirección de la relación:
-
-- Loading positivo: la variable aumenta cuando aumenta el componente.
-- Loading negativo: la variable disminuye cuando aumenta el componente.
-
-El signo global de un componente puede invertirse sin cambiar su significado matemático.
-
-## Interpretación de resultados
-
-Al revisar un PCA conviene analizar:
-
-- Número de componentes seleccionados.
-- Varianza explicada individual.
-- Varianza explicada acumulada.
-- Variables con mayores loadings.
-- Separación visual entre observaciones.
-- Posibles valores extremos.
-- Utilidad de los componentes en modelos posteriores.
-
-PCA no identifica automáticamente variables causales ni variables clínicamente importantes.
-
-## Evaluación
-
-PCA no se evalúa con métricas de clasificación o regresión cuando se utiliza de forma exploratoria.
-
-Las principales evaluaciones son:
-
-- Varianza explicada.
-- Varianza explicada acumulada.
-- Scree plot.
-- Estabilidad de los componentes.
-- Interpretabilidad de los loadings.
-- Rendimiento del modelo posterior.
-- Comparación con un pipeline sin PCA.
-
-Si PCA forma parte de un modelo predictivo, debe evaluarse el pipeline completo mediante validación cruzada.
-
-## Comparar un modelo con y sin PCA
-
-```python
-from sklearn.model_selection import cross_val_score
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from sklearn.linear_model import LogisticRegression
-
-pipeline_without_pca = Pipeline(
-    steps=[
-        (
-            "imputer",
-            SimpleImputer(strategy="median")
-        ),
-        (
-            "scaler",
-            StandardScaler()
-        ),
-        (
-            "model",
-            LogisticRegression(
-                max_iter=1000,
-                random_state=42
-            )
-        )
-    ]
-)
-
-pipeline_with_pca = Pipeline(
-    steps=[
-        (
-            "imputer",
-            SimpleImputer(strategy="median")
-        ),
-        (
-            "scaler",
-            StandardScaler()
-        ),
-        (
-            "pca",
-            PCA(n_components=0.95)
-        ),
-        (
-            "model",
-            LogisticRegression(
-                max_iter=1000,
-                random_state=42
-            )
-        )
-    ]
-)
-
-scores_without_pca = cross_val_score(
-    pipeline_without_pca,
-    X,
-    y,
-    cv=5,
-    scoring="roc_auc"
-)
-
-scores_with_pca = cross_val_score(
-    pipeline_with_pca,
-    X,
-    y,
-    cv=5,
-    scoring="roc_auc"
-)
-
-print(
-    "ROC AUC sin PCA:",
-    scores_without_pca.mean()
-)
-
-print(
-    "ROC AUC con PCA:",
-    scores_with_pca.mean()
-)
-```
-
-## Errores frecuentes
-
-- Aplicar PCA antes de separar entrenamiento y prueba.
-- Escalar utilizando todo el dataset.
-- No escalar variables con unidades diferentes.
-- Aplicar PCA directamente a variables categóricas.
-- Elegir componentes únicamente por una regla automática.
-- Interpretar los componentes como variables clínicas reales.
-- Pensar que más varianza explicada siempre implica mejor predicción.
-- Utilizar PCA cuando la interpretabilidad de las variables originales es esencial.
-- Ignorar valores extremos que dominan los componentes.
-- Comparar modelos con particiones distintas.
-
 ## Consideraciones en datos clínicos
 
-En datos clínicos, PCA requiere precaución.
+::: {.callout-note}
+## Aplicación clínica
+
+PCA puede resumir información redundante, pero también puede generar componentes difíciles de interpretar clínicamente.
+:::
 
 ### Mediciones repetidas
 
-Si un paciente aparece varias veces, las observaciones no son independientes.
-
-La separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.
-
-### Variables con significado clínico distinto
-
-Dos variables pueden estar correlacionadas estadísticamente, pero representar fenómenos clínicos diferentes.
-
-Reducirlas a un componente puede dificultar la interpretación.
+Si un paciente aparece varias veces, la separación entre entrenamiento y prueba debería hacerse a nivel de paciente, no a nivel de fila.
 
 ### Valores ausentes
 
@@ -578,76 +315,36 @@ La ausencia de una prueba puede estar relacionada con:
 - El momento del seguimiento.
 - La disponibilidad de recursos.
 
-La imputación debe incluirse dentro del pipeline.
-
 ### Diferencias entre centros
 
-Las variables pueden estar afectadas por:
+PCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes si existen diferencias en:
 
-- Equipos diferentes.
-- Unidades distintas.
-- Protocolos locales.
-- Poblaciones diferentes.
-- Métodos de laboratorio distintos.
+- Equipos.
+- Unidades.
+- Protocolos.
+- Poblaciones.
+- Métodos de laboratorio.
 
-PCA puede capturar diferencias entre centros en lugar de patrones clínicos relevantes.
+## Errores frecuentes
 
-### Interpretabilidad
-
-Los componentes pueden ser difíciles de explicar a profesionales sanitarios.
-
-Si la interpretación clínica es prioritaria, puede ser preferible utilizar:
-
-- Selección de variables.
-- Regularización.
-- Modelos interpretables.
-- Agrupaciones clínicas definidas previamente.
-
-## Comparación con otras técnicas
-
-| Técnica | Resultado | Ventaja principal | Limitación principal |
-|---|---|---|---|
-| PCA | Componentes lineales | Simple y eficiente | Pierde interpretación directa |
-| Selección de variables | Variables originales | Mantiene interpretabilidad | Puede perder información conjunta |
-| t-SNE | Representación de baja dimensión | Buena visualización local | No es ideal para pipelines predictivos |
-| UMAP | Representación no lineal | Captura estructuras complejas | Más sensible a hiperparámetros |
-| Autoencoder | Representación aprendida | Puede modelar relaciones no lineales | Requiere más datos y complejidad |
+- Aplicar PCA antes de separar entrenamiento y prueba.
+- Escalar utilizando todo el dataset.
+- No escalar variables con unidades diferentes.
+- Aplicar PCA directamente a variables categóricas.
+- Interpretar los componentes como variables clínicas reales.
+- Pensar que más varianza explicada siempre implica mejor predicción.
+- Ignorar valores extremos que dominan los componentes.
 
 ## Checklist para proyectos
 
-Antes de utilizar PCA, comprobar:
-
-- [ ] Las variables seleccionadas son numéricas.
+- [ ] Las variables son numéricas.
 - [ ] He revisado valores ausentes.
 - [ ] He revisado valores extremos.
 - [ ] He separado entrenamiento y prueba.
 - [ ] La separación se ha realizado por paciente cuando corresponde.
-- [ ] La imputación se ajusta únicamente con entrenamiento.
-- [ ] El escalado se ajusta únicamente con entrenamiento.
-- [ ] PCA se ajusta únicamente con entrenamiento.
+- [ ] La imputación se ajusta solo con entrenamiento.
+- [ ] El escalado se ajusta solo con entrenamiento.
+- [ ] PCA se ajusta solo con entrenamiento.
 - [ ] He revisado la varianza explicada.
 - [ ] He revisado los loadings.
-- [ ] He comparado el modelo con y sin PCA.
 - [ ] He considerado la interpretabilidad clínica.
-- [ ] He documentado el número de componentes elegido.
-
-## Recursos
-
-### Documentación
-
-- Documentación de `PCA` en scikit-learn.
-- Documentación de `StandardScaler` en scikit-learn.
-- Documentación de `Pipeline` en scikit-learn.
-
-### Material del máster
-
-Añadir aquí:
-
-- Nombre de la presentación.
-- Número de diapositivas relevantes.
-- Enlaces a apuntes de Notion.
-- Ejercicios realizados durante la asignatura.
-
-## Notas personales
-
-Añade aquí tus propias notas, dudas, ejemplos o recordatorios sobre PCA.

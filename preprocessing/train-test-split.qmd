@@ -1,0 +1,729 @@
+---
+title: "Train, validation and test"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Dividir correctamente los datos permite estimar cómo funcionará un modelo con observaciones nuevas.
+
+- **Train** se utiliza para ajustar el modelo.
+- **Validation** se utiliza para elegir modelos e hiperparámetros.
+- **Test** se utiliza una sola vez para obtener una estimación final del rendimiento.
+:::
+
+## ¿Por qué hay que dividir los datos?
+
+Un modelo puede funcionar muy bien con los mismos datos con los que se ha entrenado y, sin embargo, fallar con pacientes nuevos.
+
+El objetivo real no es memorizar el dataset disponible, sino aprender patrones que puedan generalizarse.
+
+La separación de datos intenta simular esta situación:
+
+- El modelo aprende con un grupo de observaciones.
+- Se toman decisiones con otro grupo.
+- Se evalúa finalmente con observaciones que no han influido en ninguna decisión previa.
+
+::: {.callout-note}
+## Idea clave
+
+El conjunto de test debe representar datos realmente no vistos.
+
+Si utilizas el test repetidamente para decidir qué modelo conservar, deja de ser un conjunto de test y pasa a actuar como validación.
+:::
+
+## Los tres conjuntos
+
+### Train set
+
+El conjunto de entrenamiento se utiliza para:
+
+- Ajustar los parámetros del modelo.
+- Calcular imputaciones.
+- Ajustar escaladores.
+- Aprender transformaciones.
+- Ajustar selección de variables.
+- Ajustar PCA.
+- Entrenar el modelo final.
+
+Ejemplos de parámetros aprendidos:
+
+- Coeficientes de una regresión.
+- Reglas de un árbol.
+- Pesos de una red neuronal.
+- Centroides de K-means.
+
+### Validation set
+
+El conjunto de validación se utiliza para:
+
+- Comparar modelos.
+- Elegir hiperparámetros.
+- Ajustar el umbral de clasificación.
+- Decidir el número de componentes.
+- Seleccionar variables.
+- Detectar sobreajuste.
+- Aplicar early stopping.
+
+Ejemplos de hiperparámetros:
+
+- Profundidad máxima de un árbol.
+- Valor de `C` en una SVM.
+- Número de vecinos.
+- Número de componentes de PCA.
+- Learning rate.
+- Número de capas de una red neuronal.
+
+### Test set
+
+El conjunto de test se utiliza para:
+
+- Obtener una estimación final del rendimiento.
+- Comparar las predicciones con los valores reales.
+- Informar las métricas finales.
+- Evaluar la generalización.
+
+::: {.callout-warning}
+## Importante
+
+No utilices el test para decidir:
+
+- Qué variables incluir.
+- Qué modelo elegir.
+- Qué hiperparámetros usar.
+- Qué umbral de clasificación aplicar.
+- Qué estrategia de imputación funciona mejor.
+:::
+
+## Esquema general
+
+Una división típica puede ser:
+
+- 60 % entrenamiento.
+- 20 % validación.
+- 20 % test.
+
+Otra posibilidad:
+
+- 70 % entrenamiento.
+- 15 % validación.
+- 15 % test.
+
+No existe una única proporción correcta. Depende del tamaño del dataset y del problema.
+
+## División simple con scikit-learn
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+En este ejemplo:
+
+- 80 % de las observaciones se destinan a entrenamiento.
+- 20 % se destinan a test.
+- `random_state=42` permite reproducir la misma partición.
+
+## Crear train, validation y test
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_temp, y_train, y_temp = train_test_split(
+    X,
+    y,
+    test_size=0.40,
+    random_state=42
+)
+
+X_validation, X_test, y_validation, y_test = (
+    train_test_split(
+        X_temp,
+        y_temp,
+        test_size=0.50,
+        random_state=42
+    )
+)
+
+print("Train:", X_train.shape)
+print("Validation:", X_validation.shape)
+print("Test:", X_test.shape)
+```
+
+El resultado aproximado será:
+
+- 60 % train.
+- 20 % validation.
+- 20 % test.
+
+## Clasificación estratificada
+
+En problemas de clasificación, especialmente si las clases están desbalanceadas, conviene mantener proporciones similares en cada conjunto.
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    stratify=y,
+    random_state=42
+)
+```
+
+El argumento:
+
+```python
+stratify=y
+```
+
+intenta conservar la proporción de cada clase.
+
+::: {.callout-important}
+## Regla práctica
+
+En clasificación, utiliza estratificación cuando sea posible, especialmente si una clase es poco frecuente.
+:::
+
+## Comprobar la distribución de clases
+
+```python
+import pandas as pd
+
+class_distribution = pd.DataFrame(
+    {
+        "full_dataset": y.value_counts(normalize=True),
+        "train": y_train.value_counts(normalize=True),
+        "test": y_test.value_counts(normalize=True)
+    }
+)
+
+display(class_distribution)
+```
+
+## ¿Qué es la validación cruzada?
+
+La validación cruzada divide el conjunto de entrenamiento en varios bloques o *folds*.
+
+En una validación cruzada de 5 folds:
+
+1. Se divide el entrenamiento en 5 partes.
+2. Se entrena con 4 partes.
+3. Se valida con la parte restante.
+4. El proceso se repite 5 veces.
+5. Se calcula la media de las métricas.
+
+El test permanece separado durante todo el proceso.
+
+## Validación cruzada básica
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression(
+    max_iter=1000,
+    random_state=42
+)
+
+scores = cross_val_score(
+    model,
+    X_train,
+    y_train,
+    cv=5,
+    scoring="roc_auc"
+)
+
+print("Scores:", scores)
+print("ROC AUC medio:", scores.mean())
+print("Desviación estándar:", scores.std())
+```
+
+## Validación cruzada estratificada
+
+```python
+from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+model = LogisticRegression(
+    max_iter=1000,
+    random_state=42
+)
+
+scores = cross_val_score(
+    model,
+    X_train,
+    y_train,
+    cv=cv,
+    scoring="roc_auc"
+)
+
+print("ROC AUC medio:", scores.mean())
+```
+
+## Flujo recomendado con validación cruzada
+
+1. Separar train y test.
+2. Mantener el test sin tocar.
+3. Utilizar validación cruzada dentro de train.
+4. Seleccionar el mejor modelo.
+5. Reentrenar el pipeline final con todo el train.
+6. Evaluar una sola vez con test.
+
+## Separación por paciente
+
+En datos clínicos, un mismo paciente puede tener múltiples filas:
+
+- Varias visitas.
+- Varias analíticas.
+- Varias ecocardiografías.
+- Varios ingresos.
+- Varias ventanas temporales.
+
+No debe haber registros del mismo paciente en train y test.
+
+Si esto ocurre, el modelo puede reconocer características del paciente en lugar de aprender patrones generalizables.
+
+::: {.callout-caution}
+## Error frecuente: dividir por filas
+
+Si cada paciente tiene varias observaciones, una división aleatoria por filas puede producir data leakage.
+
+La separación debe realizarse por identificador de paciente.
+:::
+
+## GroupShuffleSplit
+
+```python
+from sklearn.model_selection import GroupShuffleSplit
+
+groups = df["patient_id"]
+
+splitter = GroupShuffleSplit(
+    n_splits=1,
+    test_size=0.20,
+    random_state=42
+)
+
+train_idx, test_idx = next(
+    splitter.split(
+        X,
+        y,
+        groups=groups
+    )
+)
+
+X_train = X.iloc[train_idx]
+X_test = X.iloc[test_idx]
+
+y_train = y.iloc[train_idx]
+y_test = y.iloc[test_idx]
+
+train_patients = set(groups.iloc[train_idx])
+test_patients = set(groups.iloc[test_idx])
+
+assert train_patients.isdisjoint(test_patients)
+```
+
+La comprobación final garantiza que ningún paciente aparece en ambos conjuntos.
+
+## GroupKFold
+
+```python
+from sklearn.model_selection import GroupKFold
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression
+
+groups = df["patient_id"]
+
+cv = GroupKFold(n_splits=5)
+
+model = LogisticRegression(
+    max_iter=1000,
+    random_state=42
+)
+
+scores = cross_val_score(
+    model,
+    X,
+    y,
+    groups=groups,
+    cv=cv,
+    scoring="roc_auc"
+)
+
+print("ROC AUC medio:", scores.mean())
+```
+
+## StratifiedGroupKFold
+
+Cuando necesitas mantener las proporciones de clase y, además, evitar que un paciente aparezca en varios folds:
+
+```python
+from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.model_selection import cross_val_score
+from sklearn.linear_model import LogisticRegression
+
+groups = df["patient_id"]
+
+cv = StratifiedGroupKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+model = LogisticRegression(
+    max_iter=1000,
+    random_state=42
+)
+
+scores = cross_val_score(
+    model,
+    X,
+    y,
+    groups=groups,
+    cv=cv,
+    scoring="roc_auc"
+)
+
+print("ROC AUC medio:", scores.mean())
+```
+
+## Separación temporal
+
+En algunos proyectos, el modelo se utilizará para predecir el futuro.
+
+En estos casos, una división aleatoria puede ser poco realista.
+
+Por ejemplo:
+
+- Entrenamiento: pacientes atendidos entre 2018 y 2023.
+- Validación: pacientes atendidos en 2024.
+- Test: pacientes atendidos en 2025.
+
+```python
+train_mask = df["date"] < "2024-01-01"
+
+validation_mask = (
+    (df["date"] >= "2024-01-01")
+    & (df["date"] < "2025-01-01")
+)
+
+test_mask = df["date"] >= "2025-01-01"
+
+train_df = df.loc[train_mask]
+validation_df = df.loc[validation_mask]
+test_df = df.loc[test_mask]
+```
+
+::: {.callout-note}
+## Aplicación realista
+
+Una separación temporal suele aproximarse mejor al uso real del modelo cuando el objetivo es predecir pacientes futuros.
+:::
+
+## Series temporales
+
+En series temporales no se debe mezclar aleatoriamente el pasado y el futuro.
+
+Debe respetarse el orden temporal.
+
+```python
+from sklearn.model_selection import TimeSeriesSplit
+
+cv = TimeSeriesSplit(n_splits=5)
+
+for train_idx, validation_idx in cv.split(X):
+    X_train = X.iloc[train_idx]
+    X_validation = X.iloc[validation_idx]
+```
+
+## Separación por centro
+
+En estudios multicéntricos, una validación especialmente exigente consiste en entrenar con unos centros y evaluar en otro centro.
+
+Ejemplo:
+
+- Train: Barcelona y Helsinki.
+- Validation: Coimbra.
+- Test externo: un centro no utilizado previamente.
+
+Esto permite estudiar si el modelo generaliza a:
+
+- Otros equipos.
+- Otros protocolos.
+- Otras poblaciones.
+- Otros sistemas de registro.
+
+## Validación interna y externa
+
+### Validación interna
+
+Evalúa el modelo dentro de la misma fuente de datos.
+
+Ejemplos:
+
+- Holdout.
+- Cross-validation.
+- Bootstrap.
+
+### Validación externa
+
+Evalúa el modelo en datos procedentes de:
+
+- Otro centro.
+- Otro país.
+- Otro periodo temporal.
+- Otra población.
+- Otro sistema sanitario.
+
+La validación externa aporta una evidencia más fuerte sobre generalización.
+
+## Preprocesamiento y split
+
+Las transformaciones deben ajustarse únicamente con entrenamiento.
+
+Esto incluye:
+
+- Imputación.
+- Escalado.
+- Encoding.
+- Selección de variables.
+- PCA.
+- Eliminación de outliers basada en distribución.
+- Ajuste de umbrales.
+- Balanceo de clases.
+
+## Ejemplo incorrecto
+
+```python
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+Aquí el escalador se ha ajustado utilizando también el test.
+
+## Ejemplo correcto
+
+```python
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+
+X_test_scaled = scaler.transform(X_test)
+```
+
+## Ejemplo recomendado con pipeline
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(strategy="median")
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+pipeline.fit(X_train, y_train)
+
+y_pred = pipeline.predict(X_test)
+```
+
+## ¿Qué proporción elegir?
+
+No existe una regla universal.
+
+### Dataset pequeño
+
+Puede ser preferible:
+
+- Separar un test pequeño pero representativo.
+- Utilizar validación cruzada dentro del entrenamiento.
+
+### Dataset grande
+
+Puede ser suficiente:
+
+- 80 % train.
+- 10 % validation.
+- 10 % test.
+
+### Deep learning
+
+Es frecuente utilizar:
+
+- Train.
+- Validation.
+- Test.
+
+La validación se utiliza para:
+
+- Early stopping.
+- Ajustar hiperparámetros.
+- Elegir la mejor época.
+
+## Errores frecuentes
+
+- Utilizar el test varias veces.
+- Ajustar el preprocesamiento antes del split.
+- Dividir por filas cuando hay varias filas por paciente.
+- Mezclar observaciones futuras y pasadas.
+- Ignorar el desbalanceo de clases.
+- No fijar `random_state`.
+- Elegir el modelo con las métricas del test.
+- Crear variables utilizando información posterior al desenlace.
+- Comparar modelos con particiones diferentes.
+- Utilizar una partición no representativa.
+
+## Consideraciones en datos clínicos
+
+::: {.callout-important}
+## Regla clínica
+
+La unidad de separación debe corresponder a la unidad real de generalización.
+
+Puede ser:
+
+- Paciente.
+- Centro.
+- Periodo temporal.
+- Hospital.
+- Episodio asistencial.
+:::
+
+### Varios episodios por paciente
+
+Si un paciente tiene varios ingresos, debes decidir si el modelo generalizará a:
+
+- Nuevos ingresos de pacientes conocidos.
+- Pacientes completamente nuevos.
+
+Estas dos preguntas requieren splits diferentes.
+
+### Datos longitudinales
+
+Una observación futura del mismo paciente no debe utilizarse para predecir una observación pasada.
+
+### Cambios en la práctica clínica
+
+Una división temporal puede revelar problemas causados por:
+
+- Nuevos protocolos.
+- Cambios de equipos.
+- Nuevas técnicas diagnósticas.
+- Cambios en los sistemas de registro.
+- Cambios en la población atendida.
+
+### Eventos poco frecuentes
+
+En desenlaces raros, el test puede contener muy pocos casos positivos.
+
+Conviene revisar:
+
+- Número absoluto de eventos.
+- Intervalos de confianza.
+- Estratificación.
+- Variabilidad entre folds.
+
+## Tabla comparativa
+
+| Estrategia | Cuándo utilizarla | Ventaja | Riesgo |
+|---|---|---|---|
+| Holdout aleatorio | Observaciones independientes | Simple | Puede ser inestable |
+| Estratificado | Clasificación desbalanceada | Mantiene proporciones | No controla grupos |
+| Group split | Varias filas por paciente | Evita mezcla de pacientes | Puede desbalancear clases |
+| Stratified group split | Grupos y clases desbalanceadas | Combina ambas necesidades | Más complejo |
+| Temporal | Predicción futura | Simula uso real | Puede reflejar drift |
+| Por centro | Estudios multicéntricos | Evalúa transportabilidad | Puede ser muy exigente |
+| Cross-validation | Dataset limitado | Aprovecha mejor los datos | Mayor coste computacional |
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad de análisis.
+- [ ] He identificado si hay varias filas por paciente.
+- [ ] He separado el test antes de tomar decisiones.
+- [ ] He decidido si necesito validación simple o cruzada.
+- [ ] He utilizado estratificación cuando corresponde.
+- [ ] He respetado los grupos de pacientes.
+- [ ] He respetado el orden temporal.
+- [ ] He ajustado el preprocesamiento solo con train.
+- [ ] He mantenido el test sin tocar.
+- [ ] He utilizado la misma partición para comparar modelos.
+- [ ] He comprobado la distribución de clases.
+- [ ] He documentado `random_state`.
+- [ ] He considerado validación externa.
+
+## Recursos
+
+### Documentación
+
+- `train_test_split` de scikit-learn.
+- `StratifiedKFold` de scikit-learn.
+- `GroupKFold` de scikit-learn.
+- `StratifiedGroupKFold` de scikit-learn.
+- `TimeSeriesSplit` de scikit-learn.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus propias dudas, ejemplos y recordatorios.
