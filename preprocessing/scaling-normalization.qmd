@@ -1,0 +1,783 @@
+---
+title: "Escalado y normalización"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+El escalado transforma variables numéricas para que sus magnitudes sean comparables.
+
+Es especialmente importante en modelos que utilizan:
+
+- Distancias.
+- Productos escalares.
+- Gradientes.
+- Regularización.
+- Componentes principales.
+
+No todos los modelos necesitan escalado y no todas las transformaciones significan lo mismo.
+:::
+
+## ¿Por qué hay que escalar?
+
+Imagina estas variables:
+
+- Edad: entre 0 y 100.
+- Peso: entre 2 y 150.
+- Troponina: entre 0 y 0.5.
+- Presión arterial: entre 60 y 200.
+
+Aunque todas sean clínicamente relevantes, sus escalas numéricas son muy distintas.
+
+En determinados algoritmos, una variable con valores grandes puede dominar el modelo solo por su unidad de medida.
+
+::: {.callout-note}
+## Idea clave
+
+Escalar no hace que una variable sea más importante o menos importante clínicamente.
+
+Solo modifica su representación numérica.
+:::
+
+## Algoritmos sensibles al escalado
+
+El escalado suele ser importante en:
+
+- K-nearest neighbors.
+- K-means.
+- SVM.
+- Regresión logística regularizada.
+- Regresión lineal regularizada.
+- Redes neuronales.
+- PCA.
+- Métodos basados en gradiente.
+
+## Algoritmos poco sensibles al escalado
+
+Los modelos basados en árboles suelen verse poco afectados:
+
+- Decision trees.
+- Random forest.
+- Gradient boosting basado en árboles.
+- XGBoost.
+- LightGBM.
+- CatBoost.
+
+Esto ocurre porque sus divisiones dependen principalmente del orden de los valores, no de sus magnitudes absolutas.
+
+::: {.callout-warning}
+## Importante
+
+Aunque un árbol no necesite escalado, el pipeline completo puede incluir pasos que sí lo necesiten, como PCA o selección de variables basada en regularización.
+:::
+
+## Estandarización con StandardScaler
+
+`StandardScaler` transforma cada variable para que tenga aproximadamente:
+
+- Media igual a 0.
+- Desviación estándar igual a 1.
+
+La fórmula es:
+
+$$
+z = \frac{x - \mu}{\sigma}
+$$
+
+donde:
+
+- $x$ es el valor original.
+- $\mu$ es la media.
+- $\sigma$ es la desviación estándar.
+- $z$ es el valor transformado.
+
+## Código básico
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+```
+
+## Interpretación
+
+Después de estandarizar:
+
+- Un valor de `0` está cerca de la media.
+- Un valor de `1` está aproximadamente una desviación estándar por encima.
+- Un valor de `-1` está aproximadamente una desviación estándar por debajo.
+
+## MinMaxScaler
+
+`MinMaxScaler` transforma cada variable a un rango definido, normalmente entre 0 y 1.
+
+La transformación general es:
+
+$$
+x' =
+\frac{x - x_{\min}}
+{x_{\max} - x_{\min}}
+$$
+
+## Código básico
+
+```python
+from sklearn.preprocessing import MinMaxScaler
+
+scaler = MinMaxScaler(
+    feature_range=(0, 1)
+)
+
+X_scaled = scaler.fit_transform(X)
+```
+
+## Cuándo puede ser útil
+
+- Redes neuronales.
+- Variables que deben quedar en un rango concreto.
+- Métodos sensibles a escalas acotadas.
+- Visualizaciones o comparaciones específicas.
+
+::: {.callout-caution}
+## Limitación
+
+`MinMaxScaler` es sensible a outliers.
+
+Un valor extremo puede comprimir casi todos los demás valores en una zona muy pequeña del rango.
+:::
+
+## RobustScaler
+
+`RobustScaler` utiliza estadísticas más resistentes a valores extremos:
+
+- Mediana.
+- Rango intercuartílico.
+
+```python
+from sklearn.preprocessing import RobustScaler
+
+scaler = RobustScaler()
+
+X_scaled = scaler.fit_transform(X)
+```
+
+Puede ser útil cuando:
+
+- Existen outliers reales.
+- La distribución es muy asimétrica.
+- No quieres que unos pocos valores extremos dominen el escalado.
+
+::: {.callout-note}
+## Importante
+
+RobustScaler reduce la influencia de los outliers, pero no elimina ni corrige esos valores.
+:::
+
+## MaxAbsScaler
+
+`MaxAbsScaler` divide cada variable por su valor absoluto máximo.
+
+```python
+from sklearn.preprocessing import MaxAbsScaler
+
+scaler = MaxAbsScaler()
+
+X_scaled = scaler.fit_transform(X)
+```
+
+Puede ser útil con:
+
+- Datos dispersos.
+- Matrices sparse.
+- Variables ya centradas alrededor de 0.
+
+## Normalizer
+
+`Normalizer` no escala cada columna.
+
+Normaliza cada fila individualmente para que tenga norma unitaria.
+
+```python
+from sklearn.preprocessing import Normalizer
+
+normalizer = Normalizer(
+    norm="l2"
+)
+
+X_normalized = normalizer.fit_transform(X)
+```
+
+Esto significa que transforma cada observación considerando conjuntamente sus valores.
+
+::: {.callout-warning}
+## No confundir
+
+- `StandardScaler`, `MinMaxScaler` y `RobustScaler` actúan por variable.
+- `Normalizer` actúa por fila.
+
+Son operaciones distintas y no son intercambiables.
+:::
+
+## Comparación rápida
+
+| Transformador | Actúa sobre | Resultado principal | Sensibilidad a outliers |
+|---|---|---|---|
+| `StandardScaler` | Cada variable | Media 0 y desviación 1 | Alta |
+| `MinMaxScaler` | Cada variable | Rango definido | Alta |
+| `RobustScaler` | Cada variable | Escalado robusto | Menor |
+| `MaxAbsScaler` | Cada variable | Máximo absoluto igual a 1 | Alta |
+| `Normalizer` | Cada fila | Norma unitaria | Depende de la fila |
+
+## Ajustar con train y transformar test
+
+El escalador debe aprender sus parámetros únicamente con el conjunto de entrenamiento.
+
+## Ejemplo incorrecto
+
+```python
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(X)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_scaled,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+Aquí la media y la desviación estándar incluyen información del conjunto de test.
+
+## Ejemplo correcto
+
+```python
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(
+    X_train
+)
+
+X_test_scaled = scaler.transform(
+    X_test
+)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+En train se utiliza `fit_transform()`.
+
+En validation y test se utiliza únicamente `transform()`.
+:::
+
+## Pipeline recomendado
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+pipeline.fit(
+    X_train,
+    y_train
+)
+
+y_pred = pipeline.predict(
+    X_test
+)
+```
+
+## Variables numéricas y categóricas
+
+No debes escalar directamente categorías codificadas arbitrariamente.
+
+Lo habitual es aplicar transformaciones distintas según el tipo de variable.
+
+```python
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+
+numeric_features = [
+    "age",
+    "weight",
+    "troponin"
+]
+
+categorical_features = [
+    "sex",
+    "center"
+]
+
+numeric_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        )
+    ]
+)
+
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="most_frequent"
+            )
+        ),
+        (
+            "encoder",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            )
+        )
+    ]
+)
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ]
+)
+```
+
+## Pipeline completo
+
+```python
+from sklearn.linear_model import LogisticRegression
+
+model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Comparar escaladores
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import RobustScaler
+from sklearn.linear_model import LogisticRegression
+
+scalers = {
+    "standard": StandardScaler(),
+    "minmax": MinMaxScaler(),
+    "robust": RobustScaler()
+}
+
+results = {}
+
+for name, scaler in scalers.items():
+
+    pipeline = Pipeline(
+        steps=[
+            (
+                "imputer",
+                SimpleImputer(
+                    strategy="median"
+                )
+            ),
+            (
+                "scaler",
+                scaler
+            ),
+            (
+                "model",
+                LogisticRegression(
+                    max_iter=1000,
+                    random_state=42
+                )
+            )
+        ]
+    )
+
+    scores = cross_val_score(
+        pipeline,
+        X,
+        y,
+        cv=5,
+        scoring="roc_auc"
+    )
+
+    results[name] = {
+        "mean": scores.mean(),
+        "std": scores.std()
+    }
+
+print(results)
+```
+
+## Escalado y PCA
+
+PCA busca direcciones que maximicen la varianza.
+
+Si una variable tiene una escala mucho mayor, puede dominar los componentes.
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "pca",
+            PCA(
+                n_components=0.95
+            )
+        )
+    ]
+)
+
+X_pca = pipeline.fit_transform(
+    X_train
+)
+```
+
+## Escalado y regularización
+
+En modelos regularizados, las penalizaciones actúan sobre los coeficientes.
+
+Si las variables están en escalas muy distintas:
+
+- Los coeficientes no son directamente comparables.
+- La penalización puede afectar de forma desigual.
+- La optimización puede volverse menos estable.
+
+Por eso suele ser importante escalar antes de:
+
+- Ridge.
+- Lasso.
+- Elastic Net.
+- Regresión logística regularizada.
+- SVM lineal.
+
+## Escalado y distancias
+
+KNN y K-means utilizan distancias.
+
+Sin escalado, una variable con valores grandes puede dominar la distancia total.
+
+Ejemplo:
+
+- Edad: 40 frente a 60.
+- Troponina: 0.01 frente a 0.03.
+
+La diferencia en edad puede pesar mucho más solo por su escala.
+
+## Transformaciones no lineales
+
+Escalar no siempre corrige distribuciones muy sesgadas.
+
+A veces puede ser útil aplicar antes una transformación.
+
+### Logaritmo
+
+```python
+import numpy as np
+
+df["troponin_log"] = np.log1p(
+    df["troponin"]
+)
+```
+
+`log1p()` calcula:
+
+```text
+log(1 + x)
+```
+
+y puede utilizarse cuando hay ceros.
+
+### PowerTransformer
+
+```python
+from sklearn.preprocessing import PowerTransformer
+
+transformer = PowerTransformer(
+    method="yeo-johnson"
+)
+
+X_transformed = transformer.fit_transform(
+    X
+)
+```
+
+### QuantileTransformer
+
+```python
+from sklearn.preprocessing import QuantileTransformer
+
+transformer = QuantileTransformer(
+    output_distribution="normal",
+    random_state=42
+)
+
+X_transformed = transformer.fit_transform(
+    X
+)
+```
+
+::: {.callout-caution}
+## Precaución
+
+Las transformaciones no lineales cambian la forma de la distribución y pueden dificultar la interpretación clínica.
+:::
+
+## Valores ausentes
+
+La mayoría de escaladores no deben recibir valores ausentes sin una estrategia definida.
+
+Un flujo habitual es:
+
+1. Imputar.
+2. Escalar.
+3. Entrenar el modelo.
+
+Esto puede implementarse dentro de un pipeline.
+
+## Valores binarios
+
+Una variable binaria codificada como 0 y 1 no siempre necesita escalado.
+
+Ejemplos:
+
+- Sexo binario.
+- Presencia o ausencia de una condición.
+- Tratamiento sí o no.
+
+La decisión depende del modelo y del pipeline completo.
+
+## Variables one-hot
+
+Las columnas generadas por `OneHotEncoder` suelen mantenerse como 0 y 1.
+
+No suele ser necesario aplicarles `StandardScaler`.
+
+## Consideraciones en datos clínicos
+
+::: {.callout-note}
+## Aplicación clínica
+
+El escalado no corrige problemas de calidad, unidades o interpretación.
+
+Antes de escalar, comprueba que las variables representan realmente la misma magnitud en todos los pacientes y centros.
+:::
+
+### Unidades diferentes
+
+Una misma variable puede aparecer como:
+
+- mg/dL.
+- mmol/L.
+- ng/L.
+- pg/mL.
+
+No debes escalar hasta haber armonizado las unidades.
+
+### Diferencias por centro
+
+Un centro puede utilizar:
+
+- Equipos distintos.
+- Métodos de laboratorio diferentes.
+- Protocolos distintos.
+- Rangos de referencia diferentes.
+
+El escalado global puede ocultar estas diferencias.
+
+### Rangos pediátricos
+
+En pediatría, muchos valores dependen de:
+
+- Edad.
+- Sexo.
+- Peso.
+- Altura.
+- Superficie corporal.
+
+En algunos casos puede ser más apropiado utilizar:
+
+- Z-scores clínicos.
+- Percentiles.
+- Valores normalizados por edad o superficie corporal.
+
+### Interpretación de coeficientes
+
+Tras `StandardScaler`, un coeficiente suele representar el cambio asociado a una desviación estándar de la variable.
+
+Esto puede facilitar la comparación estadística, pero no siempre la explicación clínica.
+
+### Outliers reales
+
+Un valor extremo puede ser:
+
+- Un error.
+- Una unidad incorrecta.
+- Un paciente clínicamente grave.
+- Un caso raro pero válido.
+
+No elijas `RobustScaler` sin revisar antes la causa del valor extremo.
+
+## Errores frecuentes
+
+- Escalar antes del split.
+- Ajustar el escalador con test.
+- Escalar categorías codificadas arbitrariamente.
+- Confundir normalización por fila con escalado por variable.
+- Utilizar MinMaxScaler sin revisar outliers.
+- Aplicar PCA sin escalar variables de unidades distintas.
+- Escalar antes de armonizar unidades.
+- Pensar que todos los modelos necesitan escalado.
+- Interpretar el escalado como una corrección de calidad.
+- No guardar el escalador junto con el modelo.
+
+## Tabla de decisión
+
+| Situación | Opción habitual |
+|---|---|
+| Variables aproximadamente simétricas | `StandardScaler` |
+| Variables con outliers relevantes | `RobustScaler` |
+| Necesitas rango 0–1 | `MinMaxScaler` |
+| Matriz sparse | `MaxAbsScaler` |
+| Comparar dirección de cada fila | `Normalizer` |
+| Árboles sin otros pasos sensibles | Puede no ser necesario |
+| PCA, SVM, KNN o regularización | Escalado recomendado |
+
+## Flujo recomendado
+
+1. Revisar unidades.
+2. Revisar distribuciones.
+3. Revisar valores extremos.
+4. Separar train y test.
+5. Imputar si es necesario.
+6. Elegir el escalador.
+7. Ajustarlo solo con train.
+8. Transformar validation y test.
+9. Comparar el impacto en validación.
+10. Guardar todo dentro del pipeline.
+
+## Checklist para proyectos
+
+- [ ] He armonizado las unidades.
+- [ ] He revisado distribuciones.
+- [ ] He revisado outliers.
+- [ ] Sé si el algoritmo necesita escalado.
+- [ ] He separado train y test.
+- [ ] El escalador se ajusta solo con train.
+- [ ] En validation y test uso solo `transform()`.
+- [ ] He diferenciado variables numéricas y categóricas.
+- [ ] No he confundido `Normalizer` con `StandardScaler`.
+- [ ] He incluido el escalado dentro del pipeline.
+- [ ] He comparado alternativas cuando corresponde.
+- [ ] He considerado la interpretación clínica.
+- [ ] He documentado el escalador utilizado.
+
+## Recursos
+
+### Documentación
+
+- `StandardScaler` de scikit-learn.
+- `MinMaxScaler` de scikit-learn.
+- `RobustScaler` de scikit-learn.
+- `MaxAbsScaler` de scikit-learn.
+- `Normalizer` de scikit-learn.
+- Ejemplo sobre la importancia del escalado en scikit-learn.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus propios ejemplos, dudas y decisiones habituales.
