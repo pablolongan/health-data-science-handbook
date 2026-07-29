@@ -1,0 +1,868 @@
+---
+title: "Evaluación de modelos"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Evaluar un modelo significa estimar cómo funcionará con datos nuevos.
+
+No basta con obtener una métrica alta en entrenamiento. Hay que comprobar:
+
+- Generalización.
+- Overfitting.
+- Underfitting.
+- Comparación con un baseline.
+- Estabilidad.
+- Calibración.
+- Utilidad clínica.
+- Validación externa.
+:::
+
+## ¿Qué significa que un modelo funcione bien?
+
+Un modelo puede considerarse útil cuando:
+
+- Mantiene un buen rendimiento en datos no vistos.
+- Supera a una estrategia baseline.
+- Es estable entre particiones.
+- Tiene métricas adecuadas para el problema.
+- Produce predicciones interpretables.
+- Está bien calibrado.
+- Aporta valor clínico o operativo.
+- Generaliza a otras poblaciones o centros.
+
+::: {.callout-note}
+## Idea clave
+
+Una buena métrica no garantiza un buen modelo.
+
+También importan la validez del diseño, la ausencia de leakage, la calibración y la utilidad real.
+:::
+
+## Generalización
+
+La generalización es la capacidad del modelo para mantener su rendimiento en observaciones nuevas.
+
+El objetivo no es memorizar el dataset de entrenamiento, sino aprender patrones que se repitan en datos futuros.
+
+Un modelo que generaliza bien:
+
+- Funciona en test.
+- Mantiene resultados en validación cruzada.
+- Tolera pequeñas variaciones en los datos.
+- No depende de observaciones concretas.
+- No utiliza información futura.
+
+## Rendimiento en train y test
+
+Puede compararse el rendimiento en entrenamiento y test.
+
+```python
+train_score = model.score(
+    X_train,
+    y_train
+)
+
+test_score = model.score(
+    X_test,
+    y_test
+)
+
+print(
+    f"Train score: {train_score:.3f}"
+)
+
+print(
+    f"Test score: {test_score:.3f}"
+)
+```
+
+Una diferencia grande entre train y test puede indicar overfitting.
+
+## Overfitting
+
+El overfitting ocurre cuando el modelo aprende demasiado bien los detalles del entrenamiento, incluyendo ruido y patrones no generalizables.
+
+Señales habituales:
+
+- Rendimiento muy alto en train.
+- Rendimiento claramente inferior en validation o test.
+- Gran variabilidad entre folds.
+- Modelo muy complejo.
+- Muchas variables respecto al número de observaciones.
+- Métricas muy sensibles al split.
+
+::: {.callout-warning}
+## Señal de alarma
+
+Un modelo casi perfecto en un problema clínico complejo merece una revisión cuidadosa de leakage y diseño.
+:::
+
+## Causas frecuentes de overfitting
+
+- Demasiadas variables.
+- Muy pocos pacientes.
+- Modelo excesivamente flexible.
+- Ajuste repetido de hiperparámetros.
+- Selección de variables con todo el dataset.
+- Uso repetido del test.
+- Clases muy desbalanceadas.
+- Ruido en el target.
+- Observaciones relacionadas entre train y test.
+
+## Cómo reducir overfitting
+
+- Simplificar el modelo.
+- Aplicar regularización.
+- Reducir variables.
+- Aumentar datos.
+- Utilizar validación cruzada.
+- Aplicar early stopping.
+- Controlar profundidad en árboles.
+- Utilizar bagging.
+- Revisar leakage.
+- Comparar con modelos simples.
+
+## Underfitting
+
+El underfitting ocurre cuando el modelo es demasiado simple para capturar el patrón real.
+
+Señales:
+
+- Rendimiento bajo en train.
+- Rendimiento bajo en validation.
+- Errores sistemáticos.
+- Modelo incapaz de representar relaciones importantes.
+
+## Causas frecuentes de underfitting
+
+- Modelo demasiado simple.
+- Variables poco informativas.
+- Preprocesamiento inadecuado.
+- Regularización excesiva.
+- Pocas épocas de entrenamiento.
+- Hiperparámetros demasiado restrictivos.
+- Relaciones no lineales modeladas de forma lineal.
+
+## Comparación conceptual
+
+| Situación | Train | Validation/Test | Interpretación |
+|---|---:|---:|---|
+| Underfitting | Bajo | Bajo | Modelo demasiado simple |
+| Buen ajuste | Alto | Similar | Buena generalización |
+| Overfitting | Muy alto | Mucho menor | Modelo memoriza train |
+
+## Curvas de aprendizaje
+
+Las curvas de aprendizaje muestran cómo cambia el rendimiento al aumentar el tamaño del entrenamiento.
+
+```python
+from sklearn.model_selection import learning_curve
+import matplotlib.pyplot as plt
+import numpy as np
+
+train_sizes, train_scores, validation_scores = (
+    learning_curve(
+        estimator=model,
+        X=X,
+        y=y,
+        cv=5,
+        scoring="roc_auc",
+        train_sizes=np.linspace(
+            0.1,
+            1.0,
+            5
+        )
+    )
+)
+
+train_mean = train_scores.mean(
+    axis=1
+)
+
+validation_mean = validation_scores.mean(
+    axis=1
+)
+
+plt.figure(figsize=(8, 5))
+
+plt.plot(
+    train_sizes,
+    train_mean,
+    marker="o",
+    label="Train"
+)
+
+plt.plot(
+    train_sizes,
+    validation_mean,
+    marker="o",
+    label="Validation"
+)
+
+plt.xlabel("Tamaño de entrenamiento")
+plt.ylabel("ROC AUC")
+plt.title("Curva de aprendizaje")
+plt.legend()
+
+plt.show()
+```
+
+## Interpretar curvas de aprendizaje
+
+### Overfitting
+
+- Train alto.
+- Validation más bajo.
+- Separación persistente.
+
+### Underfitting
+
+- Train bajo.
+- Validation bajo.
+- Ambas curvas cercanas.
+
+### Falta de datos
+
+- Train alto.
+- Validation mejora al aumentar la muestra.
+- La diferencia disminuye progresivamente.
+
+## Baseline
+
+Un baseline es una referencia mínima que el modelo debería superar.
+
+Ejemplos:
+
+- Predecir siempre la clase mayoritaria.
+- Predecir la media.
+- Predecir la mediana.
+- Usar una regla clínica simple.
+- Utilizar una regresión logística básica.
+- Mantener el último valor observado.
+
+::: {.callout-important}
+## Regla práctica
+
+Nunca evalúes un modelo sin compararlo con al menos un baseline.
+:::
+
+## Baseline de clasificación
+
+```python
+from sklearn.dummy import DummyClassifier
+
+baseline = DummyClassifier(
+    strategy="most_frequent"
+)
+
+baseline.fit(
+    X_train,
+    y_train
+)
+
+y_pred_baseline = baseline.predict(
+    X_test
+)
+```
+
+Otras estrategias:
+
+```python
+DummyClassifier(
+    strategy="stratified",
+    random_state=42
+)
+```
+
+```python
+DummyClassifier(
+    strategy="prior"
+)
+```
+
+## Baseline de regresión
+
+```python
+from sklearn.dummy import DummyRegressor
+
+baseline = DummyRegressor(
+    strategy="mean"
+)
+
+baseline.fit(
+    X_train,
+    y_train
+)
+
+y_pred_baseline = baseline.predict(
+    X_test
+)
+```
+
+También puede usarse:
+
+```python
+DummyRegressor(
+    strategy="median"
+)
+```
+
+## Modelo simple como baseline
+
+En clasificación clínica, una regresión logística básica puede ser un buen baseline.
+
+```python
+from sklearn.linear_model import LogisticRegression
+
+baseline_model = LogisticRegression(
+    max_iter=1000,
+    random_state=42
+)
+
+baseline_model.fit(
+    X_train,
+    y_train
+)
+```
+
+Un modelo complejo debería demostrar una mejora clara y estable respecto a esta referencia.
+
+## Métrica adecuada
+
+La métrica debe depender del problema.
+
+### Clasificación
+
+Posibles métricas:
+
+- Accuracy.
+- Sensibilidad.
+- Especificidad.
+- Precision.
+- Recall.
+- F1-score.
+- ROC AUC.
+- PR AUC.
+- Brier score.
+- Log loss.
+
+### Regresión
+
+Posibles métricas:
+
+- MAE.
+- MSE.
+- RMSE.
+- $R^2$.
+- Mediana del error absoluto.
+- Error relativo.
+
+::: {.callout-warning}
+## Importante
+
+La métrica más popular no siempre es la más útil.
+
+En clases desbalanceadas, accuracy puede ser engañosa.
+:::
+
+## Métricas discriminativas y calibración
+
+Un modelo puede discriminar bien y estar mal calibrado.
+
+### Discriminación
+
+Mide si el modelo ordena correctamente pacientes de mayor y menor riesgo.
+
+Ejemplos:
+
+- ROC AUC.
+- PR AUC.
+
+### Calibración
+
+Mide si las probabilidades predichas se corresponden con las frecuencias reales.
+
+Ejemplo:
+
+- Entre pacientes con riesgo predicho del 20 %, aproximadamente un 20 % debería presentar el evento.
+
+## Calibración visual
+
+```python
+from sklearn.calibration import calibration_curve
+import matplotlib.pyplot as plt
+
+prob_true, prob_pred = calibration_curve(
+    y_test,
+    y_probability,
+    n_bins=10
+)
+
+plt.figure(figsize=(6, 6))
+
+plt.plot(
+    prob_pred,
+    prob_true,
+    marker="o"
+)
+
+plt.plot(
+    [0, 1],
+    [0, 1],
+    linestyle="--"
+)
+
+plt.xlabel("Probabilidad predicha")
+plt.ylabel("Frecuencia observada")
+plt.title("Curva de calibración")
+
+plt.show()
+```
+
+## Brier score
+
+```python
+from sklearn.metrics import brier_score_loss
+
+brier = brier_score_loss(
+    y_test,
+    y_probability
+)
+
+print(
+    f"Brier score: {brier:.3f}"
+)
+```
+
+Valores menores indican mejor precisión probabilística.
+
+## Umbral de clasificación
+
+Muchos modelos producen probabilidades.
+
+La clase final depende de un umbral.
+
+```python
+threshold = 0.50
+
+y_pred = (
+    y_probability >= threshold
+).astype(int)
+```
+
+Cambiar el umbral modifica:
+
+- Sensibilidad.
+- Especificidad.
+- Precision.
+- Recall.
+- Número de falsos positivos.
+- Número de falsos negativos.
+
+::: {.callout-note}
+## Aplicación clínica
+
+El umbral debería elegirse según las consecuencias clínicas de cada tipo de error, no solo por conveniencia estadística.
+:::
+
+## Falsos positivos y falsos negativos
+
+### Falso positivo
+
+El modelo predice evento, pero el evento no ocurre.
+
+Puede provocar:
+
+- Pruebas adicionales.
+- Ansiedad.
+- Costes.
+- Tratamientos innecesarios.
+
+### Falso negativo
+
+El modelo predice ausencia de evento, pero el evento ocurre.
+
+Puede provocar:
+
+- Retraso diagnóstico.
+- Falta de monitorización.
+- Omisión de tratamiento.
+- Daño clínico.
+
+## Evaluación interna
+
+La evaluación interna utiliza datos de la misma fuente general que el entrenamiento.
+
+Ejemplos:
+
+- Holdout.
+- K-fold cross-validation.
+- Bootstrap.
+- Validación cruzada repetida.
+
+Permite estimar rendimiento dentro del mismo contexto.
+
+## Evaluación externa
+
+La evaluación externa utiliza datos distintos.
+
+Puede ser:
+
+- Otro centro.
+- Otro país.
+- Otro periodo.
+- Otra población.
+- Otro sistema de información.
+
+::: {.callout-important}
+## Validez externa
+
+Un modelo puede funcionar bien internamente y fallar en otro centro debido a diferencias de población, protocolo o registro.
+:::
+
+## Evaluación temporal
+
+Una evaluación temporal entrena con datos antiguos y prueba con datos más recientes.
+
+Ejemplo:
+
+```text
+Train: 2018–2023
+Validation: 2024
+Test: 2025
+```
+
+Esto ayuda a detectar:
+
+- Data drift.
+- Cambios en protocolos.
+- Nuevos tratamientos.
+- Cambios en población.
+- Cambios en sistemas de información.
+
+## Evaluación por centro
+
+En estudios multicéntricos puede entrenarse con unos centros y evaluar en otro.
+
+Ejemplo:
+
+```text
+Train: Barcelona + Helsinki
+Test externo: Coimbra
+```
+
+Esto evalúa transportabilidad.
+
+## Estabilidad del rendimiento
+
+No basta con una media.
+
+También conviene revisar:
+
+- Desviación estándar.
+- Intervalos de confianza.
+- Distribución entre folds.
+- Rendimiento por subgrupo.
+- Rendimiento por centro.
+- Rendimiento por periodo.
+
+## Validación cruzada
+
+```python
+from sklearn.model_selection import cross_validate
+
+scores = cross_validate(
+    estimator=model,
+    X=X,
+    y=y,
+    cv=5,
+    scoring=[
+        "roc_auc",
+        "accuracy"
+    ],
+    return_train_score=True
+)
+
+print(
+    scores
+)
+```
+
+## Comparar train y validation en cross-validation
+
+```python
+train_auc = scores[
+    "train_roc_auc"
+]
+
+validation_auc = scores[
+    "test_roc_auc"
+]
+
+print(
+    "Train mean:",
+    train_auc.mean()
+)
+
+print(
+    "Validation mean:",
+    validation_auc.mean()
+)
+```
+
+## Intervalos de confianza
+
+Una aproximación simple puede calcularse con bootstrap.
+
+```python
+import numpy as np
+from sklearn.metrics import roc_auc_score
+
+rng = np.random.default_rng(42)
+
+bootstrap_scores = []
+
+for _ in range(1000):
+
+    indices = rng.integers(
+        0,
+        len(y_test),
+        len(y_test)
+    )
+
+    y_boot = y_test.iloc[
+        indices
+    ]
+
+    p_boot = y_probability[
+        indices
+    ]
+
+    if y_boot.nunique() < 2:
+        continue
+
+    score = roc_auc_score(
+        y_boot,
+        p_boot
+    )
+
+    bootstrap_scores.append(
+        score
+    )
+
+lower = np.percentile(
+    bootstrap_scores,
+    2.5
+)
+
+upper = np.percentile(
+    bootstrap_scores,
+    97.5
+)
+
+print(
+    f"95% CI: "
+    f"{lower:.3f}–{upper:.3f}"
+)
+```
+
+## Comparar modelos correctamente
+
+Los modelos deben compararse usando:
+
+- El mismo split.
+- Los mismos folds.
+- El mismo preprocesamiento base.
+- La misma métrica.
+- La misma definición del target.
+- El mismo momento de predicción.
+
+::: {.callout-caution}
+## Error frecuente
+
+Comparar métricas obtenidas con particiones distintas puede atribuir al modelo diferencias que en realidad se deben al split.
+:::
+
+## Complejidad frente a utilidad
+
+Un modelo complejo no es necesariamente mejor.
+
+Puede tener:
+
+- Ligera mejora estadística.
+- Menor interpretabilidad.
+- Mayor coste.
+- Mayor riesgo de overfitting.
+- Más dificultad de mantenimiento.
+
+La mejora debe ser relevante, estable y útil.
+
+## Utilidad clínica
+
+La utilidad clínica depende de:
+
+- Qué decisión se tomará.
+- En qué momento.
+- Para qué pacientes.
+- Qué coste tienen los errores.
+- Qué recursos requiere.
+- Si cambia la práctica actual.
+
+## Impacto clínico
+
+Un modelo puede tener buen rendimiento y no mejorar la atención.
+
+Para demostrar impacto pueden ser necesarios:
+
+- Estudios prospectivos.
+- Evaluación de workflow.
+- Estudios de implementación.
+- Análisis de costes.
+- Evaluación de resultados clínicos.
+
+## Rendimiento por subgrupos
+
+Conviene revisar posibles diferencias por:
+
+- Edad.
+- Sexo.
+- Centro.
+- Diagnóstico.
+- Grupo étnico cuando sea pertinente y legalmente adecuado.
+- Nivel socioeconómico.
+- Periodo temporal.
+- Gravedad.
+
+```python
+for center in X_test["center"].unique():
+
+    mask = (
+        X_test["center"] == center
+    )
+
+    subgroup_score = roc_auc_score(
+        y_test.loc[mask],
+        y_probability[mask]
+    )
+
+    print(
+        center,
+        subgroup_score
+    )
+```
+
+Debe comprobarse que cada subgrupo tenga suficientes eventos.
+
+## Data drift
+
+El data drift ocurre cuando cambia la distribución de las variables.
+
+Ejemplos:
+
+- Nueva tecnología.
+- Cambio de protocolo.
+- Nueva población.
+- Cambio en criterios diagnósticos.
+- Nuevos tratamientos.
+
+Puede producir una caída de rendimiento.
+
+## Concept drift
+
+El concept drift ocurre cuando cambia la relación entre variables y target.
+
+Ejemplo:
+
+- Un tratamiento nuevo modifica el riesgo de evento para determinados pacientes.
+
+## Qué reportar
+
+Un informe de evaluación debería incluir:
+
+- Definición de cohorte.
+- Definición del target.
+- Momento de predicción.
+- Estrategia de split.
+- Tamaños de train, validation y test.
+- Número de eventos.
+- Métricas principales.
+- Intervalos de confianza.
+- Calibración.
+- Baseline.
+- Rendimiento por subgrupos.
+- Limitaciones.
+- Validación externa si existe.
+
+## Errores frecuentes
+
+- Evaluar solo en train.
+- Utilizar test para elegir el modelo.
+- No comparar con baseline.
+- Reportar solo una métrica.
+- Ignorar calibración.
+- No reportar intervalos de confianza.
+- Comparar modelos con splits distintos.
+- Ignorar subgrupos.
+- Confundir rendimiento interno con validez externa.
+- Elegir umbral sin criterio clínico.
+- No revisar leakage cuando el rendimiento es extremo.
+
+## Flujo recomendado
+
+1. Definir la pregunta clínica.
+2. Definir target y momento de predicción.
+3. Elegir la estrategia de validación.
+4. Definir un baseline.
+5. Seleccionar métricas.
+6. Comparar train y validation.
+7. Revisar overfitting y underfitting.
+8. Evaluar calibración.
+9. Analizar subgrupos.
+10. Evaluar una vez con test.
+11. Reportar incertidumbre.
+12. Considerar validación externa.
+
+## Checklist para proyectos
+
+- [ ] He definido qué significa un buen modelo.
+- [ ] He definido un baseline.
+- [ ] He elegido métricas adecuadas.
+- [ ] He comparado train y validation.
+- [ ] He revisado overfitting.
+- [ ] He revisado underfitting.
+- [ ] He mantenido el test sin tocar.
+- [ ] He evaluado calibración.
+- [ ] He revisado umbrales.
+- [ ] He reportado incertidumbre.
+- [ ] He evaluado subgrupos.
+- [ ] He considerado drift.
+- [ ] He considerado validación externa.
+- [ ] He evaluado utilidad clínica.
+- [ ] He documentado todas las decisiones.
+
+## Recursos
+
+### Documentación
+
+- Métricas de scikit-learn.
+- Curvas de aprendizaje de scikit-learn.
+- Calibración de probabilidades.
+- DummyClassifier.
+- DummyRegressor.
+- Validación cruzada.
+- Bootstrap.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus propias dudas, ejemplos y criterios de evaluación.
