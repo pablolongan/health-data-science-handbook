@@ -2,15 +2,324 @@
 title: "Preprocesamiento"
 ---
 
-Esta sección reúne las técnicas necesarias para limpiar, transformar y preparar los datos antes del modelado.
+::: {.callout-tip}
+## Resumen en 30 segundos
 
-## Contenidos previstos
+El preprocesamiento transforma los datos originales en una representación adecuada para el análisis y el modelado.
 
-Esta sección se irá ampliando progresivamente con:
+Incluye decisiones sobre:
 
-- Fundamentos teóricos.
-- Cuándo utilizar cada técnica.
-- Código listo para adaptar.
-- Interpretación de resultados.
-- Errores frecuentes.
-- Consideraciones específicas en datos clínicos.
+- Separación de datos.
+- Valores ausentes.
+- Escalado.
+- Variables categóricas.
+- Outliers.
+- Pipelines.
+- Prevención de data leakage.
+
+Un buen modelo no compensa un preprocesamiento incorrecto.
+:::
+
+## Objetivo de esta sección
+
+Esta sección reúne los pasos necesarios para preparar los datos antes de entrenar un modelo de machine learning.
+
+El objetivo no es aplicar transformaciones automáticamente, sino construir un flujo:
+
+- Reproducible.
+- Justificado.
+- Clínicamente coherente.
+- Libre de data leakage.
+- Compatible con validación cruzada.
+- Fácil de reutilizar en nuevos proyectos.
+
+## Orden recomendado
+
+Un flujo habitual puede seguir este orden:
+
+1. Definir la unidad de análisis.
+2. Definir la variable objetivo.
+3. Definir el momento de predicción.
+4. Separar train, validation y test.
+5. Revisar data leakage.
+6. Analizar valores ausentes.
+7. Revisar outliers y unidades.
+8. Preparar variables numéricas.
+9. Preparar variables categóricas.
+10. Integrar todo en un pipeline.
+11. Validar el flujo completo.
+12. Evaluar finalmente con test.
+
+::: {.callout-note}
+## Idea clave
+
+El orden de las transformaciones importa.
+
+Muchas operaciones deben aprenderse únicamente con el conjunto de entrenamiento.
+:::
+
+## Contenidos
+
+### Train, validation and test
+
+Aprenderás:
+
+- Para qué sirve cada conjunto.
+- Cómo hacer un split simple.
+- Cómo utilizar validación cruzada.
+- Cómo separar por paciente.
+- Cómo respetar el orden temporal.
+- Cómo validar por centro.
+
+[Ir a Train, validation and test](train-test-split.qmd)
+
+### Data leakage
+
+Aprenderás:
+
+- Qué es el target leakage.
+- Qué es la contaminación entre train y test.
+- Cómo aparece en imputación, escalado, PCA y selección de variables.
+- Cómo detectar leakage temporal.
+- Cómo evitar mezclar visitas del mismo paciente.
+
+[Ir a Data leakage](data-leakage.qmd)
+
+### Valores ausentes
+
+Aprenderás:
+
+- Diferencias entre MCAR, MAR y MNAR.
+- Cómo explorar patrones de ausencia.
+- Cuándo eliminar o imputar.
+- Imputación simple, KNN e iterativa.
+- Indicadores de ausencia.
+- Imputación dentro de pipelines.
+
+[Ir a Valores ausentes](missing-data.qmd)
+
+### Escalado y normalización
+
+Aprenderás:
+
+- Cuándo escalar.
+- Diferencias entre StandardScaler, MinMaxScaler y RobustScaler.
+- Qué hace Normalizer.
+- Relación entre escalado, PCA, SVM, KNN y regularización.
+- Cómo evitar leakage al escalar.
+
+[Ir a Escalado y normalización](scaling-normalization.qmd)
+
+### Variables categóricas y encoding
+
+Aprenderás:
+
+- Diferencia entre nominal y ordinal.
+- One-hot encoding.
+- Ordinal encoding.
+- Categorías desconocidas.
+- Alta cardinalidad.
+- Target encoding.
+- Encoding dentro de ColumnTransformer.
+
+[Ir a Variables categóricas y encoding](categorical-encoding.qmd)
+
+### Outliers
+
+Aprenderás:
+
+- Diferencia entre valor raro y valor erróneo.
+- Detección univariante y multivariante.
+- IQR, z-score e Isolation Forest.
+- Winsorización y transformaciones.
+- Outliers clínicos y longitudinales.
+- Cálculo de umbrales solo con train.
+
+[Ir a Outliers](outliers.qmd)
+
+### Pipelines y ColumnTransformer
+
+Aprenderás:
+
+- Cómo encadenar transformaciones.
+- Cómo tratar variables numéricas y categóricas de forma distinta.
+- Cómo integrar preprocesamiento y modelo.
+- Cómo usar validación cruzada y GridSearchCV.
+- Cómo guardar el pipeline completo.
+- Cómo reducir errores y data leakage.
+
+[Ir a Pipelines y ColumnTransformer](pipelines-columntransformer.qmd)
+
+## Flujo visual
+
+```text
+Datos originales
+      │
+      ▼
+Definir cohorte, target y tiempo índice
+      │
+      ▼
+Separar train / validation / test
+      │
+      ▼
+Revisar data leakage
+      │
+      ▼
+Preprocesamiento dentro del pipeline
+      │
+      ├── Valores ausentes
+      ├── Outliers
+      ├── Escalado
+      └── Encoding
+      │
+      ▼
+Entrenamiento y validación cruzada
+      │
+      ▼
+Evaluación final con test
+```
+
+## Qué debe hacerse antes del pipeline
+
+Normalmente, antes del pipeline se realizan decisiones estructurales:
+
+- Definir la cohorte.
+- Crear la variable objetivo.
+- Definir el momento de predicción.
+- Armonizar unidades.
+- Corregir errores conocidos.
+- Excluir variables con leakage.
+- Separar por paciente, tiempo o centro.
+- Eliminar identificadores de las variables predictoras.
+
+## Qué debe estar dentro del pipeline
+
+Normalmente, dentro del pipeline se incluyen:
+
+- Imputación.
+- Escalado.
+- Encoding.
+- Selección de variables.
+- PCA.
+- Balanceo.
+- Modelo.
+
+::: {.callout-warning}
+## Importante
+
+Si una transformación aprende parámetros a partir de los datos, debería formar parte del pipeline o ajustarse únicamente con train.
+:::
+
+## Ejemplo conceptual
+
+```python
+model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Errores frecuentes
+
+- Preprocesar antes del split.
+- Imputar con todo el dataset.
+- Escalar train y test por separado.
+- Mezclar pacientes entre particiones.
+- Utilizar información futura.
+- Tratar códigos categóricos como cantidades.
+- Eliminar outliers automáticamente.
+- No armonizar unidades.
+- Comparar modelos con splits diferentes.
+- Guardar solo el modelo y no el pipeline.
+
+## Consideraciones en datos clínicos
+
+::: {.callout-note}
+## Aplicación clínica
+
+El preprocesamiento no es solo una tarea técnica.
+
+Cada decisión puede modificar:
+
+- La población analizada.
+- La representación de los pacientes.
+- La interpretabilidad.
+- La validez externa.
+- La utilidad clínica del modelo.
+:::
+
+### Unidad de análisis
+
+Puede ser:
+
+- Paciente.
+- Visita.
+- Ingreso.
+- Episodio.
+- Prueba.
+- Ventana temporal.
+
+Debe quedar definida antes del split.
+
+### Tiempo índice
+
+Es el momento exacto en que se genera la predicción.
+
+Todas las variables predictoras deben estar disponibles antes o en ese momento.
+
+### Diferencias entre centros
+
+Pueden existir diferencias en:
+
+- Protocolos.
+- Equipos.
+- Unidades.
+- Frecuencia de medición.
+- Sistemas de información.
+- Población atendida.
+
+### Datos longitudinales
+
+Debe evitarse utilizar observaciones futuras para construir variables pasadas.
+
+## Checklist general
+
+Antes de entrenar un modelo:
+
+- [ ] He definido la unidad de análisis.
+- [ ] He definido el target.
+- [ ] He definido el momento de predicción.
+- [ ] He separado train y test.
+- [ ] He respetado pacientes, centros y tiempo.
+- [ ] He revisado data leakage.
+- [ ] He cuantificado valores ausentes.
+- [ ] He revisado unidades.
+- [ ] He revisado outliers.
+- [ ] He distinguido variables numéricas y categóricas.
+- [ ] He integrado transformaciones en un pipeline.
+- [ ] He validado el pipeline completo.
+- [ ] He mantenido el test sin tocar.
+- [ ] He documentado todas las decisiones.
+
+## Próximo bloque
+
+Después del preprocesamiento, el siguiente paso es aprender a evaluar correctamente los modelos:
+
+- Overfitting y underfitting.
+- Baselines.
+- Métricas de clasificación.
+- Métricas de regresión.
+- Validación cruzada.
+- Calibración.
+- Validación externa.
