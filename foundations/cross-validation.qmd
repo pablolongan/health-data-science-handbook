@@ -1,0 +1,1118 @@
+---
+title: "Validación cruzada"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+La validación cruzada estima cómo generaliza un modelo utilizando varias particiones del dataset.
+
+La estrategia debe respetar la estructura real de los datos:
+
+- Clases.
+- Pacientes.
+- Centros.
+- Tiempo.
+- Episodios relacionados.
+
+No siempre sirve un K-fold aleatorio.
+:::
+
+## ¿Qué es la validación cruzada?
+
+La validación cruzada divide el dataset en varios subconjuntos llamados folds.
+
+En cada iteración:
+
+1. Se entrena el modelo con algunos folds.
+2. Se valida con el fold restante.
+3. Se repite el proceso.
+4. Se resumen las métricas.
+
+El objetivo es obtener una estimación más estable que con un único split.
+
+::: {.callout-note}
+## Idea clave
+
+La validación cruzada no sustituye al conjunto de test final.
+
+Sirve para seleccionar y comparar modelos durante el desarrollo.
+:::
+
+## K-fold cross-validation
+
+En K-fold, el dataset se divide en $K$ grupos.
+
+Por ejemplo, con 5 folds:
+
+```text
+Iteración 1: Fold 1 validation, folds 2–5 train
+Iteración 2: Fold 2 validation, folds 1, 3–5 train
+Iteración 3: Fold 3 validation, folds 1–2, 4–5 train
+Iteración 4: Fold 4 validation, folds 1–3, 5 train
+Iteración 5: Fold 5 validation, folds 1–4 train
+```
+
+## Ejemplo con KFold
+
+```python
+from sklearn.model_selection import KFold
+
+cv = KFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+```
+
+## Evaluar un modelo
+
+```python
+from sklearn.model_selection import cross_val_score
+
+scores = cross_val_score(
+    estimator=model,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring="roc_auc"
+)
+
+print(
+    "Scores:",
+    scores
+)
+
+print(
+    "Mean:",
+    scores.mean()
+)
+
+print(
+    "Standard deviation:",
+    scores.std()
+)
+```
+
+## Cuándo utilizar KFold
+
+Puede ser adecuado cuando:
+
+- Las observaciones son independientes.
+- No hay estructura temporal.
+- No hay varias filas del mismo paciente.
+- El target no está muy desbalanceado.
+- La distribución es relativamente homogénea.
+
+## Stratified K-fold
+
+Stratified K-fold mantiene aproximadamente la proporción de clases en cada fold.
+
+```python
+from sklearn.model_selection import StratifiedKFold
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+```
+
+Es especialmente útil en clasificación.
+
+::: {.callout-important}
+## Regla práctica
+
+En clasificación desbalanceada, suele ser preferible `StratifiedKFold` frente a `KFold`.
+:::
+
+## Ejemplo con varias métricas
+
+```python
+from sklearn.model_selection import cross_validate
+
+scoring = {
+    "roc_auc": "roc_auc",
+    "average_precision": "average_precision",
+    "balanced_accuracy": "balanced_accuracy",
+    "f1": "f1"
+}
+
+scores = cross_validate(
+    estimator=model,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring=scoring,
+    return_train_score=True
+)
+
+print(
+    scores
+)
+```
+
+## Revisar overfitting entre folds
+
+```python
+import pandas as pd
+
+results = pd.DataFrame(
+    {
+        "train_roc_auc": scores[
+            "train_roc_auc"
+        ],
+        "validation_roc_auc": scores[
+            "test_roc_auc"
+        ]
+    }
+)
+
+display(results)
+```
+
+Una diferencia grande y repetida puede indicar overfitting.
+
+## Group K-fold
+
+Group K-fold mantiene todos los registros de un mismo grupo dentro del mismo fold.
+
+Esto es esencial cuando hay observaciones relacionadas.
+
+Ejemplos de grupo:
+
+- Paciente.
+- Familia.
+- Centro.
+- Profesional.
+- Dispositivo.
+- Episodio.
+
+```python
+from sklearn.model_selection import GroupKFold
+
+cv = GroupKFold(
+    n_splits=5
+)
+```
+
+```python
+scores = cross_val_score(
+    estimator=model,
+    X=X,
+    y=y,
+    groups=df["patient_id"],
+    cv=cv,
+    scoring="roc_auc"
+)
+```
+
+::: {.callout-warning}
+## Data leakage por paciente
+
+Si un paciente tiene varias visitas, no debe aparecer en train y validation al mismo tiempo.
+:::
+
+## GroupShuffleSplit
+
+Permite realizar particiones aleatorias respetando grupos.
+
+```python
+from sklearn.model_selection import GroupShuffleSplit
+
+splitter = GroupShuffleSplit(
+    n_splits=1,
+    test_size=0.20,
+    random_state=42
+)
+
+train_index, test_index = next(
+    splitter.split(
+        X,
+        y,
+        groups=df["patient_id"]
+    )
+)
+
+X_train = X.iloc[
+    train_index
+]
+
+X_test = X.iloc[
+    test_index
+]
+
+y_train = y.iloc[
+    train_index
+]
+
+y_test = y.iloc[
+    test_index
+]
+```
+
+## Stratified Group K-fold
+
+Combina:
+
+- Estratificación por clase.
+- Separación por grupos.
+
+```python
+from sklearn.model_selection import StratifiedGroupKFold
+
+cv = StratifiedGroupKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+```
+
+```python
+scores = cross_val_score(
+    estimator=model,
+    X=X,
+    y=y,
+    groups=df["patient_id"],
+    cv=cv,
+    scoring="roc_auc"
+)
+```
+
+Puede ser útil cuando:
+
+- Hay varias filas por paciente.
+- El evento es poco frecuente.
+- Se quiere mantener un balance razonable entre folds.
+
+## Limitaciones de la estratificación por grupos
+
+Puede ser difícil mantener proporciones idénticas si:
+
+- Hay pocos grupos.
+- Algunos grupos son muy grandes.
+- Los eventos están concentrados en pocos pacientes.
+- Hay pocos positivos.
+
+En ese caso, conviene revisar manualmente cada fold.
+
+## Inspeccionar folds
+
+```python
+for fold, (
+    train_index,
+    validation_index
+) in enumerate(
+    cv.split(
+        X,
+        y,
+        groups=df["patient_id"]
+    ),
+    start=1
+):
+
+    y_train_fold = y.iloc[
+        train_index
+    ]
+
+    y_validation_fold = y.iloc[
+        validation_index
+    ]
+
+    print(
+        f"Fold {fold}"
+    )
+
+    print(
+        "Train positive rate:",
+        y_train_fold.mean()
+    )
+
+    print(
+        "Validation positive rate:",
+        y_validation_fold.mean()
+    )
+```
+
+## Validación temporal
+
+En datos temporales no debe entrenarse con el futuro para predecir el pasado.
+
+Una partición adecuada puede ser:
+
+```text
+Train: 2018–2022
+Validation: 2023
+Test: 2024
+```
+
+## TimeSeriesSplit
+
+```python
+from sklearn.model_selection import TimeSeriesSplit
+
+cv = TimeSeriesSplit(
+    n_splits=5
+)
+```
+
+```python
+scores = cross_val_score(
+    estimator=model,
+    X=X_sorted,
+    y=y_sorted,
+    cv=cv,
+    scoring="neg_mean_absolute_error"
+)
+```
+
+## Estructura de TimeSeriesSplit
+
+```text
+Fold 1:
+Train      Validation
+[ 1 2 ]    [ 3 ]
+
+Fold 2:
+Train      Validation
+[ 1 2 3 ]  [ 4 ]
+
+Fold 3:
+Train      Validation
+[ 1 2 3 4 ] [ 5 ]
+```
+
+::: {.callout-caution}
+## Precaución
+
+`TimeSeriesSplit` respeta el orden de las filas, por lo que el dataset debe estar correctamente ordenado por tiempo.
+:::
+
+## Gap temporal
+
+A veces conviene dejar un espacio entre train y validation.
+
+```python
+cv = TimeSeriesSplit(
+    n_splits=5,
+    gap=30
+)
+```
+
+Esto puede ser útil cuando:
+
+- Existe solapamiento entre ventanas.
+- Las observaciones cercanas son muy parecidas.
+- Se quiere evitar contaminación temporal.
+
+## Validación temporal manual
+
+```python
+train_mask = (
+    df["date"] < "2023-01-01"
+)
+
+validation_mask = (
+    (df["date"] >= "2023-01-01")
+    & (df["date"] < "2024-01-01")
+)
+
+test_mask = (
+    df["date"] >= "2024-01-01"
+)
+```
+
+```python
+X_train = X.loc[
+    train_mask
+]
+
+X_validation = X.loc[
+    validation_mask
+]
+
+X_test = X.loc[
+    test_mask
+]
+```
+
+## Validación por centro
+
+En datos multicéntricos puede validarse dejando un centro fuera.
+
+Ejemplo:
+
+```text
+Train:
+Barcelona + Helsinki
+
+Validation externa:
+Coimbra
+```
+
+## Leave-One-Group-Out
+
+```python
+from sklearn.model_selection import LeaveOneGroupOut
+
+cv = LeaveOneGroupOut()
+```
+
+```python
+scores = cross_val_score(
+    estimator=model,
+    X=X,
+    y=y,
+    groups=df["center"],
+    cv=cv,
+    scoring="roc_auc"
+)
+```
+
+Cada iteración deja un grupo completo como validation.
+
+## Inspeccionar centro dejado fuera
+
+```python
+for train_index, validation_index in cv.split(
+    X,
+    y,
+    groups=df["center"]
+):
+
+    validation_centers = (
+        df.iloc[
+            validation_index
+        ]["center"]
+        .unique()
+    )
+
+    print(
+        validation_centers
+    )
+```
+
+::: {.callout-note}
+## Aplicación clínica
+
+La validación por centro evalúa transportabilidad mejor que un split aleatorio dentro de los mismos centros.
+:::
+
+## Leave-One-Group-Out por paciente
+
+Puede utilizarse cuando hay muy pocos pacientes, aunque suele ser costoso.
+
+```python
+cv = LeaveOneGroupOut()
+
+scores = cross_val_score(
+    estimator=model,
+    X=X,
+    y=y,
+    groups=df["patient_id"],
+    cv=cv,
+    scoring="neg_mean_absolute_error"
+)
+```
+
+## Repeated K-fold
+
+Repeated K-fold repite el proceso con diferentes particiones.
+
+```python
+from sklearn.model_selection import RepeatedKFold
+
+cv = RepeatedKFold(
+    n_splits=5,
+    n_repeats=10,
+    random_state=42
+)
+```
+
+Puede ofrecer una estimación más estable, pero aumenta el coste computacional.
+
+## Repeated Stratified K-fold
+
+```python
+from sklearn.model_selection import RepeatedStratifiedKFold
+
+cv = RepeatedStratifiedKFold(
+    n_splits=5,
+    n_repeats=10,
+    random_state=42
+)
+```
+
+Es útil en clasificación con pocos datos.
+
+## Nested cross-validation
+
+Nested cross-validation separa:
+
+- Un bucle interno para elegir hiperparámetros.
+- Un bucle externo para estimar rendimiento.
+
+```text
+Outer fold:
+    Train externo
+        │
+        └── Inner cross-validation
+                └── Selección de hiperparámetros
+
+    Validation externa
+        └── Evaluación del mejor modelo interno
+```
+
+::: {.callout-important}
+## Ventaja
+
+Nested cross-validation reduce el optimismo producido al evaluar el mismo proceso utilizado para seleccionar hiperparámetros.
+:::
+
+## Ejemplo de nested cross-validation
+
+```python
+from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_val_score
+
+inner_cv = StratifiedKFold(
+    n_splits=4,
+    shuffle=True,
+    random_state=42
+)
+
+outer_cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=123
+)
+
+param_grid = {
+    "classifier__C": [
+        0.01,
+        0.1,
+        1,
+        10
+    ]
+}
+
+search = GridSearchCV(
+    estimator=model,
+    param_grid=param_grid,
+    cv=inner_cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+nested_scores = cross_val_score(
+    estimator=search,
+    X=X,
+    y=y,
+    cv=outer_cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+print(
+    nested_scores
+)
+
+print(
+    nested_scores.mean()
+)
+```
+
+## Nested cross-validation con grupos
+
+Los grupos deben respetarse tanto en el bucle interno como en el externo.
+
+Esto requiere una implementación cuidadosa.
+
+```python
+from sklearn.model_selection import GroupKFold
+
+outer_cv = GroupKFold(
+    n_splits=5
+)
+
+inner_cv = GroupKFold(
+    n_splits=4
+)
+```
+
+En muchos casos conviene implementar el bucle manualmente para pasar los grupos correctos.
+
+## Ejemplo conceptual manual
+
+```python
+outer_scores = []
+
+for train_index, validation_index in outer_cv.split(
+    X,
+    y,
+    groups=groups
+):
+
+    X_train_outer = X.iloc[
+        train_index
+    ]
+
+    y_train_outer = y.iloc[
+        train_index
+    ]
+
+    groups_train_outer = groups.iloc[
+        train_index
+    ]
+
+    X_validation_outer = X.iloc[
+        validation_index
+    ]
+
+    y_validation_outer = y.iloc[
+        validation_index
+    ]
+
+    search.fit(
+        X_train_outer,
+        y_train_outer,
+        groups=groups_train_outer
+    )
+
+    score = search.score(
+        X_validation_outer,
+        y_validation_outer
+    )
+
+    outer_scores.append(
+        score
+    )
+```
+
+## Pipeline dentro de validación cruzada
+
+Todo el preprocesamiento debe estar dentro del pipeline.
+
+```python
+scores = cross_val_score(
+    estimator=full_pipeline,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring="roc_auc"
+)
+```
+
+Esto garantiza que en cada fold se ajustan únicamente con train:
+
+- Imputación.
+- Escalado.
+- Encoding.
+- PCA.
+- Selección de variables.
+- Balanceo.
+- Modelo.
+
+::: {.callout-warning}
+## Error frecuente
+
+No preproceses todo el dataset antes de hacer cross-validation.
+:::
+
+## Ejemplo incorrecto
+
+```python
+X_scaled = scaler.fit_transform(
+    X
+)
+
+scores = cross_val_score(
+    model,
+    X_scaled,
+    y,
+    cv=5
+)
+```
+
+## Ejemplo correcto
+
+```python
+pipeline = Pipeline(
+    steps=[
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000
+            )
+        )
+    ]
+)
+
+scores = cross_val_score(
+    pipeline,
+    X,
+    y,
+    cv=5
+)
+```
+
+## Selección de variables dentro del fold
+
+La selección de variables debe realizarse dentro del pipeline.
+
+```python
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import f_classif
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "selector",
+            SelectKBest(
+                score_func=f_classif,
+                k=20
+            )
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000
+            )
+        )
+    ]
+)
+```
+
+## SMOTE dentro del fold
+
+```python
+from imblearn.pipeline import Pipeline
+from imblearn.over_sampling import SMOTE
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "smote",
+            SMOTE(
+                random_state=42
+            )
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000
+            )
+        )
+    ]
+)
+```
+
+SMOTE se aplicará únicamente a la parte de entrenamiento de cada fold.
+
+## Número de folds
+
+Valores habituales:
+
+- 5 folds.
+- 10 folds.
+
+### Más folds
+
+Ventajas:
+
+- Más datos para entrenar en cada iteración.
+
+Limitaciones:
+
+- Mayor coste.
+- Validaciones más pequeñas.
+- Mayor inestabilidad si hay pocos eventos.
+
+### Menos folds
+
+Ventajas:
+
+- Menor coste.
+- Validaciones más grandes.
+
+Limitaciones:
+
+- Menos iteraciones.
+- Mayor sesgo en la estimación.
+
+## Pocos eventos
+
+Si hay pocos eventos positivos:
+
+- Reducir el número de folds.
+- Utilizar estratificación.
+- Revisar eventos por fold.
+- Considerar validación repetida.
+- Reportar alta incertidumbre.
+
+::: {.callout-caution}
+## Regla práctica
+
+Cada fold de validation debería contener suficientes eventos para calcular métricas de forma estable.
+:::
+
+## Reproducibilidad
+
+Cuando hay aleatoriedad, define `random_state`.
+
+```python
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+```
+
+Sin embargo, no conviene confiar únicamente en una única semilla.
+
+Puede revisarse la estabilidad con varias repeticiones.
+
+## Guardar índices de los folds
+
+```python
+folds = []
+
+for fold, (
+    train_index,
+    validation_index
+) in enumerate(
+    cv.split(
+        X,
+        y
+    ),
+    start=1
+):
+
+    folds.append(
+        {
+            "fold": fold,
+            "train_index": train_index,
+            "validation_index": validation_index
+        }
+    )
+```
+
+Esto facilita:
+
+- Reproducibilidad.
+- Auditoría.
+- Comparación entre modelos.
+- Uso de los mismos folds.
+
+## Comparar modelos con los mismos folds
+
+```python
+models = {
+    "logistic": logistic_pipeline,
+    "random_forest": random_forest_pipeline
+}
+
+results = {}
+
+for name, estimator in models.items():
+
+    scores = cross_val_score(
+        estimator=estimator,
+        X=X,
+        y=y,
+        cv=cv,
+        scoring="roc_auc"
+    )
+
+    results[name] = scores
+```
+
+No debe cambiarse el split entre modelos.
+
+## Resumen de resultados
+
+```python
+import pandas as pd
+
+results_df = pd.DataFrame(
+    results
+)
+
+display(
+    results_df
+)
+
+display(
+    results_df.agg(
+        [
+            "mean",
+            "std",
+            "min",
+            "max"
+        ]
+    )
+)
+```
+
+## Intervalos de confianza aproximados
+
+```python
+import numpy as np
+
+mean_score = scores.mean()
+
+standard_error = (
+    scores.std(
+        ddof=1
+    )
+    / np.sqrt(
+        len(scores)
+    )
+)
+
+lower = (
+    mean_score
+    - 1.96 * standard_error
+)
+
+upper = (
+    mean_score
+    + 1.96 * standard_error
+)
+```
+
+Esta aproximación debe interpretarse con cautela porque los folds no son completamente independientes.
+
+## Bootstrap frente a cross-validation
+
+### Cross-validation
+
+Útil para:
+
+- Comparar modelos.
+- Seleccionar hiperparámetros.
+- Estimar generalización.
+
+### Bootstrap
+
+Útil para:
+
+- Estimar incertidumbre.
+- Calcular intervalos de confianza.
+- Evaluar estabilidad.
+
+Pueden ser técnicas complementarias.
+
+## Validación externa final
+
+Aunque se utilice cross-validation, sigue siendo importante disponer de:
+
+- Test temporal.
+- Test por centro.
+- Cohorte externa.
+- Validación prospectiva.
+
+::: {.callout-note}
+## Aplicación clínica
+
+La validación cruzada interna no demuestra que un modelo funcione en otro hospital.
+:::
+
+## Tabla de decisión
+
+| Situación | Estrategia |
+|---|---|
+| Regresión con observaciones independientes | KFold |
+| Clasificación | StratifiedKFold |
+| Varias filas por paciente | GroupKFold |
+| Varias filas por paciente y desbalance | StratifiedGroupKFold |
+| Datos temporales | TimeSeriesSplit o split temporal |
+| Validación por centro | LeaveOneGroupOut |
+| Ajuste intensivo de hiperparámetros | Nested cross-validation |
+| Pocos datos | Repeated cross-validation |
+
+## Errores frecuentes
+
+- Usar K-fold aleatorio con datos temporales.
+- Mezclar visitas del mismo paciente.
+- Ajustar preprocesamiento antes de cross-validation.
+- Aplicar SMOTE antes del split.
+- Seleccionar variables con todo el dataset.
+- Comparar modelos con folds distintos.
+- No revisar el número de eventos por fold.
+- Ajustar hiperparámetros y reportar el mismo score sin nested CV.
+- Confundir validación interna con externa.
+- Utilizar el test dentro de la validación cruzada.
+
+## Flujo recomendado
+
+1. Identificar la unidad de análisis.
+2. Revisar dependencias entre observaciones.
+3. Revisar estructura temporal.
+4. Revisar centros y grupos.
+5. Elegir el tipo de validación.
+6. Definir los folds.
+7. Integrar preprocesamiento en pipeline.
+8. Evaluar varias métricas.
+9. Revisar variabilidad.
+10. Ajustar hiperparámetros internamente.
+11. Comparar modelos con los mismos folds.
+12. Evaluar finalmente en test externo o temporal.
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad de análisis.
+- [ ] He comprobado si hay varias filas por paciente.
+- [ ] He revisado la estructura temporal.
+- [ ] He revisado centros o grupos.
+- [ ] He elegido el splitter adecuado.
+- [ ] He revisado el balance por fold.
+- [ ] He revisado eventos por fold.
+- [ ] El preprocesamiento está dentro del pipeline.
+- [ ] La selección de variables está dentro del pipeline.
+- [ ] El balanceo está dentro del pipeline.
+- [ ] Los modelos usan los mismos folds.
+- [ ] He reportado media y variabilidad.
+- [ ] He considerado nested cross-validation.
+- [ ] He mantenido un test final separado.
+- [ ] He considerado validación externa.
+
+## Recursos
+
+### Documentación
+
+- `KFold`.
+- `StratifiedKFold`.
+- `GroupKFold`.
+- `StratifiedGroupKFold`.
+- `TimeSeriesSplit`.
+- `LeaveOneGroupOut`.
+- `cross_val_score`.
+- `cross_validate`.
+- `GridSearchCV`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus estrategias de validación, dudas y ejemplos habituales.
