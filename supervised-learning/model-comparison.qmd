@@ -1,0 +1,1387 @@
+---
+title: "Comparación de modelos"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Comparar modelos no consiste solo en elegir el que tenga la métrica más alta.
+
+Una comparación rigurosa debe considerar:
+
+- Rendimiento.
+- Variabilidad entre folds.
+- Calibración.
+- Overfitting.
+- Interpretabilidad.
+- Coste computacional.
+- Disponibilidad de variables.
+- Utilidad clínica.
+
+El mejor modelo es el que ofrece el mejor equilibrio para el problema real.
+:::
+
+## ¿Por qué comparar modelos?
+
+Distintos algoritmos pueden producir resultados similares con comportamientos muy diferentes.
+
+Ejemplo:
+
+```text
+Modelo A
+ROC AUC = 0.84
+Muy interpretable
+Bien calibrado
+
+Modelo B
+ROC AUC = 0.86
+Poco interpretable
+Mal calibrado
+```
+
+La diferencia de rendimiento puede no justificar la pérdida de interpretabilidad.
+
+::: {.callout-note}
+## Idea clave
+
+La selección de modelo es una decisión técnica y clínica.
+:::
+
+## Modelos de esta sección
+
+La comparación puede incluir:
+
+- Baseline.
+- Regresión lineal.
+- Regresión logística.
+- Árbol de decisión.
+- Random forest.
+- Gradient boosting.
+- Support Vector Machines.
+- Redes neuronales, cuando corresponda.
+
+## Comparación justa
+
+Todos los modelos deben evaluarse con:
+
+- Los mismos datos.
+- Los mismos folds.
+- La misma definición del target.
+- El mismo momento de predicción.
+- El mismo conjunto de test.
+- Preprocesamiento dentro de pipelines.
+- Métricas previamente definidas.
+
+## Error frecuente
+
+```text
+Modelo A
+→ evaluado con un split
+
+Modelo B
+→ evaluado con otro split
+```
+
+Esto impide una comparación directa.
+
+## Baseline obligatorio
+
+Todo proyecto debería incluir un baseline.
+
+### Clasificación
+
+```python
+from sklearn.dummy import DummyClassifier
+
+baseline = DummyClassifier(
+    strategy="prior"
+)
+```
+
+### Regresión
+
+```python
+from sklearn.dummy import DummyRegressor
+
+baseline = DummyRegressor(
+    strategy="mean"
+)
+```
+
+También puede utilizarse:
+
+- Regla clínica.
+- Último valor disponible.
+- Media histórica.
+- Modelo lineal simple.
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp",
+    "sex",
+    "center"
+]
+
+target = "cardiotoxicity"
+
+X = df[features]
+
+y = df[target]
+```
+
+## Separar test al inicio
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    stratify=y,
+    random_state=42
+)
+```
+
+El test debe permanecer intacto hasta el final.
+
+::: {.callout-warning}
+## Importante
+
+La selección de modelo y el ajuste de hiperparámetros deben hacerse sin utilizar test.
+:::
+
+## Preprocesamiento compartido
+
+```python
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+
+numeric_features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp"
+]
+
+categorical_features = [
+    "sex",
+    "center"
+]
+```
+
+```python
+numeric_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        )
+    ]
+)
+
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="most_frequent"
+            )
+        ),
+        (
+            "encoder",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            )
+        )
+    ]
+)
+```
+
+```python
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ]
+)
+```
+
+## Definir modelos de clasificación
+
+```python
+from sklearn.dummy import DummyClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.svm import SVC
+
+models = {
+    "baseline": DummyClassifier(
+        strategy="prior"
+    ),
+    "logistic_regression": LogisticRegression(
+        max_iter=1000,
+        random_state=42
+    ),
+    "decision_tree": DecisionTreeClassifier(
+        max_depth=4,
+        min_samples_leaf=10,
+        random_state=42
+    ),
+    "random_forest": RandomForestClassifier(
+        n_estimators=500,
+        min_samples_leaf=5,
+        random_state=42,
+        n_jobs=-1
+    ),
+    "gradient_boosting": GradientBoostingClassifier(
+        n_estimators=300,
+        learning_rate=0.05,
+        max_depth=3,
+        random_state=42
+    ),
+    "svm_rbf": SVC(
+        kernel="rbf",
+        C=1.0,
+        gamma="scale",
+        random_state=42
+    )
+}
+```
+
+## Crear pipelines
+
+```python
+pipelines = {}
+
+for name, estimator in models.items():
+
+    pipelines[name] = Pipeline(
+        steps=[
+            (
+                "preprocessor",
+                preprocessor
+            ),
+            (
+                "model",
+                estimator
+            )
+        ]
+    )
+```
+
+## Validación cruzada
+
+```python
+from sklearn.model_selection import StratifiedKFold
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+```
+
+## Múltiples métricas
+
+```python
+scoring = {
+    "roc_auc": "roc_auc",
+    "average_precision": "average_precision",
+    "balanced_accuracy": "balanced_accuracy",
+    "precision": "precision",
+    "recall": "recall",
+    "f1": "f1"
+}
+```
+
+## Evaluar todos los modelos
+
+```python
+from sklearn.model_selection import cross_validate
+import pandas as pd
+
+rows = []
+
+for name, pipeline in pipelines.items():
+
+    scores = cross_validate(
+        estimator=pipeline,
+        X=X_train,
+        y=y_train,
+        cv=cv,
+        scoring=scoring,
+        return_train_score=True,
+        n_jobs=-1
+    )
+
+    rows.append(
+        {
+            "model": name,
+            "train_roc_auc_mean": scores[
+                "train_roc_auc"
+            ].mean(),
+            "validation_roc_auc_mean": scores[
+                "test_roc_auc"
+            ].mean(),
+            "validation_roc_auc_std": scores[
+                "test_roc_auc"
+            ].std(),
+            "validation_pr_auc_mean": scores[
+                "test_average_precision"
+            ].mean(),
+            "validation_balanced_accuracy_mean": scores[
+                "test_balanced_accuracy"
+            ].mean(),
+            "validation_precision_mean": scores[
+                "test_precision"
+            ].mean(),
+            "validation_recall_mean": scores[
+                "test_recall"
+            ].mean(),
+            "validation_f1_mean": scores[
+                "test_f1"
+            ].mean()
+        }
+    )
+
+comparison_table = pd.DataFrame(
+    rows
+).sort_values(
+    "validation_roc_auc_mean",
+    ascending=False
+)
+
+display(
+    comparison_table
+)
+```
+
+## No comparar solo la media
+
+Dos modelos pueden tener la misma media, pero distinta estabilidad.
+
+```text
+Modelo A
+ROC AUC = 0.82 ± 0.01
+
+Modelo B
+ROC AUC = 0.83 ± 0.08
+```
+
+El modelo A puede ser más fiable.
+
+## Visualizar resultados
+
+```python
+import matplotlib.pyplot as plt
+
+plot_data = comparison_table.sort_values(
+    "validation_roc_auc_mean"
+)
+
+plt.figure(
+    figsize=(9, 5)
+)
+
+plt.barh(
+    plot_data["model"],
+    plot_data["validation_roc_auc_mean"],
+    xerr=plot_data["validation_roc_auc_std"]
+)
+
+plt.xlabel(
+    "ROC AUC"
+)
+
+plt.ylabel(
+    "Modelo"
+)
+
+plt.title(
+    "Comparación de modelos"
+)
+
+plt.show()
+```
+
+## Distribución por folds
+
+```python
+fold_rows = []
+
+for name, pipeline in pipelines.items():
+
+    scores = cross_validate(
+        estimator=pipeline,
+        X=X_train,
+        y=y_train,
+        cv=cv,
+        scoring="roc_auc",
+        n_jobs=-1
+    )
+
+    for fold, score in enumerate(
+        scores["test_score"],
+        start=1
+    ):
+
+        fold_rows.append(
+            {
+                "model": name,
+                "fold": fold,
+                "roc_auc": score
+            }
+        )
+
+fold_results = pd.DataFrame(
+    fold_rows
+)
+```
+
+```python
+models_order = (
+    fold_results
+    .groupby("model")["roc_auc"]
+    .mean()
+    .sort_values()
+    .index
+)
+
+data_to_plot = [
+    fold_results.loc[
+        fold_results["model"] == model,
+        "roc_auc"
+    ].values
+    for model in models_order
+]
+
+plt.figure(
+    figsize=(10, 6)
+)
+
+plt.boxplot(
+    data_to_plot,
+    labels=models_order,
+    vert=False
+)
+
+plt.xlabel(
+    "ROC AUC"
+)
+
+plt.ylabel(
+    "Modelo"
+)
+
+plt.title(
+    "Variabilidad entre folds"
+)
+
+plt.show()
+```
+
+## Overfitting
+
+Puede evaluarse comparando train y validation.
+
+```python
+comparison_table[
+    "roc_auc_gap"
+] = (
+    comparison_table[
+        "train_roc_auc_mean"
+    ]
+    -
+    comparison_table[
+        "validation_roc_auc_mean"
+    ]
+)
+```
+
+Un gap grande puede indicar overfitting.
+
+::: {.callout-warning}
+## Precaución
+
+Un rendimiento perfecto en train no es necesariamente una buena señal.
+:::
+
+## Elegir métricas según el problema
+
+### Evento raro
+
+Priorizar:
+
+- PR AUC.
+- Recall.
+- Precision.
+- Calibración.
+- Número de falsos positivos.
+
+### Screening
+
+Puede priorizarse:
+
+- Sensibilidad.
+- Valor predictivo negativo.
+- Capacidad operativa.
+
+### Confirmación diagnóstica
+
+Puede priorizarse:
+
+- Especificidad.
+- Precision.
+- Valor predictivo positivo.
+
+### Riesgo continuo
+
+Debe revisarse:
+
+- Discriminación.
+- Calibración.
+- Brier score.
+- Curvas de decisión.
+
+## ROC AUC frente a PR AUC
+
+ROC AUC puede parecer alta en datasets desbalanceados.
+
+PR AUC suele ser más informativa cuando la clase positiva es rara.
+
+## Accuracy frente a balanced accuracy
+
+Accuracy puede estar dominada por la clase mayoritaria.
+
+Balanced accuracy promedia sensibilidad y especificidad.
+
+## Calibración
+
+Un modelo puede discriminar bien y calibrar mal.
+
+```text
+Buen ranking
+≠
+Probabilidades correctas
+```
+
+## Comparar curvas de calibración
+
+```python
+from sklearn.calibration import CalibrationDisplay
+
+plt.figure(
+    figsize=(8, 6)
+)
+
+for name in [
+    "logistic_regression",
+    "random_forest",
+    "gradient_boosting"
+]:
+
+    pipeline = pipelines[name]
+
+    pipeline.fit(
+        X_train,
+        y_train
+    )
+
+    y_probability = pipeline.predict_proba(
+        X_test
+    )[:, 1]
+
+    CalibrationDisplay.from_predictions(
+        y_test,
+        y_probability,
+        n_bins=10,
+        name=name
+    )
+
+plt.title(
+    "Comparación de calibración"
+)
+
+plt.show()
+```
+
+## Brier score
+
+```python
+from sklearn.metrics import brier_score_loss
+
+brier_rows = []
+
+for name, pipeline in pipelines.items():
+
+    if not hasattr(
+        pipeline.named_steps["model"],
+        "predict_proba"
+    ):
+        continue
+
+    pipeline.fit(
+        X_train,
+        y_train
+    )
+
+    y_probability = pipeline.predict_proba(
+        X_test
+    )[:, 1]
+
+    brier_rows.append(
+        {
+            "model": name,
+            "brier_score": brier_score_loss(
+                y_test,
+                y_probability
+            )
+        }
+    )
+
+brier_table = pd.DataFrame(
+    brier_rows
+).sort_values(
+    "brier_score"
+)
+```
+
+## Umbral de clasificación
+
+El modelo y el umbral son decisiones distintas.
+
+```python
+threshold = 0.20
+
+y_pred = (
+    y_probability >= threshold
+).astype(int)
+```
+
+El mejor modelo con umbral 0.50 puede no ser el mejor con el umbral clínico.
+
+## Comparar costes clínicos
+
+Ejemplo conceptual:
+
+```text
+Falso negativo
+→ coste alto
+
+Falso positivo
+→ coste moderado
+```
+
+Puede definirse una función de coste:
+
+```python
+def clinical_cost(
+    false_positives,
+    false_negatives,
+    fp_cost=1,
+    fn_cost=5
+):
+
+    return (
+        false_positives * fp_cost
+        +
+        false_negatives * fn_cost
+    )
+```
+
+## Tabla por umbral
+
+```python
+from sklearn.metrics import confusion_matrix
+
+thresholds = [
+    0.10,
+    0.20,
+    0.30,
+    0.40,
+    0.50
+]
+
+rows = []
+
+for threshold in thresholds:
+
+    y_pred_threshold = (
+        y_probability >= threshold
+    ).astype(int)
+
+    tn, fp, fn, tp = confusion_matrix(
+        y_test,
+        y_pred_threshold
+    ).ravel()
+
+    rows.append(
+        {
+            "threshold": threshold,
+            "sensitivity": tp / (
+                tp + fn
+            ),
+            "specificity": tn / (
+                tn + fp
+            ),
+            "false_positives": fp,
+            "false_negatives": fn,
+            "clinical_cost": clinical_cost(
+                fp,
+                fn
+            )
+        }
+    )
+
+threshold_table = pd.DataFrame(
+    rows
+)
+```
+
+## Comparación de regresión
+
+Para targets continuos pueden compararse:
+
+- Dummy regressor.
+- Regresión lineal.
+- Ridge.
+- Árbol de regresión.
+- Random forest.
+- Gradient boosting.
+- SVR.
+
+## Definir modelos de regresión
+
+```python
+from sklearn.dummy import DummyRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.svm import SVR
+
+regression_models = {
+    "baseline": DummyRegressor(
+        strategy="mean"
+    ),
+    "linear_regression": LinearRegression(),
+    "ridge": Ridge(
+        alpha=1.0
+    ),
+    "decision_tree": DecisionTreeRegressor(
+        max_depth=4,
+        min_samples_leaf=10,
+        random_state=42
+    ),
+    "random_forest": RandomForestRegressor(
+        n_estimators=500,
+        min_samples_leaf=5,
+        random_state=42,
+        n_jobs=-1
+    ),
+    "gradient_boosting": GradientBoostingRegressor(
+        n_estimators=300,
+        learning_rate=0.05,
+        max_depth=3,
+        random_state=42
+    ),
+    "svr": SVR(
+        kernel="rbf",
+        C=10,
+        gamma="scale"
+    )
+}
+```
+
+## Métricas de regresión
+
+```python
+regression_scoring = {
+    "mae": "neg_mean_absolute_error",
+    "rmse": "neg_root_mean_squared_error",
+    "r2": "r2"
+}
+```
+
+## Comparar modelos de regresión
+
+```python
+from sklearn.model_selection import KFold
+
+cv = KFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+rows = []
+
+for name, estimator in regression_models.items():
+
+    pipeline = Pipeline(
+        steps=[
+            (
+                "preprocessor",
+                preprocessor
+            ),
+            (
+                "model",
+                estimator
+            )
+        ]
+    )
+
+    scores = cross_validate(
+        estimator=pipeline,
+        X=X_train,
+        y=y_train,
+        cv=cv,
+        scoring=regression_scoring,
+        return_train_score=True,
+        n_jobs=-1
+    )
+
+    rows.append(
+        {
+            "model": name,
+            "validation_mae": -scores[
+                "test_mae"
+            ].mean(),
+            "validation_rmse": -scores[
+                "test_rmse"
+            ].mean(),
+            "validation_r2": scores[
+                "test_r2"
+            ].mean(),
+            "validation_r2_std": scores[
+                "test_r2"
+            ].std()
+        }
+    )
+
+regression_comparison = pd.DataFrame(
+    rows
+).sort_values(
+    "validation_mae"
+)
+```
+
+## Importancia clínica del error
+
+Ejemplo:
+
+```text
+MAE = 1.8 días
+```
+
+Debe preguntarse:
+
+- ¿Es clínicamente aceptable?
+- ¿Es mejor que la regla actual?
+- ¿Cómo se distribuyen los errores?
+- ¿Qué ocurre en estancias largas?
+- ¿Existen subgrupos mal predichos?
+
+## Métrica global frente a subgrupos
+
+Un modelo puede tener buen rendimiento global y fallar en determinados grupos.
+
+Debe evaluarse por:
+
+- Centro.
+- Sexo.
+- Edad.
+- Diagnóstico.
+- Periodo.
+- Tratamiento.
+- Grupo de riesgo.
+
+## Evaluación por subgrupos
+
+```python
+evaluation_df = X_test.copy()
+
+evaluation_df["y_true"] = y_test.values
+evaluation_df["y_probability"] = y_probability
+```
+
+```python
+from sklearn.metrics import roc_auc_score
+
+subgroup_rows = []
+
+for center, group in evaluation_df.groupby(
+    "center"
+):
+
+    if group["y_true"].nunique() < 2:
+        continue
+
+    subgroup_rows.append(
+        {
+            "center": center,
+            "n": len(group),
+            "roc_auc": roc_auc_score(
+                group["y_true"],
+                group["y_probability"]
+            )
+        }
+    )
+
+subgroup_table = pd.DataFrame(
+    subgroup_rows
+)
+```
+
+## Interpretabilidad
+
+La interpretabilidad puede clasificarse de forma aproximada:
+
+| Modelo | Interpretabilidad |
+|---|---|
+| Regresión lineal | Alta |
+| Regresión logística | Alta |
+| Árbol pequeño | Alta-moderada |
+| Random forest | Moderada-baja |
+| Gradient boosting | Baja |
+| SVM lineal | Moderada |
+| SVM RBF | Baja |
+| Red neuronal | Baja |
+
+## Rendimiento frente a interpretabilidad
+
+```text
+Modelo complejo
++0.01 ROC AUC
+- mucha interpretabilidad
+```
+
+La mejora puede no ser suficiente.
+
+::: {.callout-important}
+## Regla práctica
+
+Cuando dos modelos rinden de forma similar, suele ser preferible el más simple.
+:::
+
+## Coste computacional
+
+Debe considerarse:
+
+- Tiempo de entrenamiento.
+- Tiempo de inferencia.
+- Uso de memoria.
+- Dependencias.
+- Hardware.
+- Facilidad de despliegue.
+
+## Tiempo de entrenamiento
+
+```python
+import time
+
+timing_rows = []
+
+for name, pipeline in pipelines.items():
+
+    start = time.perf_counter()
+
+    pipeline.fit(
+        X_train,
+        y_train
+    )
+
+    elapsed = (
+        time.perf_counter()
+        -
+        start
+    )
+
+    timing_rows.append(
+        {
+            "model": name,
+            "training_seconds": elapsed
+        }
+    )
+
+timing_table = pd.DataFrame(
+    timing_rows
+)
+```
+
+## Estabilidad
+
+Un modelo estable mantiene resultados similares ante:
+
+- Cambios de fold.
+- Cambios de seed.
+- Nuevos periodos.
+- Nuevos centros.
+- Pequeñas modificaciones del dataset.
+
+## Repetir cross-validation
+
+```python
+from sklearn.model_selection import RepeatedStratifiedKFold
+
+repeated_cv = RepeatedStratifiedKFold(
+    n_splits=5,
+    n_repeats=5,
+    random_state=42
+)
+```
+
+Esto permite estimar mejor la variabilidad.
+
+## Significación estadística
+
+Comparar medias sin considerar dependencia entre folds puede ser engañoso.
+
+Además, una diferencia estadísticamente detectable puede no ser clínicamente relevante.
+
+## Significación práctica
+
+Ejemplo:
+
+```text
+Modelo A
+ROC AUC = 0.842
+
+Modelo B
+ROC AUC = 0.847
+```
+
+La diferencia es 0.005.
+
+Debe valorarse si compensa:
+
+- Complejidad.
+- Menor interpretabilidad.
+- Mayor coste.
+- Peor calibración.
+
+## Ajuste de hiperparámetros
+
+La comparación final debería realizarse después de un ajuste razonable.
+
+Pero debe evitarse:
+
+- Ajustar cientos de combinaciones sin control.
+- Elegir por ruido de validation.
+- Optimizar todos los modelos de forma desigual.
+- Usar test durante la búsqueda.
+
+## Nested cross-validation
+
+Nested cross-validation separa:
+
+- Bucle interno para ajustar hiperparámetros.
+- Bucle externo para estimar rendimiento.
+
+```text
+Outer fold
+├── Train externo
+│   └── Inner CV
+│       └── Ajuste de hiperparámetros
+└── Validation externa
+    └── Evaluación
+```
+
+## Ejemplo conceptual
+
+```python
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_validate
+
+inner_cv = StratifiedKFold(
+    n_splits=4,
+    shuffle=True,
+    random_state=42
+)
+
+outer_cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+search = GridSearchCV(
+    estimator=pipeline,
+    param_grid=param_grid,
+    cv=inner_cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+nested_scores = cross_validate(
+    estimator=search,
+    X=X_train,
+    y=y_train,
+    cv=outer_cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+```
+
+## Validación por grupos
+
+Con varias observaciones por paciente:
+
+```python
+from sklearn.model_selection import GroupKFold
+
+cv = GroupKFold(
+    n_splits=5
+)
+```
+
+Todos los modelos deben utilizar los mismos grupos.
+
+## Validación temporal
+
+Cuando el objetivo es predecir casos futuros:
+
+```text
+Train
+→ periodo antiguo
+
+Validation
+→ periodo intermedio
+
+Test
+→ periodo reciente
+```
+
+## Validación externa
+
+El modelo final debe evaluarse cuando sea posible en:
+
+- Otro centro.
+- Otro país.
+- Otro periodo.
+- Otra población.
+- Cohorte prospectiva.
+
+## Modelo final
+
+Después de seleccionar el modelo:
+
+1. Fijar pipeline.
+2. Fijar hiperparámetros.
+3. Fijar umbral.
+4. Reentrenar con train completo.
+5. Evaluar una vez en test.
+6. Documentar resultados.
+7. Guardar el modelo.
+8. Preparar validación externa.
+
+## Evaluación final en test
+
+```python
+final_model = best_pipeline
+
+final_model.fit(
+    X_train,
+    y_train
+)
+
+y_probability = final_model.predict_proba(
+    X_test
+)[:, 1]
+```
+
+```python
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score
+
+test_roc_auc = roc_auc_score(
+    y_test,
+    y_probability
+)
+
+test_pr_auc = average_precision_score(
+    y_test,
+    y_probability
+)
+```
+
+## No volver a ajustar con test
+
+Después de ver el resultado de test:
+
+- No ajustar hiperparámetros.
+- No cambiar variables.
+- No modificar el umbral.
+- No repetir hasta obtener mejor resultado.
+
+Hacerlo convertiría test en validation.
+
+## Tabla de decisión final
+
+| Criterio | Modelo A | Modelo B | Modelo C |
+|---|---:|---:|---:|
+| ROC AUC | 0.84 | 0.86 | 0.85 |
+| PR AUC | 0.46 | 0.48 | 0.50 |
+| Brier score | 0.12 | 0.16 | 0.13 |
+| Interpretabilidad | Alta | Baja | Moderada |
+| Tiempo | Bajo | Alto | Medio |
+| Estabilidad | Alta | Media | Alta |
+
+Esta tabla ayuda a justificar la decisión.
+
+## Modelo champion y challenger
+
+En producción puede mantenerse:
+
+### Champion
+
+Modelo utilizado actualmente.
+
+### Challenger
+
+Modelo alternativo que se evalúa en paralelo.
+
+Esto permite actualizar el sistema de forma controlada.
+
+## Documentación del modelo
+
+Debe registrarse:
+
+- Objetivo.
+- Población.
+- Target.
+- Features.
+- Momento de predicción.
+- Split.
+- Métricas.
+- Hiperparámetros.
+- Umbral.
+- Limitaciones.
+- Subgrupos.
+- Fecha de entrenamiento.
+- Versión de datos.
+- Versión de código.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+El mejor modelo matemático no siempre es el mejor modelo clínico.
+:::
+
+Debe preguntarse:
+
+- ¿Modifica una decisión?
+- ¿Está disponible a tiempo?
+- ¿Es interpretable?
+- ¿Está calibrado?
+- ¿Generaliza?
+- ¿Puede desplegarse?
+- ¿Puede mantenerse?
+- ¿Es seguro?
+
+## Errores frecuentes
+
+- Comparar modelos con splits distintos.
+- Ajustar hiperparámetros con test.
+- Elegir por una única métrica.
+- Reportar solo la media.
+- Ignorar variabilidad.
+- No comparar con baseline.
+- No revisar calibración.
+- Ignorar el umbral.
+- No evaluar subgrupos.
+- Elegir automáticamente el modelo más complejo.
+- Confundir significación estadística con utilidad clínica.
+- No documentar la decisión.
+
+## Flujo recomendado
+
+1. Definir métricas antes de entrenar.
+2. Reservar test.
+3. Crear baseline.
+4. Preparar pipelines.
+5. Utilizar los mismos folds.
+6. Evaluar múltiples métricas.
+7. Revisar media y variabilidad.
+8. Revisar overfitting.
+9. Evaluar calibración.
+10. Analizar umbrales y costes.
+11. Comparar interpretabilidad y coste.
+12. Seleccionar modelo.
+13. Evaluar una vez en test.
+14. Documentar la decisión.
+
+## Checklist para proyectos
+
+- [ ] He definido las métricas principales.
+- [ ] He definido una métrica secundaria.
+- [ ] He reservado test.
+- [ ] He creado un baseline.
+- [ ] Todos los modelos usan los mismos datos.
+- [ ] Todos los modelos usan los mismos folds.
+- [ ] El preprocesamiento está dentro de pipelines.
+- [ ] He comparado media y desviación.
+- [ ] He revisado train frente a validation.
+- [ ] He evaluado calibración.
+- [ ] He revisado el umbral.
+- [ ] He considerado costes clínicos.
+- [ ] He evaluado subgrupos.
+- [ ] He considerado interpretabilidad.
+- [ ] He considerado coste computacional.
+- [ ] He evaluado una sola vez en test.
+- [ ] He documentado la elección final.
+
+## Recursos
+
+### Documentación
+
+- `cross_validate`.
+- `GridSearchCV`.
+- `RandomizedSearchCV`.
+- `RepeatedStratifiedKFold`.
+- `GroupKFold`.
+- `CalibrationDisplay`.
+- `LearningCurveDisplay`.
+- `DummyClassifier`.
+- `DummyRegressor`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus tablas comparativas, criterios de selección y decisiones finales.
