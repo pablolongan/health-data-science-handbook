@@ -1,0 +1,1150 @@
+---
+title: "Regresión lineal"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+La regresión lineal modela la relación entre una variable objetivo continua y una o más variables predictoras.
+
+Su forma general es:
+
+$$
+\hat{y}
+=
+\beta_0
++
+\beta_1x_1
++
+\beta_2x_2
++
+\cdots
++
+\beta_px_p
+$$
+
+Es uno de los modelos más interpretables y un excelente baseline para problemas de regresión.
+:::
+
+## ¿Qué es la regresión lineal?
+
+La regresión lineal intenta encontrar una combinación lineal de variables que aproxime el target.
+
+Ejemplos clínicos:
+
+- Predecir duración de estancia.
+- Predecir presión arterial.
+- Estimar coste hospitalario.
+- Estimar fracción de eyección.
+- Predecir un biomarcador continuo.
+
+## Regresión lineal simple
+
+Con una sola variable predictora:
+
+$$
+\hat{y}
+=
+\beta_0
++
+\beta_1x
+$$
+
+donde:
+
+- $\beta_0$ es el intercepto.
+- $\beta_1$ es la pendiente.
+- $x$ es la variable predictora.
+- $\hat{y}$ es la predicción.
+
+::: {.callout-note}
+## Idea clave
+
+La pendiente indica cuánto cambia el target cuando la variable predictora aumenta una unidad.
+:::
+
+## Ejemplo conceptual
+
+```text
+Edad
+  │
+  ▼
+Duración de estancia
+```
+
+Si:
+
+$$
+\hat{y}
+=
+2
++
+0.15
+\cdot
+\text{edad}
+$$
+
+entonces:
+
+- Intercepto: 2 días.
+- Coeficiente de edad: 0.15 días por año.
+
+## Regresión lineal múltiple
+
+Con varias variables:
+
+$$
+\hat{y}
+=
+\beta_0
++
+\beta_1x_1
++
+\beta_2x_2
++
+\cdots
++
+\beta_px_p
+$$
+
+Ejemplo:
+
+```text
+Edad
+Peso
+Diagnóstico
+Biomarcadores
+        │
+        ▼
+Duración de estancia
+```
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp"
+]
+
+target = "length_of_stay"
+
+X = df[features]
+
+y = df[target]
+```
+
+## Separar train y test
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    random_state=42
+)
+```
+
+## Entrenar LinearRegression
+
+```python
+from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+## Generar predicciones
+
+```python
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Intercepto y coeficientes
+
+```python
+print(
+    "Intercept:",
+    model.intercept_
+)
+
+print(
+    "Coefficients:",
+    model.coef_
+)
+```
+
+## Tabla de coeficientes
+
+```python
+import pandas as pd
+
+coefficient_table = pd.DataFrame(
+    {
+        "feature": X_train.columns,
+        "coefficient": model.coef_
+    }
+).sort_values(
+    "coefficient",
+    key=abs,
+    ascending=False
+)
+
+display(
+    coefficient_table
+)
+```
+
+## Interpretación de coeficientes
+
+En regresión múltiple, un coeficiente representa el cambio esperado en el target asociado a una unidad de cambio en esa variable, manteniendo constantes las demás.
+
+::: {.callout-warning}
+## Importante
+
+Esta interpretación depende de que el modelo esté bien especificado y no implica causalidad.
+:::
+
+## Intercepto
+
+El intercepto es el valor esperado de la predicción cuando todas las variables son 0.
+
+A veces tiene sentido clínico.
+
+A veces no.
+
+Ejemplo:
+
+- Edad = 0.
+- Peso = 0.
+- Troponina = 0.
+
+Puede ser una combinación imposible.
+
+## Evaluación básica
+
+```python
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import r2_score
+
+mae = mean_absolute_error(
+    y_test,
+    y_pred
+)
+
+rmse = root_mean_squared_error(
+    y_test,
+    y_pred
+)
+
+r2 = r2_score(
+    y_test,
+    y_pred
+)
+
+print(
+    f"MAE: {mae:.3f}"
+)
+
+print(
+    f"RMSE: {rmse:.3f}"
+)
+
+print(
+    f"R²: {r2:.3f}"
+)
+```
+
+## Interpretación de métricas
+
+### MAE
+
+Error absoluto medio en las unidades originales.
+
+### RMSE
+
+Penaliza más los errores grandes.
+
+### $R^2$
+
+Mide la variabilidad explicada respecto a predecir siempre la media.
+
+## Baseline
+
+```python
+from sklearn.dummy import DummyRegressor
+
+baseline = DummyRegressor(
+    strategy="mean"
+)
+
+baseline.fit(
+    X_train,
+    y_train
+)
+
+y_pred_baseline = baseline.predict(
+    X_test
+)
+```
+
+## Comparar con baseline
+
+```python
+baseline_mae = mean_absolute_error(
+    y_test,
+    y_pred_baseline
+)
+
+model_mae = mean_absolute_error(
+    y_test,
+    y_pred
+)
+
+print(
+    "Baseline MAE:",
+    baseline_mae
+)
+
+print(
+    "Linear regression MAE:",
+    model_mae
+)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+Una regresión lineal debe superar claramente al baseline para justificar su uso.
+:::
+
+## Residuos
+
+Los residuos son:
+
+$$
+e_i
+=
+y_i
+-
+\hat{y}_i
+$$
+
+```python
+residuals = (
+    y_test - y_pred
+)
+```
+
+## Gráfico real vs predicho
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(7, 6))
+
+plt.scatter(
+    y_test,
+    y_pred
+)
+
+minimum = min(
+    y_test.min(),
+    y_pred.min()
+)
+
+maximum = max(
+    y_test.max(),
+    y_pred.max()
+)
+
+plt.plot(
+    [minimum, maximum],
+    [minimum, maximum],
+    linestyle="--"
+)
+
+plt.xlabel("Valor real")
+plt.ylabel("Valor predicho")
+plt.title("Valores reales vs predichos")
+
+plt.show()
+```
+
+## Gráfico de residuos
+
+```python
+plt.figure(figsize=(8, 5))
+
+plt.scatter(
+    y_pred,
+    residuals
+)
+
+plt.axhline(
+    0,
+    linestyle="--"
+)
+
+plt.xlabel("Valor predicho")
+plt.ylabel("Residuo")
+plt.title("Residuos vs predicciones")
+
+plt.show()
+```
+
+## Supuestos clásicos
+
+La regresión lineal clásica suele apoyarse en varios supuestos.
+
+### Linealidad
+
+La relación entre predictores y target es aproximadamente lineal.
+
+### Independencia
+
+Las observaciones son independientes.
+
+### Homocedasticidad
+
+La varianza de los residuos es aproximadamente constante.
+
+### Normalidad de residuos
+
+Importante especialmente para inferencia y tests clásicos.
+
+### Ausencia de multicolinealidad severa
+
+Las variables predictoras no deberían ser combinaciones casi redundantes.
+
+::: {.callout-note}
+## Predicción frente a inferencia
+
+Para predicción pura, algunas desviaciones de los supuestos pueden ser tolerables si el modelo generaliza bien.
+
+Para inferencia, los supuestos son mucho más importantes.
+:::
+
+## Linealidad
+
+Puede inspeccionarse con:
+
+```python
+plt.figure(figsize=(8, 5))
+
+plt.scatter(
+    X_test["age"],
+    residuals
+)
+
+plt.axhline(
+    0,
+    linestyle="--"
+)
+
+plt.xlabel("Edad")
+plt.ylabel("Residuo")
+plt.title("Residuos frente a edad")
+
+plt.show()
+```
+
+Un patrón curvo puede indicar relación no lineal.
+
+## Heterocedasticidad
+
+Una forma de embudo en los residuos puede indicar que el error aumenta con la magnitud de la predicción.
+
+Ejemplo:
+
+- Estancias cortas: error bajo.
+- Estancias largas: error alto.
+
+## Distribución de residuos
+
+```python
+plt.figure(figsize=(8, 5))
+
+plt.hist(
+    residuals,
+    bins=30
+)
+
+plt.xlabel("Residuo")
+plt.ylabel("Frecuencia")
+plt.title("Distribución de residuos")
+
+plt.show()
+```
+
+## Q-Q plot
+
+```python
+import scipy.stats as stats
+
+stats.probplot(
+    residuals,
+    dist="norm",
+    plot=plt
+)
+
+plt.title("Q-Q plot de residuos")
+
+plt.show()
+```
+
+## Multicolinealidad
+
+La multicolinealidad aparece cuando varios predictores contienen información muy similar.
+
+Ejemplos:
+
+- Peso y superficie corporal.
+- Altura e IMC.
+- Dos biomarcadores muy relacionados.
+
+Consecuencias:
+
+- Coeficientes inestables.
+- Signos inesperados.
+- Intervalos de confianza amplios.
+- Interpretación difícil.
+
+## Matriz de correlación
+
+```python
+correlation_matrix = (
+    X_train.corr()
+)
+
+display(
+    correlation_matrix
+)
+```
+
+## Variance Inflation Factor
+
+```python
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+X_vif = X_train.dropna().copy()
+
+vif_table = pd.DataFrame(
+    {
+        "feature": X_vif.columns,
+        "VIF": [
+            variance_inflation_factor(
+                X_vif.values,
+                index
+            )
+            for index in range(
+                X_vif.shape[1]
+            )
+        ]
+    }
+)
+
+display(
+    vif_table
+)
+```
+
+::: {.callout-caution}
+## Precaución
+
+VIF alto es una señal de colinealidad, pero no debe usarse como regla automática para eliminar variables.
+:::
+
+## Escalado
+
+La regresión lineal ordinaria no necesita escalado para predecir.
+
+Sin embargo, el escalado es útil para:
+
+- Comparar coeficientes.
+- Aplicar regularización.
+- Mejorar estabilidad numérica.
+- Combinar con otros pasos.
+
+## Pipeline con imputación y escalado
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            LinearRegression()
+        )
+    ]
+)
+```
+
+## Variables categóricas
+
+Las variables categóricas deben codificarse.
+
+```python
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+
+numeric_features = [
+    "age",
+    "weight",
+    "troponin"
+]
+
+categorical_features = [
+    "sex",
+    "center",
+    "diagnosis"
+]
+```
+
+```python
+numeric_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        )
+    ]
+)
+
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="most_frequent"
+            )
+        ),
+        (
+            "encoder",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            )
+        )
+    ]
+)
+```
+
+```python
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ]
+)
+```
+
+## Pipeline completo
+
+```python
+model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "regressor",
+            LinearRegression()
+        )
+    ]
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Relaciones no lineales
+
+La regresión lineal puede incorporar transformaciones.
+
+### Término cuadrático
+
+```python
+df["age_squared"] = (
+    df["age"] ** 2
+)
+```
+
+### Interacción
+
+```python
+df["age_troponin_interaction"] = (
+    df["age"]
+    * df["troponin"]
+)
+```
+
+## PolynomialFeatures
+
+```python
+from sklearn.preprocessing import PolynomialFeatures
+
+polynomial_model = Pipeline(
+    steps=[
+        (
+            "polynomial",
+            PolynomialFeatures(
+                degree=2,
+                include_bias=False
+            )
+        ),
+        (
+            "model",
+            LinearRegression()
+        )
+    ]
+)
+```
+
+::: {.callout-warning}
+## Riesgo
+
+Añadir muchos términos polinómicos puede aumentar rápidamente el riesgo de overfitting.
+:::
+
+## Transformar el target
+
+En targets muy sesgados puede utilizarse logaritmo.
+
+```python
+import numpy as np
+
+y_train_log = np.log1p(
+    y_train
+)
+```
+
+Después:
+
+```python
+model.fit(
+    X_train,
+    y_train_log
+)
+
+y_pred_log = model.predict(
+    X_test
+)
+
+y_pred = np.expm1(
+    y_pred_log
+)
+```
+
+## TransformedTargetRegressor
+
+```python
+from sklearn.compose import TransformedTargetRegressor
+
+regressor = TransformedTargetRegressor(
+    regressor=pipeline,
+    func=np.log1p,
+    inverse_func=np.expm1
+)
+```
+
+## Ridge
+
+Ridge añade regularización L2.
+
+```python
+from sklearn.linear_model import Ridge
+
+ridge_model = Ridge(
+    alpha=1.0
+)
+```
+
+Ventajas:
+
+- Reduce coeficientes.
+- Mejora estabilidad.
+- Ayuda con variables correlacionadas.
+
+## Lasso
+
+Lasso utiliza regularización L1.
+
+```python
+from sklearn.linear_model import Lasso
+
+lasso_model = Lasso(
+    alpha=0.01,
+    max_iter=10000
+)
+```
+
+Puede llevar algunos coeficientes a 0.
+
+## Elastic Net
+
+```python
+from sklearn.linear_model import ElasticNet
+
+elastic_net_model = ElasticNet(
+    alpha=0.01,
+    l1_ratio=0.5,
+    max_iter=10000
+)
+```
+
+Combina L1 y L2.
+
+## Comparar modelos regularizados
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+
+cv = KFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+models = {
+    "linear": LinearRegression(),
+    "ridge": Ridge(
+        alpha=1.0
+    ),
+    "lasso": Lasso(
+        alpha=0.01,
+        max_iter=10000
+    ),
+    "elastic_net": ElasticNet(
+        alpha=0.01,
+        l1_ratio=0.5,
+        max_iter=10000
+    )
+}
+
+results = {}
+
+for name, estimator in models.items():
+
+    pipeline = Pipeline(
+        steps=[
+            (
+                "preprocessor",
+                preprocessor
+            ),
+            (
+                "model",
+                estimator
+            )
+        ]
+    )
+
+    scores = cross_val_score(
+        pipeline,
+        X,
+        y,
+        cv=cv,
+        scoring="neg_mean_absolute_error"
+    )
+
+    results[name] = -scores
+```
+
+## Intervalos de confianza
+
+Scikit-learn se centra principalmente en predicción.
+
+Para inferencia clásica puede utilizarse `statsmodels`.
+
+```python
+import statsmodels.api as sm
+
+X_train_sm = sm.add_constant(
+    X_train
+)
+
+model_sm = sm.OLS(
+    y_train,
+    X_train_sm
+).fit()
+
+print(
+    model_sm.summary()
+)
+```
+
+Esto proporciona:
+
+- Coeficientes.
+- Errores estándar.
+- P-values.
+- Intervalos de confianza.
+- Estadísticos globales.
+
+::: {.callout-warning}
+## Importante
+
+Los p-values y los intervalos dependen de los supuestos del modelo.
+:::
+
+## Predicción frente a inferencia
+
+### Modelo predictivo
+
+Objetivo:
+
+- Minimizar error en datos nuevos.
+
+Se evalúa con:
+
+- Cross-validation.
+- MAE.
+- RMSE.
+- $R^2$.
+- Test externo.
+
+### Modelo inferencial
+
+Objetivo:
+
+- Estimar asociaciones.
+- Interpretar coeficientes.
+- Cuantificar incertidumbre.
+
+Requiere:
+
+- Diseño adecuado.
+- Control de confusión.
+- Supuestos.
+- Intervalos de confianza.
+
+## Outliers e influencia
+
+Una observación extrema puede afectar mucho a la recta.
+
+Puede revisarse:
+
+- Residuos estudentizados.
+- Leverage.
+- Cook's distance.
+- DFBETAs.
+
+## Cook's distance
+
+```python
+influence = model_sm.get_influence()
+
+cooks_distance = (
+    influence.cooks_distance[0]
+)
+```
+
+```python
+plt.figure(figsize=(9, 4))
+
+plt.stem(
+    cooks_distance
+)
+
+plt.xlabel("Observación")
+plt.ylabel("Cook's distance")
+plt.title("Observaciones influyentes")
+
+plt.show()
+```
+
+::: {.callout-caution}
+## Precaución
+
+Una observación influyente no debe eliminarse automáticamente.
+:::
+
+## Validación cruzada
+
+```python
+from sklearn.model_selection import cross_validate
+
+scores = cross_validate(
+    estimator=model,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring={
+        "mae": "neg_mean_absolute_error",
+        "rmse": "neg_root_mean_squared_error",
+        "r2": "r2"
+    },
+    return_train_score=True
+)
+```
+
+## Revisar overfitting
+
+```python
+results = pd.DataFrame(
+    {
+        "train_mae": -scores[
+            "train_mae"
+        ],
+        "validation_mae": -scores[
+            "test_mae"
+        ],
+        "train_r2": scores[
+            "train_r2"
+        ],
+        "validation_r2": scores[
+            "test_r2"
+        ]
+    }
+)
+
+display(
+    results
+)
+```
+
+## Errores frecuentes
+
+- Interpretar asociación como causalidad.
+- No revisar residuos.
+- Reportar solo $R^2$.
+- No comparar con baseline.
+- Ignorar multicolinealidad.
+- Aplicar selección de variables antes del split.
+- Usar variables futuras.
+- No codificar categóricas correctamente.
+- Añadir polinomios sin regularización.
+- Evaluar solo en train.
+- Eliminar outliers automáticamente.
+- Interpretar coeficientes sin considerar unidades.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Un modelo lineal puede ser preferible a uno más complejo si su rendimiento es similar y su interpretación es mucho más clara.
+:::
+
+Antes de utilizarlo, revisa:
+
+- Magnitud clínica de los errores.
+- Disponibilidad de variables.
+- Estabilidad entre centros.
+- Calibración de predicciones continuas.
+- Subgrupos mal predichos.
+- Valores extremos.
+
+## Tabla comparativa
+
+| Modelo | Ventaja | Limitación |
+|---|---|---|
+| Linear Regression | Muy interpretable | Sensible a no linealidad |
+| Ridge | Estable con correlación | No selecciona variables |
+| Lasso | Selección de variables | Inestable con correlación |
+| Elastic Net | Equilibrio L1-L2 | Más hiperparámetros |
+| Polynomial Regression | Captura curvatura | Riesgo de overfitting |
+
+## Flujo recomendado
+
+1. Definir el target.
+2. Crear un baseline.
+3. Explorar relaciones.
+4. Separar train y test.
+5. Preparar pipeline.
+6. Entrenar regresión lineal.
+7. Analizar residuos.
+8. Revisar multicolinealidad.
+9. Comparar con regularización.
+10. Validar con cross-validation.
+11. Evaluar en test.
+12. Interpretar clínicamente.
+
+## Checklist para proyectos
+
+- [ ] He definido el target.
+- [ ] He creado un baseline.
+- [ ] He separado train y test.
+- [ ] He preparado variables numéricas y categóricas.
+- [ ] He integrado todo en un pipeline.
+- [ ] He calculado MAE.
+- [ ] He calculado RMSE.
+- [ ] He calculado $R^2$.
+- [ ] He analizado residuos.
+- [ ] He revisado linealidad.
+- [ ] He revisado heterocedasticidad.
+- [ ] He revisado multicolinealidad.
+- [ ] He comparado Ridge, Lasso o Elastic Net.
+- [ ] He evaluado con cross-validation.
+- [ ] He interpretado los resultados clínicamente.
+
+## Recursos
+
+### Documentación
+
+- `LinearRegression`.
+- `Ridge`.
+- `Lasso`.
+- `ElasticNet`.
+- `PolynomialFeatures`.
+- `TransformedTargetRegressor`.
+- `statsmodels.OLS`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus modelos lineales, interpretaciones y errores habituales.
