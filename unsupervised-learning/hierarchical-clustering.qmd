@@ -1,0 +1,1011 @@
+---
+title: "Clustering jerárquico"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+El clustering jerárquico construye una jerarquía de grupos.
+
+En su versión aglomerativa:
+
+1. Cada observación empieza como un cluster independiente.
+2. Los clusters más próximos se van fusionando.
+3. El proceso continúa hasta formar una única estructura jerárquica.
+
+El resultado puede visualizarse mediante un dendrograma.
+:::
+
+## ¿Qué es el clustering jerárquico?
+
+El clustering jerárquico agrupa observaciones según su similitud.
+
+A diferencia de K-means, no necesita fijar desde el inicio un centroide para cada grupo.
+
+Produce una estructura anidada:
+
+```text
+Todos los pacientes
+├── Grupo A
+│   ├── Subgrupo A1
+│   └── Subgrupo A2
+└── Grupo B
+    ├── Subgrupo B1
+    └── Subgrupo B2
+```
+
+::: {.callout-note}
+## Idea clave
+
+El clustering jerárquico no genera solo una partición, sino una jerarquía completa.
+:::
+
+## Tipos de clustering jerárquico
+
+## Aglomerativo
+
+Empieza con una observación por cluster.
+
+Después fusiona progresivamente los grupos más cercanos.
+
+```text
+N observaciones
+      ↓
+N clusters
+      ↓
+N - 1 clusters
+      ↓
+N - 2 clusters
+      ↓
+...
+      ↓
+1 cluster
+```
+
+Es la variante más utilizada.
+
+## Divisivo
+
+Empieza con todas las observaciones en un único cluster.
+
+Después divide progresivamente los grupos.
+
+```text
+1 cluster
+    ↓
+2 clusters
+    ↓
+3 clusters
+    ↓
+...
+```
+
+Suele ser más costoso computacionalmente.
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "troponin",
+    "ntprobnp",
+    "lvef",
+    "gls"
+]
+
+X = df[features]
+```
+
+## Imputar valores ausentes
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+X_imputed = imputer.fit_transform(
+    X
+)
+```
+
+## Escalar
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(
+    X_imputed
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+Como el método depende de distancias, el escalado suele ser esencial.
+:::
+
+## AgglomerativeClustering
+
+```python
+from sklearn.cluster import AgglomerativeClustering
+
+model = AgglomerativeClustering(
+    n_clusters=3,
+    linkage="ward"
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+## Añadir clusters al dataframe
+
+```python
+df_clustered = df.copy()
+
+df_clustered["cluster"] = clusters
+```
+
+## Concepto de linkage
+
+El linkage define cómo se calcula la distancia entre dos clusters.
+
+Es una de las decisiones más importantes del método.
+
+## Single linkage
+
+Utiliza la distancia mínima entre pares de observaciones.
+
+$$
+d(A,B)
+=
+\min_{a \in A, b \in B}
+d(a,b)
+$$
+
+Ventajas:
+
+- Detecta formas alargadas.
+- Puede conectar estructuras no esféricas.
+
+Limitaciones:
+
+- Sensible al efecto cadena.
+- Puede unir clusters mediante puntos intermedios.
+
+## Complete linkage
+
+Utiliza la distancia máxima entre pares de observaciones.
+
+$$
+d(A,B)
+=
+\max_{a \in A, b \in B}
+d(a,b)
+$$
+
+Ventajas:
+
+- Produce clusters compactos.
+- Reduce el efecto cadena.
+
+Limitaciones:
+
+- Sensible a outliers.
+- Puede fragmentar estructuras amplias.
+
+## Average linkage
+
+Utiliza la distancia media entre todos los pares.
+
+$$
+d(A,B)
+=
+\frac{1}{|A||B|}
+\sum_{a \in A}
+\sum_{b \in B}
+d(a,b)
+$$
+
+Suele ser un equilibrio entre single y complete.
+
+## Ward linkage
+
+Ward fusiona los clusters que menos aumentan la varianza interna.
+
+Es una opción habitual para variables continuas y distancia euclídea.
+
+```python
+model = AgglomerativeClustering(
+    n_clusters=3,
+    linkage="ward"
+)
+```
+
+::: {.callout-note}
+## Regla práctica
+
+Ward suele ser un buen punto de partida cuando las variables son continuas, están escaladas y se esperan grupos compactos.
+:::
+
+## Comparar linkages
+
+```python
+linkages = [
+    "ward",
+    "complete",
+    "average",
+    "single"
+]
+
+results = {}
+
+for linkage in linkages:
+
+    model = AgglomerativeClustering(
+        n_clusters=3,
+        linkage=linkage
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    results[linkage] = labels
+```
+
+## Métricas de distancia
+
+Además del linkage, debe elegirse una métrica.
+
+Las más habituales son:
+
+- Euclídea.
+- Manhattan.
+- Coseno.
+- Distancias precomputadas.
+
+## Distancia euclídea
+
+$$
+d(x,y)
+=
+\sqrt{
+\sum_{j=1}^{p}
+(x_j-y_j)^2
+}
+$$
+
+Es la más habitual para variables continuas escaladas.
+
+## Distancia Manhattan
+
+$$
+d(x,y)
+=
+\sum_{j=1}^{p}
+|x_j-y_j|
+$$
+
+Puede ser más robusta en ciertos espacios de alta dimensión.
+
+## Distancia coseno
+
+Se centra en el ángulo entre vectores.
+
+Puede ser útil cuando importa más el patrón relativo que la magnitud.
+
+## Restricciones con Ward
+
+Ward requiere distancia euclídea.
+
+Por tanto:
+
+```python
+AgglomerativeClustering(
+    linkage="ward",
+    metric="euclidean"
+)
+```
+
+## Dendrograma
+
+Un dendrograma representa la secuencia de fusiones.
+
+```python
+from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import dendrogram
+import matplotlib.pyplot as plt
+
+linkage_matrix = linkage(
+    X_scaled,
+    method="ward"
+)
+
+plt.figure(
+    figsize=(12, 6)
+)
+
+dendrogram(
+    linkage_matrix
+)
+
+plt.xlabel(
+    "Observaciones"
+)
+
+plt.ylabel(
+    "Distancia"
+)
+
+plt.title(
+    "Dendrograma"
+)
+
+plt.show()
+```
+
+## Interpretar un dendrograma
+
+- Cada hoja representa una observación.
+- Cada unión representa una fusión.
+- La altura representa la distancia de fusión.
+- Un corte horizontal determina los clusters.
+
+```text
+Altura alta
+→ clusters muy distintos
+
+Altura baja
+→ clusters similares
+```
+
+## Elegir número de clusters
+
+Puede elegirse cortando el dendrograma a una altura concreta.
+
+```text
+Corte alto
+→ pocos clusters
+
+Corte bajo
+→ muchos clusters
+```
+
+También pueden utilizarse métricas internas.
+
+## Silhouette score
+
+```python
+from sklearn.metrics import silhouette_score
+
+score = silhouette_score(
+    X_scaled,
+    clusters
+)
+```
+
+## Davies-Bouldin
+
+```python
+from sklearn.metrics import davies_bouldin_score
+
+score = davies_bouldin_score(
+    X_scaled,
+    clusters
+)
+```
+
+## Calinski-Harabasz
+
+```python
+from sklearn.metrics import calinski_harabasz_score
+
+score = calinski_harabasz_score(
+    X_scaled,
+    clusters
+)
+```
+
+## Comparar varios números de clusters
+
+```python
+import pandas as pd
+
+rows = []
+
+for n_clusters in range(
+    2,
+    11
+):
+
+    model = AgglomerativeClustering(
+        n_clusters=n_clusters,
+        linkage="ward"
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    rows.append(
+        {
+            "n_clusters": n_clusters,
+            "silhouette": silhouette_score(
+                X_scaled,
+                labels
+            ),
+            "davies_bouldin": davies_bouldin_score(
+                X_scaled,
+                labels
+            ),
+            "calinski_harabasz": calinski_harabasz_score(
+                X_scaled,
+                labels
+            )
+        }
+    )
+
+evaluation_table = pd.DataFrame(
+    rows
+)
+
+display(
+    evaluation_table
+)
+```
+
+## Distancia umbral
+
+También puede fijarse una distancia máxima de fusión.
+
+```python
+model = AgglomerativeClustering(
+    n_clusters=None,
+    distance_threshold=5.0,
+    linkage="ward"
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+Cuando se usa `distance_threshold`, `n_clusters` debe ser `None`.
+
+## Árbol completo
+
+```python
+model = AgglomerativeClustering(
+    n_clusters=None,
+    distance_threshold=0,
+    compute_distances=True,
+    linkage="ward"
+)
+
+model.fit(
+    X_scaled
+)
+```
+
+Esto permite reconstruir la jerarquía completa.
+
+## Conectividad
+
+Puede limitarse qué observaciones pueden fusionarse.
+
+Ejemplo con vecinos próximos:
+
+```python
+from sklearn.neighbors import kneighbors_graph
+
+connectivity = kneighbors_graph(
+    X_scaled,
+    n_neighbors=10,
+    include_self=False
+)
+```
+
+```python
+model = AgglomerativeClustering(
+    n_clusters=3,
+    linkage="ward",
+    connectivity=connectivity
+)
+```
+
+Esto puede preservar estructura local.
+
+## Pipeline
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "clustering",
+            AgglomerativeClustering(
+                n_clusters=3,
+                linkage="ward"
+            )
+        )
+    ]
+)
+```
+
+## Limitación del pipeline
+
+`AgglomerativeClustering` no dispone de `predict()` para asignar directamente nuevas observaciones.
+
+Esto implica que:
+
+- Debe recalcularse el clustering.
+- No existe un centroide aprendido.
+- La asignación de nuevos casos no es directa.
+
+::: {.callout-warning}
+## Importante
+
+El clustering jerárquico es muy útil para exploración, pero menos cómodo para producción.
+:::
+
+## Visualizar clusters con PCA
+
+```python
+from sklearn.decomposition import PCA
+
+pca = PCA(
+    n_components=2
+)
+
+X_pca = pca.fit_transform(
+    X_scaled
+)
+```
+
+```python
+plt.figure(
+    figsize=(8, 6)
+)
+
+plt.scatter(
+    X_pca[:, 0],
+    X_pca[:, 1],
+    c=clusters
+)
+
+plt.xlabel(
+    "PC1"
+)
+
+plt.ylabel(
+    "PC2"
+)
+
+plt.title(
+    "Clusters jerárquicos proyectados en PCA"
+)
+
+plt.show()
+```
+
+## Describir clusters
+
+```python
+cluster_summary = (
+    df_clustered
+    .groupby("cluster")[features]
+    .agg(
+        [
+            "count",
+            "mean",
+            "median",
+            "std"
+        ]
+    )
+)
+
+display(
+    cluster_summary
+)
+```
+
+## Variables categóricas por cluster
+
+```python
+diagnosis_distribution = pd.crosstab(
+    df_clustered["cluster"],
+    df_clustered["diagnosis"],
+    normalize="index"
+)
+
+display(
+    diagnosis_distribution
+)
+```
+
+## Heatmap de perfiles
+
+```python
+cluster_means = (
+    df_clustered
+    .groupby("cluster")[features]
+    .mean()
+)
+```
+
+```python
+cluster_means_scaled = pd.DataFrame(
+    scaler.fit_transform(
+        cluster_means
+    ),
+    index=cluster_means.index,
+    columns=cluster_means.columns
+)
+```
+
+```python
+plt.figure(
+    figsize=(10, 5)
+)
+
+plt.imshow(
+    cluster_means_scaled,
+    aspect="auto"
+)
+
+plt.xticks(
+    range(
+        len(features)
+    ),
+    features,
+    rotation=45,
+    ha="right"
+)
+
+plt.yticks(
+    range(
+        len(cluster_means_scaled)
+    ),
+    cluster_means_scaled.index
+)
+
+plt.xlabel(
+    "Variable"
+)
+
+plt.ylabel(
+    "Cluster"
+)
+
+plt.title(
+    "Perfil estandarizado de clusters"
+)
+
+plt.colorbar(
+    label="Valor estandarizado"
+)
+
+plt.tight_layout()
+
+plt.show()
+```
+
+## Estabilidad
+
+El clustering jerárquico puede cambiar ante:
+
+- Pequeños cambios en los datos.
+- Nuevas observaciones.
+- Diferentes variables.
+- Distintos linkages.
+- Distintas métricas.
+
+## Comparar soluciones
+
+```python
+from sklearn.metrics import adjusted_rand_score
+
+ward_labels = results["ward"]
+average_labels = results["average"]
+
+agreement = adjusted_rand_score(
+    ward_labels,
+    average_labels
+)
+```
+
+## Bootstrap
+
+Puede evaluarse estabilidad repitiendo el clustering en submuestras.
+
+Debe analizarse si las mismas observaciones tienden a permanecer juntas.
+
+## Cophenetic correlation
+
+La correlación cofenética evalúa cuánto preserva el dendrograma las distancias originales.
+
+```python
+from scipy.cluster.hierarchy import cophenet
+from scipy.spatial.distance import pdist
+
+cophenetic_correlation, _ = cophenet(
+    linkage_matrix,
+    pdist(
+        X_scaled
+    )
+)
+
+print(
+    cophenetic_correlation
+)
+```
+
+Valores más altos indican mejor preservación de distancias.
+
+## Sensibilidad a outliers
+
+Los outliers pueden:
+
+- Crear ramas largas.
+- Formar clusters propios.
+- Alterar las fusiones.
+- Cambiar el corte del dendrograma.
+
+Debe revisarse:
+
+- Distribución de variables.
+- Casos extremos.
+- Robust scaling.
+- Validez clínica de los outliers.
+
+## RobustScaler
+
+```python
+from sklearn.preprocessing import RobustScaler
+
+scaler = RobustScaler()
+
+X_scaled = scaler.fit_transform(
+    X_imputed
+)
+```
+
+Puede ser útil cuando existen valores extremos.
+
+## Variables categóricas
+
+El clustering jerárquico permite utilizar matrices de distancia precomputadas.
+
+Esto abre la puerta a distancias para datos mixtos, como Gower.
+
+```text
+Variables numéricas
++
+Variables categóricas
+→ matriz de distancias
+→ clustering jerárquico
+```
+
+## Distancia de Gower
+
+La distancia de Gower puede combinar:
+
+- Variables continuas.
+- Variables binarias.
+- Variables categóricas.
+- Variables ordinales.
+
+Es útil en datasets clínicos mixtos.
+
+## Clustering con distancia precomputada
+
+```python
+model = AgglomerativeClustering(
+    n_clusters=3,
+    metric="precomputed",
+    linkage="average"
+)
+
+clusters = model.fit_predict(
+    distance_matrix
+)
+```
+
+Ward no puede utilizarse con distancia precomputada.
+
+## Complejidad computacional
+
+El clustering jerárquico puede ser costoso en datasets grandes.
+
+La matriz de distancias crece aproximadamente con:
+
+$$
+O(n^2)
+$$
+
+Esto limita su uso cuando hay muchas observaciones.
+
+## Ventajas
+
+- No exige centroides.
+- Produce una jerarquía.
+- Permite dendrogramas.
+- Puede usar distintas métricas.
+- Puede trabajar con distancias precomputadas.
+- Es útil para exploración.
+- Permite examinar subgrupos anidados.
+
+## Limitaciones
+
+- Coste elevado en datasets grandes.
+- Sensibilidad a outliers.
+- Sensibilidad al linkage.
+- Difícil asignar nuevas observaciones.
+- El dendrograma puede ser difícil de leer.
+- El número de clusters sigue requiriendo decisión.
+- No garantiza significado clínico.
+
+## Comparación con K-means
+
+| Aspecto | K-means | Jerárquico |
+|---|---|---|
+| Necesita K inicialmente | Sí | No necesariamente |
+| Produce jerarquía | No | Sí |
+| Nuevas observaciones | Fácil | Difícil |
+| Escalabilidad | Alta | Menor |
+| Tipos de distancia | Limitados | Flexibles |
+| Sensibilidad a outliers | Alta | Alta |
+| Visualización | Centroides | Dendrograma |
+
+## Cuándo usarlo
+
+Puede ser adecuado cuando:
+
+- La muestra no es enorme.
+- Se busca explorar subgrupos anidados.
+- Se desea un dendrograma.
+- Se necesita usar distancias no euclídeas.
+- Existen datos mixtos.
+- No se conoce claramente el número de clusters.
+
+## Cuándo evitarlo
+
+Puede ser menos adecuado cuando:
+
+- Hay millones de observaciones.
+- Se necesita asignar casos nuevos.
+- Se requiere entrenamiento rápido.
+- Se necesita una solución muy estable.
+- El dataset contiene muchos outliers no controlados.
+
+## Validación externa
+
+Los clusters pueden compararse con outcomes no utilizados durante la construcción.
+
+Ejemplos:
+
+- Mortalidad.
+- Reingreso.
+- Respuesta.
+- Progresión.
+- Cardiotoxicidad futura.
+
+```python
+outcome_distribution = pd.crosstab(
+    df_clustered["cluster"],
+    df_clustered["future_event"],
+    normalize="index"
+)
+
+display(
+    outcome_distribution
+)
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+El dendrograma puede sugerir subtipos de pacientes, pero estos deben considerarse hipótesis hasta demostrar estabilidad y utilidad.
+:::
+
+Debe revisarse:
+
+- Plausibilidad de cada rama.
+- Tamaño de clusters.
+- Estabilidad.
+- Reproducibilidad.
+- Asociación con outcomes externos.
+- Diferencias entre centros.
+- Sensibilidad a las variables incluidas.
+
+## Errores frecuentes
+
+- No escalar.
+- Elegir linkage sin justificar.
+- Interpretar un dendrograma como verdad clínica.
+- Elegir el corte visualmente sin métricas.
+- No revisar estabilidad.
+- Incluir identificadores.
+- Incluir outcomes futuros.
+- Ignorar outliers.
+- Utilizar Ward con métricas incompatibles.
+- No considerar coste computacional.
+- Confiar solo en una proyección 2D.
+- Poner nombres clínicos demasiado pronto.
+
+## Flujo recomendado
+
+1. Definir unidad de análisis.
+2. Seleccionar variables.
+3. Imputar.
+4. Escalar.
+5. Elegir distancia.
+6. Comparar linkages.
+7. Construir dendrograma.
+8. Evaluar varios cortes.
+9. Revisar métricas internas.
+10. Evaluar estabilidad.
+11. Describir clusters.
+12. Validar externamente.
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad de análisis.
+- [ ] He justificado las variables.
+- [ ] He eliminado identificadores.
+- [ ] He imputado.
+- [ ] He escalado.
+- [ ] He elegido la distancia.
+- [ ] He comparado varios linkages.
+- [ ] He construido un dendrograma.
+- [ ] He probado varios cortes.
+- [ ] He calculado silhouette score.
+- [ ] He revisado estabilidad.
+- [ ] He inspeccionado outliers.
+- [ ] He descrito los clusters.
+- [ ] He validado con outcomes externos.
+- [ ] He evitado interpretar clusters como diagnósticos.
+
+## Recursos
+
+### Documentación
+
+- `AgglomerativeClustering`.
+- `scipy.cluster.hierarchy.linkage`.
+- `dendrogram`.
+- `silhouette_score`.
+- `adjusted_rand_score`.
+- `cophenet`.
+- `kneighbors_graph`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus dendrogramas, linkages, cortes, métricas y perfiles clínicos.
