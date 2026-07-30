@@ -1,0 +1,1264 @@
+---
+title: "Evaluación del clustering"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Evaluar clustering es más difícil que evaluar un modelo supervisado porque normalmente no existe una etiqueta verdadera.
+
+Una evaluación completa debe combinar:
+
+- Métricas internas.
+- Estabilidad.
+- Tamaño y equilibrio de clusters.
+- Interpretabilidad.
+- Validación con variables externas.
+- Reproducibilidad en otras cohortes.
+- Utilidad clínica.
+
+No existe una única métrica que determine la mejor solución.
+:::
+
+## ¿Por qué es difícil evaluar clustering?
+
+En aprendizaje supervisado se compara:
+
+```text
+Predicción
+vs
+Valor real
+```
+
+En clustering, normalmente no existe una clase verdadera.
+
+Por tanto, deben combinarse varias fuentes de evidencia.
+
+::: {.callout-note}
+## Idea clave
+
+Un clustering matemáticamente compacto puede ser clínicamente inútil.
+:::
+
+## Tipos de evaluación
+
+## Evaluación interna
+
+Utiliza únicamente:
+
+- Variables originales.
+- Distancias.
+- Cohesión.
+- Separación.
+
+Ejemplos:
+
+- Silhouette score.
+- Davies-Bouldin index.
+- Calinski-Harabasz score.
+- Inercia.
+
+## Evaluación externa
+
+Compara los clusters con información no utilizada para construirlos.
+
+Ejemplos:
+
+- Mortalidad.
+- Reingreso.
+- Respuesta al tratamiento.
+- Cardiotoxicidad futura.
+- Diagnóstico conocido.
+
+## Evaluación de estabilidad
+
+Analiza si la solución se mantiene ante:
+
+- Cambios de seed.
+- Submuestras.
+- Nuevos periodos.
+- Distintas variables.
+- Diferentes centros.
+- Pequeñas perturbaciones.
+
+## Evaluación clínica
+
+Analiza si los clusters:
+
+- Son plausibles.
+- Son comprensibles.
+- Se reproducen.
+- Se relacionan con outcomes.
+- Modifican decisiones.
+- Aportan utilidad.
+
+## Preparar una solución de ejemplo
+
+```python
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
+
+features = [
+    "age",
+    "troponin",
+    "ntprobnp",
+    "lvef",
+    "gls"
+]
+
+X = df[features]
+```
+
+```python
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+scaler = StandardScaler()
+
+X_imputed = imputer.fit_transform(
+    X
+)
+
+X_scaled = scaler.fit_transform(
+    X_imputed
+)
+```
+
+```python
+model = KMeans(
+    n_clusters=3,
+    random_state=42,
+    n_init="auto"
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+## Silhouette score
+
+Silhouette combina:
+
+- Cohesión dentro del cluster.
+- Separación respecto al cluster más cercano.
+
+Para cada observación:
+
+$$
+s(i)
+=
+\frac{
+b(i)-a(i)
+}{
+\max
+\left(
+a(i),
+b(i)
+\right)
+}
+$$
+
+donde:
+
+- \(a(i)\) es la distancia media al propio cluster.
+- \(b(i)\) es la distancia media al cluster más próximo.
+
+## Calcular silhouette
+
+```python
+from sklearn.metrics import silhouette_score
+
+silhouette = silhouette_score(
+    X_scaled,
+    clusters
+)
+
+print(
+    silhouette
+)
+```
+
+## Interpretación aproximada
+
+```text
+Cercano a 1
+→ buena cohesión y separación
+
+Cercano a 0
+→ clusters solapados
+
+Negativo
+→ asignaciones potencialmente incorrectas
+```
+
+::: {.callout-warning}
+## Precaución
+
+Silhouette puede favorecer clusters compactos y aproximadamente esféricos.
+:::
+
+## Silhouette por observación
+
+```python
+from sklearn.metrics import silhouette_samples
+
+sample_silhouette = silhouette_samples(
+    X_scaled,
+    clusters
+)
+```
+
+```python
+df_evaluation = df.copy()
+
+df_evaluation["cluster"] = clusters
+
+df_evaluation[
+    "silhouette"
+] = sample_silhouette
+```
+
+## Casos con silhouette negativa
+
+```python
+problematic_cases = (
+    df_evaluation
+    .loc[
+        df_evaluation["silhouette"] < 0
+    ]
+    .sort_values(
+        "silhouette"
+    )
+)
+
+display(
+    problematic_cases
+)
+```
+
+Estos casos pueden representar:
+
+- Observaciones fronterizas.
+- Asignaciones inestables.
+- Ruido.
+- Solapamiento real.
+- Variables mal escaladas.
+
+## Perfil silhouette por cluster
+
+```python
+silhouette_by_cluster = (
+    df_evaluation
+    .groupby("cluster")[
+        "silhouette"
+    ]
+    .agg(
+        [
+            "count",
+            "mean",
+            "median",
+            "min",
+            "max"
+        ]
+    )
+)
+
+display(
+    silhouette_by_cluster
+)
+```
+
+## Davies-Bouldin index
+
+Evalúa similitud entre clusters utilizando:
+
+- Dispersión interna.
+- Distancia entre centroides.
+
+```python
+from sklearn.metrics import davies_bouldin_score
+
+davies_bouldin = davies_bouldin_score(
+    X_scaled,
+    clusters
+)
+```
+
+Valores menores suelen ser mejores.
+
+## Limitaciones de Davies-Bouldin
+
+- Depende de centroides.
+- Favorece clusters compactos.
+- Puede no funcionar bien con formas arbitrarias.
+- No informa sobre estabilidad.
+
+## Calinski-Harabasz score
+
+Compara:
+
+- Dispersión entre clusters.
+- Dispersión dentro de clusters.
+
+```python
+from sklearn.metrics import calinski_harabasz_score
+
+calinski_harabasz = calinski_harabasz_score(
+    X_scaled,
+    clusters
+)
+```
+
+Valores mayores suelen ser mejores.
+
+## Limitaciones de Calinski-Harabasz
+
+- Puede favorecer más clusters.
+- Depende de geometría euclídea.
+- No evalúa utilidad clínica.
+- No mide incertidumbre.
+
+## Inercia
+
+En K-means:
+
+```python
+inertia = model.inertia_
+```
+
+La inercia disminuye al aumentar \(K\).
+
+Por tanto, no debe utilizarse sola.
+
+## Método del codo
+
+```python
+import matplotlib.pyplot as plt
+
+k_values = range(
+    2,
+    11
+)
+
+inertias = []
+
+for k in k_values:
+
+    model = KMeans(
+        n_clusters=k,
+        random_state=42,
+        n_init="auto"
+    )
+
+    model.fit(
+        X_scaled
+    )
+
+    inertias.append(
+        model.inertia_
+    )
+
+plt.figure(
+    figsize=(8, 5)
+)
+
+plt.plot(
+    k_values,
+    inertias,
+    marker="o"
+)
+
+plt.xlabel(
+    "Número de clusters"
+)
+
+plt.ylabel(
+    "Inercia"
+)
+
+plt.title(
+    "Método del codo"
+)
+
+plt.show()
+```
+
+## Comparar métricas para varios K
+
+```python
+import pandas as pd
+
+rows = []
+
+for k in range(
+    2,
+    11
+):
+
+    model = KMeans(
+        n_clusters=k,
+        random_state=42,
+        n_init="auto"
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    rows.append(
+        {
+            "n_clusters": k,
+            "inertia": model.inertia_,
+            "silhouette": silhouette_score(
+                X_scaled,
+                labels
+            ),
+            "davies_bouldin": davies_bouldin_score(
+                X_scaled,
+                labels
+            ),
+            "calinski_harabasz": calinski_harabasz_score(
+                X_scaled,
+                labels
+            )
+        }
+    )
+
+evaluation_table = pd.DataFrame(
+    rows
+)
+
+display(
+    evaluation_table
+)
+```
+
+## Visualizar métricas
+
+```python
+plt.figure(
+    figsize=(8, 5)
+)
+
+plt.plot(
+    evaluation_table["n_clusters"],
+    evaluation_table["silhouette"],
+    marker="o"
+)
+
+plt.xlabel(
+    "Número de clusters"
+)
+
+plt.ylabel(
+    "Silhouette score"
+)
+
+plt.title(
+    "Silhouette según número de clusters"
+)
+
+plt.show()
+```
+
+## Métricas con ruido
+
+En DBSCAN y HDBSCAN puede existir la etiqueta `-1`.
+
+Para calcular métricas:
+
+```python
+mask = (
+    clusters != -1
+)
+```
+
+```python
+if len(
+    set(
+        clusters[mask]
+    )
+) >= 2:
+
+    silhouette = silhouette_score(
+        X_scaled[mask],
+        clusters[mask]
+    )
+```
+
+## Reportar ruido
+
+Además del score debe reportarse:
+
+```python
+noise_fraction = (
+    clusters == -1
+).mean()
+```
+
+Una solución con buen silhouette y 70 % de ruido puede no ser útil.
+
+## Tamaño de clusters
+
+```python
+cluster_sizes = (
+    pd.Series(
+        clusters
+    )
+    .value_counts()
+    .sort_index()
+)
+
+display(
+    cluster_sizes
+)
+```
+
+## Proporciones
+
+```python
+cluster_proportions = (
+    pd.Series(
+        clusters
+    )
+    .value_counts(
+        normalize=True
+    )
+    .sort_index()
+)
+
+display(
+    cluster_proportions
+)
+```
+
+## Clusters pequeños
+
+Un cluster pequeño puede representar:
+
+- Subtipo raro.
+- Ruido.
+- Outliers.
+- Sobrefragmentación.
+- Artefacto del algoritmo.
+
+No debe descartarse automáticamente.
+
+## Equilibrio entre clusters
+
+Una solución:
+
+```text
+Cluster 0 → 95 %
+Cluster 1 → 4 %
+Cluster 2 → 1 %
+```
+
+puede ser válida, pero exige interpretación.
+
+## Validación externa con etiquetas conocidas
+
+Si existe una etiqueta externa:
+
+```python
+from sklearn.metrics import adjusted_rand_score
+
+ari = adjusted_rand_score(
+    true_labels,
+    clusters
+)
+```
+
+## Adjusted Rand Index
+
+ARI mide similitud entre dos particiones.
+
+Interpretación aproximada:
+
+```text
+1
+→ acuerdo perfecto
+
+0
+→ acuerdo similar al azar
+
+Negativo
+→ peor que el azar
+```
+
+## Normalized Mutual Information
+
+```python
+from sklearn.metrics import normalized_mutual_info_score
+
+nmi = normalized_mutual_info_score(
+    true_labels,
+    clusters
+)
+```
+
+Valores más altos indican mayor acuerdo.
+
+## Homogeneity
+
+```python
+from sklearn.metrics import homogeneity_score
+
+homogeneity = homogeneity_score(
+    true_labels,
+    clusters
+)
+```
+
+Un cluster homogéneo contiene principalmente una sola clase externa.
+
+## Completeness
+
+```python
+from sklearn.metrics import completeness_score
+
+completeness = completeness_score(
+    true_labels,
+    clusters
+)
+```
+
+Una clase externa completa aparece concentrada en un solo cluster.
+
+## V-measure
+
+```python
+from sklearn.metrics import v_measure_score
+
+v_measure = v_measure_score(
+    true_labels,
+    clusters
+)
+```
+
+Combina homogeneity y completeness.
+
+::: {.callout-warning}
+## Importante
+
+Una etiqueta externa no siempre representa la estructura que queremos descubrir.
+:::
+
+## Validación con outcomes
+
+Aunque no exista una clase de referencia, pueden compararse clusters con outcomes futuros.
+
+```python
+df_clustered = df.copy()
+
+df_clustered["cluster"] = clusters
+```
+
+```python
+outcome_distribution = pd.crosstab(
+    df_clustered["cluster"],
+    df_clustered["future_event"],
+    normalize="index"
+)
+
+display(
+    outcome_distribution
+)
+```
+
+## Comparar outcomes continuos
+
+```python
+outcome_summary = (
+    df_clustered
+    .groupby("cluster")[
+        "length_of_stay"
+    ]
+    .agg(
+        [
+            "count",
+            "mean",
+            "median",
+            "std"
+        ]
+    )
+)
+
+display(
+    outcome_summary
+)
+```
+
+## Evitar circularidad
+
+La variable externa no debe utilizarse para construir los clusters si se pretende usarla para validación.
+
+```text
+Outcome incluido en clustering
++
+Outcome usado para validar
+→ evaluación circular
+```
+
+## Estabilidad ante seeds
+
+```python
+from sklearn.metrics import adjusted_rand_score
+import numpy as np
+
+clusterings = []
+
+for seed in range(
+    20
+):
+
+    model = KMeans(
+        n_clusters=3,
+        random_state=seed,
+        n_init=10
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    clusterings.append(
+        labels
+    )
+```
+
+```python
+agreement_matrix = np.zeros(
+    (
+        len(clusterings),
+        len(clusterings)
+    )
+)
+
+for i in range(
+    len(clusterings)
+):
+
+    for j in range(
+        len(clusterings)
+    ):
+
+        agreement_matrix[
+            i,
+            j
+        ] = adjusted_rand_score(
+            clusterings[i],
+            clusterings[j]
+        )
+```
+
+## Estabilidad media
+
+```python
+upper_triangle = (
+    agreement_matrix[
+        np.triu_indices_from(
+            agreement_matrix,
+            k=1
+        )
+    ]
+)
+
+mean_stability = upper_triangle.mean()
+```
+
+## Estabilidad mediante bootstrap
+
+El proceso puede ser:
+
+1. Crear una muestra bootstrap.
+2. Repetir clustering.
+3. Comparar coasignaciones.
+4. Repetir muchas veces.
+5. Resumir estabilidad.
+
+## Matriz de consenso
+
+Una matriz de consenso contiene la frecuencia con la que dos observaciones aparecen en el mismo cluster.
+
+```text
+Valor cercano a 1
+→ casi siempre juntas
+
+Valor cercano a 0
+→ casi nunca juntas
+
+Valor intermedio
+→ asignación inestable
+```
+
+## Estabilidad por observación
+
+Puede calcularse cuántas veces cada paciente permanece en un grupo equivalente.
+
+Esto ayuda a identificar:
+
+- Casos fronterizos.
+- Perfiles mixtos.
+- Observaciones inestables.
+
+## Comparar algoritmos
+
+```python
+from sklearn.cluster import KMeans
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import DBSCAN
+from sklearn.mixture import GaussianMixture
+
+models = {
+    "kmeans": KMeans(
+        n_clusters=3,
+        random_state=42,
+        n_init="auto"
+    ),
+    "hierarchical": AgglomerativeClustering(
+        n_clusters=3,
+        linkage="ward"
+    ),
+    "dbscan": DBSCAN(
+        eps=0.5,
+        min_samples=5
+    ),
+    "gmm": GaussianMixture(
+        n_components=3,
+        random_state=42,
+        n_init=10
+    )
+}
+```
+
+## Evaluar soluciones
+
+```python
+rows = []
+
+for name, model in models.items():
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    mask = (
+        labels != -1
+    )
+
+    n_clusters = len(
+        set(
+            labels
+        )
+        -
+        {-1}
+    )
+
+    noise_fraction = (
+        labels == -1
+    ).mean()
+
+    if (
+        n_clusters >= 2
+        and
+        mask.sum() > n_clusters
+    ):
+
+        silhouette = silhouette_score(
+            X_scaled[mask],
+            labels[mask]
+        )
+
+        davies_bouldin = davies_bouldin_score(
+            X_scaled[mask],
+            labels[mask]
+        )
+
+    else:
+
+        silhouette = np.nan
+        davies_bouldin = np.nan
+
+    rows.append(
+        {
+            "model": name,
+            "n_clusters": n_clusters,
+            "noise_fraction": noise_fraction,
+            "silhouette": silhouette,
+            "davies_bouldin": davies_bouldin
+        }
+    )
+
+model_comparison = pd.DataFrame(
+    rows
+)
+
+display(
+    model_comparison
+)
+```
+
+## No comparar métricas de forma aislada
+
+Ejemplo:
+
+```text
+K-means
+Silhouette = 0.48
+3 clusters equilibrados
+
+DBSCAN
+Silhouette = 0.60
+65 % de ruido
+```
+
+DBSCAN no es automáticamente mejor.
+
+## Interpretabilidad de los perfiles
+
+```python
+cluster_summary = (
+    df_clustered
+    .groupby("cluster")[features]
+    .agg(
+        [
+            "count",
+            "mean",
+            "median",
+            "std"
+        ]
+    )
+)
+
+display(
+    cluster_summary
+)
+```
+
+Debe evaluarse si los perfiles:
+
+- Son distintos.
+- Son comprensibles.
+- Tienen plausibilidad clínica.
+- Son suficientemente grandes.
+- Se reproducen.
+
+## Redundancia entre variables
+
+Variables muy correlacionadas pueden dominar la solución.
+
+Ejemplos:
+
+- Peso y superficie corporal.
+- FEVI Simpson y FEVI modo M.
+- Biomarcadores relacionados.
+
+Puede evaluarse:
+
+- Correlación.
+- PCA.
+- Selección de variables.
+- Sensibilidad al retirar variables.
+
+## Sensibilidad a variables
+
+```python
+feature_sets = {
+    "all_features": [
+        "age",
+        "troponin",
+        "ntprobnp",
+        "lvef",
+        "gls"
+    ],
+    "without_biomarkers": [
+        "age",
+        "lvef",
+        "gls"
+    ],
+    "cardiac_only": [
+        "lvef",
+        "gls"
+    ]
+}
+```
+
+Si los clusters cambian por completo, la solución puede ser frágil.
+
+## Sensibilidad al escalado
+
+Puede compararse:
+
+- `StandardScaler`.
+- `RobustScaler`.
+- Transformaciones logarítmicas.
+- Sin escalado, solo como comprobación.
+
+## Sensibilidad a outliers
+
+Debe repetirse el análisis:
+
+- Con y sin casos extremos.
+- Con escalado robusto.
+- Con métodos sensibles y robustos.
+- Revisando si cambian los clusters principales.
+
+## Visualización
+
+Puede utilizarse:
+
+- PCA.
+- UMAP.
+- t-SNE.
+- Heatmaps.
+- Dendrogramas.
+- Perfiles de centroides.
+
+::: {.callout-warning}
+## Precaución
+
+Una visualización bonita no demuestra que los clusters sean reales.
+:::
+
+## PCA para visualizar
+
+```python
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+pca = PCA(
+    n_components=2
+)
+
+X_pca = pca.fit_transform(
+    X_scaled
+)
+
+plt.figure(
+    figsize=(8, 6)
+)
+
+plt.scatter(
+    X_pca[:, 0],
+    X_pca[:, 1],
+    c=clusters
+)
+
+plt.xlabel(
+    "PC1"
+)
+
+plt.ylabel(
+    "PC2"
+)
+
+plt.title(
+    "Clusters proyectados en PCA"
+)
+
+plt.show()
+```
+
+## Incertidumbre
+
+Algunos métodos permiten cuantificar incertidumbre.
+
+### GMM
+
+```python
+probability = model.predict_proba(
+    X_scaled
+)
+```
+
+### HDBSCAN
+
+```python
+membership_probability = (
+    model.probabilities_
+)
+```
+
+### Silhouette individual
+
+```python
+sample_silhouette = silhouette_samples(
+    X_scaled,
+    clusters
+)
+```
+
+## Casos inciertos
+
+Los casos inciertos pueden ser:
+
+- Perfiles mixtos.
+- Transiciones.
+- Ruido.
+- Casos clínicos raros.
+- Observaciones mal medidas.
+
+No deben forzarse siempre a una interpretación rígida.
+
+## Validación temporal
+
+Una solución puede entrenarse en un periodo y evaluarse en otro.
+
+```text
+Periodo 1
+→ construir clusters
+
+Periodo 2
+→ comprobar perfiles y prevalencias
+```
+
+## Validación entre centros
+
+Puede analizarse:
+
+- Distribución de clusters por centro.
+- Reproducibilidad de centroides.
+- Diferencias en outcomes.
+- Estabilidad de variables discriminantes.
+
+## Replicación
+
+Una solución sólida debería reproducirse aproximadamente en:
+
+- Otra cohorte.
+- Otro hospital.
+- Otro país.
+- Otro periodo.
+- Otra muestra.
+
+## Utilidad clínica
+
+Debe responderse:
+
+- ¿Los clusters cambian una decisión?
+- ¿Identifican perfiles no conocidos?
+- ¿Predicen evolución?
+- ¿Ayudan a estratificar riesgo?
+- ¿Son comprensibles?
+- ¿Son accionables?
+
+## Selección final
+
+Una tabla de decisión puede incluir:
+
+| Criterio | Solución A | Solución B | Solución C |
+|---|---:|---:|---:|
+| Silhouette | 0.48 | 0.52 | 0.46 |
+| Estabilidad ARI | 0.90 | 0.62 | 0.85 |
+| Ruido | 0 % | 35 % | 5 % |
+| Interpretabilidad | Alta | Baja | Alta |
+| Replicación externa | Sí | No | Parcial |
+| Utilidad clínica | Alta | Baja | Moderada |
+
+## No existe un ganador automático
+
+La solución final debe equilibrar:
+
+- Calidad matemática.
+- Estabilidad.
+- Interpretabilidad.
+- Reproducibilidad.
+- Utilidad.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Un cluster no debe convertirse en categoría clínica hasta demostrar estabilidad, reproducibilidad y utilidad.
+:::
+
+Debe revisarse:
+
+- Tamaño.
+- Perfil.
+- Incertidumbre.
+- Outcome.
+- Centro.
+- Periodo.
+- Representatividad.
+- Posible sesgo.
+
+## Errores frecuentes
+
+- Elegir solo por silhouette.
+- Ignorar estabilidad.
+- No reportar ruido.
+- No revisar tamaño de clusters.
+- Validar con una variable usada para construirlos.
+- Confiar en una proyección 2D.
+- No comparar algoritmos.
+- No revisar sensibilidad a variables.
+- Poner nombres clínicos demasiado pronto.
+- Confundir cluster con diagnóstico.
+- No replicar.
+- Ignorar utilidad clínica.
+
+## Flujo recomendado
+
+1. Definir objetivo.
+2. Definir unidad de análisis.
+3. Construir varias soluciones.
+4. Calcular métricas internas.
+5. Revisar tamaño y ruido.
+6. Evaluar estabilidad.
+7. Comparar algoritmos.
+8. Interpretar perfiles.
+9. Validar con outcomes externos.
+10. Replicar en otra cohorte.
+11. Evaluar utilidad clínica.
+12. Documentar la elección.
+
+## Checklist para proyectos
+
+- [ ] He calculado silhouette.
+- [ ] He calculado Davies-Bouldin.
+- [ ] He calculado Calinski-Harabasz.
+- [ ] He reportado inercia cuando corresponde.
+- [ ] He reportado tamaño de clusters.
+- [ ] He reportado proporción de ruido.
+- [ ] He evaluado estabilidad.
+- [ ] He comparado seeds.
+- [ ] He comparado algoritmos.
+- [ ] He revisado incertidumbre.
+- [ ] He evaluado sensibilidad a variables.
+- [ ] He validado con outcomes externos.
+- [ ] He evaluado subgrupos.
+- [ ] He considerado replicación.
+- [ ] He justificado la solución final.
+
+## Recursos
+
+### Documentación
+
+- `silhouette_score`.
+- `silhouette_samples`.
+- `davies_bouldin_score`.
+- `calinski_harabasz_score`.
+- `adjusted_rand_score`.
+- `normalized_mutual_info_score`.
+- `homogeneity_score`.
+- `completeness_score`.
+- `v_measure_score`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus métricas, soluciones comparadas, estabilidad, perfiles y criterios de selección.

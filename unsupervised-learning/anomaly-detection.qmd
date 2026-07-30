@@ -1,0 +1,1026 @@
+---
+title: "Detección de anomalías"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+La detección de anomalías busca observaciones poco frecuentes o distintas al patrón general.
+
+Una anomalía puede representar:
+
+- Un error de datos.
+- Un caso clínico raro.
+- Un fallo de sensor.
+- Un cambio brusco.
+- Un episodio potencialmente relevante.
+
+Los algoritmos más utilizados incluyen:
+
+- Isolation Forest.
+- Local Outlier Factor.
+- One-Class SVM.
+- Métodos basados en densidad.
+- Autoencoders.
+:::
+
+## ¿Qué es una anomalía?
+
+Una anomalía es una observación que se desvía del comportamiento esperado.
+
+```text
+Patrón habitual
+● ● ● ● ● ● ● ●
+
+Anomalía
+                ×
+```
+
+::: {.callout-note}
+## Idea clave
+
+Una anomalía matemática no es necesariamente un error.
+:::
+
+## Tipos de anomalías
+
+## Anomalía puntual
+
+Una observación es extraña por sí sola.
+
+Ejemplo:
+
+```text
+Troponina = 25 ng/L
+```
+
+cuando el resto de valores están cerca de 0.02.
+
+## Anomalía contextual
+
+Una observación es anómala según el contexto.
+
+Ejemplo:
+
+```text
+Frecuencia cardiaca = 150 lpm
+```
+
+puede ser normal durante ejercicio, pero anómala en reposo.
+
+## Anomalía colectiva
+
+Un conjunto de observaciones forma un patrón anómalo.
+
+Ejemplo:
+
+```text
+Serie temporal con oscilaciones bruscas
+```
+
+aunque cada punto individual parezca plausible.
+
+## Aplicaciones clínicas
+
+- Detectar errores de laboratorio.
+- Identificar pacientes con perfiles raros.
+- Detectar deterioro inesperado.
+- Revisar fallos de monitorización.
+- Detectar cambios de distribución.
+- Priorizar revisión manual.
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "troponin",
+    "ntprobnp",
+    "lvef",
+    "gls"
+]
+
+X = df[features]
+```
+
+## Imputar valores ausentes
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+X_imputed = imputer.fit_transform(
+    X
+)
+```
+
+## Escalar
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(
+    X_imputed
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+El escalado es esencial en métodos basados en distancias, como LOF y One-Class SVM.
+:::
+
+## Isolation Forest
+
+Isolation Forest detecta anomalías intentando aislar observaciones mediante divisiones aleatorias.
+
+Las anomalías suelen aislarse con menos divisiones.
+
+```text
+Observación normal
+→ necesita muchas divisiones
+
+Observación anómala
+→ se aísla rápidamente
+```
+
+## Entrenar Isolation Forest
+
+```python
+from sklearn.ensemble import IsolationForest
+
+model = IsolationForest(
+    n_estimators=300,
+    contamination=0.02,
+    random_state=42,
+    n_jobs=-1
+)
+
+anomaly_label = model.fit_predict(
+    X_scaled
+)
+```
+
+## Interpretar etiquetas
+
+```text
+1
+→ observación considerada normal
+
+-1
+→ observación considerada anómala
+```
+
+## Añadir resultados
+
+```python
+df_anomaly = df.copy()
+
+df_anomaly[
+    "anomaly_label"
+] = anomaly_label
+```
+
+## Score de anomalía
+
+```python
+anomaly_score = model.decision_function(
+    X_scaled
+)
+```
+
+En general:
+
+```text
+Score más bajo
+→ mayor anomalía
+```
+
+## Guardar el score
+
+```python
+df_anomaly[
+    "anomaly_score"
+] = anomaly_score
+```
+
+## Casos más anómalos
+
+```python
+most_anomalous = (
+    df_anomaly
+    .sort_values(
+        "anomaly_score"
+    )
+    .head(20)
+)
+
+display(
+    most_anomalous
+)
+```
+
+## Parámetro contamination
+
+```python
+contamination=0.02
+```
+
+Indica la proporción esperada de anomalías.
+
+```text
+0.01
+→ aproximadamente 1 %
+
+0.05
+→ aproximadamente 5 %
+```
+
+::: {.callout-warning}
+## Riesgo
+
+Fijar `contamination` sin justificación fuerza una proporción concreta de anomalías.
+:::
+
+## Número de árboles
+
+```python
+n_estimators=500
+```
+
+Más árboles suelen mejorar estabilidad, con mayor coste computacional.
+
+## max_samples
+
+```python
+model = IsolationForest(
+    max_samples="auto",
+    random_state=42
+)
+```
+
+Controla cuántas observaciones se usan por árbol.
+
+## Local Outlier Factor
+
+LOF compara la densidad local de cada observación con la densidad de sus vecinos.
+
+Una observación es anómala si su densidad local es mucho menor.
+
+## Entrenar LOF
+
+```python
+from sklearn.neighbors import LocalOutlierFactor
+
+model = LocalOutlierFactor(
+    n_neighbors=20,
+    contamination=0.02
+)
+
+anomaly_label = model.fit_predict(
+    X_scaled
+)
+```
+
+## Score de LOF
+
+```python
+lof_score = (
+    model.negative_outlier_factor_
+)
+```
+
+Valores más negativos indican mayor anomalía.
+
+## Número de vecinos
+
+```python
+n_neighbors=20
+```
+
+```text
+Pocos vecinos
+→ detecta anomalías muy locales
+→ mayor sensibilidad al ruido
+
+Muchos vecinos
+→ patrón más global
+→ puede perder anomalías locales
+```
+
+## Novelty detection con LOF
+
+Por defecto, LOF se utiliza para detectar anomalías en los mismos datos de entrenamiento.
+
+Para evaluar nuevas observaciones:
+
+```python
+model = LocalOutlierFactor(
+    n_neighbors=20,
+    contamination=0.02,
+    novelty=True
+)
+
+model.fit(
+    X_train_scaled
+)
+```
+
+Después:
+
+```python
+new_label = model.predict(
+    X_new_scaled
+)
+```
+
+## One-Class SVM
+
+One-Class SVM aprende una frontera que contiene la mayoría de observaciones normales.
+
+```python
+from sklearn.svm import OneClassSVM
+
+model = OneClassSVM(
+    kernel="rbf",
+    nu=0.02,
+    gamma="scale"
+)
+
+anomaly_label = model.fit_predict(
+    X_scaled
+)
+```
+
+## Parámetro nu
+
+`nu` controla aproximadamente:
+
+- Fracción máxima de errores.
+- Fracción mínima de support vectors.
+
+```python
+nu=0.02
+```
+
+## Parámetro gamma
+
+```text
+Gamma pequeño
+→ frontera suave
+
+Gamma grande
+→ frontera compleja
+```
+
+## Comparación de métodos
+
+| Método | Enfoque | Escalado | Nuevos casos | Punto fuerte |
+|---|---|---|---|---|
+| Isolation Forest | Aislamiento | Recomendado | Sí | Escalable |
+| LOF | Densidad local | Sí | Con `novelty=True` | Anomalías locales |
+| One-Class SVM | Frontera | Sí | Sí | Flexibilidad con kernels |
+| DBSCAN | Densidad | Sí | Difícil | Ruido y clusters |
+| Autoencoder | Reconstrucción | Sí | Sí | Alta dimensionalidad |
+
+## Pipeline con Isolation Forest
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "detector",
+            IsolationForest(
+                n_estimators=300,
+                contamination=0.02,
+                random_state=42,
+                n_jobs=-1
+            )
+        )
+    ]
+)
+```
+
+## Visualizar anomalías con PCA
+
+```python
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+pca = PCA(
+    n_components=2
+)
+
+X_pca = pca.fit_transform(
+    X_scaled
+)
+```
+
+```python
+is_anomaly = (
+    anomaly_label == -1
+)
+
+plt.figure(
+    figsize=(8, 6)
+)
+
+plt.scatter(
+    X_pca[
+        ~is_anomaly,
+        0
+    ],
+    X_pca[
+        ~is_anomaly,
+        1
+    ]
+)
+
+plt.scatter(
+    X_pca[
+        is_anomaly,
+        0
+    ],
+    X_pca[
+        is_anomaly,
+        1
+    ],
+    marker="x",
+    s=80
+)
+
+plt.xlabel(
+    "PC1"
+)
+
+plt.ylabel(
+    "PC2"
+)
+
+plt.title(
+    "Anomalías proyectadas en PCA"
+)
+
+plt.show()
+```
+
+## Distribución de scores
+
+```python
+plt.figure(
+    figsize=(8, 5)
+)
+
+plt.hist(
+    anomaly_score,
+    bins=30
+)
+
+plt.xlabel(
+    "Score de anomalía"
+)
+
+plt.ylabel(
+    "Frecuencia"
+)
+
+plt.title(
+    "Distribución de scores"
+)
+
+plt.show()
+```
+
+## Elegir un umbral
+
+En lugar de usar directamente `contamination`, puede definirse un percentil.
+
+```python
+threshold = np.percentile(
+    anomaly_score,
+    2
+)
+```
+
+```python
+anomaly_label_custom = np.where(
+    anomaly_score < threshold,
+    -1,
+    1
+)
+```
+
+## Umbral clínico
+
+El umbral puede definirse según:
+
+- Capacidad de revisión.
+- Coste de falsos positivos.
+- Coste de falsos negativos.
+- Prevalencia esperada.
+- Validación retrospectiva.
+
+## Evaluación con etiquetas conocidas
+
+Cuando existen etiquetas:
+
+```python
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score
+```
+
+Los scores deben orientarse para que valores altos representen mayor anomalía.
+
+```python
+anomaly_probability_score = (
+    -anomaly_score
+)
+```
+
+```python
+roc_auc = roc_auc_score(
+    y_true_anomaly,
+    anomaly_probability_score
+)
+
+pr_auc = average_precision_score(
+    y_true_anomaly,
+    anomaly_probability_score
+)
+```
+
+## Precision y recall
+
+```python
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
+
+y_pred_binary = (
+    anomaly_label == -1
+).astype(int)
+
+precision = precision_score(
+    y_true_anomaly,
+    y_pred_binary
+)
+
+recall = recall_score(
+    y_true_anomaly,
+    y_pred_binary
+)
+
+f1 = f1_score(
+    y_true_anomaly,
+    y_pred_binary
+)
+```
+
+## Evaluación sin etiquetas
+
+Cuando no existen etiquetas, puede revisarse:
+
+- Distribución de scores.
+- Estabilidad.
+- Casos detectados.
+- Plausibilidad clínica.
+- Acuerdo entre métodos.
+- Rendimiento tras inyectar anomalías artificiales.
+
+## Inyectar anomalías artificiales
+
+Puede ser útil para pruebas controladas.
+
+Ejemplo:
+
+```python
+X_synthetic = X_scaled.copy()
+
+X_synthetic[
+    :10,
+    0
+] = (
+    X_synthetic[
+        :10,
+        0
+    ]
+    +
+    8
+)
+```
+
+Después se evalúa si el detector identifica esos casos.
+
+## Acuerdo entre métodos
+
+```python
+from sklearn.metrics import adjusted_rand_score
+
+agreement = adjusted_rand_score(
+    isolation_labels,
+    lof_labels
+)
+```
+
+También puede calcularse el porcentaje de coincidencia.
+
+```python
+agreement_rate = (
+    isolation_labels
+    ==
+    lof_labels
+).mean()
+```
+
+## Estabilidad
+
+Un detector debería producir resultados relativamente similares ante:
+
+- Cambios de seed.
+- Submuestras.
+- Distintos periodos.
+- Pequeñas variaciones del dataset.
+- Cambios razonables de hiperparámetros.
+
+## Estabilidad de Isolation Forest
+
+```python
+labels_by_seed = []
+
+for seed in range(
+    20
+):
+
+    model = IsolationForest(
+        n_estimators=300,
+        contamination=0.02,
+        random_state=seed
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    labels_by_seed.append(
+        labels
+    )
+```
+
+## Frecuencia de detección
+
+```python
+detection_matrix = np.column_stack(
+    [
+        labels == -1
+        for labels in labels_by_seed
+    ]
+)
+
+detection_frequency = (
+    detection_matrix.mean(
+        axis=1
+    )
+)
+```
+
+Casos detectados en casi todas las repeticiones son más estables.
+
+## Anomalías globales y locales
+
+### Globales
+
+Son extrañas respecto a todo el dataset.
+
+Isolation Forest suele funcionar bien.
+
+### Locales
+
+Son extrañas respecto a su entorno próximo.
+
+LOF puede ser más adecuado.
+
+## Variables responsables
+
+Puede analizarse por qué un caso es anómalo.
+
+Estrategias:
+
+- Comparar con medianas.
+- Z-scores.
+- Distancia a vecinos.
+- SHAP para Isolation Forest, con cautela.
+- Reconstrucción en autoencoders.
+
+## Z-scores por caso
+
+```python
+X_standardized = pd.DataFrame(
+    X_scaled,
+    columns=features,
+    index=df.index
+)
+```
+
+```python
+case_id = most_anomalous.index[0]
+
+display(
+    X_standardized.loc[
+        case_id
+    ].sort_values(
+        key=abs,
+        ascending=False
+    )
+)
+```
+
+## Perfil frente a población
+
+```python
+case_profile = pd.DataFrame(
+    {
+        "case_value": df.loc[
+            case_id,
+            features
+        ],
+        "population_median": df[
+            features
+        ].median()
+    }
+)
+
+display(
+    case_profile
+)
+```
+
+## Autoencoders
+
+Un autoencoder aprende a reconstruir observaciones normales.
+
+```text
+Entrada
+→ representación comprimida
+→ reconstrucción
+```
+
+Una reconstrucción mala puede indicar anomalía.
+
+## Error de reconstrucción
+
+$$
+Error
+=
+\left\|
+x
+-
+\hat{x}
+\right\|^2
+$$
+
+Valores altos indican observaciones poco compatibles con el patrón aprendido.
+
+## Cuándo usar autoencoders
+
+Pueden ser útiles cuando:
+
+- Hay alta dimensionalidad.
+- Existen señales complejas.
+- Se dispone de muchos datos.
+- Las relaciones son no lineales.
+- Se trabaja con imágenes o series.
+
+## Limitaciones de autoencoders
+
+- Requieren más datos.
+- Son menos interpretables.
+- Pueden reconstruir también anomalías.
+- El umbral sigue siendo necesario.
+- Son sensibles al diseño y entrenamiento.
+
+## Series temporales
+
+En series temporales puede buscarse:
+
+- Punto anómalo.
+- Cambio de nivel.
+- Cambio de tendencia.
+- Secuencia anómala.
+- Ruptura estructural.
+
+Ejemplos de métodos:
+
+- Residuos de modelos temporales.
+- STL.
+- Isolation Forest con ventanas.
+- Autoencoders secuenciales.
+- Change point detection.
+
+## Ventanas temporales
+
+```python
+window_features = [
+    "mean_last_6h",
+    "std_last_6h",
+    "min_last_6h",
+    "max_last_6h",
+    "slope_last_6h"
+]
+```
+
+El detector puede trabajar sobre estas características.
+
+## Leakage temporal
+
+Debe evitarse usar información posterior al momento de detección.
+
+```text
+Alerta a las 12:00
+→ solo información disponible hasta las 12:00
+```
+
+## Drift
+
+Con el tiempo pueden cambiar:
+
+- Distribuciones.
+- Protocolos.
+- Equipos.
+- Poblaciones.
+- Frecuencia de anomalías.
+
+Debe monitorizarse:
+
+- Distribución de scores.
+- Proporción de alertas.
+- Variables responsables.
+- Rendimiento validado.
+
+## Nuevos casos
+
+Para detección prospectiva:
+
+1. Ajustar imputador con train.
+2. Ajustar escalador con train.
+3. Ajustar detector con train.
+4. Aplicar los mismos pasos a casos nuevos.
+
+## Novelty detection
+
+Se diferencia entre:
+
+### Outlier detection
+
+Las anomalías están presentes en train.
+
+### Novelty detection
+
+Train contiene principalmente datos normales y se evalúan casos nuevos.
+
+::: {.callout-note}
+## Idea clave
+
+La estrategia cambia según si train contiene anomalías.
+:::
+
+## Selección de datos normales
+
+En novelty detection conviene entrenar con una población de referencia lo más limpia posible.
+
+Ejemplo:
+
+```text
+Train
+→ pacientes clínicamente estables
+
+Aplicación
+→ nuevos pacientes
+```
+
+## Contaminación del entrenamiento
+
+Si train contiene muchas anomalías:
+
+- La frontera puede adaptarse a ellas.
+- Los scores pierden contraste.
+- Disminuye sensibilidad.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+La detección de anomalías suele ser más útil como sistema de priorización que como diagnóstico automático.
+:::
+
+Debe revisarse:
+
+- Quién recibe la alerta.
+- Qué acción desencadena.
+- Cuántas alertas se generan.
+- Cuál es el coste de revisión.
+- Qué ocurre con falsos negativos.
+- Cómo se explica cada caso.
+- Cómo se monitoriza el sistema.
+
+## Riesgo de fatiga de alertas
+
+Demasiadas alertas pueden producir:
+
+- Ignorar señales.
+- Sobrecarga.
+- Pérdida de confianza.
+- Menor adherencia.
+
+El umbral debe ajustarse a la capacidad operativa.
+
+## Errores frecuentes
+
+- Interpretar anomalía como error.
+- No escalar.
+- Elegir contamination sin justificar.
+- Evaluar solo visualmente.
+- No revisar estabilidad.
+- No distinguir outlier de novelty detection.
+- Entrenar con información futura.
+- Ignorar drift.
+- Usar una única técnica.
+- No revisar casos individualmente.
+- Eliminar anomalías automáticamente.
+- Convertir alertas en diagnósticos.
+
+## Flujo recomendado
+
+1. Definir qué significa anomalía.
+2. Definir unidad de análisis.
+3. Preparar una población de referencia.
+4. Imputar.
+5. Escalar.
+6. Entrenar varios detectores.
+7. Analizar scores.
+8. Elegir umbral.
+9. Revisar casos.
+10. Evaluar estabilidad.
+11. Validar clínicamente.
+12. Monitorizar drift.
+
+## Checklist para proyectos
+
+- [ ] He definido qué es una anomalía.
+- [ ] He definido la unidad de análisis.
+- [ ] He diferenciado outlier y novelty detection.
+- [ ] He preparado train correctamente.
+- [ ] He imputado.
+- [ ] He escalado.
+- [ ] He probado más de un método.
+- [ ] He justificado el umbral.
+- [ ] He revisado la proporción de alertas.
+- [ ] He analizado casos individuales.
+- [ ] He evaluado estabilidad.
+- [ ] He comprobado leakage temporal.
+- [ ] He validado con expertos.
+- [ ] He considerado fatiga de alertas.
+- [ ] He preparado monitorización de drift.
+
+## Recursos
+
+### Documentación
+
+- `IsolationForest`.
+- `LocalOutlierFactor`.
+- `OneClassSVM`.
+- `DBSCAN`.
+- `StandardScaler`.
+- `roc_auc_score`.
+- `average_precision_score`.
+- Autoencoders.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus detectores, umbrales, scores, casos revisados y decisiones clínicas.

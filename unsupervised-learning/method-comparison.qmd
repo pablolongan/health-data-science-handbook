@@ -1,0 +1,958 @@
+---
+title: "Comparación de métodos no supervisados"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+No existe un único método no supervisado adecuado para todos los problemas.
+
+La elección depende de:
+
+- La forma esperada de los clusters.
+- La presencia de ruido.
+- La dimensionalidad.
+- El tamaño de muestra.
+- La necesidad de asignar nuevos casos.
+- La interpretabilidad.
+- La estabilidad.
+- La utilidad clínica.
+
+La comparación debe combinar métricas, estabilidad y sentido clínico.
+:::
+
+## ¿Qué métodos comparamos?
+
+En esta sección se comparan:
+
+- K-means.
+- Clustering jerárquico.
+- DBSCAN.
+- HDBSCAN.
+- Gaussian Mixture Models.
+- Métodos de detección de anomalías.
+
+## Pregunta inicial
+
+Antes de elegir algoritmo, define qué buscas.
+
+```text
+¿Agrupar pacientes?
+¿Descubrir subtipos?
+¿Detectar ruido?
+¿Asignar nuevos casos?
+¿Encontrar perfiles probabilísticos?
+¿Explorar anomalías?
+```
+
+::: {.callout-note}
+## Idea clave
+
+La pregunta de investigación determina el método más que la métrica.
+:::
+
+## Comparación general
+
+| Método | Necesita número de grupos | Detecta ruido | Asigna nuevos casos | Pertenencia probabilística | Escalabilidad |
+|---|---|---|---|---|---|
+| K-means | Sí | No | Sí | No | Alta |
+| Jerárquico | No necesariamente | No | Difícil | No | Media-baja |
+| DBSCAN | No | Sí | Difícil | No | Media |
+| HDBSCAN | No | Sí | Parcial | Sí | Media |
+| GMM | Sí | No directamente | Sí | Sí | Media |
+| Isolation Forest | No aplica | Sí | Sí | Score | Alta |
+
+## K-means
+
+Adecuado cuando:
+
+- Los clusters son compactos.
+- Las variables son numéricas.
+- Se necesita velocidad.
+- Se quiere asignar nuevos casos.
+- Existe una idea razonable de \(K\).
+
+Limitaciones:
+
+- Sensible a outliers.
+- No detecta ruido.
+- Favorece clusters esféricos.
+- Requiere escalado.
+- Puede ser inestable.
+
+## Clustering jerárquico
+
+Adecuado cuando:
+
+- Se busca una jerarquía.
+- Se quiere visualizar un dendrograma.
+- El dataset no es enorme.
+- Se necesitan métricas de distancia flexibles.
+- Se trabaja con datos mixtos mediante distancia precomputada.
+
+Limitaciones:
+
+- Costoso en muestras grandes.
+- Difícil asignar nuevos casos.
+- Sensible a linkage y outliers.
+- El número de clusters sigue requiriendo decisión.
+
+## DBSCAN
+
+Adecuado cuando:
+
+- Existen clusters de forma irregular.
+- Se desea detectar ruido.
+- No se conoce el número de grupos.
+- Las regiones densas están bien definidas.
+
+Limitaciones:
+
+- Sensible a `eps`.
+- Difícil con densidades distintas.
+- Problemas en alta dimensión.
+- Difícil asignar nuevos casos.
+
+## HDBSCAN
+
+Adecuado cuando:
+
+- Hay densidades variables.
+- Se desea detectar ruido.
+- Se quieren probabilidades de pertenencia.
+- No se quiere fijar un único `eps`.
+
+Limitaciones:
+
+- Más complejo.
+- Puede producir mucho ruido.
+- Requiere librería adicional.
+- La interpretación puede ser menos directa.
+
+## Gaussian Mixture Models
+
+Adecuado cuando:
+
+- Los clusters se solapan.
+- Se quieren probabilidades.
+- Los grupos son aproximadamente elípticos.
+- Se desea asignar nuevos casos.
+- Se quiere modelar incertidumbre.
+
+Limitaciones:
+
+- Asume estructura aproximadamente gaussiana.
+- Sensible a inicialización.
+- Puede sobreajustar.
+- Requiere elegir covarianza.
+
+## Detección de anomalías
+
+Adecuado cuando el objetivo no es agrupar, sino identificar casos raros.
+
+Métodos habituales:
+
+- Isolation Forest.
+- Local Outlier Factor.
+- One-Class SVM.
+- Autoencoders.
+- DBSCAN como detector de ruido.
+
+## Tabla por objetivo
+
+| Objetivo | Método inicial recomendado |
+|---|---|
+| Clusters compactos | K-means |
+| Jerarquía de subgrupos | Jerárquico |
+| Formas irregulares | DBSCAN |
+| Densidades variables | HDBSCAN |
+| Solapamiento probabilístico | GMM |
+| Casos raros globales | Isolation Forest |
+| Anomalías locales | LOF |
+| Frontera de normalidad | One-Class SVM |
+
+## Preparar una comparación justa
+
+Todos los métodos deben utilizar:
+
+- Las mismas variables.
+- La misma unidad de análisis.
+- La misma imputación.
+- El mismo escalado.
+- La misma cohorte.
+- La misma definición de ruido.
+- Los mismos criterios externos.
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "troponin",
+    "ntprobnp",
+    "lvef",
+    "gls"
+]
+
+X = df[features]
+```
+
+## Imputar y escalar
+
+```python
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+scaler = StandardScaler()
+
+X_imputed = imputer.fit_transform(
+    X
+)
+
+X_scaled = scaler.fit_transform(
+    X_imputed
+)
+```
+
+## Definir métodos
+
+```python
+from sklearn.cluster import KMeans
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import DBSCAN
+from sklearn.mixture import GaussianMixture
+
+models = {
+    "kmeans": KMeans(
+        n_clusters=3,
+        random_state=42,
+        n_init="auto"
+    ),
+    "hierarchical": AgglomerativeClustering(
+        n_clusters=3,
+        linkage="ward"
+    ),
+    "dbscan": DBSCAN(
+        eps=0.5,
+        min_samples=5
+    ),
+    "gmm": GaussianMixture(
+        n_components=3,
+        covariance_type="full",
+        n_init=10,
+        random_state=42
+    )
+}
+```
+
+## Evaluar todos los métodos
+
+```python
+from sklearn.metrics import silhouette_score
+from sklearn.metrics import davies_bouldin_score
+from sklearn.metrics import calinski_harabasz_score
+import numpy as np
+import pandas as pd
+
+rows = []
+
+labels_by_model = {}
+
+for name, model in models.items():
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    labels_by_model[name] = labels
+
+    mask = (
+        labels != -1
+    )
+
+    n_clusters = len(
+        set(labels)
+        -
+        {-1}
+    )
+
+    noise_fraction = (
+        labels == -1
+    ).mean()
+
+    if (
+        n_clusters >= 2
+        and
+        mask.sum() > n_clusters
+    ):
+
+        silhouette = silhouette_score(
+            X_scaled[mask],
+            labels[mask]
+        )
+
+        davies_bouldin = davies_bouldin_score(
+            X_scaled[mask],
+            labels[mask]
+        )
+
+        calinski_harabasz = calinski_harabasz_score(
+            X_scaled[mask],
+            labels[mask]
+        )
+
+    else:
+
+        silhouette = np.nan
+        davies_bouldin = np.nan
+        calinski_harabasz = np.nan
+
+    rows.append(
+        {
+            "model": name,
+            "n_clusters": n_clusters,
+            "noise_fraction": noise_fraction,
+            "silhouette": silhouette,
+            "davies_bouldin": davies_bouldin,
+            "calinski_harabasz": calinski_harabasz
+        }
+    )
+
+comparison_table = pd.DataFrame(
+    rows
+)
+
+display(
+    comparison_table
+)
+```
+
+## No elegir solo por silhouette
+
+Ejemplo:
+
+```text
+DBSCAN
+Silhouette = 0.62
+Ruido = 55 %
+
+K-means
+Silhouette = 0.48
+Ruido = 0 %
+```
+
+DBSCAN no es automáticamente mejor.
+
+## Comparar tamaños de clusters
+
+```python
+size_tables = {}
+
+for name, labels in labels_by_model.items():
+
+    size_tables[name] = (
+        pd.Series(
+            labels
+        )
+        .value_counts()
+        .sort_index()
+    )
+```
+
+## Visualizar tamaños
+
+```python
+size_dataframe = pd.concat(
+    size_tables,
+    axis=1
+).fillna(0)
+
+display(
+    size_dataframe
+)
+```
+
+## Comparar estabilidad
+
+```python
+from sklearn.metrics import adjusted_rand_score
+```
+
+Para K-means:
+
+```python
+clusterings = []
+
+for seed in range(
+    20
+):
+
+    model = KMeans(
+        n_clusters=3,
+        n_init=10,
+        random_state=seed
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    clusterings.append(
+        labels
+    )
+```
+
+```python
+agreements = []
+
+for i in range(
+    len(clusterings)
+):
+
+    for j in range(
+        i + 1,
+        len(clusterings)
+    ):
+
+        agreements.append(
+            adjusted_rand_score(
+                clusterings[i],
+                clusterings[j]
+            )
+        )
+
+mean_stability = np.mean(
+    agreements
+)
+```
+
+## Comparar soluciones entre algoritmos
+
+```python
+pairwise_rows = []
+
+model_names = list(
+    labels_by_model.keys()
+)
+
+for i in range(
+    len(model_names)
+):
+
+    for j in range(
+        i + 1,
+        len(model_names)
+    ):
+
+        name_a = model_names[i]
+        name_b = model_names[j]
+
+        ari = adjusted_rand_score(
+            labels_by_model[name_a],
+            labels_by_model[name_b]
+        )
+
+        pairwise_rows.append(
+            {
+                "model_a": name_a,
+                "model_b": name_b,
+                "adjusted_rand_index": ari
+            }
+        )
+
+pairwise_table = pd.DataFrame(
+    pairwise_rows
+)
+
+display(
+    pairwise_table
+)
+```
+
+## Acuerdo bajo entre métodos
+
+Un ARI bajo puede indicar:
+
+- Estructura poco clara.
+- Algoritmos con supuestos distintos.
+- Alta sensibilidad.
+- Clusters no robustos.
+- Variables mal elegidas.
+
+## Visualizar soluciones con PCA
+
+```python
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+pca = PCA(
+    n_components=2
+)
+
+X_pca = pca.fit_transform(
+    X_scaled
+)
+```
+
+```python
+for name, labels in labels_by_model.items():
+
+    plt.figure(
+        figsize=(8, 6)
+    )
+
+    plt.scatter(
+        X_pca[:, 0],
+        X_pca[:, 1],
+        c=labels
+    )
+
+    plt.xlabel(
+        "PC1"
+    )
+
+    plt.ylabel(
+        "PC2"
+    )
+
+    plt.title(
+        name
+    )
+
+    plt.show()
+```
+
+::: {.callout-warning}
+## Precaución
+
+La visualización 2D no sustituye la evaluación en el espacio completo.
+:::
+
+## Comparar perfiles clínicos
+
+```python
+profile_tables = {}
+
+for name, labels in labels_by_model.items():
+
+    df_temp = df.copy()
+
+    df_temp["cluster"] = labels
+
+    profile_tables[name] = (
+        df_temp
+        .groupby("cluster")[features]
+        .mean()
+    )
+```
+
+## Coherencia clínica
+
+Debe revisarse si los perfiles:
+
+- Son distintos.
+- Son comprensibles.
+- Son plausibles.
+- Se repiten entre métodos.
+- Tienen tamaños razonables.
+- Se relacionan con outcomes.
+
+## Validación externa
+
+```python
+external_rows = []
+
+for name, labels in labels_by_model.items():
+
+    df_temp = df.copy()
+
+    df_temp["cluster"] = labels
+
+    summary = (
+        df_temp
+        .groupby("cluster")[
+            "future_event"
+        ]
+        .mean()
+    )
+
+    for cluster_id, event_rate in summary.items():
+
+        external_rows.append(
+            {
+                "model": name,
+                "cluster": cluster_id,
+                "future_event_rate": event_rate
+            }
+        )
+
+external_table = pd.DataFrame(
+    external_rows
+)
+```
+
+## Separación por outcomes
+
+Una solución puede ser útil si identifica grupos con diferencias consistentes en:
+
+- Mortalidad.
+- Reingreso.
+- Respuesta.
+- Progresión.
+- Cardiotoxicidad futura.
+
+## Evitar validación circular
+
+```text
+Outcome usado para crear clusters
++
+Mismo outcome usado para validar
+→ resultado circular
+```
+
+## Datos mixtos
+
+Cuando existen variables numéricas y categóricas:
+
+- K-means puede no ser adecuado.
+- GMM tampoco directamente.
+- Jerárquico con Gower puede ser útil.
+- K-prototypes puede ser una alternativa.
+- HDBSCAN con distancia adecuada puede explorarse.
+
+## Distancia de Gower
+
+La distancia de Gower combina:
+
+- Variables continuas.
+- Binarias.
+- Categóricas.
+- Ordinales.
+
+Es especialmente útil en datasets clínicos mixtos.
+
+## Alta dimensionalidad
+
+Con muchas variables puede ocurrir:
+
+- Distancias poco informativas.
+- Clusters inestables.
+- Ruido.
+- Dificultad de interpretación.
+
+Opciones:
+
+- Selección de variables.
+- PCA.
+- Autoencoders.
+- Regularización.
+- Agrupación por dominios clínicos.
+
+## PCA antes de clustering
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "pca",
+            PCA(
+                n_components=0.90
+            )
+        ),
+        (
+            "clustering",
+            KMeans(
+                n_clusters=3,
+                random_state=42,
+                n_init="auto"
+            )
+        )
+    ]
+)
+```
+
+## Sensibilidad a variables
+
+Debe repetirse el análisis con distintos subconjuntos.
+
+```python
+feature_sets = {
+    "all": [
+        "age",
+        "troponin",
+        "ntprobnp",
+        "lvef",
+        "gls"
+    ],
+    "cardiac": [
+        "troponin",
+        "ntprobnp",
+        "lvef",
+        "gls"
+    ],
+    "imaging": [
+        "lvef",
+        "gls"
+    ]
+}
+```
+
+## Sensibilidad al escalado
+
+Comparar:
+
+- `StandardScaler`.
+- `RobustScaler`.
+- Transformación logarítmica.
+- Sin escalado, solo como comprobación.
+
+## Sensibilidad a outliers
+
+Puede repetirse:
+
+- Con todos los casos.
+- Sin extremos clínicamente imposibles.
+- Con RobustScaler.
+- Con métodos robustos.
+- Con y sin variables muy sesgadas.
+
+## Asignación de nuevos casos
+
+| Método | Nuevos casos |
+|---|---|
+| K-means | Fácil |
+| GMM | Fácil |
+| Jerárquico | Difícil |
+| DBSCAN | Difícil |
+| HDBSCAN | Posible con herramientas específicas |
+| Isolation Forest | Fácil |
+
+## Producción
+
+Cuando el objetivo es desplegar el modelo, suele ser importante:
+
+- Guardar imputador.
+- Guardar escalador.
+- Guardar modelo.
+- Versionar centroides o parámetros.
+- Definir reglas para casos nuevos.
+- Monitorizar drift.
+
+## Interpretabilidad
+
+| Método | Interpretabilidad |
+|---|---|
+| K-means | Alta-moderada |
+| Jerárquico | Alta con dendrograma |
+| DBSCAN | Moderada |
+| HDBSCAN | Moderada |
+| GMM | Moderada |
+| Isolation Forest | Baja-moderada |
+| Autoencoder | Baja |
+
+## Coste computacional
+
+| Método | Coste aproximado |
+|---|---|
+| K-means | Bajo |
+| Jerárquico | Alto con n grande |
+| DBSCAN | Medio |
+| HDBSCAN | Medio-alto |
+| GMM | Medio |
+| Isolation Forest | Bajo-medio |
+| Autoencoder | Alto |
+
+## Selección práctica
+
+### Usa K-means cuando
+
+- Necesitas una solución rápida.
+- Los grupos parecen compactos.
+- Quieres asignar nuevos casos.
+- La muestra es grande.
+
+### Usa jerárquico cuando
+
+- Quieres explorar relaciones anidadas.
+- Necesitas un dendrograma.
+- Trabajas con distancias personalizadas.
+- La muestra no es enorme.
+
+### Usa DBSCAN cuando
+
+- Esperas formas irregulares.
+- Quieres detectar ruido.
+- No conoces \(K\).
+- La densidad es relativamente homogénea.
+
+### Usa HDBSCAN cuando
+
+- Existen densidades diferentes.
+- Quieres probabilidades.
+- Esperas ruido.
+- Buscas mayor flexibilidad.
+
+### Usa GMM cuando
+
+- Esperas solapamiento.
+- Quieres pertenencia probabilística.
+- Necesitas asignar nuevos casos.
+- Los clusters pueden ser elípticos.
+
+### Usa detección de anomalías cuando
+
+- El objetivo es priorizar casos raros.
+- No necesitas crear grupos completos.
+- Buscas alertas o revisión manual.
+
+## Tabla de decisión final
+
+| Criterio | K-means | Jerárquico | DBSCAN | GMM |
+|---|---:|---:|---:|---:|
+| Silhouette | 0.48 | 0.45 | 0.56 | 0.50 |
+| Estabilidad | Alta | Media | Media | Alta |
+| Ruido | 0 % | 0 % | 20 % | 0 % |
+| Nuevos casos | Sí | No | No | Sí |
+| Interpretabilidad | Alta | Alta | Media | Media |
+| Utilidad clínica | Alta | Moderada | Moderada | Alta |
+
+## No existe un ganador automático
+
+La decisión debe considerar:
+
+- Objetivo.
+- Estabilidad.
+- Geometría.
+- Ruido.
+- Interpretabilidad.
+- Producción.
+- Validación externa.
+
+::: {.callout-important}
+## Regla práctica
+
+Cuando varias soluciones son razonables, suele ser preferible la más estable, interpretable y reproducible.
+:::
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+El método no supervisado elegido debe producir perfiles reproducibles y útiles, no solo métricas atractivas.
+:::
+
+Debe revisarse:
+
+- Tamaños.
+- Outliers.
+- Incertidumbre.
+- Outcomes.
+- Centros.
+- Periodos.
+- Sesgos.
+- Accionabilidad.
+
+## Errores frecuentes
+
+- Elegir un método por popularidad.
+- Usar solo silhouette.
+- No revisar estabilidad.
+- No comparar algoritmos.
+- Ignorar ruido.
+- Confiar en una proyección 2D.
+- No evaluar nuevos casos.
+- Incluir variables redundantes.
+- No validar externamente.
+- Confundir clusters con diagnósticos.
+- Elegir el método más complejo.
+- No documentar la decisión.
+
+## Flujo recomendado
+
+1. Definir objetivo.
+2. Definir unidad de análisis.
+3. Seleccionar variables.
+4. Imputar y escalar.
+5. Probar varios métodos.
+6. Evaluar métricas internas.
+7. Revisar ruido y tamaños.
+8. Analizar estabilidad.
+9. Comparar perfiles.
+10. Validar con outcomes externos.
+11. Evaluar producción.
+12. Elegir la solución más útil.
+
+## Checklist para proyectos
+
+- [ ] He definido el objetivo.
+- [ ] He definido la unidad de análisis.
+- [ ] He comparado varios métodos.
+- [ ] He usado el mismo preprocesamiento.
+- [ ] He calculado métricas internas.
+- [ ] He reportado ruido.
+- [ ] He evaluado tamaños.
+- [ ] He revisado estabilidad.
+- [ ] He comparado perfiles.
+- [ ] He evaluado incertidumbre.
+- [ ] He considerado nuevos casos.
+- [ ] He evaluado coste computacional.
+- [ ] He validado con outcomes externos.
+- [ ] He considerado replicación.
+- [ ] He justificado la elección final.
+
+## Cierre de la sección
+
+El aprendizaje no supervisado es especialmente útil para:
+
+- Explorar datos.
+- Generar hipótesis.
+- Descubrir perfiles.
+- Detectar anomalías.
+- Reducir complejidad.
+
+Pero sus resultados deben interpretarse con más cautela que una predicción supervisada.
+
+## Recursos
+
+### Documentación
+
+- `KMeans`.
+- `AgglomerativeClustering`.
+- `DBSCAN`.
+- HDBSCAN.
+- `GaussianMixture`.
+- `IsolationForest`.
+- `silhouette_score`.
+- `adjusted_rand_score`.
+- `PCA`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus comparaciones, tablas de decisión, estabilidad y método final.
