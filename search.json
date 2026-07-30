@@ -2976,27 +2976,1815 @@
     ]
   },
   {
-    "objectID": "time-series/index.html",
-    "href": "time-series/index.html",
-    "title": "Series temporales",
+    "objectID": "time-series/time-series-fundamentals.html",
+    "href": "time-series/time-series-fundamentals.html",
+    "title": "Fundamentos de series temporales",
     "section": "",
-    "text": "Esta sección reúne métodos para analizar y predecir datos ordenados en el tiempo.",
+    "text": "TipResumen en 30 segundos\n\n\n\nAntes de modelar una serie temporal hay que definir correctamente:\n\nQué representa cada observación.\nCon qué frecuencia se mide.\nQué horizonte se quiere predecir.\nQué información estaba disponible en cada instante.\nCómo se construyen lags y ventanas.\nCómo se separan train, validation y test.\n\nLa mayor parte de los errores en forecasting aparece antes de entrenar el modelo.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Introducción"
+      "Fundamentos y preparación temporal"
     ]
   },
   {
-    "objectID": "time-series/index.html#contenidos-previstos",
-    "href": "time-series/index.html#contenidos-previstos",
-    "title": "Series temporales",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "objectID": "time-series/time-series-fundamentals.html#qué-define-una-serie-temporal",
+    "href": "time-series/time-series-fundamentals.html#qué-define-una-serie-temporal",
+    "title": "Fundamentos de series temporales",
+    "section": "¿Qué define una serie temporal?",
+    "text": "¿Qué define una serie temporal?\nUna serie temporal contiene una variable observada a lo largo del tiempo.\n\\[\ny_1, y_2, y_3, \\ldots, y_t\n\\]\ndonde cada valor está asociado a un instante temporal.\nEjemplos:\n\nPresión arterial cada hora.\nOcupación hospitalaria cada día.\nBiomarcador en cada visita.\nNúmero de ingresos por semana.\nFrecuencia cardiaca cada minuto.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Introducción"
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#unidad-de-análisis",
+    "href": "time-series/time-series-fundamentals.html#unidad-de-análisis",
+    "title": "Fundamentos de series temporales",
+    "section": "Unidad de análisis",
+    "text": "Unidad de análisis\nAntes de empezar, define qué representa cada fila.\nPuede ser:\n\nUn paciente en un instante.\nUn episodio.\nUna visita.\nUn día.\nUna hora.\nUna ventana temporal.\nUna medición de sensor.\n\n\n\n\n\n\n\nWarningImportante\n\n\n\nLa unidad de análisis determina cómo deben construirse las variables y cómo debe hacerse la validación.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#estructura-básica",
+    "href": "time-series/time-series-fundamentals.html#estructura-básica",
+    "title": "Fundamentos de series temporales",
+    "section": "Estructura básica",
+    "text": "Estructura básica\nimport pandas as pd\n\ndf = pd.DataFrame(\n    {\n        \"patient_id\": [\n            1,\n            1,\n            1,\n            2,\n            2\n        ],\n        \"datetime\": [\n            \"2026-01-01 08:00\",\n            \"2026-01-01 12:00\",\n            \"2026-01-01 16:00\",\n            \"2026-01-01 09:00\",\n            \"2026-01-01 15:00\"\n        ],\n        \"heart_rate\": [\n            88,\n            92,\n            95,\n            80,\n            84\n        ]\n    }\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#convertir-fechas",
+    "href": "time-series/time-series-fundamentals.html#convertir-fechas",
+    "title": "Fundamentos de series temporales",
+    "section": "Convertir fechas",
+    "text": "Convertir fechas\ndf[\"datetime\"] = pd.to_datetime(\n    df[\"datetime\"]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#ordenar-correctamente",
+    "href": "time-series/time-series-fundamentals.html#ordenar-correctamente",
+    "title": "Fundamentos de series temporales",
+    "section": "Ordenar correctamente",
+    "text": "Ordenar correctamente\ndf = df.sort_values(\n    [\n        \"patient_id\",\n        \"datetime\"\n    ]\n)\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nNunca construyas lags o ventanas antes de ordenar por entidad y tiempo.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#índice-temporal",
+    "href": "time-series/time-series-fundamentals.html#índice-temporal",
+    "title": "Fundamentos de series temporales",
+    "section": "Índice temporal",
+    "text": "Índice temporal\nEn una única serie:\nseries = (\n    df\n    .set_index(\"datetime\")\n    .sort_index()\n)\nEn múltiples pacientes conviene mantener patient_id como columna o usar un índice múltiple.\npanel = (\n    df\n    .set_index(\n        [\n            \"patient_id\",\n            \"datetime\"\n        ]\n    )\n    .sort_index()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#frecuencia-temporal",
+    "href": "time-series/time-series-fundamentals.html#frecuencia-temporal",
+    "title": "Fundamentos de series temporales",
+    "section": "Frecuencia temporal",
+    "text": "Frecuencia temporal\nLa frecuencia indica cada cuánto se observa la serie.\nEjemplos:\nminuto\nhora\ndía\nsemana\nmes\nvisita",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#frecuencia-regular",
+    "href": "time-series/time-series-fundamentals.html#frecuencia-regular",
+    "title": "Fundamentos de series temporales",
+    "section": "Frecuencia regular",
+    "text": "Frecuencia regular\n08:00\n09:00\n10:00\n11:00",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#frecuencia-irregular",
+    "href": "time-series/time-series-fundamentals.html#frecuencia-irregular",
+    "title": "Fundamentos de series temporales",
+    "section": "Frecuencia irregular",
+    "text": "Frecuencia irregular\nDía 0\nDía 3\nDía 11\nDía 45\nLa irregularidad es frecuente en datos clínicos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#inferir-frecuencia",
+    "href": "time-series/time-series-fundamentals.html#inferir-frecuencia",
+    "title": "Fundamentos de series temporales",
+    "section": "Inferir frecuencia",
+    "text": "Inferir frecuencia\nfrequency = pd.infer_freq(\n    series.index\n)\n\nprint(\n    frequency\n)\nPuede devolver None si los intervalos no son regulares.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#diferencias-temporales",
+    "href": "time-series/time-series-fundamentals.html#diferencias-temporales",
+    "title": "Fundamentos de series temporales",
+    "section": "Diferencias temporales",
+    "text": "Diferencias temporales\ndf[\n    \"time_since_previous\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"datetime\"\n    ]\n    .diff()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#convertir-a-horas",
+    "href": "time-series/time-series-fundamentals.html#convertir-a-horas",
+    "title": "Fundamentos de series temporales",
+    "section": "Convertir a horas",
+    "text": "Convertir a horas\ndf[\n    \"hours_since_previous\"\n] = (\n    df[\n        \"time_since_previous\"\n    ]\n    .dt\n    .total_seconds()\n    /\n    3600\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#revisar-regularidad",
+    "href": "time-series/time-series-fundamentals.html#revisar-regularidad",
+    "title": "Fundamentos de series temporales",
+    "section": "Revisar regularidad",
+    "text": "Revisar regularidad\ninterval_summary = (\n    df\n    .groupby(\"patient_id\")[\n        \"hours_since_previous\"\n    ]\n    .describe()\n)\n\ndisplay(\n    interval_summary\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#resampling",
+    "href": "time-series/time-series-fundamentals.html#resampling",
+    "title": "Fundamentos de series temporales",
+    "section": "Resampling",
+    "text": "Resampling\nResampling cambia la frecuencia temporal.\nEjemplo: pasar de mediciones horarias a resumen diario.\ndaily = (\n    series[\"heart_rate\"]\n    .resample(\"D\")\n    .mean()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#agregaciones",
+    "href": "time-series/time-series-fundamentals.html#agregaciones",
+    "title": "Fundamentos de series temporales",
+    "section": "Agregaciones",
+    "text": "Agregaciones\ndaily_summary = (\n    series[\"heart_rate\"]\n    .resample(\"D\")\n    .agg(\n        [\n            \"count\",\n            \"mean\",\n            \"median\",\n            \"min\",\n            \"max\",\n            \"std\"\n        ]\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#resampling-por-paciente",
+    "href": "time-series/time-series-fundamentals.html#resampling-por-paciente",
+    "title": "Fundamentos de series temporales",
+    "section": "Resampling por paciente",
+    "text": "Resampling por paciente\ndaily_by_patient = (\n    df\n    .set_index(\"datetime\")\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .resample(\"D\")\n    .mean()\n    .reset_index()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#elegir-agregación",
+    "href": "time-series/time-series-fundamentals.html#elegir-agregación",
+    "title": "Fundamentos de series temporales",
+    "section": "Elegir agregación",
+    "text": "Elegir agregación\nLa agregación depende del significado clínico.\nEjemplos:\n\nFrecuencia cardiaca: media, mínimo, máximo.\nTroponina: máximo.\nDosis administrada: suma.\nPresencia de evento: máximo o any.\nNúmero de alertas: conteo.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#pérdida-de-información",
+    "href": "time-series/time-series-fundamentals.html#pérdida-de-información",
+    "title": "Fundamentos de series temporales",
+    "section": "Pérdida de información",
+    "text": "Pérdida de información\nResampling puede ocultar:\n\nPicos.\nVariabilidad.\nCambios rápidos.\nEventos breves.\nOrden intra-periodo.\n\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nUna media diaria puede ocultar un episodio clínicamente importante de pocos minutos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#valores-ausentes-tras-resampling",
+    "href": "time-series/time-series-fundamentals.html#valores-ausentes-tras-resampling",
+    "title": "Fundamentos de series temporales",
+    "section": "Valores ausentes tras resampling",
+    "text": "Valores ausentes tras resampling\nmissing_days = (\n    daily\n    .isna()\n    .sum()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#forward-fill",
+    "href": "time-series/time-series-fundamentals.html#forward-fill",
+    "title": "Fundamentos de series temporales",
+    "section": "Forward fill",
+    "text": "Forward fill\ndaily_ffill = (\n    daily\n    .ffill()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#backward-fill",
+    "href": "time-series/time-series-fundamentals.html#backward-fill",
+    "title": "Fundamentos de series temporales",
+    "section": "Backward fill",
+    "text": "Backward fill\ndaily_bfill = (\n    daily\n    .bfill()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#interpolación-temporal",
+    "href": "time-series/time-series-fundamentals.html#interpolación-temporal",
+    "title": "Fundamentos de series temporales",
+    "section": "Interpolación temporal",
+    "text": "Interpolación temporal\ndaily_interpolated = (\n    daily\n    .interpolate(\n        method=\"time\"\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#riesgo-de-backward-fill",
+    "href": "time-series/time-series-fundamentals.html#riesgo-de-backward-fill",
+    "title": "Fundamentos de series temporales",
+    "section": "Riesgo de backward fill",
+    "text": "Riesgo de backward fill\nBackward fill utiliza una observación futura para rellenar una pasada.\nEn forecasting puede introducir leakage.\nValor del día 5\n→ usado para imputar día 4",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#missingness-informativa",
+    "href": "time-series/time-series-fundamentals.html#missingness-informativa",
+    "title": "Fundamentos de series temporales",
+    "section": "Missingness informativa",
+    "text": "Missingness informativa\nLa ausencia de una medición puede contener información.\nEjemplos:\n\nNo se solicita analítica porque el paciente está estable.\nSe repite una prueba por sospecha clínica.\nHay más mediciones en pacientes graves.\n\nPuede añadirse una variable indicadora.\ndf[\n    \"heart_rate_missing\"\n] = (\n    df[\"heart_rate\"]\n    .isna()\n    .astype(int)\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#lags",
+    "href": "time-series/time-series-fundamentals.html#lags",
+    "title": "Fundamentos de series temporales",
+    "section": "Lags",
+    "text": "Lags\nUn lag representa un valor pasado.\ndf[\n    \"heart_rate_lag_1\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .shift(1)\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#varios-lags",
+    "href": "time-series/time-series-fundamentals.html#varios-lags",
+    "title": "Fundamentos de series temporales",
+    "section": "Varios lags",
+    "text": "Varios lags\nlags = [\n    1,\n    2,\n    3,\n    6\n]\n\nfor lag in lags:\n\n    df[\n        f\"heart_rate_lag_{lag}\"\n    ] = (\n        df\n        .groupby(\"patient_id\")[\n            \"heart_rate\"\n        ]\n        .shift(lag)\n    )",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#interpretación-de-lag",
+    "href": "time-series/time-series-fundamentals.html#interpretación-de-lag",
+    "title": "Fundamentos de series temporales",
+    "section": "Interpretación de lag",
+    "text": "Interpretación de lag\nlag 1\n→ observación anterior\n\nlag 2\n→ dos observaciones atrás\n\n\n\n\n\n\nWarningImportante\n\n\n\nEn series irregulares, un lag representa observaciones anteriores, no necesariamente horas o días concretos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#lags-basados-en-tiempo",
+    "href": "time-series/time-series-fundamentals.html#lags-basados-en-tiempo",
+    "title": "Fundamentos de series temporales",
+    "section": "Lags basados en tiempo",
+    "text": "Lags basados en tiempo\nPara obtener el valor de hace 24 horas puede ser necesario:\n\nResamplear a frecuencia horaria.\nHacer una unión temporal.\nConstruir ventanas por tiempo.\nUsar merge_asof.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#merge_asof",
+    "href": "time-series/time-series-fundamentals.html#merge_asof",
+    "title": "Fundamentos de series temporales",
+    "section": "merge_asof",
+    "text": "merge_asof\ncurrent = df.sort_values(\n    \"datetime\"\n)\n\npast = (\n    df[\n        [\n            \"patient_id\",\n            \"datetime\",\n            \"heart_rate\"\n        ]\n    ]\n    .rename(\n        columns={\n            \"heart_rate\":\n            \"heart_rate_previous\"\n        }\n    )\n    .sort_values(\n        \"datetime\"\n    )\n)\nmerged = pd.merge_asof(\n    current,\n    past,\n    on=\"datetime\",\n    by=\"patient_id\",\n    direction=\"backward\",\n    allow_exact_matches=False\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#diferencias",
+    "href": "time-series/time-series-fundamentals.html#diferencias",
+    "title": "Fundamentos de series temporales",
+    "section": "Diferencias",
+    "text": "Diferencias\ndf[\n    \"heart_rate_diff_1\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .diff(1)\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#cambio-porcentual",
+    "href": "time-series/time-series-fundamentals.html#cambio-porcentual",
+    "title": "Fundamentos de series temporales",
+    "section": "Cambio porcentual",
+    "text": "Cambio porcentual\ndf[\n    \"heart_rate_pct_change\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .pct_change()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#rolling-windows",
+    "href": "time-series/time-series-fundamentals.html#rolling-windows",
+    "title": "Fundamentos de series temporales",
+    "section": "Rolling windows",
+    "text": "Rolling windows\nUna ventana móvil resume observaciones recientes.\ndf[\n    \"heart_rate_rolling_mean_3\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .transform(\n        lambda series:\n        series\n        .shift(1)\n        .rolling(\n            window=3\n        )\n        .mean()\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#por-qué-usar-shift",
+    "href": "time-series/time-series-fundamentals.html#por-qué-usar-shift",
+    "title": "Fundamentos de series temporales",
+    "section": "Por qué usar shift",
+    "text": "Por qué usar shift\nSin shift(1), la ventana incluye el valor actual.\nSi ese valor forma parte del target o no estaría disponible, aparece leakage.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#variabilidad-móvil",
+    "href": "time-series/time-series-fundamentals.html#variabilidad-móvil",
+    "title": "Fundamentos de series temporales",
+    "section": "Variabilidad móvil",
+    "text": "Variabilidad móvil\ndf[\n    \"heart_rate_rolling_std_3\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .transform(\n        lambda series:\n        series\n        .shift(1)\n        .rolling(\n            window=3\n        )\n        .std()\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#mínimo-y-máximo",
+    "href": "time-series/time-series-fundamentals.html#mínimo-y-máximo",
+    "title": "Fundamentos de series temporales",
+    "section": "Mínimo y máximo",
+    "text": "Mínimo y máximo\ndf[\n    \"heart_rate_rolling_min_3\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .transform(\n        lambda series:\n        series\n        .shift(1)\n        .rolling(\n            window=3\n        )\n        .min()\n    )\n)\ndf[\n    \"heart_rate_rolling_max_3\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .transform(\n        lambda series:\n        series\n        .shift(1)\n        .rolling(\n            window=3\n        )\n        .max()\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#ventanas-basadas-en-tiempo",
+    "href": "time-series/time-series-fundamentals.html#ventanas-basadas-en-tiempo",
+    "title": "Fundamentos de series temporales",
+    "section": "Ventanas basadas en tiempo",
+    "text": "Ventanas basadas en tiempo\ndf_time = (\n    df\n    .set_index(\"datetime\")\n    .sort_index()\n)\nrolling_24h = (\n    df_time\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .rolling(\"24h\")\n    .mean()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#ventanas-de-observaciones-vs-ventanas-temporales",
+    "href": "time-series/time-series-fundamentals.html#ventanas-de-observaciones-vs-ventanas-temporales",
+    "title": "Fundamentos de series temporales",
+    "section": "Ventanas de observaciones vs ventanas temporales",
+    "text": "Ventanas de observaciones vs ventanas temporales\nÚltimas 3 observaciones\n≠\nÚltimas 24 horas\nEn datos irregulares pueden producir resultados muy distintos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#pendiente-reciente",
+    "href": "time-series/time-series-fundamentals.html#pendiente-reciente",
+    "title": "Fundamentos de series temporales",
+    "section": "Pendiente reciente",
+    "text": "Pendiente reciente\nPuede estimarse la tendencia de una ventana.\nimport numpy as np\n\ndef calculate_slope(\n    values\n):\n\n    if len(values) &lt; 2:\n        return np.nan\n\n    x = np.arange(\n        len(values)\n    )\n\n    return np.polyfit(\n        x,\n        values,\n        1\n    )[0]\ndf[\n    \"heart_rate_slope_4\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .transform(\n        lambda series:\n        series\n        .shift(1)\n        .rolling(\n            window=4\n        )\n        .apply(\n            calculate_slope,\n            raw=True\n        )\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#variables-de-calendario",
+    "href": "time-series/time-series-fundamentals.html#variables-de-calendario",
+    "title": "Fundamentos de series temporales",
+    "section": "Variables de calendario",
+    "text": "Variables de calendario\ndf[\"hour\"] = (\n    df[\"datetime\"]\n    .dt\n    .hour\n)\n\ndf[\"day_of_week\"] = (\n    df[\"datetime\"]\n    .dt\n    .dayofweek\n)\n\ndf[\"month\"] = (\n    df[\"datetime\"]\n    .dt\n    .month\n)\n\ndf[\"is_weekend\"] = (\n    df[\"day_of_week\"]\n    .isin(\n        [\n            5,\n            6\n        ]\n    )\n    .astype(int)\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#codificación-cíclica",
+    "href": "time-series/time-series-fundamentals.html#codificación-cíclica",
+    "title": "Fundamentos de series temporales",
+    "section": "Codificación cíclica",
+    "text": "Codificación cíclica\nimport numpy as np\n\ndf[\"hour_sin\"] = np.sin(\n    2\n    *\n    np.pi\n    *\n    df[\"hour\"]\n    /\n    24\n)\n\ndf[\"hour_cos\"] = np.cos(\n    2\n    *\n    np.pi\n    *\n    df[\"hour\"]\n    /\n    24\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#target-temporal",
+    "href": "time-series/time-series-fundamentals.html#target-temporal",
+    "title": "Fundamentos de series temporales",
+    "section": "Target temporal",
+    "text": "Target temporal\nEl target debe alinearse con el horizonte.\nEjemplo: predecir frecuencia cardiaca de la siguiente observación.\ndf[\n    \"target_next_heart_rate\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"heart_rate\"\n    ]\n    .shift(-1)\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#target-a-varios-pasos",
+    "href": "time-series/time-series-fundamentals.html#target-a-varios-pasos",
+    "title": "Fundamentos de series temporales",
+    "section": "Target a varios pasos",
+    "text": "Target a varios pasos\nfor horizon in [\n    1,\n    2,\n    3\n]:\n\n    df[\n        f\"target_horizon_{horizon}\"\n    ] = (\n        df\n        .groupby(\"patient_id\")[\n            \"heart_rate\"\n        ]\n        .shift(\n            -horizon\n        )\n    )",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#clasificación-futura",
+    "href": "time-series/time-series-fundamentals.html#clasificación-futura",
+    "title": "Fundamentos de series temporales",
+    "section": "Clasificación futura",
+    "text": "Clasificación futura\nEjemplo: evento en las próximas 24 horas.\ndf[\n    \"event_next_24h\"\n] = (\n    df[\n        \"future_event_time\"\n    ]\n    &lt;=\n    (\n        df[\"datetime\"]\n        +\n        pd.Timedelta(\n            hours=24\n        )\n    )\n).astype(int)\nLa lógica debe revisar también que el evento ocurra después del momento actual.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#tiempo-índice",
+    "href": "time-series/time-series-fundamentals.html#tiempo-índice",
+    "title": "Fundamentos de series temporales",
+    "section": "Tiempo índice",
+    "text": "Tiempo índice\nEn algunos modelos conviene añadir una variable temporal relativa.\ndf[\n    \"hours_from_start\"\n] = (\n    df[\"datetime\"]\n    -\n    df\n    .groupby(\"patient_id\")[\n        \"datetime\"\n    ]\n    .transform(\"min\")\n).dt.total_seconds() / 3600",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#variables-estáticas",
+    "href": "time-series/time-series-fundamentals.html#variables-estáticas",
+    "title": "Fundamentos de series temporales",
+    "section": "Variables estáticas",
+    "text": "Variables estáticas\nstatic_features = [\n    \"sex\",\n    \"diagnosis\",\n    \"center\"\n]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#variables-dinámicas",
+    "href": "time-series/time-series-fundamentals.html#variables-dinámicas",
+    "title": "Fundamentos de series temporales",
+    "section": "Variables dinámicas",
+    "text": "Variables dinámicas\ndynamic_features = [\n    \"heart_rate\",\n    \"troponin\",\n    \"lvef\"\n]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#datos-en-formato-wide",
+    "href": "time-series/time-series-fundamentals.html#datos-en-formato-wide",
+    "title": "Fundamentos de series temporales",
+    "section": "Datos en formato wide",
+    "text": "Datos en formato wide\npatient_id\nheart_rate_t0\nheart_rate_t1\nheart_rate_t2\nVentajas:\n\nFácil para modelos tabulares.\nÚtil con ventanas fijas.\n\nLimitaciones:\n\nDifícil con longitudes variables.\nMuchas columnas.\nPoco flexible.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#datos-en-formato-long",
+    "href": "time-series/time-series-fundamentals.html#datos-en-formato-long",
+    "title": "Fundamentos de series temporales",
+    "section": "Datos en formato long",
+    "text": "Datos en formato long\npatient_id | datetime | variable | value\nVentajas:\n\nFlexible.\nAdecuado para series irregulares.\nMás natural para análisis longitudinal.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#construir-una-tabla-de-modelado",
+    "href": "time-series/time-series-fundamentals.html#construir-una-tabla-de-modelado",
+    "title": "Fundamentos de series temporales",
+    "section": "Construir una tabla de modelado",
+    "text": "Construir una tabla de modelado\nmodeling_features = [\n    \"heart_rate_lag_1\",\n    \"heart_rate_lag_2\",\n    \"heart_rate_rolling_mean_3\",\n    \"heart_rate_rolling_std_3\",\n    \"hours_since_previous\",\n    \"hour_sin\",\n    \"hour_cos\"\n]\n\ntarget = \"target_next_heart_rate\"\nmodeling_df = (\n    df[\n        modeling_features\n        +\n        [\n            target,\n            \"patient_id\",\n            \"datetime\"\n        ]\n    ]\n    .dropna(\n        subset=[\n            target\n        ]\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#split-temporal-global",
+    "href": "time-series/time-series-fundamentals.html#split-temporal-global",
+    "title": "Fundamentos de series temporales",
+    "section": "Split temporal global",
+    "text": "Split temporal global\ncutoff_train = pd.Timestamp(\n    \"2025-01-01\"\n)\n\ncutoff_validation = pd.Timestamp(\n    \"2025-07-01\"\n)\ntrain = modeling_df.loc[\n    modeling_df[\"datetime\"]\n    &lt;\n    cutoff_train\n]\n\nvalidation = modeling_df.loc[\n    (\n        modeling_df[\"datetime\"]\n        &gt;=\n        cutoff_train\n    )\n    &\n    (\n        modeling_df[\"datetime\"]\n        &lt;\n        cutoff_validation\n    )\n]\n\ntest = modeling_df.loc[\n    modeling_df[\"datetime\"]\n    &gt;=\n    cutoff_validation\n]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#split-por-paciente-y-tiempo",
+    "href": "time-series/time-series-fundamentals.html#split-por-paciente-y-tiempo",
+    "title": "Fundamentos de series temporales",
+    "section": "Split por paciente y tiempo",
+    "text": "Split por paciente y tiempo\nCon varias filas por paciente puede ser necesario evitar que información casi idéntica aparezca en train y test.\nOpciones:\n\nPacientes completamente separados.\nPeriodos separados dentro de paciente.\nEvaluación en pacientes nuevos.\nEvaluación futura en pacientes conocidos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#dos-preguntas-distintas",
+    "href": "time-series/time-series-fundamentals.html#dos-preguntas-distintas",
+    "title": "Fundamentos de series temporales",
+    "section": "Dos preguntas distintas",
+    "text": "Dos preguntas distintas\nGeneralización a pacientes nuevos\n≠\nGeneralización a tiempos futuros del mismo paciente\nLa validación debe reflejar la pregunta real.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#leakage-por-normalización",
+    "href": "time-series/time-series-fundamentals.html#leakage-por-normalización",
+    "title": "Fundamentos de series temporales",
+    "section": "Leakage por normalización",
+    "text": "Leakage por normalización\nIncorrecto:\nscaler.fit(\n    modeling_df[modeling_features]\n)\nCorrecto:\nscaler.fit(\n    train[modeling_features]\n)\nDespués:\nX_train_scaled = scaler.transform(\n    train[modeling_features]\n)\n\nX_validation_scaled = scaler.transform(\n    validation[modeling_features]\n)\n\nX_test_scaled = scaler.transform(\n    test[modeling_features]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#leakage-por-agregación",
+    "href": "time-series/time-series-fundamentals.html#leakage-por-agregación",
+    "title": "Fundamentos de series temporales",
+    "section": "Leakage por agregación",
+    "text": "Leakage por agregación\nUna variable como:\nmedia de toda la estancia\nno puede utilizarse para predecir en el ingreso.\nDebe calcularse solo con datos disponibles hasta el momento de predicción.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#leakage-por-labels",
+    "href": "time-series/time-series-fundamentals.html#leakage-por-labels",
+    "title": "Fundamentos de series temporales",
+    "section": "Leakage por labels",
+    "text": "Leakage por labels\nEjemplo:\nTarget\n→ deterioro en 24 h\n\nFeature\n→ medicación iniciada después del deterioro\nEsto puede revelar indirectamente el outcome.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#revisar-disponibilidad",
+    "href": "time-series/time-series-fundamentals.html#revisar-disponibilidad",
+    "title": "Fundamentos de series temporales",
+    "section": "Revisar disponibilidad",
+    "text": "Revisar disponibilidad\nPara cada feature documenta:\n\nFecha y hora de generación.\nFecha y hora de disponibilidad.\nPosibles retrasos.\nCorrecciones posteriores.\nSi se actualiza retrospectivamente.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#baseline-temporal",
+    "href": "time-series/time-series-fundamentals.html#baseline-temporal",
+    "title": "Fundamentos de series temporales",
+    "section": "Baseline temporal",
+    "text": "Baseline temporal\nAntes de entrenar modelos complejos:\nvalidation[\n    \"naive_prediction\"\n] = (\n    validation[\n        \"heart_rate_lag_1\"\n    ]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#evaluar-baseline",
+    "href": "time-series/time-series-fundamentals.html#evaluar-baseline",
+    "title": "Fundamentos de series temporales",
+    "section": "Evaluar baseline",
+    "text": "Evaluar baseline\nfrom sklearn.metrics import mean_absolute_error\n\nbaseline_mae = mean_absolute_error(\n    validation[target],\n    validation[\n        \"naive_prediction\"\n    ]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#dataset-supervisado-temporal",
+    "href": "time-series/time-series-fundamentals.html#dataset-supervisado-temporal",
+    "title": "Fundamentos de series temporales",
+    "section": "Dataset supervisado temporal",
+    "text": "Dataset supervisado temporal\nUna serie temporal puede convertirse en un problema tabular:\nLags\nRolling features\nCalendario\nVariables estáticas\n        ↓\nModelo supervisado\n        ↓\nPredicción futura",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#pipeline-temporal",
+    "href": "time-series/time-series-fundamentals.html#pipeline-temporal",
+    "title": "Fundamentos de series temporales",
+    "section": "Pipeline temporal",
+    "text": "Pipeline temporal\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import Ridge\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(\n                strategy=\"median\"\n            )\n        ),\n        (\n            \"scaler\",\n            StandardScaler()\n        ),\n        (\n            \"model\",\n            Ridge(\n                alpha=1.0\n            )\n        )\n    ]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#entrenar",
+    "href": "time-series/time-series-fundamentals.html#entrenar",
+    "title": "Fundamentos de series temporales",
+    "section": "Entrenar",
+    "text": "Entrenar\npipeline.fit(\n    train[modeling_features],\n    train[target]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#validar",
+    "href": "time-series/time-series-fundamentals.html#validar",
+    "title": "Fundamentos de series temporales",
+    "section": "Validar",
+    "text": "Validar\nvalidation_prediction = pipeline.predict(\n    validation[modeling_features]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#comparar-con-baseline",
+    "href": "time-series/time-series-fundamentals.html#comparar-con-baseline",
+    "title": "Fundamentos de series temporales",
+    "section": "Comparar con baseline",
+    "text": "Comparar con baseline\nmodel_mae = mean_absolute_error(\n    validation[target],\n    validation_prediction\n)\n\nprint(\n    \"Baseline MAE:\",\n    baseline_mae\n)\n\nprint(\n    \"Model MAE:\",\n    model_mae\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#errores-por-horizonte",
+    "href": "time-series/time-series-fundamentals.html#errores-por-horizonte",
+    "title": "Fundamentos de series temporales",
+    "section": "Errores por horizonte",
+    "text": "Errores por horizonte\nhorizon_results = []\n\nfor horizon in [\n    1,\n    2,\n    3\n]:\n\n    target_column = (\n        f\"target_horizon_{horizon}\"\n    )\n\n    valid_rows = validation[\n        target_column\n    ].notna()\n\n    prediction = models[\n        horizon\n    ].predict(\n        validation.loc[\n            valid_rows,\n            modeling_features\n        ]\n    )\n\n    horizon_results.append(\n        {\n            \"horizon\": horizon,\n            \"mae\": mean_absolute_error(\n                validation.loc[\n                    valid_rows,\n                    target_column\n                ],\n                prediction\n            )\n        }\n    )",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#consideraciones-clínicas",
+    "href": "time-series/time-series-fundamentals.html#consideraciones-clínicas",
+    "title": "Fundamentos de series temporales",
+    "section": "Consideraciones clínicas",
+    "text": "Consideraciones clínicas\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nLa preparación temporal debe reproducir exactamente la información disponible en el momento real de uso.\n\n\nDebe definirse:\n\nMomento de predicción.\nHorizonte.\nLatencia de cada variable.\nFrecuencia de actualización.\nAcción esperada.\nUnidad de análisis.\nPolítica ante datos ausentes.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#errores-frecuentes",
+    "href": "time-series/time-series-fundamentals.html#errores-frecuentes",
+    "title": "Fundamentos de series temporales",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nNo ordenar por tiempo.\nCrear lags sin agrupar por paciente.\nConfundir observaciones con horas.\nIncluir el valor actual en rolling features.\nUsar backward fill.\nAjustar scaler con todo el dataset.\nMezclar pacientes sin justificar.\nDefinir mal el target futuro.\nIgnorar retrasos de disponibilidad.\nNo crear baseline temporal.\nResamplear sin revisar pérdida de información.\nConfundir frecuencia de medición con horizonte.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#flujo-recomendado",
+    "href": "time-series/time-series-fundamentals.html#flujo-recomendado",
+    "title": "Fundamentos de series temporales",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nDefinir entidad y tiempo.\nConvertir fechas.\nOrdenar.\nRevisar frecuencia.\nDecidir si resamplear.\nCrear lags.\nCrear ventanas con shift.\nDefinir target y horizonte.\nSeparar por tiempo.\nAjustar preprocesamiento en train.\nComparar con baseline.\nDocumentar disponibilidad.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#checklist-para-proyectos",
+    "href": "time-series/time-series-fundamentals.html#checklist-para-proyectos",
+    "title": "Fundamentos de series temporales",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe definido la unidad de análisis.\nHe convertido fechas correctamente.\nHe ordenado por entidad y tiempo.\nHe revisado regularidad.\nHe justificado el resampling.\nHe creado lags por entidad.\nHe desplazado rolling features.\nHe definido el horizonte.\nHe alineado correctamente el target.\nHe evitado backward fill inapropiado.\nHe separado por tiempo.\nHe ajustado scaler solo con train.\nHe creado un baseline temporal.\nHe documentado latencia de variables.\nHe revisado leakage.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#recursos",
+    "href": "time-series/time-series-fundamentals.html#recursos",
+    "title": "Fundamentos de series temporales",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\npandas.to_datetime.\nresample.\nshift.\nrolling.\nmerge_asof.\nTimeSeriesSplit.\nStandardScaler.\nFeature engineering temporal.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/time-series-fundamentals.html#notas-personales",
+    "href": "time-series/time-series-fundamentals.html#notas-personales",
+    "title": "Fundamentos de series temporales",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus frecuencias, lags, ventanas, horizontes y decisiones de preparación.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Fundamentos y preparación temporal"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html",
+    "href": "time-series/decomposition-stationarity.html",
+    "title": "Descomposición y estacionariedad",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nUna serie temporal puede contener:\n\nTendencia.\nEstacionalidad.\nCiclos.\nRuido.\nCambios estructurales.\n\nLa descomposición separa estos componentes.\nLa estacionariedad describe una serie cuyas propiedades estadísticas permanecen aproximadamente estables en el tiempo.\nMuchos modelos clásicos funcionan mejor cuando la serie es estacionaria.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#componentes-de-una-serie-temporal",
+    "href": "time-series/decomposition-stationarity.html#componentes-de-una-serie-temporal",
+    "title": "Descomposición y estacionariedad",
+    "section": "Componentes de una serie temporal",
+    "text": "Componentes de una serie temporal\nUna serie puede representarse de forma simplificada como:\n\\[\ny_t\n=\nT_t\n+\nS_t\n+\nR_t\n\\]\ndonde:\n\n(T_t) es la tendencia.\n(S_t) es la estacionalidad.\n(R_t) es el residuo.\n\nEsta es una descomposición aditiva.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#tendencia",
+    "href": "time-series/decomposition-stationarity.html#tendencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Tendencia",
+    "text": "Tendencia\nLa tendencia es un cambio sostenido a largo plazo.\nValor\n  │\n  │             /\n  │          /\n  │       /\n  │    /\n  └──────────────── Tiempo\nPuede ser:\n\nCreciente.\nDecreciente.\nLineal.\nCurva.\nCambiante.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#estacionalidad",
+    "href": "time-series/decomposition-stationarity.html#estacionalidad",
+    "title": "Descomposición y estacionariedad",
+    "section": "Estacionalidad",
+    "text": "Estacionalidad\nLa estacionalidad es un patrón que se repite con una frecuencia relativamente fija.\nEjemplos:\n\nVariación horaria.\nCiclo día-noche.\nPatrón semanal.\nPatrón mensual.\nPatrón anual.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#ciclos",
+    "href": "time-series/decomposition-stationarity.html#ciclos",
+    "title": "Descomposición y estacionariedad",
+    "section": "Ciclos",
+    "text": "Ciclos\nLos ciclos son oscilaciones que no tienen necesariamente una frecuencia fija.\nEjemplos:\n\nCambios económicos.\nOleadas epidémicas.\nCambios asistenciales.\nPeriodos de tratamiento.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#residuo",
+    "href": "time-series/decomposition-stationarity.html#residuo",
+    "title": "Descomposición y estacionariedad",
+    "section": "Residuo",
+    "text": "Residuo\nEl residuo contiene la variación que no explican la tendencia ni la estacionalidad.\nSerie observada\n-\ntendencia\n-\nestacionalidad\n=\nresiduo\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nUn residuo aparentemente aleatorio sugiere que la descomposición ha capturado buena parte de la estructura.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#preparar-una-serie",
+    "href": "time-series/decomposition-stationarity.html#preparar-una-serie",
+    "title": "Descomposición y estacionariedad",
+    "section": "Preparar una serie",
+    "text": "Preparar una serie\nimport pandas as pd\n\nseries = (\n    df\n    .set_index(\"datetime\")[\n        \"value\"\n    ]\n    .sort_index()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#revisar-frecuencia",
+    "href": "time-series/decomposition-stationarity.html#revisar-frecuencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Revisar frecuencia",
+    "text": "Revisar frecuencia\nprint(\n    pd.infer_freq(\n        series.index\n    )\n)\nPara muchos métodos de descomposición conviene trabajar con frecuencia regular.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#resampling",
+    "href": "time-series/decomposition-stationarity.html#resampling",
+    "title": "Descomposición y estacionariedad",
+    "section": "Resampling",
+    "text": "Resampling\ndaily_series = (\n    series\n    .resample(\"D\")\n    .mean()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#revisar-valores-ausentes",
+    "href": "time-series/decomposition-stationarity.html#revisar-valores-ausentes",
+    "title": "Descomposición y estacionariedad",
+    "section": "Revisar valores ausentes",
+    "text": "Revisar valores ausentes\nprint(\n    daily_series\n    .isna()\n    .sum()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#imputación-simple",
+    "href": "time-series/decomposition-stationarity.html#imputación-simple",
+    "title": "Descomposición y estacionariedad",
+    "section": "Imputación simple",
+    "text": "Imputación simple\ndaily_series = (\n    daily_series\n    .interpolate(\n        method=\"time\"\n    )\n)\n\n\n\n\n\n\nWarningImportante\n\n\n\nLa imputación debe estar justificada y no debe introducir información futura en un workflow predictivo.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#visualizar-la-serie",
+    "href": "time-series/decomposition-stationarity.html#visualizar-la-serie",
+    "title": "Descomposición y estacionariedad",
+    "section": "Visualizar la serie",
+    "text": "Visualizar la serie\nimport matplotlib.pyplot as plt\n\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    daily_series.index,\n    daily_series.values\n)\n\nplt.xlabel(\n    \"Fecha\"\n)\n\nplt.ylabel(\n    \"Valor\"\n)\n\nplt.title(\n    \"Serie temporal\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#descomposición-aditiva",
+    "href": "time-series/decomposition-stationarity.html#descomposición-aditiva",
+    "title": "Descomposición y estacionariedad",
+    "section": "Descomposición aditiva",
+    "text": "Descomposición aditiva\nLa descomposición aditiva es adecuada cuando la amplitud estacional se mantiene aproximadamente constante.\n\\[\ny_t\n=\nT_t\n+\nS_t\n+\nR_t\n\\]\nEjemplo conceptual:\nNivel bajo\n→ oscilación de ±5\n\nNivel alto\n→ oscilación de ±5",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#seasonal_decompose",
+    "href": "time-series/decomposition-stationarity.html#seasonal_decompose",
+    "title": "Descomposición y estacionariedad",
+    "section": "seasonal_decompose",
+    "text": "seasonal_decompose\nfrom statsmodels.tsa.seasonal import seasonal_decompose\n\ndecomposition = seasonal_decompose(\n    daily_series,\n    model=\"additive\",\n    period=7\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#visualizar-componentes",
+    "href": "time-series/decomposition-stationarity.html#visualizar-componentes",
+    "title": "Descomposición y estacionariedad",
+    "section": "Visualizar componentes",
+    "text": "Visualizar componentes\ndecomposition.plot()\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#acceder-a-los-componentes",
+    "href": "time-series/decomposition-stationarity.html#acceder-a-los-componentes",
+    "title": "Descomposición y estacionariedad",
+    "section": "Acceder a los componentes",
+    "text": "Acceder a los componentes\ntrend = decomposition.trend\n\nseasonal = decomposition.seasonal\n\nresidual = decomposition.resid",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#descomposición-multiplicativa",
+    "href": "time-series/decomposition-stationarity.html#descomposición-multiplicativa",
+    "title": "Descomposición y estacionariedad",
+    "section": "Descomposición multiplicativa",
+    "text": "Descomposición multiplicativa\nEs adecuada cuando la amplitud estacional aumenta con el nivel.\n\\[\ny_t\n=\nT_t\n\\times\nS_t\n\\times\nR_t\n\\]\nEjemplo conceptual:\nNivel bajo\n→ oscilación pequeña\n\nNivel alto\n→ oscilación grande",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#aplicar-modelo-multiplicativo",
+    "href": "time-series/decomposition-stationarity.html#aplicar-modelo-multiplicativo",
+    "title": "Descomposición y estacionariedad",
+    "section": "Aplicar modelo multiplicativo",
+    "text": "Aplicar modelo multiplicativo\ndecomposition = seasonal_decompose(\n    daily_series,\n    model=\"multiplicative\",\n    period=7\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#requisito-práctico",
+    "href": "time-series/decomposition-stationarity.html#requisito-práctico",
+    "title": "Descomposición y estacionariedad",
+    "section": "Requisito práctico",
+    "text": "Requisito práctico\nUna descomposición multiplicativa necesita valores positivos.\nSi existen ceros o valores negativos, debe utilizarse otra estrategia.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#aditiva-frente-a-multiplicativa",
+    "href": "time-series/decomposition-stationarity.html#aditiva-frente-a-multiplicativa",
+    "title": "Descomposición y estacionariedad",
+    "section": "Aditiva frente a multiplicativa",
+    "text": "Aditiva frente a multiplicativa\n\n\n\nAspecto\nAditiva\nMultiplicativa\n\n\n\n\nAmplitud estacional\nConstante\nProporcional al nivel\n\n\nValores cero\nPosibles\nProblemáticos\n\n\nFórmula\nSuma\nProducto\n\n\nInterpretación\nDiferencias absolutas\nCambios relativos",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#transformación-logarítmica",
+    "href": "time-series/decomposition-stationarity.html#transformación-logarítmica",
+    "title": "Descomposición y estacionariedad",
+    "section": "Transformación logarítmica",
+    "text": "Transformación logarítmica\nUna serie multiplicativa puede transformarse en aditiva mediante logaritmo.\n\\[\n\\log(y_t)\n=\n\\log(T_t)\n+\n\\log(S_t)\n+\n\\log(R_t)\n\\]\nimport numpy as np\n\nlog_series = np.log(\n    daily_series\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#stl",
+    "href": "time-series/decomposition-stationarity.html#stl",
+    "title": "Descomposición y estacionariedad",
+    "section": "STL",
+    "text": "STL\nSTL significa Seasonal-Trend decomposition using LOESS.\nEs un método flexible para separar:\n\nTendencia.\nEstacionalidad.\nResiduo.\n\nfrom statsmodels.tsa.seasonal import STL\n\nstl = STL(\n    daily_series,\n    period=7\n)\n\nstl_result = stl.fit()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#visualizar-stl",
+    "href": "time-series/decomposition-stationarity.html#visualizar-stl",
+    "title": "Descomposición y estacionariedad",
+    "section": "Visualizar STL",
+    "text": "Visualizar STL\nstl_result.plot()\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#acceder-a-componentes-stl",
+    "href": "time-series/decomposition-stationarity.html#acceder-a-componentes-stl",
+    "title": "Descomposición y estacionariedad",
+    "section": "Acceder a componentes STL",
+    "text": "Acceder a componentes STL\ntrend = stl_result.trend\n\nseasonal = stl_result.seasonal\n\nresidual = stl_result.resid",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#stl-robusto",
+    "href": "time-series/decomposition-stationarity.html#stl-robusto",
+    "title": "Descomposición y estacionariedad",
+    "section": "STL robusto",
+    "text": "STL robusto\nstl = STL(\n    daily_series,\n    period=7,\n    robust=True\n)\n\nstl_result = stl.fit()\nLa opción robusta reduce la influencia de valores extremos sobre la tendencia y la estacionalidad.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#ventajas-de-stl",
+    "href": "time-series/decomposition-stationarity.html#ventajas-de-stl",
+    "title": "Descomposición y estacionariedad",
+    "section": "Ventajas de STL",
+    "text": "Ventajas de STL\n\nFlexible.\nPermite tendencia no lineal.\nPuede ser robusto a outliers.\nÚtil con estacionalidad estable.\nFácil de interpretar.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#limitaciones-de-stl",
+    "href": "time-series/decomposition-stationarity.html#limitaciones-de-stl",
+    "title": "Descomposición y estacionariedad",
+    "section": "Limitaciones de STL",
+    "text": "Limitaciones de STL\n\nRequiere elegir un periodo.\nNo resuelve automáticamente cambios estructurales.\nNecesita frecuencia suficientemente regular.\nNo sustituye la validación predictiva.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#elegir-el-periodo",
+    "href": "time-series/decomposition-stationarity.html#elegir-el-periodo",
+    "title": "Descomposición y estacionariedad",
+    "section": "Elegir el periodo",
+    "text": "Elegir el periodo\nEjemplos:\nDatos horarios con ciclo diario\n→ period = 24\n\nDatos diarios con ciclo semanal\n→ period = 7\n\nDatos mensuales con ciclo anual\n→ period = 12\n\n\n\n\n\n\nWarningError frecuente\n\n\n\nConfundir número de observaciones con unidad temporal.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#varias-estacionalidades",
+    "href": "time-series/decomposition-stationarity.html#varias-estacionalidades",
+    "title": "Descomposición y estacionariedad",
+    "section": "Varias estacionalidades",
+    "text": "Varias estacionalidades\nUna serie horaria puede contener:\n\nCiclo diario.\nCiclo semanal.\nCiclo anual.\n\nUna única descomposición STL clásica modela una estacionalidad principal.\nPara varias estacionalidades pueden considerarse:\n\nMSTL.\nModelos de Fourier.\nTBATS.\nProphet.\nModelos de machine learning con variables de calendario.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#suavizado-de-tendencia",
+    "href": "time-series/decomposition-stationarity.html#suavizado-de-tendencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Suavizado de tendencia",
+    "text": "Suavizado de tendencia\nUna media móvil puede utilizarse como aproximación de tendencia.\ntrend_7 = (\n    daily_series\n    .rolling(\n        window=7,\n        center=True\n    )\n    .mean()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#media-móvil-centrada",
+    "href": "time-series/decomposition-stationarity.html#media-móvil-centrada",
+    "title": "Descomposición y estacionariedad",
+    "section": "Media móvil centrada",
+    "text": "Media móvil centrada\nEl uso de center=True incluye valores futuros.\nEs adecuado para análisis descriptivo retrospectivo.\nNo es adecuado como feature predictiva en tiempo real.\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nUna tendencia centrada puede generar leakage si se utiliza para predecir.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#eliminar-tendencia",
+    "href": "time-series/decomposition-stationarity.html#eliminar-tendencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Eliminar tendencia",
+    "text": "Eliminar tendencia\nUna forma sencilla es restar la tendencia.\ndetrended = (\n    daily_series\n    -\n    trend_7\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#eliminar-estacionalidad",
+    "href": "time-series/decomposition-stationarity.html#eliminar-estacionalidad",
+    "title": "Descomposición y estacionariedad",
+    "section": "Eliminar estacionalidad",
+    "text": "Eliminar estacionalidad\nseasonally_adjusted = (\n    daily_series\n    -\n    stl_result.seasonal\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#serie-desestacionalizada",
+    "href": "time-series/decomposition-stationarity.html#serie-desestacionalizada",
+    "title": "Descomposición y estacionariedad",
+    "section": "Serie desestacionalizada",
+    "text": "Serie desestacionalizada\nLa serie ajustada permite estudiar:\n\nTendencia.\nCambios estructurales.\nComparaciones entre periodos.\nModelos posteriores.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#qué-es-estacionariedad",
+    "href": "time-series/decomposition-stationarity.html#qué-es-estacionariedad",
+    "title": "Descomposición y estacionariedad",
+    "section": "¿Qué es estacionariedad?",
+    "text": "¿Qué es estacionariedad?\nUna serie es débilmente estacionaria cuando mantiene aproximadamente:\n\nMedia constante.\nVarianza constante.\nAutocovarianza dependiente del lag, no del tiempo concreto.\n\nMedia estable\nVarianza estable\nDependencia temporal estable",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#serie-no-estacionaria",
+    "href": "time-series/decomposition-stationarity.html#serie-no-estacionaria",
+    "title": "Descomposición y estacionariedad",
+    "section": "Serie no estacionaria",
+    "text": "Serie no estacionaria\nPuede presentar:\n\nTendencia.\nEstacionalidad.\nVarianza cambiante.\nCambios de nivel.\nRupturas estructurales.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#por-qué-importa",
+    "href": "time-series/decomposition-stationarity.html#por-qué-importa",
+    "title": "Descomposición y estacionariedad",
+    "section": "¿Por qué importa?",
+    "text": "¿Por qué importa?\nMuchos modelos clásicos como ARMA y ciertas formulaciones ARIMA se apoyan en una serie estacionaria después de las transformaciones necesarias.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#inspección-visual",
+    "href": "time-series/decomposition-stationarity.html#inspección-visual",
+    "title": "Descomposición y estacionariedad",
+    "section": "Inspección visual",
+    "text": "Inspección visual\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    daily_series\n)\n\nplt.title(\n    \"Inspección visual de estacionariedad\"\n)\n\nplt.show()\nBusca:\n\nTendencia.\nCambios de varianza.\nCambios de nivel.\nEstacionalidad.\nRupturas.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#media-y-varianza-móviles",
+    "href": "time-series/decomposition-stationarity.html#media-y-varianza-móviles",
+    "title": "Descomposición y estacionariedad",
+    "section": "Media y varianza móviles",
+    "text": "Media y varianza móviles\nrolling_mean = (\n    daily_series\n    .rolling(\n        window=30\n    )\n    .mean()\n)\n\nrolling_std = (\n    daily_series\n    .rolling(\n        window=30\n    )\n    .std()\n)\nplt.figure(\n    figsize=(12, 6)\n)\n\nplt.plot(\n    daily_series,\n    label=\"Serie\"\n)\n\nplt.plot(\n    rolling_mean,\n    label=\"Media móvil\"\n)\n\nplt.plot(\n    rolling_std,\n    label=\"Desviación móvil\"\n)\n\nplt.legend()\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#augmented-dickey-fuller",
+    "href": "time-series/decomposition-stationarity.html#augmented-dickey-fuller",
+    "title": "Descomposición y estacionariedad",
+    "section": "Augmented Dickey-Fuller",
+    "text": "Augmented Dickey-Fuller\nEl test ADF evalúa la presencia de raíz unitaria.\nHipótesis:\nH₀\n→ existe raíz unitaria\n→ serie no estacionaria\n\nH₁\n→ serie estacionaria",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#aplicar-adf",
+    "href": "time-series/decomposition-stationarity.html#aplicar-adf",
+    "title": "Descomposición y estacionariedad",
+    "section": "Aplicar ADF",
+    "text": "Aplicar ADF\nfrom statsmodels.tsa.stattools import adfuller\n\nadf_result = adfuller(\n    daily_series.dropna(),\n    autolag=\"AIC\"\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#interpretar-adf",
+    "href": "time-series/decomposition-stationarity.html#interpretar-adf",
+    "title": "Descomposición y estacionariedad",
+    "section": "Interpretar ADF",
+    "text": "Interpretar ADF\nadf_statistic = adf_result[0]\n\np_value = adf_result[1]\n\nused_lags = adf_result[2]\n\nn_observations = adf_result[3]\n\ncritical_values = adf_result[4]\nprint(\n    \"ADF statistic:\",\n    adf_statistic\n)\n\nprint(\n    \"p-value:\",\n    p_value\n)\n\nprint(\n    \"Critical values:\",\n    critical_values\n)\nInterpretación habitual:\np &lt; 0.05\n→ rechazar H₀\n→ evidencia compatible con estacionariedad",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#kpss",
+    "href": "time-series/decomposition-stationarity.html#kpss",
+    "title": "Descomposición y estacionariedad",
+    "section": "KPSS",
+    "text": "KPSS\nEl test KPSS utiliza hipótesis opuestas.\nH₀\n→ serie estacionaria\n\nH₁\n→ serie no estacionaria",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#aplicar-kpss",
+    "href": "time-series/decomposition-stationarity.html#aplicar-kpss",
+    "title": "Descomposición y estacionariedad",
+    "section": "Aplicar KPSS",
+    "text": "Aplicar KPSS\nfrom statsmodels.tsa.stattools import kpss\n\nkpss_result = kpss(\n    daily_series.dropna(),\n    regression=\"c\",\n    nlags=\"auto\"\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#interpretar-kpss",
+    "href": "time-series/decomposition-stationarity.html#interpretar-kpss",
+    "title": "Descomposición y estacionariedad",
+    "section": "Interpretar KPSS",
+    "text": "Interpretar KPSS\nkpss_statistic = kpss_result[0]\n\np_value = kpss_result[1]\n\nused_lags = kpss_result[2]\n\ncritical_values = kpss_result[3]\nprint(\n    \"KPSS statistic:\",\n    kpss_statistic\n)\n\nprint(\n    \"p-value:\",\n    p_value\n)\nInterpretación habitual:\np &lt; 0.05\n→ rechazar H₀\n→ evidencia de no estacionariedad",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#combinar-adf-y-kpss",
+    "href": "time-series/decomposition-stationarity.html#combinar-adf-y-kpss",
+    "title": "Descomposición y estacionariedad",
+    "section": "Combinar ADF y KPSS",
+    "text": "Combinar ADF y KPSS\n\n\n\n\n\n\n\n\nADF\nKPSS\nInterpretación orientativa\n\n\n\n\nRechaza H₀\nNo rechaza H₀\nCompatible con estacionariedad\n\n\nNo rechaza H₀\nRechaza H₀\nCompatible con no estacionariedad\n\n\nNo rechaza H₀\nNo rechaza H₀\nResultado inconcluso\n\n\nRechaza H₀\nRechaza H₀\nPosible cambio estructural o problema de especificación\n\n\n\n\n\n\n\n\n\nNoteBuena práctica\n\n\n\nCombina inspección visual, ADF, KPSS y conocimiento del dominio.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#diferenciación",
+    "href": "time-series/decomposition-stationarity.html#diferenciación",
+    "title": "Descomposición y estacionariedad",
+    "section": "Diferenciación",
+    "text": "Diferenciación\nLa primera diferencia es:\n\\[\n\\Delta y_t\n=\ny_t-y_{t-1}\n\\]\nfirst_difference = (\n    daily_series\n    .diff()\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#visualizar-la-primera-diferencia",
+    "href": "time-series/decomposition-stationarity.html#visualizar-la-primera-diferencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Visualizar la primera diferencia",
+    "text": "Visualizar la primera diferencia\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    first_difference\n)\n\nplt.title(\n    \"Primera diferencia\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#segunda-diferencia",
+    "href": "time-series/decomposition-stationarity.html#segunda-diferencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Segunda diferencia",
+    "text": "Segunda diferencia\nsecond_difference = (\n    daily_series\n    .diff()\n    .diff()\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#riesgo-de-sobrediferenciación",
+    "href": "time-series/decomposition-stationarity.html#riesgo-de-sobrediferenciación",
+    "title": "Descomposición y estacionariedad",
+    "section": "Riesgo de sobrediferenciación",
+    "text": "Riesgo de sobrediferenciación\nAplicar demasiadas diferencias puede:\n\nAumentar ruido.\nEliminar señal.\nCrear autocorrelación negativa.\nEmpeorar forecasts.\n\n\n\n\n\n\n\nWarningRegla práctica\n\n\n\nUtiliza el mínimo número de diferencias necesario.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#diferencia-estacional",
+    "href": "time-series/decomposition-stationarity.html#diferencia-estacional",
+    "title": "Descomposición y estacionariedad",
+    "section": "Diferencia estacional",
+    "text": "Diferencia estacional\nPara datos diarios con ciclo semanal:\n\\[\n\\Delta_7 y_t\n=\ny_t-y_{t-7}\n\\]\nseasonal_difference = (\n    daily_series\n    .diff(\n        7\n    )\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#diferenciación-regular-y-estacional",
+    "href": "time-series/decomposition-stationarity.html#diferenciación-regular-y-estacional",
+    "title": "Descomposición y estacionariedad",
+    "section": "Diferenciación regular y estacional",
+    "text": "Diferenciación regular y estacional\ntransformed_series = (\n    daily_series\n    .diff()\n    .diff(\n        7\n    )\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#transformación-logarítmica-y-diferencia",
+    "href": "time-series/decomposition-stationarity.html#transformación-logarítmica-y-diferencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Transformación logarítmica y diferencia",
+    "text": "Transformación logarítmica y diferencia\nlog_difference = (\n    np.log(\n        daily_series\n    )\n    .diff()\n    .dropna()\n)\nEsto aproxima una tasa de crecimiento.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#box-cox",
+    "href": "time-series/decomposition-stationarity.html#box-cox",
+    "title": "Descomposición y estacionariedad",
+    "section": "Box-Cox",
+    "text": "Box-Cox\nBox-Cox puede estabilizar la varianza.\nfrom scipy.stats import boxcox\n\ntransformed_values, lambda_value = boxcox(\n    daily_series.dropna()\n)\nRequiere valores positivos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#autocorrelación",
+    "href": "time-series/decomposition-stationarity.html#autocorrelación",
+    "title": "Descomposición y estacionariedad",
+    "section": "Autocorrelación",
+    "text": "Autocorrelación\nLa autocorrelación mide la relación entre la serie y sus valores pasados.\n\\[\nCorr\n\\left(\ny_t,\ny_{t-k}\n\\right)\n\\]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#acf",
+    "href": "time-series/decomposition-stationarity.html#acf",
+    "title": "Descomposición y estacionariedad",
+    "section": "ACF",
+    "text": "ACF\nfrom statsmodels.graphics.tsaplots import plot_acf\n\nplot_acf(\n    daily_series.dropna(),\n    lags=40\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#interpretar-acf",
+    "href": "time-series/decomposition-stationarity.html#interpretar-acf",
+    "title": "Descomposición y estacionariedad",
+    "section": "Interpretar ACF",
+    "text": "Interpretar ACF\nPuede mostrar:\n\nPersistencia.\nEstacionalidad.\nDecaimiento lento.\nEstructura MA.\nNo estacionariedad.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#pacf",
+    "href": "time-series/decomposition-stationarity.html#pacf",
+    "title": "Descomposición y estacionariedad",
+    "section": "PACF",
+    "text": "PACF\nLa autocorrelación parcial mide la relación con un lag controlando los lags intermedios.\nfrom statsmodels.graphics.tsaplots import plot_pacf\n\nplot_pacf(\n    daily_series.dropna(),\n    lags=40,\n    method=\"ywm\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#acf-y-pacf",
+    "href": "time-series/decomposition-stationarity.html#acf-y-pacf",
+    "title": "Descomposición y estacionariedad",
+    "section": "ACF y PACF",
+    "text": "ACF y PACF\nSe utilizan como guía para identificar:\n\nOrden autoregresivo.\nOrden de media móvil.\nEstacionalidad.\nNecesidad de diferenciación.\n\nNo deben interpretarse como reglas automáticas.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#patrón-de-tendencia-en-acf",
+    "href": "time-series/decomposition-stationarity.html#patrón-de-tendencia-en-acf",
+    "title": "Descomposición y estacionariedad",
+    "section": "Patrón de tendencia en ACF",
+    "text": "Patrón de tendencia en ACF\nUna ACF que disminuye lentamente puede sugerir:\n\nTendencia.\nRaíz unitaria.\nNo estacionariedad.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#patrón-estacional-en-acf",
+    "href": "time-series/decomposition-stationarity.html#patrón-estacional-en-acf",
+    "title": "Descomposición y estacionariedad",
+    "section": "Patrón estacional en ACF",
+    "text": "Patrón estacional en ACF\nPicos en:\nlag 7\nlag 14\nlag 21\npueden sugerir estacionalidad semanal en datos diarios.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#residuos-de-descomposición",
+    "href": "time-series/decomposition-stationarity.html#residuos-de-descomposición",
+    "title": "Descomposición y estacionariedad",
+    "section": "Residuos de descomposición",
+    "text": "Residuos de descomposición\nresidual = (\n    stl_result\n    .resid\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#revisar-residuos",
+    "href": "time-series/decomposition-stationarity.html#revisar-residuos",
+    "title": "Descomposición y estacionariedad",
+    "section": "Revisar residuos",
+    "text": "Revisar residuos\nplot_acf(\n    residual,\n    lags=40\n)\n\nplt.show()\nSi persiste autocorrelación, queda estructura temporal sin explicar.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#ljung-box",
+    "href": "time-series/decomposition-stationarity.html#ljung-box",
+    "title": "Descomposición y estacionariedad",
+    "section": "Ljung-Box",
+    "text": "Ljung-Box\nEvalúa autocorrelación conjunta en varios lags.\nfrom statsmodels.stats.diagnostic import acorr_ljungbox\n\nljung_box = acorr_ljungbox(\n    residual,\n    lags=[\n        7,\n        14,\n        21\n    ],\n    return_df=True\n)\n\ndisplay(\n    ljung_box\n)\nHipótesis:\nH₀\n→ no existe autocorrelación conjunta\nUn p-value pequeño sugiere dependencia residual.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#ruido-blanco",
+    "href": "time-series/decomposition-stationarity.html#ruido-blanco",
+    "title": "Descomposición y estacionariedad",
+    "section": "Ruido blanco",
+    "text": "Ruido blanco\nUn residuo parecido a ruido blanco tiene:\n\nMedia aproximadamente 0.\nVarianza estable.\nPoca autocorrelación.\nDistribución sin patrones temporales claros.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#cambio-estructural",
+    "href": "time-series/decomposition-stationarity.html#cambio-estructural",
+    "title": "Descomposición y estacionariedad",
+    "section": "Cambio estructural",
+    "text": "Cambio estructural\nUna serie puede cambiar de comportamiento por:\n\nNuevo protocolo.\nNueva máquina.\nCambio poblacional.\nPandemia.\nCambio de codificación.\nIntervención clínica.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#visualizar-cambios",
+    "href": "time-series/decomposition-stationarity.html#visualizar-cambios",
+    "title": "Descomposición y estacionariedad",
+    "section": "Visualizar cambios",
+    "text": "Visualizar cambios\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    daily_series\n)\n\nplt.axvline(\n    pd.Timestamp(\n        \"2025-01-01\"\n    ),\n    linestyle=\"--\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#cambio-de-nivel",
+    "href": "time-series/decomposition-stationarity.html#cambio-de-nivel",
+    "title": "Descomposición y estacionariedad",
+    "section": "Cambio de nivel",
+    "text": "Cambio de nivel\nAntes\n→ media 50\n\nDespués\n→ media 70",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#cambio-de-pendiente",
+    "href": "time-series/decomposition-stationarity.html#cambio-de-pendiente",
+    "title": "Descomposición y estacionariedad",
+    "section": "Cambio de pendiente",
+    "text": "Cambio de pendiente\nAntes\n→ estable\n\nDespués\n→ tendencia creciente",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#cambio-de-varianza",
+    "href": "time-series/decomposition-stationarity.html#cambio-de-varianza",
+    "title": "Descomposición y estacionariedad",
+    "section": "Cambio de varianza",
+    "text": "Cambio de varianza\nAntes\n→ poca dispersión\n\nDespués\n→ alta variabilidad",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#estacionariedad-local",
+    "href": "time-series/decomposition-stationarity.html#estacionariedad-local",
+    "title": "Descomposición y estacionariedad",
+    "section": "Estacionariedad local",
+    "text": "Estacionariedad local\nUna serie puede no ser estacionaria globalmente, pero sí dentro de ventanas o periodos concretos.\nEsto puede justificar:\n\nModelos con ventana móvil.\nRetraining periódico.\nSegmentación temporal.\nModelos de cambio de régimen.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#estacionariedad-y-machine-learning",
+    "href": "time-series/decomposition-stationarity.html#estacionariedad-y-machine-learning",
+    "title": "Descomposición y estacionariedad",
+    "section": "Estacionariedad y machine learning",
+    "text": "Estacionariedad y machine learning\nLos modelos de árboles no exigen estacionariedad de la misma forma que ARIMA.\nPero siguen siendo sensibles a:\n\nDrift.\nCambios de distribución.\nTendencias no representadas.\nExtrapolación.\nLeakage temporal.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#descomposición-como-feature-engineering",
+    "href": "time-series/decomposition-stationarity.html#descomposición-como-feature-engineering",
+    "title": "Descomposición y estacionariedad",
+    "section": "Descomposición como feature engineering",
+    "text": "Descomposición como feature engineering\nPueden utilizarse:\n\nTendencia estimada.\nComponente estacional.\nResiduo.\nÍndice estacional.\nDistancia a tendencia.\n\nPero solo si pueden calcularse con información disponible en tiempo real.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#descomposición-retrospectiva-vs-predictiva",
+    "href": "time-series/decomposition-stationarity.html#descomposición-retrospectiva-vs-predictiva",
+    "title": "Descomposición y estacionariedad",
+    "section": "Descomposición retrospectiva vs predictiva",
+    "text": "Descomposición retrospectiva vs predictiva\nDescomposición centrada\n→ usa pasado y futuro\n→ adecuada para análisis descriptivo\n\nDescomposición causal\n→ usa solo pasado\n→ necesaria para predicción en tiempo real",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#consideraciones-clínicas",
+    "href": "time-series/decomposition-stationarity.html#consideraciones-clínicas",
+    "title": "Descomposición y estacionariedad",
+    "section": "Consideraciones clínicas",
+    "text": "Consideraciones clínicas\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nUna tendencia o estacionalidad puede reflejar tanto biología como organización asistencial.\n\n\nEjemplos:\n\nCambios por ciclos de tratamiento.\nMás pruebas en pacientes inestables.\nPatrones semanales de actividad.\nCambios por protocolos.\nDiferencias entre centros.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#errores-frecuentes",
+    "href": "time-series/decomposition-stationarity.html#errores-frecuentes",
+    "title": "Descomposición y estacionariedad",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nNo definir el periodo.\nAplicar descomposición a una serie irregular sin revisar.\nConfundir ciclo con estacionalidad.\nUsar una media centrada como feature predictiva.\nInterpretar un test aislado.\nDiferenciar demasiadas veces.\nIgnorar cambios estructurales.\nNo revisar ACF de residuos.\nUsar modelo multiplicativo con ceros.\nNo estabilizar varianza.\nIgnorar múltiples estacionalidades.\nConfundir estacionariedad con ausencia total de estructura.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#flujo-recomendado",
+    "href": "time-series/decomposition-stationarity.html#flujo-recomendado",
+    "title": "Descomposición y estacionariedad",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nVisualizar la serie.\nConfirmar frecuencia.\nRevisar valores ausentes.\nIdentificar tendencia.\nIdentificar estacionalidad.\nAplicar STL.\nRevisar residuos.\nEvaluar ADF y KPSS.\nProbar transformaciones.\nAplicar diferenciación mínima.\nRevisar ACF y PACF.\nDocumentar cambios estructurales.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#checklist-para-proyectos",
+    "href": "time-series/decomposition-stationarity.html#checklist-para-proyectos",
+    "title": "Descomposición y estacionariedad",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe definido la frecuencia.\nHe justificado el periodo.\nHe visualizado la serie.\nHe evaluado tendencia.\nHe evaluado estacionalidad.\nHe aplicado descomposición.\nHe revisado residuos.\nHe ejecutado ADF.\nHe ejecutado KPSS.\nHe revisado ACF.\nHe revisado PACF.\nHe aplicado el mínimo de diferencias.\nHe considerado transformación logarítmica.\nHe revisado cambios estructurales.\nHe evitado usar información futura.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#recursos",
+    "href": "time-series/decomposition-stationarity.html#recursos",
+    "title": "Descomposición y estacionariedad",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\nseasonal_decompose.\nSTL.\nadfuller.\nkpss.\nplot_acf.\nplot_pacf.\nacorr_ljungbox.\nSeries.diff.\nSeries.rolling.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#notas-personales",
+    "href": "time-series/decomposition-stationarity.html#notas-personales",
+    "title": "Descomposición y estacionariedad",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus periodos, descomposiciones, tests, transformaciones y decisiones metodológicas.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
     ]
   },
   {
@@ -17102,6 +18890,1134 @@
     "title": "Nombre de la técnica",
     "section": "Notas personales",
     "text": "Notas personales\nAñade aquí tus propias notas, dudas, ejemplos o recordatorios."
+  },
+  {
+    "objectID": "time-series/index.html",
+    "href": "time-series/index.html",
+    "title": "Series temporales",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nUna serie temporal es una secuencia de observaciones ordenadas en el tiempo.\nEl orden importa.\nEn estos problemas no debe mezclarse información futura con el pasado.\nLos objetivos principales son:\n\nDescribir evolución.\nDetectar patrones.\nPredecir valores futuros.\nDetectar cambios.\nIdentificar anomalías temporales.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#qué-es-una-serie-temporal",
+    "href": "time-series/index.html#qué-es-una-serie-temporal",
+    "title": "Series temporales",
+    "section": "¿Qué es una serie temporal?",
+    "text": "¿Qué es una serie temporal?\nUna serie temporal contiene observaciones registradas a lo largo del tiempo.\nEjemplos:\n\nFrecuencia cardiaca cada minuto.\nPresión arterial cada hora.\nIngresos hospitalarios por día.\nBiomarcadores por visita.\nOcupación de camas por semana.\nVentas mensuales.\nTemperatura de un sensor.\n\nTiempo\n──────────────────────────────→\n\ny₁  y₂  y₃  y₄  y₅  ...  yₜ\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nEn series temporales, el orden de las observaciones forma parte de los datos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#diferencia-con-datos-tabulares",
+    "href": "time-series/index.html#diferencia-con-datos-tabulares",
+    "title": "Series temporales",
+    "section": "Diferencia con datos tabulares",
+    "text": "Diferencia con datos tabulares\nEn datos tabulares suele asumirse que las filas son intercambiables.\nEn series temporales:\nPasado\n→ presente\n→ futuro\nCambiar el orden destruye información.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#tipos-de-problemas",
+    "href": "time-series/index.html#tipos-de-problemas",
+    "title": "Series temporales",
+    "section": "Tipos de problemas",
+    "text": "Tipos de problemas",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#forecasting",
+    "href": "time-series/index.html#forecasting",
+    "title": "Series temporales",
+    "section": "Forecasting",
+    "text": "Forecasting\nPredecir valores futuros.\nEjemplos:\n\nOcupación de camas mañana.\nDuración de estancia restante.\nBiomarcador en la siguiente visita.\nDemanda asistencial la próxima semana.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#clasificación-temporal",
+    "href": "time-series/index.html#clasificación-temporal",
+    "title": "Series temporales",
+    "section": "Clasificación temporal",
+    "text": "Clasificación temporal\nPredecir una categoría a partir de una secuencia.\nEjemplos:\n\nDeterioro en las próximas 6 horas.\nArritmia: sí o no.\nReingreso en 30 días.\nCambio de estado clínico.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#detección-de-anomalías",
+    "href": "time-series/index.html#detección-de-anomalías",
+    "title": "Series temporales",
+    "section": "Detección de anomalías",
+    "text": "Detección de anomalías\nIdentificar patrones temporales inusuales.\nEjemplos:\n\nCambio brusco de sensor.\nDeterioro inesperado.\nError de registro.\nRuptura de tendencia.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#imputación-temporal",
+    "href": "time-series/index.html#imputación-temporal",
+    "title": "Series temporales",
+    "section": "Imputación temporal",
+    "text": "Imputación temporal\nEstimar valores ausentes aprovechando observaciones anteriores y posteriores.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#segmentación",
+    "href": "time-series/index.html#segmentación",
+    "title": "Series temporales",
+    "section": "Segmentación",
+    "text": "Segmentación\nDividir una serie en periodos con comportamiento diferente.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#componentes-de-una-serie-temporal",
+    "href": "time-series/index.html#componentes-de-una-serie-temporal",
+    "title": "Series temporales",
+    "section": "Componentes de una serie temporal",
+    "text": "Componentes de una serie temporal\nUna serie puede contener:\n\nNivel.\nTendencia.\nEstacionalidad.\nCiclos.\nRuido.\nCambios estructurales.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#nivel",
+    "href": "time-series/index.html#nivel",
+    "title": "Series temporales",
+    "section": "Nivel",
+    "text": "Nivel\nEs el valor medio alrededor del cual fluctúa la serie.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#tendencia",
+    "href": "time-series/index.html#tendencia",
+    "title": "Series temporales",
+    "section": "Tendencia",
+    "text": "Tendencia\nEs un cambio sostenido a largo plazo.\nValores\n   │\n   │        /\n   │      /\n   │    /\n   │  /\n   └──────────── Tiempo",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#estacionalidad",
+    "href": "time-series/index.html#estacionalidad",
+    "title": "Series temporales",
+    "section": "Estacionalidad",
+    "text": "Estacionalidad\nEs un patrón que se repite con frecuencia conocida.\nEjemplos:\n\nCiclo diario.\nCiclo semanal.\nCiclo anual.\nMayor actividad en días laborables.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#ciclo",
+    "href": "time-series/index.html#ciclo",
+    "title": "Series temporales",
+    "section": "Ciclo",
+    "text": "Ciclo\nEs una oscilación de duración variable, no necesariamente fija.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#ruido",
+    "href": "time-series/index.html#ruido",
+    "title": "Series temporales",
+    "section": "Ruido",
+    "text": "Ruido\nVariación no explicada por los componentes anteriores.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#frecuencia-temporal",
+    "href": "time-series/index.html#frecuencia-temporal",
+    "title": "Series temporales",
+    "section": "Frecuencia temporal",
+    "text": "Frecuencia temporal\nDebe identificarse la frecuencia de observación.\nEjemplos:\n1 minuto\n1 hora\n1 día\n1 semana\n1 visita\nUna serie puede ser:\n\nRegular.\nIrregular.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#serie-regular",
+    "href": "time-series/index.html#serie-regular",
+    "title": "Series temporales",
+    "section": "Serie regular",
+    "text": "Serie regular\nLas observaciones están separadas por intervalos constantes.\n08:00\n09:00\n10:00\n11:00",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#serie-irregular",
+    "href": "time-series/index.html#serie-irregular",
+    "title": "Series temporales",
+    "section": "Serie irregular",
+    "text": "Serie irregular\nLos intervalos son variables.\nDía 0\nDía 7\nDía 23\nDía 90\nEsto es frecuente en datos clínicos longitudinales.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#preparar-fechas",
+    "href": "time-series/index.html#preparar-fechas",
+    "title": "Series temporales",
+    "section": "Preparar fechas",
+    "text": "Preparar fechas\nimport pandas as pd\n\ndf[\"datetime\"] = pd.to_datetime(\n    df[\"datetime\"]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#ordenar",
+    "href": "time-series/index.html#ordenar",
+    "title": "Series temporales",
+    "section": "Ordenar",
+    "text": "Ordenar\ndf = df.sort_values(\n    [\n        \"patient_id\",\n        \"datetime\"\n    ]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#usar-fecha-como-índice",
+    "href": "time-series/index.html#usar-fecha-como-índice",
+    "title": "Series temporales",
+    "section": "Usar fecha como índice",
+    "text": "Usar fecha como índice\ntime_series = (\n    df\n    .set_index(\"datetime\")\n    .sort_index()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#revisar-frecuencia",
+    "href": "time-series/index.html#revisar-frecuencia",
+    "title": "Series temporales",
+    "section": "Revisar frecuencia",
+    "text": "Revisar frecuencia\nprint(\n    pd.infer_freq(\n        time_series.index\n    )\n)\nPuede devolver None si la serie es irregular.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#resampling",
+    "href": "time-series/index.html#resampling",
+    "title": "Series temporales",
+    "section": "Resampling",
+    "text": "Resampling\ndaily_series = (\n    time_series[\"value\"]\n    .resample(\"D\")\n    .mean()\n)\nOtras frecuencias:\nh  → hora\nD  → día\nW  → semana\nME → fin de mes",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#agregación-temporal",
+    "href": "time-series/index.html#agregación-temporal",
+    "title": "Series temporales",
+    "section": "Agregación temporal",
+    "text": "Agregación temporal\nweekly_summary = (\n    time_series[\"value\"]\n    .resample(\"W\")\n    .agg(\n        [\n            \"mean\",\n            \"median\",\n            \"min\",\n            \"max\",\n            \"std\"\n        ]\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#visualización-básica",
+    "href": "time-series/index.html#visualización-básica",
+    "title": "Series temporales",
+    "section": "Visualización básica",
+    "text": "Visualización básica\nimport matplotlib.pyplot as plt\n\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    daily_series.index,\n    daily_series.values\n)\n\nplt.xlabel(\n    \"Fecha\"\n)\n\nplt.ylabel(\n    \"Valor\"\n)\n\nplt.title(\n    \"Serie temporal\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#valores-ausentes",
+    "href": "time-series/index.html#valores-ausentes",
+    "title": "Series temporales",
+    "section": "Valores ausentes",
+    "text": "Valores ausentes\nmissing_count = (\n    daily_series\n    .isna()\n    .sum()\n)\nOpciones:\n\nNo imputar.\nForward fill.\nBackward fill.\nInterpolación.\nModelos temporales.\nImputación por contexto clínico.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#forward-fill",
+    "href": "time-series/index.html#forward-fill",
+    "title": "Series temporales",
+    "section": "Forward fill",
+    "text": "Forward fill\nfilled_series = (\n    daily_series\n    .ffill()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#interpolación-temporal",
+    "href": "time-series/index.html#interpolación-temporal",
+    "title": "Series temporales",
+    "section": "Interpolación temporal",
+    "text": "Interpolación temporal\ninterpolated_series = (\n    daily_series\n    .interpolate(\n        method=\"time\"\n    )\n)\n\n\n\n\n\n\nWarningImportante\n\n\n\nImputar hacia atrás puede introducir información futura.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#lags",
+    "href": "time-series/index.html#lags",
+    "title": "Series temporales",
+    "section": "Lags",
+    "text": "Lags\nUn lag representa un valor pasado.\ndf[\"value_lag_1\"] = (\n    df[\"value\"]\n    .shift(1)\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#varios-lags",
+    "href": "time-series/index.html#varios-lags",
+    "title": "Series temporales",
+    "section": "Varios lags",
+    "text": "Varios lags\nfor lag in [\n    1,\n    2,\n    3,\n    7\n]:\n\n    df[\n        f\"value_lag_{lag}\"\n    ] = (\n        df[\"value\"]\n        .shift(lag)\n    )",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#rolling-windows",
+    "href": "time-series/index.html#rolling-windows",
+    "title": "Series temporales",
+    "section": "Rolling windows",
+    "text": "Rolling windows\ndf[\n    \"rolling_mean_7\"\n] = (\n    df[\"value\"]\n    .rolling(\n        window=7\n    )\n    .mean()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#estadísticos-móviles",
+    "href": "time-series/index.html#estadísticos-móviles",
+    "title": "Series temporales",
+    "section": "Estadísticos móviles",
+    "text": "Estadísticos móviles\ndf[\n    \"rolling_std_7\"\n] = (\n    df[\"value\"]\n    .rolling(\n        window=7\n    )\n    .std()\n)\n\ndf[\n    \"rolling_min_7\"\n] = (\n    df[\"value\"]\n    .rolling(\n        window=7\n    )\n    .min()\n)\n\ndf[\n    \"rolling_max_7\"\n] = (\n    df[\"value\"]\n    .rolling(\n        window=7\n    )\n    .max()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#evitar-leakage-en-rolling-features",
+    "href": "time-series/index.html#evitar-leakage-en-rolling-features",
+    "title": "Series temporales",
+    "section": "Evitar leakage en rolling features",
+    "text": "Evitar leakage en rolling features\nPara predecir el tiempo (t), la ventana debe contener solo información anterior.\ndf[\n    \"rolling_mean_7\"\n] = (\n    df[\"value\"]\n    .shift(1)\n    .rolling(\n        window=7\n    )\n    .mean()\n)\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nAplica shift(1) antes de calcular estadísticas si no debe incluirse el valor actual.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#variables-de-calendario",
+    "href": "time-series/index.html#variables-de-calendario",
+    "title": "Series temporales",
+    "section": "Variables de calendario",
+    "text": "Variables de calendario\ndf[\"year\"] = (\n    df[\"datetime\"]\n    .dt\n    .year\n)\n\ndf[\"month\"] = (\n    df[\"datetime\"]\n    .dt\n    .month\n)\n\ndf[\"day_of_week\"] = (\n    df[\"datetime\"]\n    .dt\n    .dayofweek\n)\n\ndf[\"hour\"] = (\n    df[\"datetime\"]\n    .dt\n    .hour\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#variables-cíclicas",
+    "href": "time-series/index.html#variables-cíclicas",
+    "title": "Series temporales",
+    "section": "Variables cíclicas",
+    "text": "Variables cíclicas\nEl mes 12 y el mes 1 están próximos.\nPuede representarse con seno y coseno.\nimport numpy as np\n\ndf[\"month_sin\"] = np.sin(\n    2\n    *\n    np.pi\n    *\n    df[\"month\"]\n    /\n    12\n)\n\ndf[\"month_cos\"] = np.cos(\n    2\n    *\n    np.pi\n    *\n    df[\"month\"]\n    /\n    12\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#horizonte-de-predicción",
+    "href": "time-series/index.html#horizonte-de-predicción",
+    "title": "Series temporales",
+    "section": "Horizonte de predicción",
+    "text": "Horizonte de predicción\nDebe definirse cuánto futuro se quiere predecir.\nEjemplos:\n1 hora\n6 horas\n24 horas\n7 días\n30 días\n1 visita",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#forecast-horizon",
+    "href": "time-series/index.html#forecast-horizon",
+    "title": "Series temporales",
+    "section": "Forecast horizon",
+    "text": "Forecast horizon\nTiempo de predicción\n        │\n        ├── t + 1\n        ├── t + 2\n        └── t + H",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#predicción-one-step",
+    "href": "time-series/index.html#predicción-one-step",
+    "title": "Series temporales",
+    "section": "Predicción one-step",
+    "text": "Predicción one-step\nPredice el siguiente instante.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#predicción-multi-step",
+    "href": "time-series/index.html#predicción-multi-step",
+    "title": "Series temporales",
+    "section": "Predicción multi-step",
+    "text": "Predicción multi-step\nPredice varios pasos futuros.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#estrategia-recursiva",
+    "href": "time-series/index.html#estrategia-recursiva",
+    "title": "Series temporales",
+    "section": "Estrategia recursiva",
+    "text": "Estrategia recursiva\nUtiliza predicciones anteriores para predecir pasos posteriores.\nPredice t+1\n→ usa predicción para t+2\n→ usa predicciones para t+3\nPuede acumular error.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#estrategia-directa",
+    "href": "time-series/index.html#estrategia-directa",
+    "title": "Series temporales",
+    "section": "Estrategia directa",
+    "text": "Estrategia directa\nEntrena un modelo distinto para cada horizonte.\nModelo 1 → t+1\nModelo 2 → t+2\nModelo 3 → t+3",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#estrategia-multi-output",
+    "href": "time-series/index.html#estrategia-multi-output",
+    "title": "Series temporales",
+    "section": "Estrategia multi-output",
+    "text": "Estrategia multi-output\nUn único modelo predice varios horizontes.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#split-temporal",
+    "href": "time-series/index.html#split-temporal",
+    "title": "Series temporales",
+    "section": "Split temporal",
+    "text": "Split temporal\nNo debe usarse un split aleatorio si el objetivo es predecir el futuro.\nTrain\n────────────\n\nValidation\n            ──────\n\nTest\n                  ──────",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#split-por-fecha",
+    "href": "time-series/index.html#split-por-fecha",
+    "title": "Series temporales",
+    "section": "Split por fecha",
+    "text": "Split por fecha\ntrain = df.loc[\n    df[\"datetime\"]\n    &lt;\n    \"2025-01-01\"\n]\n\nvalidation = df.loc[\n    (\n        df[\"datetime\"]\n        &gt;=\n        \"2025-01-01\"\n    )\n    &\n    (\n        df[\"datetime\"]\n        &lt;\n        \"2025-07-01\"\n    )\n]\n\ntest = df.loc[\n    df[\"datetime\"]\n    &gt;=\n    \"2025-07-01\"\n]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#timeseriessplit",
+    "href": "time-series/index.html#timeseriessplit",
+    "title": "Series temporales",
+    "section": "TimeSeriesSplit",
+    "text": "TimeSeriesSplit\nfrom sklearn.model_selection import TimeSeriesSplit\n\ncv = TimeSeriesSplit(\n    n_splits=5\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#ventana-expansiva",
+    "href": "time-series/index.html#ventana-expansiva",
+    "title": "Series temporales",
+    "section": "Ventana expansiva",
+    "text": "Ventana expansiva\nFold 1\nTrain: [1 2 3]\nTest:          [4]\n\nFold 2\nTrain: [1 2 3 4]\nTest:            [5]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#ventana-deslizante",
+    "href": "time-series/index.html#ventana-deslizante",
+    "title": "Series temporales",
+    "section": "Ventana deslizante",
+    "text": "Ventana deslizante\nFold 1\nTrain: [1 2 3]\nTest:          [4]\n\nFold 2\nTrain:   [2 3 4]\nTest:            [5]\nPuede ser útil cuando los datos antiguos pierden relevancia.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#gap-temporal",
+    "href": "time-series/index.html#gap-temporal",
+    "title": "Series temporales",
+    "section": "Gap temporal",
+    "text": "Gap temporal\ncv = TimeSeriesSplit(\n    n_splits=5,\n    gap=7\n)\nEl gap evita que observaciones muy próximas aparezcan en train y validation.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#baselines-temporales",
+    "href": "time-series/index.html#baselines-temporales",
+    "title": "Series temporales",
+    "section": "Baselines temporales",
+    "text": "Baselines temporales\nTodo forecasting debe compararse con baselines.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#naive-forecast",
+    "href": "time-series/index.html#naive-forecast",
+    "title": "Series temporales",
+    "section": "Naive forecast",
+    "text": "Naive forecast\ny_pred_naive = (\n    y_test\n    .shift(1)\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#último-valor",
+    "href": "time-series/index.html#último-valor",
+    "title": "Series temporales",
+    "section": "Último valor",
+    "text": "Último valor\nPredicción futura\n=\núltimo valor observado",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#media-histórica",
+    "href": "time-series/index.html#media-histórica",
+    "title": "Series temporales",
+    "section": "Media histórica",
+    "text": "Media histórica\nhistorical_mean = (\n    y_train.mean()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#seasonal-naive",
+    "href": "time-series/index.html#seasonal-naive",
+    "title": "Series temporales",
+    "section": "Seasonal naive",
+    "text": "Seasonal naive\nPredicción de hoy\n=\nvalor del mismo día de la semana anterior",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#media-móvil",
+    "href": "time-series/index.html#media-móvil",
+    "title": "Series temporales",
+    "section": "Media móvil",
+    "text": "Media móvil\nrolling_baseline = (\n    y_train\n    .rolling(\n        window=7\n    )\n    .mean()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#métricas-de-forecasting",
+    "href": "time-series/index.html#métricas-de-forecasting",
+    "title": "Series temporales",
+    "section": "Métricas de forecasting",
+    "text": "Métricas de forecasting\n\nMAE.\nRMSE.\nMAPE.\nsMAPE.\nMASE.\nWAPE.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#mae",
+    "href": "time-series/index.html#mae",
+    "title": "Series temporales",
+    "section": "MAE",
+    "text": "MAE\nfrom sklearn.metrics import mean_absolute_error\n\nmae = mean_absolute_error(\n    y_test,\n    y_pred\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#rmse",
+    "href": "time-series/index.html#rmse",
+    "title": "Series temporales",
+    "section": "RMSE",
+    "text": "RMSE\nfrom sklearn.metrics import root_mean_squared_error\n\nrmse = root_mean_squared_error(\n    y_test,\n    y_pred\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#mape",
+    "href": "time-series/index.html#mape",
+    "title": "Series temporales",
+    "section": "MAPE",
+    "text": "MAPE\n\\[\nMAPE\n=\n\\frac{100}{n}\n\\sum\n\\left|\n\\frac{\ny_t-\\hat{y}_t\n}{\ny_t\n}\n\\right|\n\\]\nProblemas:\n\nNo funciona bien con ceros.\nPuede explotar con valores pequeños.\nEs asimétrica.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#smape",
+    "href": "time-series/index.html#smape",
+    "title": "Series temporales",
+    "section": "sMAPE",
+    "text": "sMAPE\nUtiliza una escala simétrica aproximada.\nTambién puede ser inestable cerca de cero.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#mase",
+    "href": "time-series/index.html#mase",
+    "title": "Series temporales",
+    "section": "MASE",
+    "text": "MASE\nCompara el error con un baseline naive.\nMASE &lt; 1\n→ mejor que naive\n\nMASE &gt; 1\n→ peor que naive",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#evaluación-por-horizonte",
+    "href": "time-series/index.html#evaluación-por-horizonte",
+    "title": "Series temporales",
+    "section": "Evaluación por horizonte",
+    "text": "Evaluación por horizonte\nNo debe reportarse solo una métrica global.\nHorizonte 1 día\nHorizonte 3 días\nHorizonte 7 días\nEl error suele aumentar con el horizonte.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#intervalos-de-predicción",
+    "href": "time-series/index.html#intervalos-de-predicción",
+    "title": "Series temporales",
+    "section": "Intervalos de predicción",
+    "text": "Intervalos de predicción\nUna predicción útil debería incluir incertidumbre.\nPredicción central\n+\nlímite inferior\n+\nlímite superior",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#cobertura",
+    "href": "time-series/index.html#cobertura",
+    "title": "Series temporales",
+    "section": "Cobertura",
+    "text": "Cobertura\nUn intervalo del 95 % debería contener aproximadamente el 95 % de observaciones futuras, bajo las condiciones del modelo.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#descomposición",
+    "href": "time-series/index.html#descomposición",
+    "title": "Series temporales",
+    "section": "Descomposición",
+    "text": "Descomposición\nUna serie puede descomponerse en:\n\\[\ny_t\n=\nT_t\n+\nS_t\n+\nR_t\n\\]\ndonde:\n\n(T_t): tendencia.\n(S_t): estacionalidad.\n(R_t): residuo.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#stl",
+    "href": "time-series/index.html#stl",
+    "title": "Series temporales",
+    "section": "STL",
+    "text": "STL\nfrom statsmodels.tsa.seasonal import STL\n\ndecomposition = STL(\n    daily_series,\n    period=7\n).fit()\ndecomposition.plot()\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#estacionariedad",
+    "href": "time-series/index.html#estacionariedad",
+    "title": "Series temporales",
+    "section": "Estacionariedad",
+    "text": "Estacionariedad\nUna serie estacionaria mantiene aproximadamente:\n\nMedia constante.\nVarianza constante.\nDependencia temporal estable.\n\nMuchos modelos clásicos requieren estacionariedad.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#diferenciación",
+    "href": "time-series/index.html#diferenciación",
+    "title": "Series temporales",
+    "section": "Diferenciación",
+    "text": "Diferenciación\ndifferenced = (\n    daily_series\n    .diff()\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#autocorrelación",
+    "href": "time-series/index.html#autocorrelación",
+    "title": "Series temporales",
+    "section": "Autocorrelación",
+    "text": "Autocorrelación\nMide la relación entre una serie y sus valores pasados.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#acf",
+    "href": "time-series/index.html#acf",
+    "title": "Series temporales",
+    "section": "ACF",
+    "text": "ACF\nfrom statsmodels.graphics.tsaplots import plot_acf\n\nplot_acf(\n    daily_series.dropna(),\n    lags=30\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#pacf",
+    "href": "time-series/index.html#pacf",
+    "title": "Series temporales",
+    "section": "PACF",
+    "text": "PACF\nfrom statsmodels.graphics.tsaplots import plot_pacf\n\nplot_pacf(\n    daily_series.dropna(),\n    lags=30\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#modelos-clásicos",
+    "href": "time-series/index.html#modelos-clásicos",
+    "title": "Series temporales",
+    "section": "Modelos clásicos",
+    "text": "Modelos clásicos\n\nExponential smoothing.\nHolt.\nHolt-Winters.\nARIMA.\nSARIMA.\nModelos de estado.\nProphet.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#modelos-de-machine-learning",
+    "href": "time-series/index.html#modelos-de-machine-learning",
+    "title": "Series temporales",
+    "section": "Modelos de machine learning",
+    "text": "Modelos de machine learning\n\nRegresión lineal con lags.\nRandom forest.\nGradient boosting.\nXGBoost.\nLightGBM.\nCatBoost.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#deep-learning-temporal",
+    "href": "time-series/index.html#deep-learning-temporal",
+    "title": "Series temporales",
+    "section": "Deep learning temporal",
+    "text": "Deep learning temporal\n\nRNN.\nLSTM.\nGRU.\nTemporal CNN.\nTransformers.\nTemporal Fusion Transformer.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#regresión-con-lags",
+    "href": "time-series/index.html#regresión-con-lags",
+    "title": "Series temporales",
+    "section": "Regresión con lags",
+    "text": "Regresión con lags\nfeatures = [\n    \"value_lag_1\",\n    \"value_lag_2\",\n    \"value_lag_7\",\n    \"rolling_mean_7\",\n    \"day_of_week\"\n]\n\nX = df[features]\n\ny = df[\"value\"]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#pipeline-temporal",
+    "href": "time-series/index.html#pipeline-temporal",
+    "title": "Series temporales",
+    "section": "Pipeline temporal",
+    "text": "Pipeline temporal\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.impute import SimpleImputer\nfrom sklearn.ensemble import HistGradientBoostingRegressor\n\nmodel = Pipeline(\n    steps=[\n        (\n            \"imputer\",\n            SimpleImputer(\n                strategy=\"median\"\n            )\n        ),\n        (\n            \"regressor\",\n            HistGradientBoostingRegressor(\n                learning_rate=0.05,\n                max_iter=300,\n                random_state=42\n            )\n        )\n    ]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#evaluar-con-timeseriessplit",
+    "href": "time-series/index.html#evaluar-con-timeseriessplit",
+    "title": "Series temporales",
+    "section": "Evaluar con TimeSeriesSplit",
+    "text": "Evaluar con TimeSeriesSplit\nfrom sklearn.model_selection import cross_validate\n\nscores = cross_validate(\n    estimator=model,\n    X=X,\n    y=y,\n    cv=cv,\n    scoring={\n        \"mae\": \"neg_mean_absolute_error\",\n        \"rmse\": \"neg_root_mean_squared_error\"\n    }\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#series-por-paciente",
+    "href": "time-series/index.html#series-por-paciente",
+    "title": "Series temporales",
+    "section": "Series por paciente",
+    "text": "Series por paciente\nEn datos clínicos puede haber múltiples series.\nPaciente 1\n→ serie propia\n\nPaciente 2\n→ serie propia\n\nPaciente 3\n→ serie propia\nDebe decidirse si el modelo es:\n\nIndividual.\nGlobal.\nPor centro.\nPor población.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#modelo-global",
+    "href": "time-series/index.html#modelo-global",
+    "title": "Series temporales",
+    "section": "Modelo global",
+    "text": "Modelo global\nEntrena con múltiples series y añade identificadores o características estáticas.\nVentajas:\n\nMás datos.\nAprende patrones compartidos.\nPuede generalizar a pacientes nuevos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#datos-estáticos-y-dinámicos",
+    "href": "time-series/index.html#datos-estáticos-y-dinámicos",
+    "title": "Series temporales",
+    "section": "Datos estáticos y dinámicos",
+    "text": "Datos estáticos y dinámicos\n\nEstáticos\n\nSexo.\nDiagnóstico.\nCentro.\nGenética.\n\n\n\nDinámicos\n\nBiomarcadores.\nSignos vitales.\nTratamientos.\nEstado clínico.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#irregularidad-clínica",
+    "href": "time-series/index.html#irregularidad-clínica",
+    "title": "Series temporales",
+    "section": "Irregularidad clínica",
+    "text": "Irregularidad clínica\nLas visitas no ocurren a intervalos regulares.\nOpciones:\n\nResampling.\nTiempo desde última observación.\nModelos para eventos irregulares.\nFeatures por ventanas.\nModelos multiestado.\nJoint models.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#tiempo-desde-última-medición",
+    "href": "time-series/index.html#tiempo-desde-última-medición",
+    "title": "Series temporales",
+    "section": "Tiempo desde última medición",
+    "text": "Tiempo desde última medición\ndf[\n    \"time_since_previous_measurement\"\n] = (\n    df\n    .groupby(\"patient_id\")[\n        \"datetime\"\n    ]\n    .diff()\n    .dt\n    .total_seconds()\n    /\n    3600\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#censura",
+    "href": "time-series/index.html#censura",
+    "title": "Series temporales",
+    "section": "Censura",
+    "text": "Censura\nEn salud puede ocurrir que:\n\nEl seguimiento termine.\nEl evento no ocurra.\nEl paciente abandone.\nLa observación se interrumpa.\n\nEn estos casos puede ser más adecuado:\n\nSurvival analysis.\nTime-to-event.\nModelos multiestado.\nJoint longitudinal-survival models.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#forecasting-frente-a-time-to-event",
+    "href": "time-series/index.html#forecasting-frente-a-time-to-event",
+    "title": "Series temporales",
+    "section": "Forecasting frente a time-to-event",
+    "text": "Forecasting frente a time-to-event\nForecasting\n→ ¿qué valor tendrá?\n\nTime-to-event\n→ ¿cuándo ocurrirá?",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#leakage-temporal",
+    "href": "time-series/index.html#leakage-temporal",
+    "title": "Series temporales",
+    "section": "Leakage temporal",
+    "text": "Leakage temporal\nEjemplos frecuentes:\n\nUsar el valor futuro para imputar.\nCalcular rolling mean con el punto actual.\nNormalizar con todo el periodo.\nSeleccionar variables usando test.\nCrear target con información posterior mal alineada.\nMezclar episodios del mismo paciente.\n\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nEl leakage temporal puede producir resultados artificialmente excelentes.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#drift-temporal",
+    "href": "time-series/index.html#drift-temporal",
+    "title": "Series temporales",
+    "section": "Drift temporal",
+    "text": "Drift temporal\nCon el tiempo cambian:\n\nProtocolos.\nEquipos.\nPoblación.\nTratamientos.\nCodificación.\nPrevalencia.\nEstacionalidad.\n\nDebe monitorizarse:\n\nError por periodo.\nDistribución de features.\nCalibración.\nFrecuencia de alertas.\nResiduos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#backtesting",
+    "href": "time-series/index.html#backtesting",
+    "title": "Series temporales",
+    "section": "Backtesting",
+    "text": "Backtesting\nBacktesting simula cómo habría funcionado el modelo en distintos momentos históricos.\nEntrenar hasta enero\n→ predecir febrero\n\nEntrenar hasta febrero\n→ predecir marzo\n\nEntrenar hasta marzo\n→ predecir abril",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#errores-por-periodo",
+    "href": "time-series/index.html#errores-por-periodo",
+    "title": "Series temporales",
+    "section": "Errores por periodo",
+    "text": "Errores por periodo\nevaluation_df = pd.DataFrame(\n    {\n        \"datetime\": test_dates,\n        \"y_true\": y_test,\n        \"y_pred\": y_pred\n    }\n)\nmonthly_mae = (\n    evaluation_df\n    .set_index(\"datetime\")\n    .resample(\"ME\")\n    .apply(\n        lambda group:\n        mean_absolute_error(\n            group[\"y_true\"],\n            group[\"y_pred\"]\n        )\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#consideraciones-clínicas",
+    "href": "time-series/index.html#consideraciones-clínicas",
+    "title": "Series temporales",
+    "section": "Consideraciones clínicas",
+    "text": "Consideraciones clínicas\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nUna predicción temporal solo es útil si llega con suficiente antelación para modificar una decisión.\n\n\nDebe definirse:\n\nMomento de predicción.\nHorizonte.\nFrecuencia de actualización.\nLatencia.\nAcción clínica.\nCoste de falsas alertas.\nDisponibilidad de datos.\nEstrategia de monitorización.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#errores-frecuentes",
+    "href": "time-series/index.html#errores-frecuentes",
+    "title": "Series temporales",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nHacer split aleatorio.\nNo ordenar por tiempo.\nUsar información futura.\nNo comparar con naive.\nEvaluar solo un horizonte.\nIgnorar irregularidad.\nImputar hacia atrás.\nNo usar gap.\nMezclar pacientes.\nReportar solo RMSE.\nIgnorar intervalos.\nNo revisar drift.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#flujo-recomendado",
+    "href": "time-series/index.html#flujo-recomendado",
+    "title": "Series temporales",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nDefinir la serie.\nDefinir unidad temporal.\nDefinir momento de predicción.\nDefinir horizonte.\nExplorar tendencia y estacionalidad.\nCrear baseline.\nCrear features temporales.\nDividir por tiempo.\nAplicar backtesting.\nEvaluar por horizonte.\nCuantificar incertidumbre.\nMonitorizar drift.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#checklist-para-proyectos",
+    "href": "time-series/index.html#checklist-para-proyectos",
+    "title": "Series temporales",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe definido la unidad temporal.\nHe ordenado los datos.\nHe definido el horizonte.\nHe definido el momento de predicción.\nHe creado un baseline naive.\nHe evitado información futura.\nHe calculado lags correctamente.\nHe desplazado rolling features.\nHe realizado split temporal.\nHe aplicado backtesting.\nHe evaluado varios horizontes.\nHe revisado intervalos de predicción.\nHe considerado irregularidad.\nHe revisado pacientes repetidos.\nHe planificado monitorización de drift.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#próximos-documentos",
+    "href": "time-series/index.html#próximos-documentos",
+    "title": "Series temporales",
+    "section": "Próximos documentos",
+    "text": "Próximos documentos\nEsta sección se completará con:\n\nFundamentos y preparación temporal.\nDescomposición y estacionariedad.\nExponential smoothing.\nARIMA y SARIMA.\nFeature engineering temporal.\nMachine learning para forecasting.\nEvaluación y backtesting.\nSeries temporales clínicas.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#recursos",
+    "href": "time-series/index.html#recursos",
+    "title": "Series temporales",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\npandas.resample.\nTimeSeriesSplit.\nSTL.\nACF y PACF.\nARIMA.\nExponential smoothing.\nMétricas de forecasting.\nBacktesting.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "time-series/index.html#notas-personales",
+    "href": "time-series/index.html#notas-personales",
+    "title": "Series temporales",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus series, horizontes, baselines, features y decisiones temporales.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Introducción"
+    ]
   },
   {
     "objectID": "unsupervised-learning/anomaly-detection.html",

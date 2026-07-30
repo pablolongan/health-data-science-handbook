@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -72,6 +107,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -437,6 +501,18 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/time-series-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fundamentos y preparación temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/decomposition-stationarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Descomposición y estacionariedad</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -500,7 +576,107 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#contenidos-previstos" id="toc-contenidos-previstos" class="nav-link active" data-scroll-target="#contenidos-previstos">Contenidos previstos</a></li>
+  <li><a href="#qué-es-una-serie-temporal" id="toc-qué-es-una-serie-temporal" class="nav-link active" data-scroll-target="#qué-es-una-serie-temporal">¿Qué es una serie temporal?</a></li>
+  <li><a href="#diferencia-con-datos-tabulares" id="toc-diferencia-con-datos-tabulares" class="nav-link" data-scroll-target="#diferencia-con-datos-tabulares">Diferencia con datos tabulares</a></li>
+  <li><a href="#tipos-de-problemas" id="toc-tipos-de-problemas" class="nav-link" data-scroll-target="#tipos-de-problemas">Tipos de problemas</a></li>
+  <li><a href="#forecasting" id="toc-forecasting" class="nav-link" data-scroll-target="#forecasting">Forecasting</a></li>
+  <li><a href="#clasificación-temporal" id="toc-clasificación-temporal" class="nav-link" data-scroll-target="#clasificación-temporal">Clasificación temporal</a></li>
+  <li><a href="#detección-de-anomalías" id="toc-detección-de-anomalías" class="nav-link" data-scroll-target="#detección-de-anomalías">Detección de anomalías</a></li>
+  <li><a href="#imputación-temporal" id="toc-imputación-temporal" class="nav-link" data-scroll-target="#imputación-temporal">Imputación temporal</a></li>
+  <li><a href="#segmentación" id="toc-segmentación" class="nav-link" data-scroll-target="#segmentación">Segmentación</a></li>
+  <li><a href="#componentes-de-una-serie-temporal" id="toc-componentes-de-una-serie-temporal" class="nav-link" data-scroll-target="#componentes-de-una-serie-temporal">Componentes de una serie temporal</a></li>
+  <li><a href="#nivel" id="toc-nivel" class="nav-link" data-scroll-target="#nivel">Nivel</a></li>
+  <li><a href="#tendencia" id="toc-tendencia" class="nav-link" data-scroll-target="#tendencia">Tendencia</a></li>
+  <li><a href="#estacionalidad" id="toc-estacionalidad" class="nav-link" data-scroll-target="#estacionalidad">Estacionalidad</a></li>
+  <li><a href="#ciclo" id="toc-ciclo" class="nav-link" data-scroll-target="#ciclo">Ciclo</a></li>
+  <li><a href="#ruido" id="toc-ruido" class="nav-link" data-scroll-target="#ruido">Ruido</a></li>
+  <li><a href="#frecuencia-temporal" id="toc-frecuencia-temporal" class="nav-link" data-scroll-target="#frecuencia-temporal">Frecuencia temporal</a></li>
+  <li><a href="#serie-regular" id="toc-serie-regular" class="nav-link" data-scroll-target="#serie-regular">Serie regular</a></li>
+  <li><a href="#serie-irregular" id="toc-serie-irregular" class="nav-link" data-scroll-target="#serie-irregular">Serie irregular</a></li>
+  <li><a href="#preparar-fechas" id="toc-preparar-fechas" class="nav-link" data-scroll-target="#preparar-fechas">Preparar fechas</a></li>
+  <li><a href="#ordenar" id="toc-ordenar" class="nav-link" data-scroll-target="#ordenar">Ordenar</a></li>
+  <li><a href="#usar-fecha-como-índice" id="toc-usar-fecha-como-índice" class="nav-link" data-scroll-target="#usar-fecha-como-índice">Usar fecha como índice</a></li>
+  <li><a href="#revisar-frecuencia" id="toc-revisar-frecuencia" class="nav-link" data-scroll-target="#revisar-frecuencia">Revisar frecuencia</a></li>
+  <li><a href="#resampling" id="toc-resampling" class="nav-link" data-scroll-target="#resampling">Resampling</a></li>
+  <li><a href="#agregación-temporal" id="toc-agregación-temporal" class="nav-link" data-scroll-target="#agregación-temporal">Agregación temporal</a></li>
+  <li><a href="#visualización-básica" id="toc-visualización-básica" class="nav-link" data-scroll-target="#visualización-básica">Visualización básica</a></li>
+  <li><a href="#valores-ausentes" id="toc-valores-ausentes" class="nav-link" data-scroll-target="#valores-ausentes">Valores ausentes</a></li>
+  <li><a href="#forward-fill" id="toc-forward-fill" class="nav-link" data-scroll-target="#forward-fill">Forward fill</a></li>
+  <li><a href="#interpolación-temporal" id="toc-interpolación-temporal" class="nav-link" data-scroll-target="#interpolación-temporal">Interpolación temporal</a></li>
+  <li><a href="#lags" id="toc-lags" class="nav-link" data-scroll-target="#lags">Lags</a></li>
+  <li><a href="#varios-lags" id="toc-varios-lags" class="nav-link" data-scroll-target="#varios-lags">Varios lags</a></li>
+  <li><a href="#rolling-windows" id="toc-rolling-windows" class="nav-link" data-scroll-target="#rolling-windows">Rolling windows</a></li>
+  <li><a href="#estadísticos-móviles" id="toc-estadísticos-móviles" class="nav-link" data-scroll-target="#estadísticos-móviles">Estadísticos móviles</a></li>
+  <li><a href="#evitar-leakage-en-rolling-features" id="toc-evitar-leakage-en-rolling-features" class="nav-link" data-scroll-target="#evitar-leakage-en-rolling-features">Evitar leakage en rolling features</a></li>
+  <li><a href="#variables-de-calendario" id="toc-variables-de-calendario" class="nav-link" data-scroll-target="#variables-de-calendario">Variables de calendario</a></li>
+  <li><a href="#variables-cíclicas" id="toc-variables-cíclicas" class="nav-link" data-scroll-target="#variables-cíclicas">Variables cíclicas</a></li>
+  <li><a href="#horizonte-de-predicción" id="toc-horizonte-de-predicción" class="nav-link" data-scroll-target="#horizonte-de-predicción">Horizonte de predicción</a></li>
+  <li><a href="#forecast-horizon" id="toc-forecast-horizon" class="nav-link" data-scroll-target="#forecast-horizon">Forecast horizon</a></li>
+  <li><a href="#predicción-one-step" id="toc-predicción-one-step" class="nav-link" data-scroll-target="#predicción-one-step">Predicción one-step</a></li>
+  <li><a href="#predicción-multi-step" id="toc-predicción-multi-step" class="nav-link" data-scroll-target="#predicción-multi-step">Predicción multi-step</a></li>
+  <li><a href="#estrategia-recursiva" id="toc-estrategia-recursiva" class="nav-link" data-scroll-target="#estrategia-recursiva">Estrategia recursiva</a></li>
+  <li><a href="#estrategia-directa" id="toc-estrategia-directa" class="nav-link" data-scroll-target="#estrategia-directa">Estrategia directa</a></li>
+  <li><a href="#estrategia-multi-output" id="toc-estrategia-multi-output" class="nav-link" data-scroll-target="#estrategia-multi-output">Estrategia multi-output</a></li>
+  <li><a href="#split-temporal" id="toc-split-temporal" class="nav-link" data-scroll-target="#split-temporal">Split temporal</a></li>
+  <li><a href="#split-por-fecha" id="toc-split-por-fecha" class="nav-link" data-scroll-target="#split-por-fecha">Split por fecha</a></li>
+  <li><a href="#timeseriessplit" id="toc-timeseriessplit" class="nav-link" data-scroll-target="#timeseriessplit">TimeSeriesSplit</a></li>
+  <li><a href="#ventana-expansiva" id="toc-ventana-expansiva" class="nav-link" data-scroll-target="#ventana-expansiva">Ventana expansiva</a></li>
+  <li><a href="#ventana-deslizante" id="toc-ventana-deslizante" class="nav-link" data-scroll-target="#ventana-deslizante">Ventana deslizante</a></li>
+  <li><a href="#gap-temporal" id="toc-gap-temporal" class="nav-link" data-scroll-target="#gap-temporal">Gap temporal</a></li>
+  <li><a href="#baselines-temporales" id="toc-baselines-temporales" class="nav-link" data-scroll-target="#baselines-temporales">Baselines temporales</a></li>
+  <li><a href="#naive-forecast" id="toc-naive-forecast" class="nav-link" data-scroll-target="#naive-forecast">Naive forecast</a></li>
+  <li><a href="#último-valor" id="toc-último-valor" class="nav-link" data-scroll-target="#último-valor">Último valor</a></li>
+  <li><a href="#media-histórica" id="toc-media-histórica" class="nav-link" data-scroll-target="#media-histórica">Media histórica</a></li>
+  <li><a href="#seasonal-naive" id="toc-seasonal-naive" class="nav-link" data-scroll-target="#seasonal-naive">Seasonal naive</a></li>
+  <li><a href="#media-móvil" id="toc-media-móvil" class="nav-link" data-scroll-target="#media-móvil">Media móvil</a></li>
+  <li><a href="#métricas-de-forecasting" id="toc-métricas-de-forecasting" class="nav-link" data-scroll-target="#métricas-de-forecasting">Métricas de forecasting</a></li>
+  <li><a href="#mae" id="toc-mae" class="nav-link" data-scroll-target="#mae">MAE</a></li>
+  <li><a href="#rmse" id="toc-rmse" class="nav-link" data-scroll-target="#rmse">RMSE</a></li>
+  <li><a href="#mape" id="toc-mape" class="nav-link" data-scroll-target="#mape">MAPE</a></li>
+  <li><a href="#smape" id="toc-smape" class="nav-link" data-scroll-target="#smape">sMAPE</a></li>
+  <li><a href="#mase" id="toc-mase" class="nav-link" data-scroll-target="#mase">MASE</a></li>
+  <li><a href="#evaluación-por-horizonte" id="toc-evaluación-por-horizonte" class="nav-link" data-scroll-target="#evaluación-por-horizonte">Evaluación por horizonte</a></li>
+  <li><a href="#intervalos-de-predicción" id="toc-intervalos-de-predicción" class="nav-link" data-scroll-target="#intervalos-de-predicción">Intervalos de predicción</a></li>
+  <li><a href="#cobertura" id="toc-cobertura" class="nav-link" data-scroll-target="#cobertura">Cobertura</a></li>
+  <li><a href="#descomposición" id="toc-descomposición" class="nav-link" data-scroll-target="#descomposición">Descomposición</a></li>
+  <li><a href="#stl" id="toc-stl" class="nav-link" data-scroll-target="#stl">STL</a></li>
+  <li><a href="#estacionariedad" id="toc-estacionariedad" class="nav-link" data-scroll-target="#estacionariedad">Estacionariedad</a></li>
+  <li><a href="#diferenciación" id="toc-diferenciación" class="nav-link" data-scroll-target="#diferenciación">Diferenciación</a></li>
+  <li><a href="#autocorrelación" id="toc-autocorrelación" class="nav-link" data-scroll-target="#autocorrelación">Autocorrelación</a></li>
+  <li><a href="#acf" id="toc-acf" class="nav-link" data-scroll-target="#acf">ACF</a></li>
+  <li><a href="#pacf" id="toc-pacf" class="nav-link" data-scroll-target="#pacf">PACF</a></li>
+  <li><a href="#modelos-clásicos" id="toc-modelos-clásicos" class="nav-link" data-scroll-target="#modelos-clásicos">Modelos clásicos</a></li>
+  <li><a href="#modelos-de-machine-learning" id="toc-modelos-de-machine-learning" class="nav-link" data-scroll-target="#modelos-de-machine-learning">Modelos de machine learning</a></li>
+  <li><a href="#deep-learning-temporal" id="toc-deep-learning-temporal" class="nav-link" data-scroll-target="#deep-learning-temporal">Deep learning temporal</a></li>
+  <li><a href="#regresión-con-lags" id="toc-regresión-con-lags" class="nav-link" data-scroll-target="#regresión-con-lags">Regresión con lags</a></li>
+  <li><a href="#pipeline-temporal" id="toc-pipeline-temporal" class="nav-link" data-scroll-target="#pipeline-temporal">Pipeline temporal</a></li>
+  <li><a href="#evaluar-con-timeseriessplit" id="toc-evaluar-con-timeseriessplit" class="nav-link" data-scroll-target="#evaluar-con-timeseriessplit">Evaluar con TimeSeriesSplit</a></li>
+  <li><a href="#series-por-paciente" id="toc-series-por-paciente" class="nav-link" data-scroll-target="#series-por-paciente">Series por paciente</a></li>
+  <li><a href="#modelo-global" id="toc-modelo-global" class="nav-link" data-scroll-target="#modelo-global">Modelo global</a></li>
+  <li><a href="#datos-estáticos-y-dinámicos" id="toc-datos-estáticos-y-dinámicos" class="nav-link" data-scroll-target="#datos-estáticos-y-dinámicos">Datos estáticos y dinámicos</a>
+  <ul class="collapse">
+  <li><a href="#estáticos" id="toc-estáticos" class="nav-link" data-scroll-target="#estáticos">Estáticos</a></li>
+  <li><a href="#dinámicos" id="toc-dinámicos" class="nav-link" data-scroll-target="#dinámicos">Dinámicos</a></li>
+  </ul></li>
+  <li><a href="#irregularidad-clínica" id="toc-irregularidad-clínica" class="nav-link" data-scroll-target="#irregularidad-clínica">Irregularidad clínica</a></li>
+  <li><a href="#tiempo-desde-última-medición" id="toc-tiempo-desde-última-medición" class="nav-link" data-scroll-target="#tiempo-desde-última-medición">Tiempo desde última medición</a></li>
+  <li><a href="#censura" id="toc-censura" class="nav-link" data-scroll-target="#censura">Censura</a></li>
+  <li><a href="#forecasting-frente-a-time-to-event" id="toc-forecasting-frente-a-time-to-event" class="nav-link" data-scroll-target="#forecasting-frente-a-time-to-event">Forecasting frente a time-to-event</a></li>
+  <li><a href="#leakage-temporal" id="toc-leakage-temporal" class="nav-link" data-scroll-target="#leakage-temporal">Leakage temporal</a></li>
+  <li><a href="#drift-temporal" id="toc-drift-temporal" class="nav-link" data-scroll-target="#drift-temporal">Drift temporal</a></li>
+  <li><a href="#backtesting" id="toc-backtesting" class="nav-link" data-scroll-target="#backtesting">Backtesting</a></li>
+  <li><a href="#errores-por-periodo" id="toc-errores-por-periodo" class="nav-link" data-scroll-target="#errores-por-periodo">Errores por periodo</a></li>
+  <li><a href="#consideraciones-clínicas" id="toc-consideraciones-clínicas" class="nav-link" data-scroll-target="#consideraciones-clínicas">Consideraciones clínicas</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#checklist-para-proyectos" id="toc-checklist-para-proyectos" class="nav-link" data-scroll-target="#checklist-para-proyectos">Checklist para proyectos</a></li>
+  <li><a href="#próximos-documentos" id="toc-próximos-documentos" class="nav-link" data-scroll-target="#próximos-documentos">Próximos documentos</a></li>
+  <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
+  <ul class="collapse">
+  <li><a href="#documentación" id="toc-documentación" class="nav-link" data-scroll-target="#documentación">Documentación</a></li>
+  <li><a href="#material-del-máster" id="toc-material-del-máster" class="nav-link" data-scroll-target="#material-del-máster">Material del máster</a></li>
+  </ul></li>
+  <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
   </ul>
 </nav>
     </div>
@@ -526,18 +702,1193 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Esta sección reúne métodos para analizar y predecir datos ordenados en el tiempo.</p>
-<section id="contenidos-previstos" class="level2">
-<h2 data-anchor-id="contenidos-previstos">Contenidos previstos</h2>
-<p>Esta sección se irá ampliando progresivamente con:</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Una serie temporal es una secuencia de observaciones ordenadas en el tiempo.</p>
+<p>El orden importa.</p>
+<p>En estos problemas no debe mezclarse información futura con el pasado.</p>
+<p>Los objetivos principales son:</p>
 <ul>
-<li>Fundamentos teóricos.</li>
-<li>Cuándo utilizar cada técnica.</li>
-<li>Código listo para adaptar.</li>
-<li>Interpretación de resultados.</li>
-<li>Errores frecuentes.</li>
-<li>Consideraciones específicas en datos clínicos.</li>
+<li>Describir evolución.</li>
+<li>Detectar patrones.</li>
+<li>Predecir valores futuros.</li>
+<li>Detectar cambios.</li>
+<li>Identificar anomalías temporales.</li>
 </ul>
+</div>
+</div>
+<section id="qué-es-una-serie-temporal" class="level2">
+<h2 data-anchor-id="qué-es-una-serie-temporal">¿Qué es una serie temporal?</h2>
+<p>Una serie temporal contiene observaciones registradas a lo largo del tiempo.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Frecuencia cardiaca cada minuto.</li>
+<li>Presión arterial cada hora.</li>
+<li>Ingresos hospitalarios por día.</li>
+<li>Biomarcadores por visita.</li>
+<li>Ocupación de camas por semana.</li>
+<li>Ventas mensuales.</li>
+<li>Temperatura de un sensor.</li>
+</ul>
+<pre class="text"><code>Tiempo
+──────────────────────────────→
+
+y₁  y₂  y₃  y₄  y₅  ...  yₜ</code></pre>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>En series temporales, el orden de las observaciones forma parte de los datos.</p>
+</div>
+</div>
+</section>
+<section id="diferencia-con-datos-tabulares" class="level2">
+<h2 data-anchor-id="diferencia-con-datos-tabulares">Diferencia con datos tabulares</h2>
+<p>En datos tabulares suele asumirse que las filas son intercambiables.</p>
+<p>En series temporales:</p>
+<pre class="text"><code>Pasado
+→ presente
+→ futuro</code></pre>
+<p>Cambiar el orden destruye información.</p>
+</section>
+<section id="tipos-de-problemas" class="level2">
+<h2 data-anchor-id="tipos-de-problemas">Tipos de problemas</h2>
+</section>
+<section id="forecasting" class="level2">
+<h2 data-anchor-id="forecasting">Forecasting</h2>
+<p>Predecir valores futuros.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Ocupación de camas mañana.</li>
+<li>Duración de estancia restante.</li>
+<li>Biomarcador en la siguiente visita.</li>
+<li>Demanda asistencial la próxima semana.</li>
+</ul>
+</section>
+<section id="clasificación-temporal" class="level2">
+<h2 data-anchor-id="clasificación-temporal">Clasificación temporal</h2>
+<p>Predecir una categoría a partir de una secuencia.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Deterioro en las próximas 6 horas.</li>
+<li>Arritmia: sí o no.</li>
+<li>Reingreso en 30 días.</li>
+<li>Cambio de estado clínico.</li>
+</ul>
+</section>
+<section id="detección-de-anomalías" class="level2">
+<h2 data-anchor-id="detección-de-anomalías">Detección de anomalías</h2>
+<p>Identificar patrones temporales inusuales.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Cambio brusco de sensor.</li>
+<li>Deterioro inesperado.</li>
+<li>Error de registro.</li>
+<li>Ruptura de tendencia.</li>
+</ul>
+</section>
+<section id="imputación-temporal" class="level2">
+<h2 data-anchor-id="imputación-temporal">Imputación temporal</h2>
+<p>Estimar valores ausentes aprovechando observaciones anteriores y posteriores.</p>
+</section>
+<section id="segmentación" class="level2">
+<h2 data-anchor-id="segmentación">Segmentación</h2>
+<p>Dividir una serie en periodos con comportamiento diferente.</p>
+</section>
+<section id="componentes-de-una-serie-temporal" class="level2">
+<h2 data-anchor-id="componentes-de-una-serie-temporal">Componentes de una serie temporal</h2>
+<p>Una serie puede contener:</p>
+<ul>
+<li>Nivel.</li>
+<li>Tendencia.</li>
+<li>Estacionalidad.</li>
+<li>Ciclos.</li>
+<li>Ruido.</li>
+<li>Cambios estructurales.</li>
+</ul>
+</section>
+<section id="nivel" class="level2">
+<h2 data-anchor-id="nivel">Nivel</h2>
+<p>Es el valor medio alrededor del cual fluctúa la serie.</p>
+</section>
+<section id="tendencia" class="level2">
+<h2 data-anchor-id="tendencia">Tendencia</h2>
+<p>Es un cambio sostenido a largo plazo.</p>
+<pre class="text"><code>Valores
+   │
+   │        /
+   │      /
+   │    /
+   │  /
+   └──────────── Tiempo</code></pre>
+</section>
+<section id="estacionalidad" class="level2">
+<h2 data-anchor-id="estacionalidad">Estacionalidad</h2>
+<p>Es un patrón que se repite con frecuencia conocida.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Ciclo diario.</li>
+<li>Ciclo semanal.</li>
+<li>Ciclo anual.</li>
+<li>Mayor actividad en días laborables.</li>
+</ul>
+</section>
+<section id="ciclo" class="level2">
+<h2 data-anchor-id="ciclo">Ciclo</h2>
+<p>Es una oscilación de duración variable, no necesariamente fija.</p>
+</section>
+<section id="ruido" class="level2">
+<h2 data-anchor-id="ruido">Ruido</h2>
+<p>Variación no explicada por los componentes anteriores.</p>
+</section>
+<section id="frecuencia-temporal" class="level2">
+<h2 data-anchor-id="frecuencia-temporal">Frecuencia temporal</h2>
+<p>Debe identificarse la frecuencia de observación.</p>
+<p>Ejemplos:</p>
+<pre class="text"><code>1 minuto
+1 hora
+1 día
+1 semana
+1 visita</code></pre>
+<p>Una serie puede ser:</p>
+<ul>
+<li>Regular.</li>
+<li>Irregular.</li>
+</ul>
+</section>
+<section id="serie-regular" class="level2">
+<h2 data-anchor-id="serie-regular">Serie regular</h2>
+<p>Las observaciones están separadas por intervalos constantes.</p>
+<pre class="text"><code>08:00
+09:00
+10:00
+11:00</code></pre>
+</section>
+<section id="serie-irregular" class="level2">
+<h2 data-anchor-id="serie-irregular">Serie irregular</h2>
+<p>Los intervalos son variables.</p>
+<pre class="text"><code>Día 0
+Día 7
+Día 23
+Día 90</code></pre>
+<p>Esto es frecuente en datos clínicos longitudinales.</p>
+</section>
+<section id="preparar-fechas" class="level2">
+<h2 data-anchor-id="preparar-fechas">Preparar fechas</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"datetime"</span>] <span class="op">=</span> pd.to_datetime(</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"datetime"</span>]</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ordenar" class="level2">
+<h2 data-anchor-id="ordenar">Ordenar</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.sort_values(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"patient_id"</span>,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"datetime"</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="usar-fecha-como-índice" class="level2">
+<h2 data-anchor-id="usar-fecha-como-índice">Usar fecha como índice</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>time_series <span class="op">=</span> (</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    df</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"datetime"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    .sort_index()</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="revisar-frecuencia" class="level2">
+<h2 data-anchor-id="revisar-frecuencia">Revisar frecuencia</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    pd.infer_freq(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        time_series.index</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Puede devolver <code>None</code> si la serie es irregular.</p>
+</section>
+<section id="resampling" class="level2">
+<h2 data-anchor-id="resampling">Resampling</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>daily_series <span class="op">=</span> (</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    time_series[<span class="st">"value"</span>]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    .resample(<span class="st">"D"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    .mean()</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Otras frecuencias:</p>
+<pre class="text"><code>h  → hora
+D  → día
+W  → semana
+ME → fin de mes</code></pre>
+</section>
+<section id="agregación-temporal" class="level2">
+<h2 data-anchor-id="agregación-temporal">Agregación temporal</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>weekly_summary <span class="op">=</span> (</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    time_series[<span class="st">"value"</span>]</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    .resample(<span class="st">"W"</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"mean"</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"median"</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"min"</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"max"</span>,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"std"</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="visualización-básica" class="level2">
+<h2 data-anchor-id="visualización-básica">Visualización básica</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>plt.figure(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    daily_series.index,</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    daily_series.values</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>plt.xlabel(</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Fecha"</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>plt.ylabel(</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Valor"</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>plt.title(</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Serie temporal"</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="valores-ausentes" class="level2">
+<h2 data-anchor-id="valores-ausentes">Valores ausentes</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>missing_count <span class="op">=</span> (</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    daily_series</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .isna()</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">sum</span>()</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Opciones:</p>
+<ul>
+<li>No imputar.</li>
+<li>Forward fill.</li>
+<li>Backward fill.</li>
+<li>Interpolación.</li>
+<li>Modelos temporales.</li>
+<li>Imputación por contexto clínico.</li>
+</ul>
+</section>
+<section id="forward-fill" class="level2">
+<h2 data-anchor-id="forward-fill">Forward fill</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>filled_series <span class="op">=</span> (</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    daily_series</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    .ffill()</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpolación-temporal" class="level2">
+<h2 data-anchor-id="interpolación-temporal">Interpolación temporal</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>interpolated_series <span class="op">=</span> (</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    daily_series</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    .interpolate(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>        method<span class="op">=</span><span class="st">"time"</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Imputar hacia atrás puede introducir información futura.</p>
+</div>
+</div>
+</section>
+<section id="lags" class="level2">
+<h2 data-anchor-id="lags">Lags</h2>
+<p>Un lag representa un valor pasado.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"value_lag_1"</span>] <span class="op">=</span> (</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"value"</span>]</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    .shift(<span class="dv">1</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="varios-lags" class="level2">
+<h2 data-anchor-id="varios-lags">Varios lags</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> lag <span class="kw">in</span> [</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">3</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">7</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>]:</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    df[</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"value_lag_</span><span class="sc">{</span>lag<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    ] <span class="op">=</span> (</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>        df[<span class="st">"value"</span>]</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        .shift(lag)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="rolling-windows" class="level2">
+<h2 data-anchor-id="rolling-windows">Rolling windows</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df[</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rolling_mean_7"</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"value"</span>]</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    .rolling(</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>        window<span class="op">=</span><span class="dv">7</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    .mean()</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="estadísticos-móviles" class="level2">
+<h2 data-anchor-id="estadísticos-móviles">Estadísticos móviles</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>df[</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rolling_std_7"</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"value"</span>]</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    .rolling(</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        window<span class="op">=</span><span class="dv">7</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    .std()</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>df[</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rolling_min_7"</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"value"</span>]</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>    .rolling(</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>        window<span class="op">=</span><span class="dv">7</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">min</span>()</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>df[</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rolling_max_7"</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"value"</span>]</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    .rolling(</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>        window<span class="op">=</span><span class="dv">7</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">max</span>()</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="evitar-leakage-en-rolling-features" class="level2">
+<h2 data-anchor-id="evitar-leakage-en-rolling-features">Evitar leakage en rolling features</h2>
+<p>Para predecir el tiempo (t), la ventana debe contener solo información anterior.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>df[</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rolling_mean_7"</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"value"</span>]</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    .shift(<span class="dv">1</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    .rolling(</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        window<span class="op">=</span><span class="dv">7</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    .mean()</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Regla práctica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Aplica <code>shift(1)</code> antes de calcular estadísticas si no debe incluirse el valor actual.</p>
+</div>
+</div>
+</section>
+<section id="variables-de-calendario" class="level2">
+<h2 data-anchor-id="variables-de-calendario">Variables de calendario</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"year"</span>] <span class="op">=</span> (</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"datetime"</span>]</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .dt</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    .year</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"month"</span>] <span class="op">=</span> (</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"datetime"</span>]</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    .dt</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    .month</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"day_of_week"</span>] <span class="op">=</span> (</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"datetime"</span>]</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>    .dt</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>    .dayofweek</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"hour"</span>] <span class="op">=</span> (</span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"datetime"</span>]</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>    .dt</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>    .hour</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="variables-cíclicas" class="level2">
+<h2 data-anchor-id="variables-cíclicas">Variables cíclicas</h2>
+<p>El mes 12 y el mes 1 están próximos.</p>
+<p>Puede representarse con seno y coseno.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"month_sin"</span>] <span class="op">=</span> np.sin(</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    np.pi</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"month"</span>]</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    <span class="dv">12</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"month_cos"</span>] <span class="op">=</span> np.cos(</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    np.pi</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"month"</span>]</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>    <span class="dv">12</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="horizonte-de-predicción" class="level2">
+<h2 data-anchor-id="horizonte-de-predicción">Horizonte de predicción</h2>
+<p>Debe definirse cuánto futuro se quiere predecir.</p>
+<p>Ejemplos:</p>
+<pre class="text"><code>1 hora
+6 horas
+24 horas
+7 días
+30 días
+1 visita</code></pre>
+</section>
+<section id="forecast-horizon" class="level2">
+<h2 data-anchor-id="forecast-horizon">Forecast horizon</h2>
+<pre class="text"><code>Tiempo de predicción
+        │
+        ├── t + 1
+        ├── t + 2
+        └── t + H</code></pre>
+</section>
+<section id="predicción-one-step" class="level2">
+<h2 data-anchor-id="predicción-one-step">Predicción one-step</h2>
+<p>Predice el siguiente instante.</p>
+</section>
+<section id="predicción-multi-step" class="level2">
+<h2 data-anchor-id="predicción-multi-step">Predicción multi-step</h2>
+<p>Predice varios pasos futuros.</p>
+</section>
+<section id="estrategia-recursiva" class="level2">
+<h2 data-anchor-id="estrategia-recursiva">Estrategia recursiva</h2>
+<p>Utiliza predicciones anteriores para predecir pasos posteriores.</p>
+<pre class="text"><code>Predice t+1
+→ usa predicción para t+2
+→ usa predicciones para t+3</code></pre>
+<p>Puede acumular error.</p>
+</section>
+<section id="estrategia-directa" class="level2">
+<h2 data-anchor-id="estrategia-directa">Estrategia directa</h2>
+<p>Entrena un modelo distinto para cada horizonte.</p>
+<pre class="text"><code>Modelo 1 → t+1
+Modelo 2 → t+2
+Modelo 3 → t+3</code></pre>
+</section>
+<section id="estrategia-multi-output" class="level2">
+<h2 data-anchor-id="estrategia-multi-output">Estrategia multi-output</h2>
+<p>Un único modelo predice varios horizontes.</p>
+</section>
+<section id="split-temporal" class="level2">
+<h2 data-anchor-id="split-temporal">Split temporal</h2>
+<p>No debe usarse un split aleatorio si el objetivo es predecir el futuro.</p>
+<pre class="text"><code>Train
+────────────
+
+Validation
+            ──────
+
+Test
+                  ──────</code></pre>
+</section>
+<section id="split-por-fecha" class="level2">
+<h2 data-anchor-id="split-por-fecha">Split por fecha</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> df.loc[</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"datetime"</span>]</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"2025-01-01"</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>validation <span class="op">=</span> df.loc[</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>        df[<span class="st">"datetime"</span>]</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">&gt;=</span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"2025-01-01"</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">&amp;</span></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>        df[<span class="st">"datetime"</span>]</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">&lt;</span></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"2025-07-01"</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> df.loc[</span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a>    df[<span class="st">"datetime"</span>]</span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">&gt;=</span></span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"2025-07-01"</span></span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="timeseriessplit" class="level2">
+<h2 data-anchor-id="timeseriessplit">TimeSeriesSplit</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> TimeSeriesSplit</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>cv <span class="op">=</span> TimeSeriesSplit(</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    n_splits<span class="op">=</span><span class="dv">5</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ventana-expansiva" class="level2">
+<h2 data-anchor-id="ventana-expansiva">Ventana expansiva</h2>
+<pre class="text"><code>Fold 1
+Train: [1 2 3]
+Test:          [4]
+
+Fold 2
+Train: [1 2 3 4]
+Test:            [5]</code></pre>
+</section>
+<section id="ventana-deslizante" class="level2">
+<h2 data-anchor-id="ventana-deslizante">Ventana deslizante</h2>
+<pre class="text"><code>Fold 1
+Train: [1 2 3]
+Test:          [4]
+
+Fold 2
+Train:   [2 3 4]
+Test:            [5]</code></pre>
+<p>Puede ser útil cuando los datos antiguos pierden relevancia.</p>
+</section>
+<section id="gap-temporal" class="level2">
+<h2 data-anchor-id="gap-temporal">Gap temporal</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>cv <span class="op">=</span> TimeSeriesSplit(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    n_splits<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    gap<span class="op">=</span><span class="dv">7</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>El gap evita que observaciones muy próximas aparezcan en train y validation.</p>
+</section>
+<section id="baselines-temporales" class="level2">
+<h2 data-anchor-id="baselines-temporales">Baselines temporales</h2>
+<p>Todo forecasting debe compararse con baselines.</p>
+</section>
+<section id="naive-forecast" class="level2">
+<h2 data-anchor-id="naive-forecast">Naive forecast</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>y_pred_naive <span class="op">=</span> (</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    y_test</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    .shift(<span class="dv">1</span>)</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="último-valor" class="level2">
+<h2 data-anchor-id="último-valor">Último valor</h2>
+<pre class="text"><code>Predicción futura
+=
+último valor observado</code></pre>
+</section>
+<section id="media-histórica" class="level2">
+<h2 data-anchor-id="media-histórica">Media histórica</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>historical_mean <span class="op">=</span> (</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    y_train.mean()</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="seasonal-naive" class="level2">
+<h2 data-anchor-id="seasonal-naive">Seasonal naive</h2>
+<pre class="text"><code>Predicción de hoy
+=
+valor del mismo día de la semana anterior</code></pre>
+</section>
+<section id="media-móvil" class="level2">
+<h2 data-anchor-id="media-móvil">Media móvil</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>rolling_baseline <span class="op">=</span> (</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    y_train</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    .rolling(</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>        window<span class="op">=</span><span class="dv">7</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    .mean()</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="métricas-de-forecasting" class="level2">
+<h2 data-anchor-id="métricas-de-forecasting">Métricas de forecasting</h2>
+<ul>
+<li>MAE.</li>
+<li>RMSE.</li>
+<li>MAPE.</li>
+<li>sMAPE.</li>
+<li>MASE.</li>
+<li>WAPE.</li>
+</ul>
+</section>
+<section id="mae" class="level2">
+<h2 data-anchor-id="mae">MAE</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_absolute_error</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>mae <span class="op">=</span> mean_absolute_error(</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    y_test,</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    y_pred</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="rmse" class="level2">
+<h2 data-anchor-id="rmse">RMSE</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> root_mean_squared_error</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> root_mean_squared_error(</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    y_test,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    y_pred</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="mape" class="level2">
+<h2 data-anchor-id="mape">MAPE</h2>
+<p><span class="math display">\[
+MAPE
+=
+\frac{100}{n}
+\sum
+\left|
+\frac{
+y_t-\hat{y}_t
+}{
+y_t
+}
+\right|
+\]</span></p>
+<p>Problemas:</p>
+<ul>
+<li>No funciona bien con ceros.</li>
+<li>Puede explotar con valores pequeños.</li>
+<li>Es asimétrica.</li>
+</ul>
+</section>
+<section id="smape" class="level2">
+<h2 data-anchor-id="smape">sMAPE</h2>
+<p>Utiliza una escala simétrica aproximada.</p>
+<p>También puede ser inestable cerca de cero.</p>
+</section>
+<section id="mase" class="level2">
+<h2 data-anchor-id="mase">MASE</h2>
+<p>Compara el error con un baseline naive.</p>
+<pre class="text"><code>MASE &lt; 1
+→ mejor que naive
+
+MASE &gt; 1
+→ peor que naive</code></pre>
+</section>
+<section id="evaluación-por-horizonte" class="level2">
+<h2 data-anchor-id="evaluación-por-horizonte">Evaluación por horizonte</h2>
+<p>No debe reportarse solo una métrica global.</p>
+<pre class="text"><code>Horizonte 1 día
+Horizonte 3 días
+Horizonte 7 días</code></pre>
+<p>El error suele aumentar con el horizonte.</p>
+</section>
+<section id="intervalos-de-predicción" class="level2">
+<h2 data-anchor-id="intervalos-de-predicción">Intervalos de predicción</h2>
+<p>Una predicción útil debería incluir incertidumbre.</p>
+<pre class="text"><code>Predicción central
++
+límite inferior
++
+límite superior</code></pre>
+</section>
+<section id="cobertura" class="level2">
+<h2 data-anchor-id="cobertura">Cobertura</h2>
+<p>Un intervalo del 95 % debería contener aproximadamente el 95 % de observaciones futuras, bajo las condiciones del modelo.</p>
+</section>
+<section id="descomposición" class="level2">
+<h2 data-anchor-id="descomposición">Descomposición</h2>
+<p>Una serie puede descomponerse en:</p>
+<p><span class="math display">\[
+y_t
+=
+T_t
++
+S_t
++
+R_t
+\]</span></p>
+<p>donde:</p>
+<ul>
+<li>(T_t): tendencia.</li>
+<li>(S_t): estacionalidad.</li>
+<li>(R_t): residuo.</li>
+</ul>
+</section>
+<section id="stl" class="level2">
+<h2 data-anchor-id="stl">STL</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.tsa.seasonal <span class="im">import</span> STL</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>decomposition <span class="op">=</span> STL(</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    daily_series,</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    period<span class="op">=</span><span class="dv">7</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>).fit()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>decomposition.plot()</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="estacionariedad" class="level2">
+<h2 data-anchor-id="estacionariedad">Estacionariedad</h2>
+<p>Una serie estacionaria mantiene aproximadamente:</p>
+<ul>
+<li>Media constante.</li>
+<li>Varianza constante.</li>
+<li>Dependencia temporal estable.</li>
+</ul>
+<p>Muchos modelos clásicos requieren estacionariedad.</p>
+</section>
+<section id="diferenciación" class="level2">
+<h2 data-anchor-id="diferenciación">Diferenciación</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>differenced <span class="op">=</span> (</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    daily_series</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    .diff()</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    .dropna()</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="autocorrelación" class="level2">
+<h2 data-anchor-id="autocorrelación">Autocorrelación</h2>
+<p>Mide la relación entre una serie y sus valores pasados.</p>
+</section>
+<section id="acf" class="level2">
+<h2 data-anchor-id="acf">ACF</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.graphics.tsaplots <span class="im">import</span> plot_acf</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>plot_acf(</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    daily_series.dropna(),</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    lags<span class="op">=</span><span class="dv">30</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="pacf" class="level2">
+<h2 data-anchor-id="pacf">PACF</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.graphics.tsaplots <span class="im">import</span> plot_pacf</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>plot_pacf(</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    daily_series.dropna(),</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    lags<span class="op">=</span><span class="dv">30</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="modelos-clásicos" class="level2">
+<h2 data-anchor-id="modelos-clásicos">Modelos clásicos</h2>
+<ul>
+<li>Exponential smoothing.</li>
+<li>Holt.</li>
+<li>Holt-Winters.</li>
+<li>ARIMA.</li>
+<li>SARIMA.</li>
+<li>Modelos de estado.</li>
+<li>Prophet.</li>
+</ul>
+</section>
+<section id="modelos-de-machine-learning" class="level2">
+<h2 data-anchor-id="modelos-de-machine-learning">Modelos de machine learning</h2>
+<ul>
+<li>Regresión lineal con lags.</li>
+<li>Random forest.</li>
+<li>Gradient boosting.</li>
+<li>XGBoost.</li>
+<li>LightGBM.</li>
+<li>CatBoost.</li>
+</ul>
+</section>
+<section id="deep-learning-temporal" class="level2">
+<h2 data-anchor-id="deep-learning-temporal">Deep learning temporal</h2>
+<ul>
+<li>RNN.</li>
+<li>LSTM.</li>
+<li>GRU.</li>
+<li>Temporal CNN.</li>
+<li>Transformers.</li>
+<li>Temporal Fusion Transformer.</li>
+</ul>
+</section>
+<section id="regresión-con-lags" class="level2">
+<h2 data-anchor-id="regresión-con-lags">Regresión con lags</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"value_lag_1"</span>,</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"value_lag_2"</span>,</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"value_lag_7"</span>,</span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rolling_mean_7"</span>,</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"day_of_week"</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[features]</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">"value"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="pipeline-temporal" class="level2">
+<h2 data-anchor-id="pipeline-temporal">Pipeline temporal</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> HistGradientBoostingRegressor</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> Pipeline(</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"imputer"</span>,</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>            SimpleImputer(</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>                strategy<span class="op">=</span><span class="st">"median"</span></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"regressor"</span>,</span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>            HistGradientBoostingRegressor(</span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>                learning_rate<span class="op">=</span><span class="fl">0.05</span>,</span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>                max_iter<span class="op">=</span><span class="dv">300</span>,</span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="evaluar-con-timeseriessplit" class="level2">
+<h2 data-anchor-id="evaluar-con-timeseriessplit">Evaluar con TimeSeriesSplit</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_validate</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> cross_validate(</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    estimator<span class="op">=</span>model,</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    X<span class="op">=</span>X,</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>y,</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span>cv,</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    scoring<span class="op">=</span>{</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"mae"</span>: <span class="st">"neg_mean_absolute_error"</span>,</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"rmse"</span>: <span class="st">"neg_root_mean_squared_error"</span></span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="series-por-paciente" class="level2">
+<h2 data-anchor-id="series-por-paciente">Series por paciente</h2>
+<p>En datos clínicos puede haber múltiples series.</p>
+<pre class="text"><code>Paciente 1
+→ serie propia
+
+Paciente 2
+→ serie propia
+
+Paciente 3
+→ serie propia</code></pre>
+<p>Debe decidirse si el modelo es:</p>
+<ul>
+<li>Individual.</li>
+<li>Global.</li>
+<li>Por centro.</li>
+<li>Por población.</li>
+</ul>
+</section>
+<section id="modelo-global" class="level2">
+<h2 data-anchor-id="modelo-global">Modelo global</h2>
+<p>Entrena con múltiples series y añade identificadores o características estáticas.</p>
+<p>Ventajas:</p>
+<ul>
+<li>Más datos.</li>
+<li>Aprende patrones compartidos.</li>
+<li>Puede generalizar a pacientes nuevos.</li>
+</ul>
+</section>
+<section id="datos-estáticos-y-dinámicos" class="level2">
+<h2 data-anchor-id="datos-estáticos-y-dinámicos">Datos estáticos y dinámicos</h2>
+<section id="estáticos" class="level3">
+<h3 data-anchor-id="estáticos">Estáticos</h3>
+<ul>
+<li>Sexo.</li>
+<li>Diagnóstico.</li>
+<li>Centro.</li>
+<li>Genética.</li>
+</ul>
+</section>
+<section id="dinámicos" class="level3">
+<h3 data-anchor-id="dinámicos">Dinámicos</h3>
+<ul>
+<li>Biomarcadores.</li>
+<li>Signos vitales.</li>
+<li>Tratamientos.</li>
+<li>Estado clínico.</li>
+</ul>
+</section>
+</section>
+<section id="irregularidad-clínica" class="level2">
+<h2 data-anchor-id="irregularidad-clínica">Irregularidad clínica</h2>
+<p>Las visitas no ocurren a intervalos regulares.</p>
+<p>Opciones:</p>
+<ul>
+<li>Resampling.</li>
+<li>Tiempo desde última observación.</li>
+<li>Modelos para eventos irregulares.</li>
+<li>Features por ventanas.</li>
+<li>Modelos multiestado.</li>
+<li>Joint models.</li>
+</ul>
+</section>
+<section id="tiempo-desde-última-medición" class="level2">
+<h2 data-anchor-id="tiempo-desde-última-medición">Tiempo desde última medición</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>df[</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"time_since_previous_measurement"</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    df</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    .groupby(<span class="st">"patient_id"</span>)[</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"datetime"</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>    .diff()</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>    .dt</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>    .total_seconds()</span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span></span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>    <span class="dv">3600</span></span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="censura" class="level2">
+<h2 data-anchor-id="censura">Censura</h2>
+<p>En salud puede ocurrir que:</p>
+<ul>
+<li>El seguimiento termine.</li>
+<li>El evento no ocurra.</li>
+<li>El paciente abandone.</li>
+<li>La observación se interrumpa.</li>
+</ul>
+<p>En estos casos puede ser más adecuado:</p>
+<ul>
+<li>Survival analysis.</li>
+<li>Time-to-event.</li>
+<li>Modelos multiestado.</li>
+<li>Joint longitudinal-survival models.</li>
+</ul>
+</section>
+<section id="forecasting-frente-a-time-to-event" class="level2">
+<h2 data-anchor-id="forecasting-frente-a-time-to-event">Forecasting frente a time-to-event</h2>
+<pre class="text"><code>Forecasting
+→ ¿qué valor tendrá?
+
+Time-to-event
+→ ¿cuándo ocurrirá?</code></pre>
+</section>
+<section id="leakage-temporal" class="level2">
+<h2 data-anchor-id="leakage-temporal">Leakage temporal</h2>
+<p>Ejemplos frecuentes:</p>
+<ul>
+<li>Usar el valor futuro para imputar.</li>
+<li>Calcular rolling mean con el punto actual.</li>
+<li>Normalizar con todo el periodo.</li>
+<li>Seleccionar variables usando test.</li>
+<li>Crear target con información posterior mal alineada.</li>
+<li>Mezclar episodios del mismo paciente.</li>
+</ul>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Precaución
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El leakage temporal puede producir resultados artificialmente excelentes.</p>
+</div>
+</div>
+</section>
+<section id="drift-temporal" class="level2">
+<h2 data-anchor-id="drift-temporal">Drift temporal</h2>
+<p>Con el tiempo cambian:</p>
+<ul>
+<li>Protocolos.</li>
+<li>Equipos.</li>
+<li>Población.</li>
+<li>Tratamientos.</li>
+<li>Codificación.</li>
+<li>Prevalencia.</li>
+<li>Estacionalidad.</li>
+</ul>
+<p>Debe monitorizarse:</p>
+<ul>
+<li>Error por periodo.</li>
+<li>Distribución de features.</li>
+<li>Calibración.</li>
+<li>Frecuencia de alertas.</li>
+<li>Residuos.</li>
+</ul>
+</section>
+<section id="backtesting" class="level2">
+<h2 data-anchor-id="backtesting">Backtesting</h2>
+<p>Backtesting simula cómo habría funcionado el modelo en distintos momentos históricos.</p>
+<pre class="text"><code>Entrenar hasta enero
+→ predecir febrero
+
+Entrenar hasta febrero
+→ predecir marzo
+
+Entrenar hasta marzo
+→ predecir abril</code></pre>
+</section>
+<section id="errores-por-periodo" class="level2">
+<h2 data-anchor-id="errores-por-periodo">Errores por periodo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>evaluation_df <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"datetime"</span>: test_dates,</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"y_true"</span>: y_test,</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"y_pred"</span>: y_pred</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>monthly_mae <span class="op">=</span> (</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>    evaluation_df</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>    .set_index(<span class="st">"datetime"</span>)</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>    .resample(<span class="st">"ME"</span>)</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">apply</span>(</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">lambda</span> group:</span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>        mean_absolute_error(</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>            group[<span class="st">"y_true"</span>],</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>            group[<span class="st">"y_pred"</span>]</span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="consideraciones-clínicas" class="level2">
+<h2 data-anchor-id="consideraciones-clínicas">Consideraciones clínicas</h2>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Aplicación clínica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Una predicción temporal solo es útil si llega con suficiente antelación para modificar una decisión.</p>
+</div>
+</div>
+<p>Debe definirse:</p>
+<ul>
+<li>Momento de predicción.</li>
+<li>Horizonte.</li>
+<li>Frecuencia de actualización.</li>
+<li>Latencia.</li>
+<li>Acción clínica.</li>
+<li>Coste de falsas alertas.</li>
+<li>Disponibilidad de datos.</li>
+<li>Estrategia de monitorización.</li>
+</ul>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>Hacer split aleatorio.</li>
+<li>No ordenar por tiempo.</li>
+<li>Usar información futura.</li>
+<li>No comparar con naive.</li>
+<li>Evaluar solo un horizonte.</li>
+<li>Ignorar irregularidad.</li>
+<li>Imputar hacia atrás.</li>
+<li>No usar gap.</li>
+<li>Mezclar pacientes.</li>
+<li>Reportar solo RMSE.</li>
+<li>Ignorar intervalos.</li>
+<li>No revisar drift.</li>
+</ul>
+</section>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Definir la serie.</li>
+<li>Definir unidad temporal.</li>
+<li>Definir momento de predicción.</li>
+<li>Definir horizonte.</li>
+<li>Explorar tendencia y estacionalidad.</li>
+<li>Crear baseline.</li>
+<li>Crear features temporales.</li>
+<li>Dividir por tiempo.</li>
+<li>Aplicar backtesting.</li>
+<li>Evaluar por horizonte.</li>
+<li>Cuantificar incertidumbre.</li>
+<li>Monitorizar drift.</li>
+</ol>
+</section>
+<section id="checklist-para-proyectos" class="level2">
+<h2 data-anchor-id="checklist-para-proyectos">Checklist para proyectos</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">He definido la unidad temporal.</label></li>
+<li><label><input type="checkbox">He ordenado los datos.</label></li>
+<li><label><input type="checkbox">He definido el horizonte.</label></li>
+<li><label><input type="checkbox">He definido el momento de predicción.</label></li>
+<li><label><input type="checkbox">He creado un baseline naive.</label></li>
+<li><label><input type="checkbox">He evitado información futura.</label></li>
+<li><label><input type="checkbox">He calculado lags correctamente.</label></li>
+<li><label><input type="checkbox">He desplazado rolling features.</label></li>
+<li><label><input type="checkbox">He realizado split temporal.</label></li>
+<li><label><input type="checkbox">He aplicado backtesting.</label></li>
+<li><label><input type="checkbox">He evaluado varios horizontes.</label></li>
+<li><label><input type="checkbox">He revisado intervalos de predicción.</label></li>
+<li><label><input type="checkbox">He considerado irregularidad.</label></li>
+<li><label><input type="checkbox">He revisado pacientes repetidos.</label></li>
+<li><label><input type="checkbox">He planificado monitorización de drift.</label></li>
+</ul>
+</section>
+<section id="próximos-documentos" class="level2">
+<h2 data-anchor-id="próximos-documentos">Próximos documentos</h2>
+<p>Esta sección se completará con:</p>
+<ol type="1">
+<li>Fundamentos y preparación temporal.</li>
+<li>Descomposición y estacionariedad.</li>
+<li>Exponential smoothing.</li>
+<li>ARIMA y SARIMA.</li>
+<li>Feature engineering temporal.</li>
+<li>Machine learning para forecasting.</li>
+<li>Evaluación y backtesting.</li>
+<li>Series temporales clínicas.</li>
+</ol>
+</section>
+<section id="recursos" class="level2">
+<h2 data-anchor-id="recursos">Recursos</h2>
+<section id="documentación" class="level3">
+<h3 data-anchor-id="documentación">Documentación</h3>
+<ul>
+<li><code>pandas.resample</code>.</li>
+<li><code>TimeSeriesSplit</code>.</li>
+<li><code>STL</code>.</li>
+<li>ACF y PACF.</li>
+<li>ARIMA.</li>
+<li>Exponential smoothing.</li>
+<li>Métricas de forecasting.</li>
+<li>Backtesting.</li>
+</ul>
+</section>
+<section id="material-del-máster" class="level3">
+<h3 data-anchor-id="material-del-máster">Material del máster</h3>
+<p>Añadir aquí:</p>
+<ul>
+<li>Presentación correspondiente.</li>
+<li>Diapositivas relevantes.</li>
+<li>Ejercicios realizados.</li>
+<li>Apuntes de Notion.</li>
+</ul>
+</section>
+</section>
+<section id="notas-personales" class="level2">
+<h2 data-anchor-id="notas-personales">Notas personales</h2>
+<p>Añade aquí tus series, horizontes, baselines, features y decisiones temporales.</p>
 
 
 </section>
