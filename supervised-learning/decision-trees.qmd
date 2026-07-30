@@ -1,0 +1,1019 @@
+---
+title: "Árboles de decisión"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Un árbol de decisión divide los datos mediante reglas sucesivas.
+
+Ejemplo:
+
+```text
+Troponina > 0.02
+├── Sí  → riesgo alto
+└── No
+    ├── FEVI < 50 → riesgo intermedio
+    └── FEVI ≥ 50 → riesgo bajo
+```
+
+Los árboles son fáciles de interpretar, capturan relaciones no lineales y no requieren escalado.
+:::
+
+## ¿Qué es un árbol de decisión?
+
+Un árbol de decisión construye una secuencia de preguntas sobre las variables predictoras.
+
+Cada pregunta divide los datos en grupos progresivamente más homogéneos respecto al target.
+
+Los componentes principales son:
+
+- Nodo raíz.
+- Nodos internos.
+- Ramas.
+- Hojas.
+- Regla de división.
+- Predicción final.
+
+## Estructura básica
+
+```text
+                Nodo raíz
+                    │
+          ┌─────────┴─────────┐
+          │                   │
+      Regla falsa         Regla verdadera
+          │                   │
+       Subárbol             Subárbol
+          │                   │
+        Hoja                Hoja
+```
+
+## Clasificación y regresión
+
+Los árboles pueden utilizarse para:
+
+### Clasificación
+
+Predicen una clase o una probabilidad.
+
+Ejemplos:
+
+- Complicación: sí o no.
+- Riesgo bajo, medio o alto.
+- Diagnóstico A, B o C.
+
+### Regresión
+
+Predicen un valor continuo.
+
+Ejemplos:
+
+- Duración de estancia.
+- Coste hospitalario.
+- Presión arterial.
+- Valor de biomarcador.
+
+## Árbol de clasificación
+
+```python
+from sklearn.tree import DecisionTreeClassifier
+
+model = DecisionTreeClassifier(
+    random_state=42
+)
+```
+
+## Árbol de regresión
+
+```python
+from sklearn.tree import DecisionTreeRegressor
+
+model = DecisionTreeRegressor(
+    random_state=42
+)
+```
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp"
+]
+
+target = "cardiotoxicity"
+
+X = df[features]
+
+y = df[target]
+```
+
+## Separar train y test
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    stratify=y,
+    random_state=42
+)
+```
+
+## Entrenar un árbol de clasificación
+
+```python
+from sklearn.tree import DecisionTreeClassifier
+
+model = DecisionTreeClassifier(
+    max_depth=3,
+    random_state=42
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+## Predicción de clases
+
+```python
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Predicción de probabilidades
+
+```python
+y_probability = model.predict_proba(
+    X_test
+)[:, 1]
+```
+
+## Cómo elige una división
+
+En cada nodo, el árbol busca una regla que mejore la separación entre clases.
+
+Ejemplo:
+
+```text
+troponin <= 0.02
+```
+
+El objetivo es crear grupos más puros.
+
+## Impureza Gini
+
+Para clasificación binaria:
+
+$$
+Gini
+=
+1
+-
+\sum_{k=1}^{K}
+p_k^2
+$$
+
+donde $p_k$ es la proporción de cada clase.
+
+Interpretación:
+
+```text
+Gini = 0
+→ nodo puro
+
+Gini alto
+→ clases mezcladas
+```
+
+## Entropía
+
+$$
+Entropy
+=
+-
+\sum_{k=1}^{K}
+p_k
+\log_2(p_k)
+$$
+
+También mide impureza.
+
+## Elegir criterio
+
+```python
+model = DecisionTreeClassifier(
+    criterion="gini",
+    random_state=42
+)
+```
+
+o:
+
+```python
+model = DecisionTreeClassifier(
+    criterion="entropy",
+    random_state=42
+)
+```
+
+::: {.callout-note}
+## Idea clave
+
+Gini y entropía suelen producir árboles similares.
+:::
+
+## Árbol de regresión
+
+En regresión, el árbol busca divisiones que reduzcan el error dentro de cada nodo.
+
+```python
+from sklearn.tree import DecisionTreeRegressor
+
+model = DecisionTreeRegressor(
+    max_depth=3,
+    random_state=42
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+## Función de pérdida en regresión
+
+Una opción común es el error cuadrático.
+
+```python
+model = DecisionTreeRegressor(
+    criterion="squared_error",
+    random_state=42
+)
+```
+
+## Predicción en una hoja
+
+### Clasificación
+
+La predicción suele ser la clase mayoritaria.
+
+### Regresión
+
+La predicción suele ser la media de los valores de esa hoja.
+
+## Visualizar el árbol
+
+```python
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+
+plt.figure(
+    figsize=(18, 10)
+)
+
+plot_tree(
+    model,
+    feature_names=X_train.columns,
+    class_names=[
+        "No",
+        "Sí"
+    ],
+    filled=True,
+    rounded=True
+)
+
+plt.show()
+```
+
+## Exportar reglas como texto
+
+```python
+from sklearn.tree import export_text
+
+rules = export_text(
+    model,
+    feature_names=list(
+        X_train.columns
+    )
+)
+
+print(
+    rules
+)
+```
+
+## Profundidad máxima
+
+```python
+model = DecisionTreeClassifier(
+    max_depth=4,
+    random_state=42
+)
+```
+
+Una profundidad pequeña produce un árbol más simple.
+
+Una profundidad grande aumenta la capacidad del modelo.
+
+::: {.callout-warning}
+## Riesgo
+
+Un árbol sin restricciones puede memorizar train.
+:::
+
+## Número mínimo de muestras para dividir
+
+```python
+model = DecisionTreeClassifier(
+    min_samples_split=20,
+    random_state=42
+)
+```
+
+Controla cuántas observaciones debe tener un nodo para poder dividirse.
+
+## Número mínimo de muestras por hoja
+
+```python
+model = DecisionTreeClassifier(
+    min_samples_leaf=10,
+    random_state=42
+)
+```
+
+Ayuda a evitar hojas demasiado pequeñas.
+
+## Número máximo de hojas
+
+```python
+model = DecisionTreeClassifier(
+    max_leaf_nodes=12,
+    random_state=42
+)
+```
+
+## Máximo número de variables por división
+
+```python
+model = DecisionTreeClassifier(
+    max_features="sqrt",
+    random_state=42
+)
+```
+
+Es más frecuente en ensembles, pero también puede utilizarse en un árbol individual.
+
+## Overfitting
+
+Se produce cuando:
+
+- El árbol es demasiado profundo.
+- Tiene demasiadas hojas.
+- Existen hojas con muy pocas observaciones.
+- Aprende ruido específico de train.
+
+Síntomas:
+
+- Rendimiento muy alto en train.
+- Rendimiento claramente peor en validation.
+- Reglas clínicas poco plausibles.
+- Árbol inestable entre folds.
+
+## Comparar train y validation
+
+```python
+from sklearn.metrics import balanced_accuracy_score
+
+train_pred = model.predict(
+    X_train
+)
+
+test_pred = model.predict(
+    X_test
+)
+
+train_score = balanced_accuracy_score(
+    y_train,
+    train_pred
+)
+
+test_score = balanced_accuracy_score(
+    y_test,
+    test_pred
+)
+
+print(
+    "Train:",
+    train_score
+)
+
+print(
+    "Test:",
+    test_score
+)
+```
+
+## Underfitting
+
+Puede ocurrir cuando el árbol es demasiado simple.
+
+Ejemplos:
+
+- `max_depth=1`.
+- Hojas demasiado grandes.
+- Muy pocas divisiones.
+
+Síntoma:
+
+```text
+Rendimiento bajo en train
+y bajo en validation
+```
+
+## Poda previa
+
+Consiste en limitar el crecimiento desde el inicio.
+
+Parámetros habituales:
+
+- `max_depth`.
+- `min_samples_split`.
+- `min_samples_leaf`.
+- `max_leaf_nodes`.
+
+## Poda por complejidad
+
+Scikit-learn utiliza `ccp_alpha`.
+
+```python
+model = DecisionTreeClassifier(
+    ccp_alpha=0.01,
+    random_state=42
+)
+```
+
+Un `ccp_alpha` mayor produce un árbol más pequeño.
+
+## Ruta de poda
+
+```python
+path = model.cost_complexity_pruning_path(
+    X_train,
+    y_train
+)
+
+ccp_alphas = path.ccp_alphas
+```
+
+## Comparar árboles podados
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import StratifiedKFold
+import pandas as pd
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+rows = []
+
+for alpha in ccp_alphas:
+
+    tree = DecisionTreeClassifier(
+        ccp_alpha=alpha,
+        random_state=42
+    )
+
+    scores = cross_val_score(
+        tree,
+        X_train,
+        y_train,
+        cv=cv,
+        scoring="balanced_accuracy"
+    )
+
+    rows.append(
+        {
+            "ccp_alpha": alpha,
+            "mean_score": scores.mean(),
+            "std_score": scores.std()
+        }
+    )
+
+pruning_results = pd.DataFrame(
+    rows
+)
+```
+
+## Ajuste de hiperparámetros
+
+```python
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    "max_depth": [
+        2,
+        3,
+        4,
+        5,
+        None
+    ],
+    "min_samples_split": [
+        2,
+        10,
+        20,
+        50
+    ],
+    "min_samples_leaf": [
+        1,
+        5,
+        10,
+        20
+    ],
+    "criterion": [
+        "gini",
+        "entropy"
+    ]
+}
+```
+
+```python
+search = GridSearchCV(
+    estimator=DecisionTreeClassifier(
+        random_state=42
+    ),
+    param_grid=param_grid,
+    cv=cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+search.fit(
+    X_train,
+    y_train
+)
+```
+
+## Mejor modelo
+
+```python
+best_model = search.best_estimator_
+
+print(
+    search.best_params_
+)
+```
+
+## Evaluación de clasificación
+
+```python
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import classification_report
+
+y_pred = best_model.predict(
+    X_test
+)
+
+y_probability = best_model.predict_proba(
+    X_test
+)[:, 1]
+
+roc_auc = roc_auc_score(
+    y_test,
+    y_probability
+)
+
+pr_auc = average_precision_score(
+    y_test,
+    y_probability
+)
+
+balanced_accuracy = balanced_accuracy_score(
+    y_test,
+    y_pred
+)
+
+print(
+    classification_report(
+        y_test,
+        y_pred
+    )
+)
+```
+
+## Evaluación de regresión
+
+```python
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import r2_score
+
+y_pred = model.predict(
+    X_test
+)
+
+mae = mean_absolute_error(
+    y_test,
+    y_pred
+)
+
+rmse = root_mean_squared_error(
+    y_test,
+    y_pred
+)
+
+r2 = r2_score(
+    y_test,
+    y_pred
+)
+```
+
+## Importancia de variables
+
+```python
+importance_table = pd.DataFrame(
+    {
+        "feature": X_train.columns,
+        "importance": model.feature_importances_
+    }
+).sort_values(
+    "importance",
+    ascending=False
+)
+
+display(
+    importance_table
+)
+```
+
+## Limitaciones de feature_importances_
+
+La importancia basada en impureza puede favorecer:
+
+- Variables continuas.
+- Variables con muchos valores posibles.
+- Variables categóricas con muchas categorías.
+
+::: {.callout-caution}
+## Precaución
+
+Importancia alta no significa causalidad.
+:::
+
+## Permutation importance
+
+```python
+from sklearn.inspection import permutation_importance
+
+permutation = permutation_importance(
+    model,
+    X_test,
+    y_test,
+    scoring="roc_auc",
+    n_repeats=20,
+    random_state=42
+)
+```
+
+```python
+permutation_table = pd.DataFrame(
+    {
+        "feature": X_test.columns,
+        "importance_mean": permutation.importances_mean,
+        "importance_std": permutation.importances_std
+    }
+).sort_values(
+    "importance_mean",
+    ascending=False
+)
+
+display(
+    permutation_table
+)
+```
+
+## Datos categóricos
+
+Los árboles de scikit-learn requieren variables numéricas.
+
+Las categóricas deben codificarse.
+
+```python
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+```
+
+## Valores ausentes
+
+Los árboles clásicos de scikit-learn suelen necesitar imputación previa.
+
+```python
+from sklearn.impute import SimpleImputer
+```
+
+## Pipeline completo
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            DecisionTreeClassifier(
+                max_depth=4,
+                min_samples_leaf=10,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Escalado
+
+Los árboles no necesitan escalado porque las divisiones dependen del orden de los valores, no de su magnitud.
+
+```text
+Edad en años
+Troponina en ng/L
+Peso en kg
+```
+
+pueden utilizarse sin estandarización.
+
+## Clases desbalanceadas
+
+```python
+model = DecisionTreeClassifier(
+    class_weight="balanced",
+    random_state=42
+)
+```
+
+También puede ajustarse el umbral sobre las probabilidades.
+
+## Baseline
+
+```python
+from sklearn.dummy import DummyClassifier
+
+baseline = DummyClassifier(
+    strategy="prior"
+)
+```
+
+Un árbol debe compararse con:
+
+- Dummy classifier.
+- Regresión logística.
+- Regla clínica.
+- Árbol poco profundo.
+
+## Probabilidades poco calibradas
+
+Los árboles pueden producir probabilidades extremas.
+
+Ejemplo:
+
+```text
+0.00
+1.00
+```
+
+especialmente cuando las hojas son pequeñas.
+
+## Calibración
+
+```python
+from sklearn.calibration import CalibratedClassifierCV
+
+calibrated_model = CalibratedClassifierCV(
+    estimator=best_model,
+    method="isotonic",
+    cv=5
+)
+```
+
+## Inestabilidad
+
+Pequeños cambios en los datos pueden producir árboles diferentes.
+
+Esto se debe a que una división temprana modifica todo el árbol posterior.
+
+::: {.callout-important}
+## Idea clave
+
+La inestabilidad de los árboles individuales es una de las razones para usar random forest.
+:::
+
+## Ventajas
+
+- Interpretación intuitiva.
+- Captura relaciones no lineales.
+- Captura interacciones.
+- No requiere escalado.
+- Acepta distintos tipos de relaciones.
+- Produce reglas explícitas.
+- Útil como baseline interpretable.
+
+## Limitaciones
+
+- Fácil overfitting.
+- Alta inestabilidad.
+- Probabilidades poco calibradas.
+- Fronteras de decisión abruptas.
+- Menor rendimiento que ensembles en muchos problemas.
+- Importancias potencialmente sesgadas.
+
+## Árboles y causalidad
+
+Una regla como:
+
+```text
+Troponina > 0.02
+```
+
+indica que el modelo la utilizó para separar observaciones.
+
+No demuestra:
+
+- Causalidad.
+- Efecto terapéutico.
+- Relación biológica independiente.
+- Validez fuera de la muestra.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Un árbol pequeño puede convertirse en una regla clínica comprensible, pero debe validarse rigurosamente.
+:::
+
+Debe revisarse:
+
+- Número de pacientes por hoja.
+- Estabilidad entre centros.
+- Sensibilidad a valores de corte.
+- Plausibilidad clínica.
+- Calibración.
+- Validez externa.
+- Coste de errores.
+
+## Reglas clínicamente frágiles
+
+Ejemplo:
+
+```text
+Edad <= 7.43 años
+```
+
+Puede ser una división matemática útil, pero poco práctica.
+
+Puede ser preferible:
+
+```text
+Edad < 8 años
+```
+
+aunque cualquier simplificación debe revalidarse.
+
+## Validación por grupos
+
+Con varias observaciones por paciente:
+
+```python
+from sklearn.model_selection import GroupKFold
+
+cv = GroupKFold(
+    n_splits=5
+)
+```
+
+```python
+scores = cross_val_score(
+    pipeline,
+    X,
+    y,
+    groups=df["patient_id"],
+    cv=cv,
+    scoring="roc_auc"
+)
+```
+
+## Validación temporal
+
+Para predecir casos futuros:
+
+```text
+Train
+→ periodo antiguo
+
+Test
+→ periodo posterior
+```
+
+No debe mezclarse información futura en train.
+
+## Errores frecuentes
+
+- Entrenar un árbol sin límites.
+- Evaluar únicamente en train.
+- No revisar tamaño de hojas.
+- No comparar con un baseline.
+- Interpretar reglas como causalidad.
+- Confiar solo en feature importance.
+- Aplicar escalado innecesario.
+- Ignorar calibración.
+- Ajustar hiperparámetros con test.
+- Mezclar pacientes entre folds.
+- Elegir el árbol más profundo.
+- No revisar estabilidad.
+
+## Tabla de hiperparámetros
+
+| Parámetro | Efecto |
+|---|---|
+| `max_depth` | Limita profundidad |
+| `min_samples_split` | Mínimo para dividir |
+| `min_samples_leaf` | Mínimo por hoja |
+| `max_leaf_nodes` | Limita hojas |
+| `criterion` | Mide calidad de división |
+| `class_weight` | Ajusta desbalance |
+| `ccp_alpha` | Controla poda |
+
+## Flujo recomendado
+
+1. Definir clasificación o regresión.
+2. Crear baseline.
+3. Separar train y test.
+4. Preparar imputación y encoding.
+5. Entrenar árbol poco profundo.
+6. Visualizar reglas.
+7. Revisar train frente a validation.
+8. Ajustar profundidad y hojas.
+9. Evaluar poda.
+10. Revisar calibración.
+11. Evaluar una vez en test.
+12. Interpretar utilidad clínica.
+
+## Checklist para proyectos
+
+- [ ] He definido el target.
+- [ ] He creado un baseline.
+- [ ] He separado train y test.
+- [ ] He imputado valores ausentes.
+- [ ] He codificado categóricas.
+- [ ] He limitado la profundidad.
+- [ ] He revisado `min_samples_leaf`.
+- [ ] He comparado train y validation.
+- [ ] He realizado cross-validation.
+- [ ] He revisado el tamaño de las hojas.
+- [ ] He visualizado el árbol.
+- [ ] He evaluado poda.
+- [ ] He revisado calibración.
+- [ ] He comparado con regresión logística.
+- [ ] He interpretado las reglas clínicamente.
+
+## Recursos
+
+### Documentación
+
+- `DecisionTreeClassifier`.
+- `DecisionTreeRegressor`.
+- `plot_tree`.
+- `export_text`.
+- `cost_complexity_pruning_path`.
+- `permutation_importance`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí árboles, reglas clínicas, hiperparámetros y errores habituales.

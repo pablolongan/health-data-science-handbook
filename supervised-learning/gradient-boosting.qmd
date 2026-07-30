@@ -1,0 +1,1123 @@
+---
+title: "Gradient boosting"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Gradient boosting construye árboles de forma secuencial.
+
+Cada nuevo árbol intenta corregir los errores cometidos por el conjunto anterior.
+
+La predicción final es la suma de muchos árboles pequeños:
+
+$$
+\hat{y}
+=
+f_0(X)
++
+\eta f_1(X)
++
+\eta f_2(X)
++
+\cdots
++
+\eta f_M(X)
+$$
+
+donde $\eta$ es el learning rate.
+:::
+
+## ¿Qué es gradient boosting?
+
+Gradient boosting es una familia de métodos ensemble.
+
+A diferencia de random forest, que entrena árboles de forma independiente, gradient boosting los entrena uno detrás de otro.
+
+```text
+Modelo inicial
+      ↓
+Calcula errores
+      ↓
+Nuevo árbol corrige errores
+      ↓
+Vuelve a calcular errores
+      ↓
+Otro árbol corrige errores
+      ↓
+Predicción final
+```
+
+::: {.callout-note}
+## Idea clave
+
+Random forest reduce varianza combinando árboles independientes.
+
+Gradient boosting reduce error construyendo árboles secuenciales.
+:::
+
+## Intuición
+
+Supongamos que queremos predecir duración de estancia.
+
+El primer modelo predice la media:
+
+```text
+Predicción inicial = 5 días
+```
+
+Después calcula los residuos:
+
+```text
+Residuo = valor real - predicción
+```
+
+El siguiente árbol aprende a corregir esos residuos.
+
+El proceso se repite muchas veces.
+
+## Modelo aditivo
+
+Gradient boosting construye un modelo de la forma:
+
+$$
+F_M(X)
+=
+F_0(X)
++
+\sum_{m=1}^{M}
+\eta h_m(X)
+$$
+
+donde:
+
+- $F_0(X)$ es la predicción inicial.
+- $h_m(X)$ es el árbol añadido en la iteración $m$.
+- $\eta$ es el learning rate.
+- $M$ es el número de árboles.
+
+## Clasificación y regresión
+
+Gradient boosting puede utilizarse para:
+
+### Clasificación
+
+- Evento adverso.
+- Reingreso.
+- Complicación.
+- Diagnóstico.
+- Respuesta al tratamiento.
+
+### Regresión
+
+- Duración de estancia.
+- Coste.
+- Presión arterial.
+- Biomarcadores.
+- Fracción de eyección.
+
+## GradientBoostingClassifier
+
+```python
+from sklearn.ensemble import GradientBoostingClassifier
+
+model = GradientBoostingClassifier(
+    random_state=42
+)
+```
+
+## GradientBoostingRegressor
+
+```python
+from sklearn.ensemble import GradientBoostingRegressor
+
+model = GradientBoostingRegressor(
+    random_state=42
+)
+```
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp"
+]
+
+target = "cardiotoxicity"
+
+X = df[features]
+
+y = df[target]
+```
+
+## Separar train y test
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    stratify=y,
+    random_state=42
+)
+```
+
+## Entrenar el modelo
+
+```python
+model = GradientBoostingClassifier(
+    n_estimators=200,
+    learning_rate=0.05,
+    max_depth=3,
+    random_state=42
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+## Predicción de clases
+
+```python
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Predicción de probabilidades
+
+```python
+y_probability = model.predict_proba(
+    X_test
+)[:, 1]
+```
+
+## Predicción de regresión
+
+```python
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Número de árboles
+
+```python
+n_estimators=300
+```
+
+Más árboles permiten aprender patrones más complejos.
+
+Pero demasiados árboles pueden producir overfitting.
+
+## Learning rate
+
+```python
+learning_rate=0.05
+```
+
+El learning rate controla cuánto contribuye cada árbol.
+
+```text
+Learning rate pequeño
+→ aprendizaje más lento
+→ más árboles
+→ mayor regularización
+
+Learning rate grande
+→ aprendizaje más rápido
+→ menos árboles
+→ mayor riesgo de overfitting
+```
+
+::: {.callout-important}
+## Relación clave
+
+`learning_rate` y `n_estimators` deben ajustarse conjuntamente.
+:::
+
+## Profundidad de los árboles
+
+En boosting se utilizan normalmente árboles pequeños.
+
+```python
+max_depth=3
+```
+
+Árboles pequeños:
+
+- Reducen overfitting.
+- Aprenden interacciones simples.
+- Funcionan bien de forma secuencial.
+
+## Stumps
+
+Un stump es un árbol de profundidad 1.
+
+```python
+max_depth=1
+```
+
+Solo contiene una división.
+
+Puede ser útil cuando se desea un modelo muy regularizado.
+
+## Muestras mínimas por hoja
+
+```python
+min_samples_leaf=10
+```
+
+Ayuda a evitar hojas demasiado pequeñas.
+
+## Subsampling
+
+```python
+subsample=0.8
+```
+
+Cada árbol se entrena con una fracción aleatoria de train.
+
+Esto se conoce como stochastic gradient boosting.
+
+Puede:
+
+- Reducir overfitting.
+- Aumentar diversidad.
+- Mejorar generalización.
+
+## Hiperparámetros principales
+
+| Parámetro | Función |
+|---|---|
+| `n_estimators` | Número de árboles |
+| `learning_rate` | Contribución de cada árbol |
+| `max_depth` | Complejidad de cada árbol |
+| `min_samples_split` | Mínimo para dividir |
+| `min_samples_leaf` | Mínimo por hoja |
+| `subsample` | Fracción de datos por árbol |
+| `max_features` | Variables candidatas por split |
+| `loss` | Función de pérdida |
+
+## Función de pérdida
+
+En clasificación binaria se utiliza una pérdida logística.
+
+En regresión puede utilizarse:
+
+```python
+model = GradientBoostingRegressor(
+    loss="squared_error",
+    random_state=42
+)
+```
+
+Otras pérdidas permiten mayor robustez ante outliers.
+
+## Evaluación de clasificación
+
+```python
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import classification_report
+
+roc_auc = roc_auc_score(
+    y_test,
+    y_probability
+)
+
+pr_auc = average_precision_score(
+    y_test,
+    y_probability
+)
+
+balanced_accuracy = balanced_accuracy_score(
+    y_test,
+    y_pred
+)
+
+print(
+    classification_report(
+        y_test,
+        y_pred
+    )
+)
+```
+
+## Evaluación de regresión
+
+```python
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import r2_score
+
+mae = mean_absolute_error(
+    y_test,
+    y_pred
+)
+
+rmse = root_mean_squared_error(
+    y_test,
+    y_pred
+)
+
+r2 = r2_score(
+    y_test,
+    y_pred
+)
+```
+
+## Escalado
+
+Los modelos basados en árboles no necesitan escalado.
+
+Esto incluye:
+
+- Gradient boosting.
+- XGBoost.
+- LightGBM.
+- CatBoost.
+
+## Valores ausentes
+
+La implementación clásica de `GradientBoostingClassifier` suele requerir imputación previa.
+
+```python
+from sklearn.impute import SimpleImputer
+```
+
+## Variables categóricas
+
+En scikit-learn suelen codificarse antes.
+
+```python
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+```
+
+## Pipeline completo
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            GradientBoostingClassifier(
+                n_estimators=300,
+                learning_rate=0.05,
+                max_depth=3,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Ajuste de hiperparámetros
+
+```python
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import StratifiedKFold
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+```
+
+```python
+param_distributions = {
+    "classifier__n_estimators": [
+        100,
+        200,
+        300,
+        500
+    ],
+    "classifier__learning_rate": [
+        0.01,
+        0.03,
+        0.05,
+        0.10
+    ],
+    "classifier__max_depth": [
+        1,
+        2,
+        3,
+        4
+    ],
+    "classifier__min_samples_leaf": [
+        1,
+        5,
+        10,
+        20
+    ],
+    "classifier__subsample": [
+        0.6,
+        0.8,
+        1.0
+    ]
+}
+```
+
+```python
+search = RandomizedSearchCV(
+    estimator=pipeline,
+    param_distributions=param_distributions,
+    n_iter=40,
+    cv=cv,
+    scoring="roc_auc",
+    n_jobs=-1,
+    random_state=42
+)
+
+search.fit(
+    X_train,
+    y_train
+)
+```
+
+## Mejor modelo
+
+```python
+best_model = search.best_estimator_
+
+print(
+    search.best_params_
+)
+```
+
+## Overfitting
+
+Puede aparecer cuando:
+
+- Hay demasiados árboles.
+- El learning rate es alto.
+- Los árboles son profundos.
+- Las hojas son pequeñas.
+- El dataset es pequeño.
+- Se ajustan demasiados hiperparámetros.
+
+## Revisar train y validation
+
+```python
+from sklearn.model_selection import cross_validate
+
+scores = cross_validate(
+    estimator=pipeline,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring={
+        "roc_auc": "roc_auc",
+        "average_precision": "average_precision"
+    },
+    return_train_score=True
+)
+```
+
+```python
+import pandas as pd
+
+results = pd.DataFrame(
+    {
+        "train_roc_auc": scores[
+            "train_roc_auc"
+        ],
+        "validation_roc_auc": scores[
+            "test_roc_auc"
+        ]
+    }
+)
+
+display(
+    results
+)
+```
+
+## Early stopping
+
+Early stopping detiene el entrenamiento cuando validation deja de mejorar.
+
+```python
+model = GradientBoostingClassifier(
+    n_estimators=1000,
+    learning_rate=0.03,
+    validation_fraction=0.20,
+    n_iter_no_change=20,
+    tol=1e-4,
+    random_state=42
+)
+```
+
+::: {.callout-note}
+## Idea clave
+
+Early stopping permite indicar un número alto de árboles sin entrenar necesariamente todos.
+:::
+
+## Curva de rendimiento por etapa
+
+```python
+from sklearn.metrics import roc_auc_score
+
+staged_scores = []
+
+for probability in model.staged_predict_proba(
+    X_test
+):
+
+    score = roc_auc_score(
+        y_test,
+        probability[:, 1]
+    )
+
+    staged_scores.append(
+        score
+    )
+```
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(
+    figsize=(8, 5)
+)
+
+plt.plot(
+    range(
+        1,
+        len(staged_scores) + 1
+    ),
+    staged_scores
+)
+
+plt.xlabel(
+    "Número de árboles"
+)
+
+plt.ylabel(
+    "ROC AUC"
+)
+
+plt.title(
+    "Rendimiento por etapa"
+)
+
+plt.show()
+```
+
+## HistGradientBoosting
+
+Scikit-learn también incluye una implementación basada en histogramas.
+
+```python
+from sklearn.ensemble import HistGradientBoostingClassifier
+
+model = HistGradientBoostingClassifier(
+    learning_rate=0.05,
+    max_iter=300,
+    max_leaf_nodes=31,
+    random_state=42
+)
+```
+
+Ventajas:
+
+- Más rápido en datasets grandes.
+- Menor consumo de memoria.
+- Puede gestionar valores ausentes de forma nativa.
+- Incluye early stopping.
+
+## HistGradientBoostingRegressor
+
+```python
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+model = HistGradientBoostingRegressor(
+    learning_rate=0.05,
+    max_iter=300,
+    random_state=42
+)
+```
+
+## XGBoost
+
+XGBoost es una implementación optimizada de gradient boosting.
+
+```python
+from xgboost import XGBClassifier
+
+model = XGBClassifier(
+    n_estimators=500,
+    learning_rate=0.05,
+    max_depth=3,
+    subsample=0.8,
+    colsample_bytree=0.8,
+    eval_metric="logloss",
+    random_state=42
+)
+```
+
+Aspectos destacados:
+
+- Regularización.
+- Subsampling.
+- Paralelización.
+- Manejo eficiente de datos tabulares.
+- Valores ausentes.
+
+## XGBoost para regresión
+
+```python
+from xgboost import XGBRegressor
+
+model = XGBRegressor(
+    n_estimators=500,
+    learning_rate=0.05,
+    max_depth=3,
+    random_state=42
+)
+```
+
+## Regularización en XGBoost
+
+Parámetros habituales:
+
+- `reg_alpha`: regularización L1.
+- `reg_lambda`: regularización L2.
+- `gamma`: ganancia mínima para dividir.
+- `min_child_weight`: tamaño mínimo efectivo de hoja.
+
+## LightGBM
+
+LightGBM está diseñado para ser rápido y eficiente.
+
+```python
+from lightgbm import LGBMClassifier
+
+model = LGBMClassifier(
+    n_estimators=500,
+    learning_rate=0.05,
+    num_leaves=31,
+    random_state=42
+)
+```
+
+Características:
+
+- Crecimiento leaf-wise.
+- Alta velocidad.
+- Eficiencia en datasets grandes.
+- Soporte de variables categóricas.
+
+## Riesgo de LightGBM
+
+El crecimiento por hojas puede producir overfitting en datasets pequeños.
+
+Parámetros importantes:
+
+- `num_leaves`.
+- `max_depth`.
+- `min_child_samples`.
+- `feature_fraction`.
+- `bagging_fraction`.
+
+## CatBoost
+
+CatBoost está especialmente orientado a variables categóricas.
+
+```python
+from catboost import CatBoostClassifier
+
+model = CatBoostClassifier(
+    iterations=500,
+    learning_rate=0.05,
+    depth=6,
+    verbose=False,
+    random_seed=42
+)
+```
+
+Características:
+
+- Tratamiento nativo de categóricas.
+- Reducción de target leakage en encoding.
+- Buen rendimiento con poco ajuste.
+- Manejo de valores ausentes.
+
+## Comparación general
+
+| Modelo | Punto fuerte | Precaución |
+|---|---|---|
+| GradientBoosting | Simple y didáctico | Menos eficiente |
+| HistGradientBoosting | Rápido y moderno | Menos flexible que librerías externas |
+| XGBoost | Potente y regularizado | Muchos hiperparámetros |
+| LightGBM | Muy rápido | Puede sobreajustar muestras pequeñas |
+| CatBoost | Categóricas | Mayor coste computacional |
+
+## Clases desbalanceadas
+
+En XGBoost puede utilizarse:
+
+```python
+scale_pos_weight = (
+    number_negative
+    /
+    number_positive
+)
+```
+
+```python
+model = XGBClassifier(
+    scale_pos_weight=scale_pos_weight,
+    random_state=42
+)
+```
+
+En cualquier modelo también puede ajustarse el umbral final.
+
+## Ajuste de umbral
+
+```python
+threshold = 0.25
+
+y_pred_threshold = (
+    y_probability >= threshold
+).astype(int)
+```
+
+## Calibración
+
+Los modelos boosting pueden estar mal calibrados.
+
+```python
+from sklearn.calibration import CalibrationDisplay
+
+CalibrationDisplay.from_predictions(
+    y_test,
+    y_probability,
+    n_bins=10
+)
+
+plt.show()
+```
+
+## Calibrar el modelo
+
+```python
+from sklearn.calibration import CalibratedClassifierCV
+
+calibrated_model = CalibratedClassifierCV(
+    estimator=best_model,
+    method="isotonic",
+    cv=5
+)
+```
+
+## Feature importance
+
+```python
+importance_table = pd.DataFrame(
+    {
+        "feature": X_train.columns,
+        "importance": model.feature_importances_
+    }
+).sort_values(
+    "importance",
+    ascending=False
+)
+
+display(
+    importance_table
+)
+```
+
+## Limitaciones de la importancia por impureza
+
+Puede favorecer:
+
+- Variables continuas.
+- Variables con alta cardinalidad.
+- Variables correlacionadas.
+
+## Permutation importance
+
+```python
+from sklearn.inspection import permutation_importance
+
+permutation = permutation_importance(
+    model,
+    X_test,
+    y_test,
+    scoring="roc_auc",
+    n_repeats=20,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+## SHAP
+
+Los modelos de boosting suelen analizarse con TreeSHAP.
+
+```python
+import shap
+
+explainer = shap.TreeExplainer(
+    model
+)
+
+shap_values = explainer(
+    X_test
+)
+```
+
+```python
+shap.plots.beeswarm(
+    shap_values
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+SHAP explica cómo utiliza las variables el modelo.
+
+No demuestra causalidad.
+:::
+
+## Partial dependence
+
+```python
+from sklearn.inspection import PartialDependenceDisplay
+
+PartialDependenceDisplay.from_estimator(
+    model,
+    X_test,
+    features=[
+        "age",
+        "troponin"
+    ]
+)
+
+plt.show()
+```
+
+## Interacciones
+
+Gradient boosting captura interacciones de forma automática.
+
+Ejemplo:
+
+```text
+Troponina alta
++
+FEVI baja
++
+Tratamiento concreto
+```
+
+El modelo puede aprender que la combinación es más informativa que cada variable por separado.
+
+## Bias y varianza
+
+Un boosting poco profundo suele tener:
+
+- Sesgo moderado.
+- Varianza controlada.
+- Buena capacidad para relaciones complejas.
+
+Pero puede sobreajustar si se aumenta demasiado la complejidad.
+
+## Comparar con random forest
+
+| Aspecto | Random forest | Gradient boosting |
+|---|---|---|
+| Entrenamiento | Paralelo | Secuencial |
+| Objetivo | Reducir varianza | Corregir errores |
+| Ajuste | Más sencillo | Más sensible |
+| Velocidad | Alta | Menor |
+| Rendimiento tabular | Bueno | Frecuentemente muy bueno |
+| Overfitting | Moderado | Mayor si no se regula |
+
+## Curvas de aprendizaje
+
+```python
+from sklearn.model_selection import LearningCurveDisplay
+
+LearningCurveDisplay.from_estimator(
+    estimator=best_model,
+    X=X_train,
+    y=y_train,
+    cv=cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+```
+
+## Validación por grupos
+
+Con múltiples filas por paciente:
+
+```python
+from sklearn.model_selection import GroupKFold
+
+cv = GroupKFold(
+    n_splits=5
+)
+```
+
+```python
+scores = cross_validate(
+    estimator=pipeline,
+    X=X,
+    y=y,
+    groups=df["patient_id"],
+    cv=cv,
+    scoring="roc_auc"
+)
+```
+
+## Validación temporal
+
+En datos clínicos longitudinales:
+
+```text
+Train
+→ pacientes o episodios antiguos
+
+Test
+→ pacientes o episodios posteriores
+```
+
+Esto evalúa mejor el comportamiento futuro.
+
+## Validación externa
+
+Puede realizarse en:
+
+- Otro hospital.
+- Otro país.
+- Otro periodo.
+- Otra población.
+- Cohorte prospectiva.
+
+## Baseline
+
+Gradient boosting debe compararse con:
+
+- Dummy classifier o regressor.
+- Regresión logística o lineal.
+- Árbol de decisión.
+- Random forest.
+- Regla clínica.
+
+## Interpretación clínica
+
+::: {.callout-note}
+## Aplicación clínica
+
+Gradient boosting puede ofrecer un gran rendimiento en datos tabulares, pero debe acompañarse de calibración, validación externa e interpretación.
+:::
+
+Debe revisarse:
+
+- Sensibilidad y especificidad.
+- PR AUC en eventos raros.
+- Calibración.
+- Umbral clínico.
+- Rendimiento por subgrupos.
+- Estabilidad entre centros.
+- Drift temporal.
+- Disponibilidad de variables.
+
+## Errores frecuentes
+
+- Elegir demasiados árboles.
+- Usar learning rate alto.
+- No aplicar early stopping.
+- Ajustar hiperparámetros con test.
+- Reportar solo ROC AUC.
+- No revisar calibración.
+- Ignorar desbalance.
+- Confiar solo en feature importance.
+- Interpretar SHAP como causalidad.
+- Mezclar pacientes entre folds.
+- No comparar con modelos simples.
+- Usar un modelo complejo en una muestra muy pequeña.
+
+## Flujo recomendado
+
+1. Definir target y clase positiva.
+2. Crear un baseline.
+3. Separar train y test.
+4. Preparar pipeline.
+5. Entrenar un modelo sencillo.
+6. Ajustar learning rate y árboles.
+7. Limitar profundidad.
+8. Aplicar early stopping.
+9. Validar con cross-validation.
+10. Revisar calibración.
+11. Interpretar con permutation importance o SHAP.
+12. Evaluar una vez en test.
+
+## Checklist para proyectos
+
+- [ ] He definido el target.
+- [ ] He creado un baseline.
+- [ ] He separado train y test.
+- [ ] He utilizado un pipeline.
+- [ ] He ajustado `learning_rate`.
+- [ ] He ajustado `n_estimators`.
+- [ ] He limitado la profundidad.
+- [ ] He revisado `min_samples_leaf`.
+- [ ] He aplicado early stopping.
+- [ ] He evaluado con cross-validation.
+- [ ] He revisado overfitting.
+- [ ] He revisado calibración.
+- [ ] He evaluado desbalance.
+- [ ] He calculado permutation importance.
+- [ ] He comparado con random forest.
+- [ ] He evaluado una vez en test.
+
+## Recursos
+
+### Documentación
+
+- `GradientBoostingClassifier`.
+- `GradientBoostingRegressor`.
+- `HistGradientBoostingClassifier`.
+- `HistGradientBoostingRegressor`.
+- XGBoost.
+- LightGBM.
+- CatBoost.
+- `CalibratedClassifierCV`.
+- `permutation_importance`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus modelos boosting, hiperparámetros, resultados y decisiones clínicas.

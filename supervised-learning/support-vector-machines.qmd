@@ -1,0 +1,1209 @@
+---
+title: "Support Vector Machines"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Las Support Vector Machines buscan una frontera que separe las clases con el mayor margen posible.
+
+Los puntos más cercanos a la frontera se llaman support vectors.
+
+Con kernels, una SVM puede aprender fronteras no lineales.
+
+Son modelos potentes, pero requieren escalado y un ajuste cuidadoso de hiperparámetros.
+:::
+
+## ¿Qué es una Support Vector Machine?
+
+Una Support Vector Machine, o SVM, es un modelo supervisado que puede utilizarse para:
+
+- Clasificación.
+- Regresión.
+- Detección de novedades.
+- Problemas lineales y no lineales.
+
+En clasificación, busca una frontera de decisión que separe las clases.
+
+## Frontera de decisión
+
+En dos dimensiones, la frontera puede representarse como una línea:
+
+```text
+Clase 0  ○ ○ ○    │    ● ● ●  Clase 1
+        ○ ○       │      ● ●
+                  │
+          frontera de decisión
+```
+
+En más dimensiones, la frontera se denomina hiperplano.
+
+## Margen
+
+El margen es la distancia entre la frontera y las observaciones más cercanas de cada clase.
+
+```text
+Clase 0        margen        Clase 1
+
+○ ○ ○      ┆     │     ┆      ● ● ●
+             ┆    │    ┆
+                  frontera
+```
+
+La SVM intenta maximizar este margen.
+
+::: {.callout-note}
+## Idea clave
+
+Una frontera con un margen amplio suele generalizar mejor que una frontera que pasa demasiado cerca de las observaciones.
+:::
+
+## Support vectors
+
+Los support vectors son las observaciones más cercanas a la frontera.
+
+Son especialmente importantes porque determinan la posición del hiperplano.
+
+Las observaciones alejadas de la frontera suelen influir menos en el modelo final.
+
+## Clasificación lineal
+
+Una frontera lineal puede escribirse como:
+
+$$
+w^\top x + b = 0
+$$
+
+donde:
+
+- $w$ define la orientación.
+- $b$ desplaza la frontera.
+- $x$ representa las variables predictoras.
+
+La clase depende del signo de:
+
+$$
+f(x) = w^\top x + b
+$$
+
+## Hard margin
+
+El hard margin exige separar perfectamente todas las observaciones.
+
+Esto solo funciona cuando:
+
+- Las clases son perfectamente separables.
+- No existe ruido.
+- No hay outliers problemáticos.
+
+En datos reales suele ser demasiado rígido.
+
+## Soft margin
+
+El soft margin permite algunos errores a cambio de una frontera más estable.
+
+El parámetro principal es `C`.
+
+## Parámetro C
+
+`C` controla el equilibrio entre:
+
+- Maximizar el margen.
+- Penalizar errores de clasificación.
+
+```text
+C pequeño
+→ margen más amplio
+→ mayor regularización
+→ más errores tolerados
+
+C grande
+→ margen más estrecho
+→ menor regularización
+→ intenta clasificar mejor train
+```
+
+::: {.callout-warning}
+## Riesgo
+
+Un valor de `C` demasiado alto puede producir overfitting.
+:::
+
+## LinearSVC
+
+Para clasificación lineal:
+
+```python
+from sklearn.svm import LinearSVC
+
+model = LinearSVC(
+    C=1.0,
+    class_weight=None,
+    random_state=42
+)
+```
+
+`LinearSVC` suele ser eficiente cuando:
+
+- Hay muchas observaciones.
+- Hay muchas variables.
+- La frontera lineal es suficiente.
+
+## SVC con kernel lineal
+
+```python
+from sklearn.svm import SVC
+
+model = SVC(
+    kernel="linear",
+    C=1.0,
+    class_weight=None,
+    random_state=42
+)
+```
+
+`SVC(kernel="linear")` y `LinearSVC` no son implementaciones idénticas.
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp"
+]
+
+target = "cardiotoxicity"
+
+X = df[features]
+
+y = df[target]
+```
+
+## Separar train y test
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    stratify=y,
+    random_state=42
+)
+```
+
+## Escalado
+
+El escalado es esencial en SVM.
+
+Ejemplo de escalas originales:
+
+```text
+Edad       → 0 a 18
+Peso       → 2 a 100
+Troponina  → 0.001 a 0.200
+NT-proBNP  → 10 a 5000
+```
+
+Sin escalado, las variables de mayor magnitud pueden dominar las distancias.
+
+## Pipeline básico
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+
+model = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "classifier",
+            SVC(
+                kernel="linear",
+                C=1.0,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Entrenar el modelo
+
+```python
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+## Predicción de clases
+
+```python
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Decision function
+
+SVC produce una puntuación de decisión:
+
+```python
+decision_score = model.decision_function(
+    X_test
+)
+```
+
+En clasificación binaria:
+
+```text
+Score negativo
+→ tendencia hacia clase 0
+
+Score positivo
+→ tendencia hacia clase 1
+```
+
+La puntuación no es una probabilidad.
+
+## Probabilidades calibradas
+
+Para obtener probabilidades puede calibrarse el clasificador.
+
+```python
+from sklearn.calibration import CalibratedClassifierCV
+
+base_svc = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "classifier",
+            SVC(
+                kernel="rbf",
+                C=1.0,
+                gamma="scale",
+                class_weight=None,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+```python
+calibrated_model = CalibratedClassifierCV(
+    estimator=base_svc,
+    method="sigmoid",
+    cv=5
+)
+
+calibrated_model.fit(
+    X_train,
+    y_train
+)
+
+y_probability = calibrated_model.predict_proba(
+    X_test
+)[:, 1]
+```
+
+::: {.callout-note}
+## Buena práctica
+
+La calibración debe realizarse utilizando únicamente datos de entrenamiento.
+:::
+
+## Kernel trick
+
+Cuando las clases no pueden separarse con una línea, puede utilizarse un kernel.
+
+El kernel permite trabajar implícitamente en un espacio de mayor dimensión.
+
+```text
+Espacio original
+→ clases no separables linealmente
+
+Transformación mediante kernel
+→ separación posible
+```
+
+## Kernel lineal
+
+```python
+SVC(
+    kernel="linear"
+)
+```
+
+Útil cuando:
+
+- Hay muchas variables.
+- La relación es aproximadamente lineal.
+- Se busca mayor interpretabilidad.
+- Se trabaja con datos de alta dimensión.
+
+## Kernel RBF
+
+```python
+SVC(
+    kernel="rbf"
+)
+```
+
+RBF significa Radial Basis Function.
+
+Es una opción habitual para relaciones no lineales.
+
+Puede crear fronteras curvas y complejas.
+
+## Kernel polinómico
+
+```python
+SVC(
+    kernel="poly",
+    degree=3
+)
+```
+
+Permite modelar relaciones polinómicas.
+
+Suele ser más difícil de ajustar e interpretar.
+
+## Kernel sigmoide
+
+```python
+SVC(
+    kernel="sigmoid"
+)
+```
+
+Se utiliza menos en la práctica.
+
+## Parámetro gamma
+
+`gamma` controla el alcance de influencia de cada observación en kernels como RBF.
+
+```text
+Gamma pequeño
+→ influencia amplia
+→ frontera suave
+
+Gamma grande
+→ influencia local
+→ frontera compleja
+```
+
+::: {.callout-warning}
+## Riesgo
+
+Un `gamma` demasiado alto puede hacer que el modelo memorice train.
+:::
+
+## Gamma scale
+
+```python
+SVC(
+    kernel="rbf",
+    gamma="scale"
+)
+```
+
+Es una opción inicial razonable.
+
+## C y gamma conjuntamente
+
+| C | Gamma | Comportamiento probable |
+|---|---|---|
+| Bajo | Bajo | Modelo muy suave |
+| Alto | Bajo | Margen estricto, frontera suave |
+| Bajo | Alto | Regularización fuerte, efectos locales |
+| Alto | Alto | Frontera muy compleja |
+
+## Pipeline con variables categóricas
+
+```python
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+
+numeric_features = [
+    "age",
+    "weight",
+    "troponin"
+]
+
+categorical_features = [
+    "sex",
+    "center",
+    "diagnosis"
+]
+```
+
+```python
+numeric_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        )
+    ]
+)
+
+categorical_transformer = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="most_frequent"
+            )
+        ),
+        (
+            "encoder",
+            OneHotEncoder(
+                handle_unknown="ignore"
+            )
+        )
+    ]
+)
+```
+
+```python
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            numeric_transformer,
+            numeric_features
+        ),
+        (
+            "categorical",
+            categorical_transformer,
+            categorical_features
+        )
+    ]
+)
+```
+
+## Pipeline completo con RBF
+
+```python
+model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            SVC(
+                kernel="rbf",
+                C=1.0,
+                gamma="scale",
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Ajuste de hiperparámetros
+
+```python
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import StratifiedKFold
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+```
+
+```python
+param_grid = [
+    {
+        "classifier__kernel": [
+            "linear"
+        ],
+        "classifier__C": [
+            0.01,
+            0.1,
+            1,
+            10,
+            100
+        ]
+    },
+    {
+        "classifier__kernel": [
+            "rbf"
+        ],
+        "classifier__C": [
+            0.1,
+            1,
+            10,
+            100
+        ],
+        "classifier__gamma": [
+            0.001,
+            0.01,
+            0.1,
+            1,
+            "scale"
+        ]
+    }
+]
+```
+
+```python
+search = GridSearchCV(
+    estimator=model,
+    param_grid=param_grid,
+    cv=cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+search.fit(
+    X_train,
+    y_train
+)
+```
+
+## Mejor modelo
+
+```python
+best_model = search.best_estimator_
+
+print(
+    search.best_params_
+)
+```
+
+## Evaluación de clasificación
+
+```python
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import classification_report
+
+y_pred = best_model.predict(
+    X_test
+)
+
+decision_score = best_model.decision_function(
+    X_test
+)
+
+roc_auc = roc_auc_score(
+    y_test,
+    decision_score
+)
+
+pr_auc = average_precision_score(
+    y_test,
+    decision_score
+)
+
+balanced_accuracy = balanced_accuracy_score(
+    y_test,
+    y_pred
+)
+
+print(
+    classification_report(
+        y_test,
+        y_pred
+    )
+)
+```
+
+## ROC y precision-recall
+
+Las puntuaciones de `decision_function` pueden utilizarse para calcular curvas basadas en ranking.
+
+```python
+from sklearn.metrics import RocCurveDisplay
+from sklearn.metrics import PrecisionRecallDisplay
+import matplotlib.pyplot as plt
+
+RocCurveDisplay.from_predictions(
+    y_test,
+    decision_score
+)
+
+plt.show()
+```
+
+```python
+PrecisionRecallDisplay.from_predictions(
+    y_test,
+    decision_score
+)
+
+plt.show()
+```
+
+## Clases desbalanceadas
+
+```python
+model = SVC(
+    kernel="rbf",
+    C=1.0,
+    gamma="scale",
+    class_weight="balanced",
+    random_state=42
+)
+```
+
+También puede especificarse un peso manual:
+
+```python
+class_weights = {
+    0: 1,
+    1: 3
+}
+```
+
+```python
+model = SVC(
+    class_weight=class_weights,
+    random_state=42
+)
+```
+
+## Umbral de decisión
+
+El umbral predeterminado de `decision_function` suele ser 0.
+
+Puede modificarse:
+
+```python
+threshold = -0.40
+
+y_pred_threshold = (
+    decision_score >= threshold
+).astype(int)
+```
+
+Un umbral menor suele aumentar sensibilidad y reducir especificidad.
+
+## Calibración
+
+Para decisiones clínicas conviene revisar si las probabilidades están calibradas.
+
+```python
+from sklearn.calibration import CalibrationDisplay
+
+CalibrationDisplay.from_predictions(
+    y_test,
+    y_probability,
+    n_bins=10
+)
+
+plt.show()
+```
+
+## SVM multiclase
+
+SVC admite clasificación multiclase.
+
+```python
+model = SVC(
+    kernel="rbf",
+    decision_function_shape="ovr",
+    random_state=42
+)
+```
+
+`ovr` significa one-vs-rest para la forma de la función de decisión expuesta.
+
+## Support Vector Regression
+
+SVR adapta la idea de margen a problemas de regresión.
+
+```python
+from sklearn.svm import SVR
+
+model = SVR(
+    kernel="rbf",
+    C=1.0,
+    gamma="scale",
+    epsilon=0.1
+)
+```
+
+## Tubo epsilon-insensitive
+
+SVR intenta colocar las predicciones dentro de un tubo de tolerancia.
+
+```text
+       límite superior
+----------------------------
+
+        función estimada
+
+----------------------------
+       límite inferior
+```
+
+Los errores dentro del tubo no se penalizan de la misma manera.
+
+## Parámetro epsilon
+
+```python
+epsilon=0.1
+```
+
+Controla el ancho del tubo.
+
+```text
+Epsilon pequeño
+→ ajuste más preciso
+→ más support vectors
+→ mayor sensibilidad al ruido
+
+Epsilon grande
+→ mayor tolerancia
+→ modelo más simple
+```
+
+## Pipeline de SVR
+
+```python
+regression_model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "regressor",
+            SVR(
+                kernel="rbf",
+                C=10,
+                gamma="scale",
+                epsilon=0.1
+            )
+        )
+    ]
+)
+```
+
+## Evaluación de SVR
+
+```python
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import r2_score
+
+regression_model.fit(
+    X_train,
+    y_train
+)
+
+y_pred = regression_model.predict(
+    X_test
+)
+
+mae = mean_absolute_error(
+    y_test,
+    y_pred
+)
+
+rmse = root_mean_squared_error(
+    y_test,
+    y_pred
+)
+
+r2 = r2_score(
+    y_test,
+    y_pred
+)
+```
+
+## Ajuste de SVR
+
+```python
+param_grid = {
+    "regressor__kernel": [
+        "linear",
+        "rbf"
+    ],
+    "regressor__C": [
+        0.1,
+        1,
+        10,
+        100
+    ],
+    "regressor__gamma": [
+        "scale",
+        0.001,
+        0.01,
+        0.1
+    ],
+    "regressor__epsilon": [
+        0.01,
+        0.1,
+        0.5,
+        1.0
+    ]
+}
+```
+
+## LinearSVR
+
+Para regresión lineal en datasets más grandes:
+
+```python
+from sklearn.svm import LinearSVR
+
+model = LinearSVR(
+    C=1.0,
+    epsilon=0.1,
+    random_state=42,
+    max_iter=5000
+)
+```
+
+## Ventajas
+
+- Eficaz en espacios de alta dimensión.
+- Flexible mediante kernels.
+- Buena capacidad de generalización.
+- Útil con muestras pequeñas o moderadas.
+- Puede funcionar bien con muchas variables.
+- Permite clasificación y regresión.
+
+## Limitaciones
+
+- Necesita escalado.
+- Ajuste sensible de `C` y `gamma`.
+- Coste elevado en datasets grandes.
+- Menor interpretabilidad.
+- Probabilidades requieren calibración.
+- Puede ser difícil explicar decisiones individuales.
+- No maneja valores ausentes directamente.
+
+## Coste computacional
+
+SVC con kernels puede ser costoso cuando aumenta el número de observaciones.
+
+En datasets grandes pueden considerarse:
+
+- `LinearSVC`.
+- `SGDClassifier`.
+- Aproximaciones de kernels.
+- Modelos basados en árboles.
+- Muestreo o reducción dimensional.
+
+## Kernel approximation
+
+```python
+from sklearn.kernel_approximation import Nystroem
+from sklearn.linear_model import SGDClassifier
+
+approximate_model = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "kernel_map",
+            Nystroem(
+                kernel="rbf",
+                gamma=0.1,
+                n_components=300,
+                random_state=42
+            )
+        ),
+        (
+            "classifier",
+            SGDClassifier(
+                loss="hinge",
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Interpretabilidad
+
+En una SVM lineal pueden inspeccionarse los coeficientes.
+
+```python
+linear_model = Pipeline(
+    steps=[
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "classifier",
+            LinearSVC(
+                C=1.0,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+```python
+linear_model.fit(
+    X_train,
+    y_train
+)
+
+coefficients = (
+    linear_model
+    .named_steps["classifier"]
+    .coef_[0]
+)
+```
+
+En kernels no lineales la interpretación es más compleja.
+
+## Permutation importance
+
+```python
+from sklearn.inspection import permutation_importance
+
+permutation = permutation_importance(
+    best_model,
+    X_test,
+    y_test,
+    scoring="roc_auc",
+    n_repeats=20,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+::: {.callout-caution}
+## Precaución
+
+La importancia explica la dependencia del modelo respecto a las variables, no causalidad.
+:::
+
+## Número de support vectors
+
+Con un modelo SVC directo:
+
+```python
+model.fit(
+    X_train_scaled,
+    y_train
+)
+
+print(
+    model.n_support_
+)
+```
+
+Un número muy elevado puede indicar:
+
+- Frontera compleja.
+- Clases solapadas.
+- Ruido.
+- Regularización insuficiente.
+
+## Validación cruzada
+
+```python
+from sklearn.model_selection import cross_validate
+
+scores = cross_validate(
+    estimator=model,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring={
+        "roc_auc": "roc_auc",
+        "average_precision": "average_precision",
+        "balanced_accuracy": "balanced_accuracy"
+    },
+    return_train_score=True
+)
+```
+
+## Validación por grupos
+
+Con varias observaciones por paciente:
+
+```python
+from sklearn.model_selection import GroupKFold
+
+cv = GroupKFold(
+    n_splits=5
+)
+```
+
+```python
+scores = cross_validate(
+    estimator=model,
+    X=X,
+    y=y,
+    groups=df["patient_id"],
+    cv=cv,
+    scoring="roc_auc"
+)
+```
+
+## Validación temporal
+
+En un problema clínico longitudinal:
+
+```text
+Train
+→ periodo anterior
+
+Test
+→ periodo posterior
+```
+
+Esto ayuda a evaluar la capacidad de generalización futura.
+
+## Comparar con otros modelos
+
+SVM debe compararse con:
+
+- Regresión logística.
+- Árbol de decisión.
+- Random forest.
+- Gradient boosting.
+- Baseline dummy.
+
+## Tabla comparativa
+
+| Modelo | Escalado | No linealidad | Interpretabilidad |
+|---|---|---|---|
+| Regresión logística | Sí | Limitada | Alta |
+| SVM lineal | Sí | No | Moderada |
+| SVM RBF | Sí | Sí | Baja |
+| Random forest | No | Sí | Moderada-baja |
+| Gradient boosting | No | Sí | Baja |
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Una SVM puede rendir bien, pero la dificultad para interpretar y calibrar sus predicciones debe considerarse antes de desplegarla.
+:::
+
+Debe revisarse:
+
+- Sensibilidad y especificidad.
+- PR AUC en eventos raros.
+- Calibración.
+- Umbral de decisión.
+- Rendimiento por subgrupos.
+- Estabilidad entre centros.
+- Tiempo de inferencia.
+- Explicabilidad.
+
+## Errores frecuentes
+
+- No escalar las variables.
+- Escalar antes del split.
+- Ajustar `C` y `gamma` con test.
+- Interpretar `decision_function` como probabilidad.
+- Ignorar calibración.
+- Usar kernel RBF automáticamente.
+- No comparar con una SVM lineal.
+- No revisar desbalance.
+- Mezclar pacientes entre folds.
+- Utilizar demasiadas combinaciones en GridSearch.
+- No revisar tiempo computacional.
+- Interpretar importancia como causalidad.
+
+## Flujo recomendado
+
+1. Definir clasificación o regresión.
+2. Crear un baseline.
+3. Separar train y test.
+4. Integrar imputación y escalado en pipeline.
+5. Entrenar un modelo lineal.
+6. Comparar con kernel RBF.
+7. Ajustar `C`.
+8. Ajustar `gamma` o `epsilon`.
+9. Validar con folds adecuados.
+10. Revisar desbalance.
+11. Calibrar probabilidades cuando sea necesario.
+12. Evaluar una vez en test.
+
+## Checklist para proyectos
+
+- [ ] He definido el target.
+- [ ] He creado un baseline.
+- [ ] He separado train y test.
+- [ ] He escalado dentro del pipeline.
+- [ ] He imputado dentro del pipeline.
+- [ ] He probado una SVM lineal.
+- [ ] He probado RBF solo cuando corresponde.
+- [ ] He ajustado `C`.
+- [ ] He ajustado `gamma`.
+- [ ] He revisado el número de support vectors.
+- [ ] He evaluado con cross-validation.
+- [ ] He revisado desbalance.
+- [ ] He calibrado probabilidades cuando procede.
+- [ ] He comparado con modelos más simples.
+- [ ] He evaluado una vez en test.
+
+## Recursos
+
+### Documentación
+
+- `SVC`.
+- `LinearSVC`.
+- `SVR`.
+- `LinearSVR`.
+- `StandardScaler`.
+- `CalibratedClassifierCV`.
+- `GridSearchCV`.
+- `Nystroem`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus kernels, hiperparámetros, resultados y decisiones clínicas.

@@ -1,0 +1,964 @@
+---
+title: "Random forest"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Random forest combina muchos árboles de decisión.
+
+Cada árbol se entrena con:
+
+- Una muestra bootstrap de los datos.
+- Un subconjunto aleatorio de variables en cada división.
+
+La predicción final se obtiene agregando las predicciones de todos los árboles.
+
+Esto reduce la varianza y mejora la estabilidad respecto a un árbol individual.
+:::
+
+## ¿Qué es random forest?
+
+Random forest es un método de ensemble basado en múltiples árboles de decisión.
+
+En clasificación:
+
+```text
+Árbol 1 → clase positiva
+Árbol 2 → clase negativa
+Árbol 3 → clase positiva
+Árbol 4 → clase positiva
+...
+```
+
+La clase final se obtiene por votación.
+
+En regresión:
+
+```text
+Árbol 1 → 4.2 días
+Árbol 2 → 5.1 días
+Árbol 3 → 4.7 días
+...
+```
+
+La predicción final suele ser la media.
+
+## Idea principal
+
+Un árbol individual puede ser inestable.
+
+Random forest reduce esa inestabilidad al combinar muchos árboles diferentes.
+
+::: {.callout-note}
+## Idea clave
+
+No busca construir un árbol perfecto, sino muchos árboles razonables y poco correlacionados.
+:::
+
+## Bagging
+
+Bagging significa bootstrap aggregating.
+
+El proceso es:
+
+1. Crear múltiples muestras bootstrap.
+2. Entrenar un modelo en cada muestra.
+3. Agregar sus predicciones.
+
+## Bootstrap
+
+Una muestra bootstrap se obtiene seleccionando observaciones con reemplazo.
+
+Esto significa que:
+
+- Algunas observaciones aparecen varias veces.
+- Otras no aparecen en esa muestra.
+- Cada árbol recibe un conjunto ligeramente diferente.
+
+## Selección aleatoria de variables
+
+En cada división, el árbol no evalúa todas las variables.
+
+Solo considera un subconjunto aleatorio.
+
+Esto ayuda a:
+
+- Reducir correlación entre árboles.
+- Evitar que una variable dominante aparezca siempre.
+- Aumentar diversidad del ensemble.
+
+## Random forest de clasificación
+
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+model = RandomForestClassifier(
+    n_estimators=300,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+## Random forest de regresión
+
+```python
+from sklearn.ensemble import RandomForestRegressor
+
+model = RandomForestRegressor(
+    n_estimators=300,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp"
+]
+
+target = "cardiotoxicity"
+
+X = df[features]
+
+y = df[target]
+```
+
+## Separar train y test
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.20,
+    stratify=y,
+    random_state=42
+)
+```
+
+## Entrenar el modelo
+
+```python
+model.fit(
+    X_train,
+    y_train
+)
+```
+
+## Predicción de clases
+
+```python
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Predicción de probabilidades
+
+```python
+y_probability = model.predict_proba(
+    X_test
+)[:, 1]
+```
+
+## Predicción en regresión
+
+```python
+y_pred = model.predict(
+    X_test
+)
+```
+
+## Número de árboles
+
+```python
+model = RandomForestClassifier(
+    n_estimators=500,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+Más árboles suelen producir:
+
+- Mayor estabilidad.
+- Menor variabilidad.
+- Más coste computacional.
+
+::: {.callout-note}
+## Regla práctica
+
+Aumentar `n_estimators` rara vez empeora el rendimiento, pero llega un punto de rendimientos decrecientes.
+:::
+
+## Profundidad máxima
+
+```python
+model = RandomForestClassifier(
+    max_depth=8,
+    random_state=42
+)
+```
+
+Limitar profundidad puede:
+
+- Reducir overfitting.
+- Aumentar interpretabilidad.
+- Mejorar generalización.
+
+## Muestras mínimas por hoja
+
+```python
+model = RandomForestClassifier(
+    min_samples_leaf=10,
+    random_state=42
+)
+```
+
+Este parámetro suele ser muy útil en datos clínicos.
+
+Hojas demasiado pequeñas pueden generar probabilidades extremas e inestables.
+
+## Muestras mínimas para dividir
+
+```python
+model = RandomForestClassifier(
+    min_samples_split=20,
+    random_state=42
+)
+```
+
+## Variables candidatas por división
+
+```python
+model = RandomForestClassifier(
+    max_features="sqrt",
+    random_state=42
+)
+```
+
+Opciones habituales:
+
+- `"sqrt"`.
+- `"log2"`.
+- Un número entero.
+- Una proporción.
+- `None`.
+
+## Bootstrap
+
+```python
+model = RandomForestClassifier(
+    bootstrap=True,
+    random_state=42
+)
+```
+
+Si `bootstrap=False`, cada árbol utiliza todo el conjunto de entrenamiento.
+
+## Out-of-bag score
+
+Las observaciones no seleccionadas en una muestra bootstrap pueden utilizarse como validación interna.
+
+```python
+model = RandomForestClassifier(
+    n_estimators=500,
+    bootstrap=True,
+    oob_score=True,
+    random_state=42,
+    n_jobs=-1
+)
+
+model.fit(
+    X_train,
+    y_train
+)
+
+print(
+    model.oob_score_
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+OOB score es útil, pero no sustituye necesariamente una estrategia de validación bien diseñada.
+:::
+
+## Evaluación de clasificación
+
+```python
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import balanced_accuracy_score
+from sklearn.metrics import classification_report
+
+roc_auc = roc_auc_score(
+    y_test,
+    y_probability
+)
+
+pr_auc = average_precision_score(
+    y_test,
+    y_probability
+)
+
+balanced_accuracy = balanced_accuracy_score(
+    y_test,
+    y_pred
+)
+
+print(
+    classification_report(
+        y_test,
+        y_pred
+    )
+)
+```
+
+## Evaluación de regresión
+
+```python
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import r2_score
+
+mae = mean_absolute_error(
+    y_test,
+    y_pred
+)
+
+rmse = root_mean_squared_error(
+    y_test,
+    y_pred
+)
+
+r2 = r2_score(
+    y_test,
+    y_pred
+)
+```
+
+## Escalado
+
+Random forest no necesita escalado.
+
+Esto se debe a que las divisiones dependen del orden de los valores.
+
+Por ejemplo:
+
+```text
+Troponina > 0.02
+Edad <= 8
+Peso > 30
+```
+
+La magnitud de las unidades no afecta de la misma forma que en modelos lineales o SVM.
+
+## Valores ausentes
+
+En muchos workflows conviene imputar antes.
+
+```python
+from sklearn.impute import SimpleImputer
+```
+
+## Variables categóricas
+
+En scikit-learn normalmente deben codificarse.
+
+```python
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+```
+
+## Pipeline completo
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            RandomForestClassifier(
+                n_estimators=500,
+                min_samples_leaf=5,
+                random_state=42,
+                n_jobs=-1
+            )
+        )
+    ]
+)
+```
+
+## Hiperparámetros principales
+
+| Parámetro | Función |
+|---|---|
+| `n_estimators` | Número de árboles |
+| `max_depth` | Profundidad máxima |
+| `min_samples_split` | Mínimo para dividir |
+| `min_samples_leaf` | Mínimo por hoja |
+| `max_features` | Variables candidatas por split |
+| `bootstrap` | Activa muestras bootstrap |
+| `class_weight` | Ajusta desbalance |
+| `max_samples` | Tamaño de cada bootstrap |
+| `ccp_alpha` | Poda de árboles |
+
+## Ajuste de hiperparámetros
+
+```python
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import StratifiedKFold
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+```
+
+```python
+param_distributions = {
+    "classifier__n_estimators": [
+        200,
+        400,
+        600,
+        800
+    ],
+    "classifier__max_depth": [
+        None,
+        4,
+        6,
+        8,
+        12
+    ],
+    "classifier__min_samples_split": [
+        2,
+        10,
+        20,
+        40
+    ],
+    "classifier__min_samples_leaf": [
+        1,
+        5,
+        10,
+        20
+    ],
+    "classifier__max_features": [
+        "sqrt",
+        "log2",
+        0.5
+    ],
+    "classifier__class_weight": [
+        None,
+        "balanced"
+    ]
+}
+```
+
+```python
+search = RandomizedSearchCV(
+    estimator=pipeline,
+    param_distributions=param_distributions,
+    n_iter=40,
+    cv=cv,
+    scoring="roc_auc",
+    n_jobs=-1,
+    random_state=42
+)
+
+search.fit(
+    X_train,
+    y_train
+)
+```
+
+## Mejor modelo
+
+```python
+best_model = search.best_estimator_
+
+print(
+    search.best_params_
+)
+```
+
+## GridSearch frente a RandomizedSearch
+
+### GridSearch
+
+Evalúa todas las combinaciones.
+
+Ventajas:
+
+- Exhaustivo.
+- Fácil de interpretar.
+
+Limitaciones:
+
+- Costoso.
+- Poco eficiente con muchos parámetros.
+
+### RandomizedSearch
+
+Evalúa combinaciones aleatorias.
+
+Ventajas:
+
+- Más eficiente.
+- Permite explorar espacios grandes.
+
+## Clases desbalanceadas
+
+```python
+model = RandomForestClassifier(
+    class_weight="balanced",
+    random_state=42
+)
+```
+
+También existe:
+
+```python
+model = RandomForestClassifier(
+    class_weight="balanced_subsample",
+    random_state=42
+)
+```
+
+## Ajustar umbral
+
+```python
+threshold = 0.25
+
+y_pred_threshold = (
+    y_probability >= threshold
+).astype(int)
+```
+
+En datos clínicos, el umbral debe elegirse según:
+
+- Coste de falsos negativos.
+- Coste de falsos positivos.
+- Capacidad asistencial.
+- Objetivo del modelo.
+
+## Feature importance por impureza
+
+```python
+importance_table = pd.DataFrame(
+    {
+        "feature": X_train.columns,
+        "importance": model.feature_importances_
+    }
+).sort_values(
+    "importance",
+    ascending=False
+)
+
+display(
+    importance_table
+)
+```
+
+## Limitaciones de feature_importances_
+
+Puede favorecer:
+
+- Variables continuas.
+- Variables con muchos niveles.
+- Variables con alta cardinalidad.
+
+::: {.callout-caution}
+## Precaución
+
+Importancia alta no significa efecto causal.
+:::
+
+## Permutation importance
+
+```python
+from sklearn.inspection import permutation_importance
+
+permutation = permutation_importance(
+    best_model,
+    X_test,
+    y_test,
+    scoring="roc_auc",
+    n_repeats=20,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+```python
+feature_names = (
+    best_model
+    .named_steps["preprocessor"]
+    .get_feature_names_out()
+)
+
+permutation_table = pd.DataFrame(
+    {
+        "feature": feature_names,
+        "importance_mean": permutation.importances_mean,
+        "importance_std": permutation.importances_std
+    }
+).sort_values(
+    "importance_mean",
+    ascending=False
+)
+
+display(
+    permutation_table
+)
+```
+
+## Interpretación con SHAP
+
+SHAP puede utilizarse para estudiar contribuciones locales y globales.
+
+```python
+import shap
+
+explainer = shap.TreeExplainer(
+    model
+)
+
+shap_values = explainer.shap_values(
+    X_test
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+SHAP explica el comportamiento del modelo, no demuestra causalidad.
+:::
+
+## Partial dependence
+
+```python
+from sklearn.inspection import PartialDependenceDisplay
+
+PartialDependenceDisplay.from_estimator(
+    model,
+    X_test,
+    features=[
+        "age",
+        "troponin"
+    ]
+)
+```
+
+Puede ayudar a visualizar la relación media aprendida por el modelo.
+
+## ICE plots
+
+Los Individual Conditional Expectation plots muestran cómo cambia la predicción para cada observación.
+
+Pueden revelar heterogeneidad entre pacientes.
+
+## Probabilidades y calibración
+
+Random forest puede producir probabilidades poco calibradas.
+
+```python
+from sklearn.calibration import CalibrationDisplay
+
+CalibrationDisplay.from_predictions(
+    y_test,
+    y_probability,
+    n_bins=10
+)
+```
+
+## Calibrar el modelo
+
+```python
+from sklearn.calibration import CalibratedClassifierCV
+
+calibrated_model = CalibratedClassifierCV(
+    estimator=best_model,
+    method="isotonic",
+    cv=5
+)
+
+calibrated_model.fit(
+    X_train,
+    y_train
+)
+```
+
+Métodos habituales:
+
+- `"sigmoid"`.
+- `"isotonic"`.
+
+## Ventajas
+
+- Captura relaciones no lineales.
+- Captura interacciones.
+- No requiere escalado.
+- Más estable que un árbol individual.
+- Funciona bien como baseline potente.
+- Puede modelar clasificación y regresión.
+- Tolera ruido y variables irrelevantes mejor que un árbol único.
+
+## Limitaciones
+
+- Menor interpretabilidad.
+- Más coste computacional.
+- Probabilidades no siempre calibradas.
+- Feature importance puede ser engañosa.
+- Puede rendir peor que boosting en algunos problemas tabulares.
+- No extrapola bien en regresión.
+
+## Extrapolación en regresión
+
+Un random forest predice combinando valores observados en las hojas.
+
+Por tanto, suele tener dificultades para predecir fuera del rango visto en train.
+
+::: {.callout-note}
+## Ejemplo
+
+Si en train la estancia máxima es de 30 días, el modelo puede tener dificultades para predecir correctamente valores mucho mayores.
+:::
+
+## Correlación entre árboles
+
+Random forest funciona mejor cuando los árboles:
+
+- Tienen buen rendimiento individual.
+- No están demasiado correlacionados.
+
+La aleatoriedad en muestras y variables ayuda a conseguirlo.
+
+## Bias y varianza
+
+Comparado con un árbol individual:
+
+- Suele reducir varianza.
+- Puede aumentar ligeramente sesgo.
+- Mejora generalización.
+
+## Comparar con un árbol individual
+
+```python
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import cross_validate
+
+models = {
+    "decision_tree": DecisionTreeClassifier(
+        random_state=42
+    ),
+    "random_forest": RandomForestClassifier(
+        n_estimators=500,
+        random_state=42,
+        n_jobs=-1
+    )
+}
+```
+
+```python
+results = {}
+
+for name, estimator in models.items():
+
+    scores = cross_validate(
+        estimator=estimator,
+        X=X,
+        y=y,
+        cv=cv,
+        scoring={
+            "roc_auc": "roc_auc",
+            "balanced_accuracy": "balanced_accuracy"
+        }
+    )
+
+    results[name] = scores
+```
+
+## Curva de aprendizaje
+
+```python
+from sklearn.model_selection import LearningCurveDisplay
+
+LearningCurveDisplay.from_estimator(
+    estimator=best_model,
+    X=X_train,
+    y=y_train,
+    cv=cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+```
+
+Ayuda a estudiar:
+
+- Si faltan datos.
+- Si existe overfitting.
+- Si el rendimiento se estabiliza.
+
+## Validación por grupos
+
+Si existen varias filas por paciente:
+
+```python
+from sklearn.model_selection import GroupKFold
+
+cv = GroupKFold(
+    n_splits=5
+)
+```
+
+```python
+scores = cross_validate(
+    estimator=pipeline,
+    X=X,
+    y=y,
+    groups=df["patient_id"],
+    cv=cv,
+    scoring="roc_auc"
+)
+```
+
+## Validación temporal
+
+Para predecir casos futuros:
+
+```text
+Train
+→ periodo anterior
+
+Test
+→ periodo posterior
+```
+
+Esto suele ser más realista que un split aleatorio.
+
+## Multi-centro
+
+Puede evaluarse:
+
+- Entrenamiento en varios centros.
+- Validación dejando un centro fuera.
+- Rendimiento por centro.
+- Calibración por centro.
+
+## Baseline
+
+Random forest debe compararse con:
+
+- Dummy classifier o regressor.
+- Regresión logística o lineal.
+- Árbol de decisión.
+- Regla clínica.
+- Gradient boosting.
+
+## Interpretación clínica
+
+::: {.callout-note}
+## Aplicación clínica
+
+Random forest puede ser útil cuando existen relaciones no lineales e interacciones, pero la explicación del modelo debe formar parte de la evaluación.
+:::
+
+Debe revisarse:
+
+- Calibración.
+- Rendimiento por subgrupos.
+- Estabilidad temporal.
+- Importancia de variables.
+- Sensibilidad al umbral.
+- Disponibilidad de predictores.
+- Coste computacional.
+- Validez externa.
+
+## Errores frecuentes
+
+- Usar demasiados parámetros sin validación.
+- Reportar solo accuracy.
+- No ajustar `min_samples_leaf`.
+- No revisar calibración.
+- Confiar únicamente en feature importance.
+- Interpretar SHAP como causalidad.
+- Mezclar pacientes entre folds.
+- Ajustar hiperparámetros con test.
+- No comparar con modelos simples.
+- Usar SMOTE antes del split.
+- Ignorar el coste computacional.
+- No fijar `random_state`.
+
+## Flujo recomendado
+
+1. Definir target y clase positiva.
+2. Crear baseline.
+3. Separar train y test.
+4. Preparar imputación y encoding.
+5. Entrenar un random forest inicial.
+6. Revisar OOB score.
+7. Ajustar profundidad y hojas.
+8. Ajustar `max_features`.
+9. Validar con cross-validation.
+10. Revisar calibración.
+11. Interpretar con permutation importance.
+12. Evaluar una vez en test.
+
+## Checklist para proyectos
+
+- [ ] He definido el target.
+- [ ] He creado un baseline.
+- [ ] He separado train y test.
+- [ ] He usado un pipeline.
+- [ ] He fijado `random_state`.
+- [ ] He elegido `n_estimators`.
+- [ ] He revisado `max_depth`.
+- [ ] He revisado `min_samples_leaf`.
+- [ ] He ajustado `max_features`.
+- [ ] He evaluado OOB score.
+- [ ] He usado cross-validation.
+- [ ] He revisado calibración.
+- [ ] He evaluado desbalance.
+- [ ] He calculado permutation importance.
+- [ ] He comparado con modelos simples.
+- [ ] He evaluado una vez en test.
+
+## Recursos
+
+### Documentación
+
+- `RandomForestClassifier`.
+- `RandomForestRegressor`.
+- `RandomizedSearchCV`.
+- `permutation_importance`.
+- `CalibrationDisplay`.
+- `CalibratedClassifierCV`.
+- `PartialDependenceDisplay`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus modelos, hiperparámetros, importancias y decisiones clínicas.
