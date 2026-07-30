@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Comparación de métodos no supervisados – Health Data Science Handbook</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-2aa33e8751edae3f9b77d048c1294c38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Health Data Science Handbook</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> <i class="bi bi-info-circle" role="img" aria-label="Sobre el proyecto">
+</i> 
+<span class="menu-text">Sobre el proyecto</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/pablolongan/health-data-science-handbook"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../unsupervised-learning/index.html">Aprendizaje no supervisado</a></li><li class="breadcrumb-item"><a href="../unsupervised-learning/method-comparison.html">Comparación de métodos</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/data-exploration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory data analysis (EDA)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación de modelos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/classification-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métricas de clasificación</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/regression-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métricas de regresión</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/cross-validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Validación cruzada</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Preprocesamiento</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/train-test-split.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Train, validation and test</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/data-leakage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data leakage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/missing-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Valores ausentes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/scaling-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Escalado y normalización</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/categorical-encoding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variables categóricas y encoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/outliers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Outliers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/pipelines-columntransformer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pipelines y ColumnTransformer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Reducción de dimensionalidad</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/pca.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PCA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Selección de variables</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/filter-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos filter</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/wrapper-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos wrapper</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/embedded-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos embedded</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regularización</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/logistic-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Árboles de decisión</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/random-forest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random forest</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/gradient-boosting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gradient boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support Vector Machines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/model-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparación de modelos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Aprendizaje no supervisado</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/k-means.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">K-means</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/hierarchical-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Clustering jerárquico</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/dbscan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DBSCAN y clustering por densidad</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/gaussian-mixture-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gaussian Mixture Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/clustering-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación del clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/anomaly-detection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Detección de anomalías</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/method-comparison.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Comparación de métodos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Series temporales</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Deep learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Guías de proyectos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../project-guides/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
+ <span class="menu-text">Recetario de código</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#qué-métodos-comparamos" id="toc-qué-métodos-comparamos" class="nav-link active" data-scroll-target="#qué-métodos-comparamos">¿Qué métodos comparamos?</a></li>
+  <li><a href="#pregunta-inicial" id="toc-pregunta-inicial" class="nav-link" data-scroll-target="#pregunta-inicial">Pregunta inicial</a></li>
+  <li><a href="#comparación-general" id="toc-comparación-general" class="nav-link" data-scroll-target="#comparación-general">Comparación general</a></li>
+  <li><a href="#k-means" id="toc-k-means" class="nav-link" data-scroll-target="#k-means">K-means</a></li>
+  <li><a href="#clustering-jerárquico" id="toc-clustering-jerárquico" class="nav-link" data-scroll-target="#clustering-jerárquico">Clustering jerárquico</a></li>
+  <li><a href="#dbscan" id="toc-dbscan" class="nav-link" data-scroll-target="#dbscan">DBSCAN</a></li>
+  <li><a href="#hdbscan" id="toc-hdbscan" class="nav-link" data-scroll-target="#hdbscan">HDBSCAN</a></li>
+  <li><a href="#gaussian-mixture-models" id="toc-gaussian-mixture-models" class="nav-link" data-scroll-target="#gaussian-mixture-models">Gaussian Mixture Models</a></li>
+  <li><a href="#detección-de-anomalías" id="toc-detección-de-anomalías" class="nav-link" data-scroll-target="#detección-de-anomalías">Detección de anomalías</a></li>
+  <li><a href="#tabla-por-objetivo" id="toc-tabla-por-objetivo" class="nav-link" data-scroll-target="#tabla-por-objetivo">Tabla por objetivo</a></li>
+  <li><a href="#preparar-una-comparación-justa" id="toc-preparar-una-comparación-justa" class="nav-link" data-scroll-target="#preparar-una-comparación-justa">Preparar una comparación justa</a></li>
+  <li><a href="#preparar-los-datos" id="toc-preparar-los-datos" class="nav-link" data-scroll-target="#preparar-los-datos">Preparar los datos</a></li>
+  <li><a href="#imputar-y-escalar" id="toc-imputar-y-escalar" class="nav-link" data-scroll-target="#imputar-y-escalar">Imputar y escalar</a></li>
+  <li><a href="#definir-métodos" id="toc-definir-métodos" class="nav-link" data-scroll-target="#definir-métodos">Definir métodos</a></li>
+  <li><a href="#evaluar-todos-los-métodos" id="toc-evaluar-todos-los-métodos" class="nav-link" data-scroll-target="#evaluar-todos-los-métodos">Evaluar todos los métodos</a></li>
+  <li><a href="#no-elegir-solo-por-silhouette" id="toc-no-elegir-solo-por-silhouette" class="nav-link" data-scroll-target="#no-elegir-solo-por-silhouette">No elegir solo por silhouette</a></li>
+  <li><a href="#comparar-tamaños-de-clusters" id="toc-comparar-tamaños-de-clusters" class="nav-link" data-scroll-target="#comparar-tamaños-de-clusters">Comparar tamaños de clusters</a></li>
+  <li><a href="#visualizar-tamaños" id="toc-visualizar-tamaños" class="nav-link" data-scroll-target="#visualizar-tamaños">Visualizar tamaños</a></li>
+  <li><a href="#comparar-estabilidad" id="toc-comparar-estabilidad" class="nav-link" data-scroll-target="#comparar-estabilidad">Comparar estabilidad</a></li>
+  <li><a href="#comparar-soluciones-entre-algoritmos" id="toc-comparar-soluciones-entre-algoritmos" class="nav-link" data-scroll-target="#comparar-soluciones-entre-algoritmos">Comparar soluciones entre algoritmos</a></li>
+  <li><a href="#acuerdo-bajo-entre-métodos" id="toc-acuerdo-bajo-entre-métodos" class="nav-link" data-scroll-target="#acuerdo-bajo-entre-métodos">Acuerdo bajo entre métodos</a></li>
+  <li><a href="#visualizar-soluciones-con-pca" id="toc-visualizar-soluciones-con-pca" class="nav-link" data-scroll-target="#visualizar-soluciones-con-pca">Visualizar soluciones con PCA</a></li>
+  <li><a href="#comparar-perfiles-clínicos" id="toc-comparar-perfiles-clínicos" class="nav-link" data-scroll-target="#comparar-perfiles-clínicos">Comparar perfiles clínicos</a></li>
+  <li><a href="#coherencia-clínica" id="toc-coherencia-clínica" class="nav-link" data-scroll-target="#coherencia-clínica">Coherencia clínica</a></li>
+  <li><a href="#validación-externa" id="toc-validación-externa" class="nav-link" data-scroll-target="#validación-externa">Validación externa</a></li>
+  <li><a href="#separación-por-outcomes" id="toc-separación-por-outcomes" class="nav-link" data-scroll-target="#separación-por-outcomes">Separación por outcomes</a></li>
+  <li><a href="#evitar-validación-circular" id="toc-evitar-validación-circular" class="nav-link" data-scroll-target="#evitar-validación-circular">Evitar validación circular</a></li>
+  <li><a href="#datos-mixtos" id="toc-datos-mixtos" class="nav-link" data-scroll-target="#datos-mixtos">Datos mixtos</a></li>
+  <li><a href="#distancia-de-gower" id="toc-distancia-de-gower" class="nav-link" data-scroll-target="#distancia-de-gower">Distancia de Gower</a></li>
+  <li><a href="#alta-dimensionalidad" id="toc-alta-dimensionalidad" class="nav-link" data-scroll-target="#alta-dimensionalidad">Alta dimensionalidad</a></li>
+  <li><a href="#pca-antes-de-clustering" id="toc-pca-antes-de-clustering" class="nav-link" data-scroll-target="#pca-antes-de-clustering">PCA antes de clustering</a></li>
+  <li><a href="#sensibilidad-a-variables" id="toc-sensibilidad-a-variables" class="nav-link" data-scroll-target="#sensibilidad-a-variables">Sensibilidad a variables</a></li>
+  <li><a href="#sensibilidad-al-escalado" id="toc-sensibilidad-al-escalado" class="nav-link" data-scroll-target="#sensibilidad-al-escalado">Sensibilidad al escalado</a></li>
+  <li><a href="#sensibilidad-a-outliers" id="toc-sensibilidad-a-outliers" class="nav-link" data-scroll-target="#sensibilidad-a-outliers">Sensibilidad a outliers</a></li>
+  <li><a href="#asignación-de-nuevos-casos" id="toc-asignación-de-nuevos-casos" class="nav-link" data-scroll-target="#asignación-de-nuevos-casos">Asignación de nuevos casos</a></li>
+  <li><a href="#producción" id="toc-producción" class="nav-link" data-scroll-target="#producción">Producción</a></li>
+  <li><a href="#interpretabilidad" id="toc-interpretabilidad" class="nav-link" data-scroll-target="#interpretabilidad">Interpretabilidad</a></li>
+  <li><a href="#coste-computacional" id="toc-coste-computacional" class="nav-link" data-scroll-target="#coste-computacional">Coste computacional</a></li>
+  <li><a href="#selección-práctica" id="toc-selección-práctica" class="nav-link" data-scroll-target="#selección-práctica">Selección práctica</a>
+  <ul class="collapse">
+  <li><a href="#usa-k-means-cuando" id="toc-usa-k-means-cuando" class="nav-link" data-scroll-target="#usa-k-means-cuando">Usa K-means cuando</a></li>
+  <li><a href="#usa-jerárquico-cuando" id="toc-usa-jerárquico-cuando" class="nav-link" data-scroll-target="#usa-jerárquico-cuando">Usa jerárquico cuando</a></li>
+  <li><a href="#usa-dbscan-cuando" id="toc-usa-dbscan-cuando" class="nav-link" data-scroll-target="#usa-dbscan-cuando">Usa DBSCAN cuando</a></li>
+  <li><a href="#usa-hdbscan-cuando" id="toc-usa-hdbscan-cuando" class="nav-link" data-scroll-target="#usa-hdbscan-cuando">Usa HDBSCAN cuando</a></li>
+  <li><a href="#usa-gmm-cuando" id="toc-usa-gmm-cuando" class="nav-link" data-scroll-target="#usa-gmm-cuando">Usa GMM cuando</a></li>
+  <li><a href="#usa-detección-de-anomalías-cuando" id="toc-usa-detección-de-anomalías-cuando" class="nav-link" data-scroll-target="#usa-detección-de-anomalías-cuando">Usa detección de anomalías cuando</a></li>
+  </ul></li>
+  <li><a href="#tabla-de-decisión-final" id="toc-tabla-de-decisión-final" class="nav-link" data-scroll-target="#tabla-de-decisión-final">Tabla de decisión final</a></li>
+  <li><a href="#no-existe-un-ganador-automático" id="toc-no-existe-un-ganador-automático" class="nav-link" data-scroll-target="#no-existe-un-ganador-automático">No existe un ganador automático</a></li>
+  <li><a href="#consideraciones-clínicas" id="toc-consideraciones-clínicas" class="nav-link" data-scroll-target="#consideraciones-clínicas">Consideraciones clínicas</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#checklist-para-proyectos" id="toc-checklist-para-proyectos" class="nav-link" data-scroll-target="#checklist-para-proyectos">Checklist para proyectos</a></li>
+  <li><a href="#cierre-de-la-sección" id="toc-cierre-de-la-sección" class="nav-link" data-scroll-target="#cierre-de-la-sección">Cierre de la sección</a></li>
+  <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
+  <ul class="collapse">
+  <li><a href="#documentación" id="toc-documentación" class="nav-link" data-scroll-target="#documentación">Documentación</a></li>
+  <li><a href="#material-del-máster" id="toc-material-del-máster" class="nav-link" data-scroll-target="#material-del-máster">Material del máster</a></li>
+  </ul></li>
+  <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../unsupervised-learning/index.html">Aprendizaje no supervisado</a></li><li class="breadcrumb-item"><a href="../unsupervised-learning/method-comparison.html">Comparación de métodos</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Comparación de métodos no supervisados</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>No existe un único método no supervisado adecuado para todos los problemas.</p>
+<p>La elección depende de:</p>
+<ul>
+<li>La forma esperada de los clusters.</li>
+<li>La presencia de ruido.</li>
+<li>La dimensionalidad.</li>
+<li>El tamaño de muestra.</li>
+<li>La necesidad de asignar nuevos casos.</li>
+<li>La interpretabilidad.</li>
+<li>La estabilidad.</li>
+<li>La utilidad clínica.</li>
+</ul>
+<p>La comparación debe combinar métricas, estabilidad y sentido clínico.</p>
+</div>
+</div>
+<section id="qué-métodos-comparamos" class="level2">
+<h2 data-anchor-id="qué-métodos-comparamos">¿Qué métodos comparamos?</h2>
+<p>En esta sección se comparan:</p>
+<ul>
+<li>K-means.</li>
+<li>Clustering jerárquico.</li>
+<li>DBSCAN.</li>
+<li>HDBSCAN.</li>
+<li>Gaussian Mixture Models.</li>
+<li>Métodos de detección de anomalías.</li>
+</ul>
+</section>
+<section id="pregunta-inicial" class="level2">
+<h2 data-anchor-id="pregunta-inicial">Pregunta inicial</h2>
+<p>Antes de elegir algoritmo, define qué buscas.</p>
+<pre class="text"><code>¿Agrupar pacientes?
+¿Descubrir subtipos?
+¿Detectar ruido?
+¿Asignar nuevos casos?
+¿Encontrar perfiles probabilísticos?
+¿Explorar anomalías?</code></pre>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>La pregunta de investigación determina el método más que la métrica.</p>
+</div>
+</div>
+</section>
+<section id="comparación-general" class="level2">
+<h2 data-anchor-id="comparación-general">Comparación general</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Método</th>
+<th>Necesita número de grupos</th>
+<th>Detecta ruido</th>
+<th>Asigna nuevos casos</th>
+<th>Pertenencia probabilística</th>
+<th>Escalabilidad</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>K-means</td>
+<td>Sí</td>
+<td>No</td>
+<td>Sí</td>
+<td>No</td>
+<td>Alta</td>
+</tr>
+<tr class="even">
+<td>Jerárquico</td>
+<td>No necesariamente</td>
+<td>No</td>
+<td>Difícil</td>
+<td>No</td>
+<td>Media-baja</td>
+</tr>
+<tr class="odd">
+<td>DBSCAN</td>
+<td>No</td>
+<td>Sí</td>
+<td>Difícil</td>
+<td>No</td>
+<td>Media</td>
+</tr>
+<tr class="even">
+<td>HDBSCAN</td>
+<td>No</td>
+<td>Sí</td>
+<td>Parcial</td>
+<td>Sí</td>
+<td>Media</td>
+</tr>
+<tr class="odd">
+<td>GMM</td>
+<td>Sí</td>
+<td>No directamente</td>
+<td>Sí</td>
+<td>Sí</td>
+<td>Media</td>
+</tr>
+<tr class="even">
+<td>Isolation Forest</td>
+<td>No aplica</td>
+<td>Sí</td>
+<td>Sí</td>
+<td>Score</td>
+<td>Alta</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="k-means" class="level2">
+<h2 data-anchor-id="k-means">K-means</h2>
+<p>Adecuado cuando:</p>
+<ul>
+<li>Los clusters son compactos.</li>
+<li>Las variables son numéricas.</li>
+<li>Se necesita velocidad.</li>
+<li>Se quiere asignar nuevos casos.</li>
+<li>Existe una idea razonable de (K).</li>
+</ul>
+<p>Limitaciones:</p>
+<ul>
+<li>Sensible a outliers.</li>
+<li>No detecta ruido.</li>
+<li>Favorece clusters esféricos.</li>
+<li>Requiere escalado.</li>
+<li>Puede ser inestable.</li>
+</ul>
+</section>
+<section id="clustering-jerárquico" class="level2">
+<h2 data-anchor-id="clustering-jerárquico">Clustering jerárquico</h2>
+<p>Adecuado cuando:</p>
+<ul>
+<li>Se busca una jerarquía.</li>
+<li>Se quiere visualizar un dendrograma.</li>
+<li>El dataset no es enorme.</li>
+<li>Se necesitan métricas de distancia flexibles.</li>
+<li>Se trabaja con datos mixtos mediante distancia precomputada.</li>
+</ul>
+<p>Limitaciones:</p>
+<ul>
+<li>Costoso en muestras grandes.</li>
+<li>Difícil asignar nuevos casos.</li>
+<li>Sensible a linkage y outliers.</li>
+<li>El número de clusters sigue requiriendo decisión.</li>
+</ul>
+</section>
+<section id="dbscan" class="level2">
+<h2 data-anchor-id="dbscan">DBSCAN</h2>
+<p>Adecuado cuando:</p>
+<ul>
+<li>Existen clusters de forma irregular.</li>
+<li>Se desea detectar ruido.</li>
+<li>No se conoce el número de grupos.</li>
+<li>Las regiones densas están bien definidas.</li>
+</ul>
+<p>Limitaciones:</p>
+<ul>
+<li>Sensible a <code>eps</code>.</li>
+<li>Difícil con densidades distintas.</li>
+<li>Problemas en alta dimensión.</li>
+<li>Difícil asignar nuevos casos.</li>
+</ul>
+</section>
+<section id="hdbscan" class="level2">
+<h2 data-anchor-id="hdbscan">HDBSCAN</h2>
+<p>Adecuado cuando:</p>
+<ul>
+<li>Hay densidades variables.</li>
+<li>Se desea detectar ruido.</li>
+<li>Se quieren probabilidades de pertenencia.</li>
+<li>No se quiere fijar un único <code>eps</code>.</li>
+</ul>
+<p>Limitaciones:</p>
+<ul>
+<li>Más complejo.</li>
+<li>Puede producir mucho ruido.</li>
+<li>Requiere librería adicional.</li>
+<li>La interpretación puede ser menos directa.</li>
+</ul>
+</section>
+<section id="gaussian-mixture-models" class="level2">
+<h2 data-anchor-id="gaussian-mixture-models">Gaussian Mixture Models</h2>
+<p>Adecuado cuando:</p>
+<ul>
+<li>Los clusters se solapan.</li>
+<li>Se quieren probabilidades.</li>
+<li>Los grupos son aproximadamente elípticos.</li>
+<li>Se desea asignar nuevos casos.</li>
+<li>Se quiere modelar incertidumbre.</li>
+</ul>
+<p>Limitaciones:</p>
+<ul>
+<li>Asume estructura aproximadamente gaussiana.</li>
+<li>Sensible a inicialización.</li>
+<li>Puede sobreajustar.</li>
+<li>Requiere elegir covarianza.</li>
+</ul>
+</section>
+<section id="detección-de-anomalías" class="level2">
+<h2 data-anchor-id="detección-de-anomalías">Detección de anomalías</h2>
+<p>Adecuado cuando el objetivo no es agrupar, sino identificar casos raros.</p>
+<p>Métodos habituales:</p>
+<ul>
+<li>Isolation Forest.</li>
+<li>Local Outlier Factor.</li>
+<li>One-Class SVM.</li>
+<li>Autoencoders.</li>
+<li>DBSCAN como detector de ruido.</li>
+</ul>
+</section>
+<section id="tabla-por-objetivo" class="level2">
+<h2 data-anchor-id="tabla-por-objetivo">Tabla por objetivo</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Objetivo</th>
+<th>Método inicial recomendado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Clusters compactos</td>
+<td>K-means</td>
+</tr>
+<tr class="even">
+<td>Jerarquía de subgrupos</td>
+<td>Jerárquico</td>
+</tr>
+<tr class="odd">
+<td>Formas irregulares</td>
+<td>DBSCAN</td>
+</tr>
+<tr class="even">
+<td>Densidades variables</td>
+<td>HDBSCAN</td>
+</tr>
+<tr class="odd">
+<td>Solapamiento probabilístico</td>
+<td>GMM</td>
+</tr>
+<tr class="even">
+<td>Casos raros globales</td>
+<td>Isolation Forest</td>
+</tr>
+<tr class="odd">
+<td>Anomalías locales</td>
+<td>LOF</td>
+</tr>
+<tr class="even">
+<td>Frontera de normalidad</td>
+<td>One-Class SVM</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="preparar-una-comparación-justa" class="level2">
+<h2 data-anchor-id="preparar-una-comparación-justa">Preparar una comparación justa</h2>
+<p>Todos los métodos deben utilizar:</p>
+<ul>
+<li>Las mismas variables.</li>
+<li>La misma unidad de análisis.</li>
+<li>La misma imputación.</li>
+<li>El mismo escalado.</li>
+<li>La misma cohorte.</li>
+<li>La misma definición de ruido.</li>
+<li>Los mismos criterios externos.</li>
+</ul>
+</section>
+<section id="preparar-los-datos" class="level2">
+<h2 data-anchor-id="preparar-los-datos">Preparar los datos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"age"</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"troponin"</span>,</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ntprobnp"</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lvef"</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gls"</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[features]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="imputar-y-escalar" class="level2">
+<h2 data-anchor-id="imputar-y-escalar">Imputar y escalar</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>imputer <span class="op">=</span> SimpleImputer(</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    strategy<span class="op">=</span><span class="st">"median"</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>X_imputed <span class="op">=</span> imputer.fit_transform(</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    X</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>X_scaled <span class="op">=</span> scaler.fit_transform(</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    X_imputed</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="definir-métodos" class="level2">
+<h2 data-anchor-id="definir-métodos">Definir métodos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> AgglomerativeClustering</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> DBSCAN</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.mixture <span class="im">import</span> GaussianMixture</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>models <span class="op">=</span> {</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"kmeans"</span>: KMeans(</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        n_clusters<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        random_state<span class="op">=</span><span class="dv">42</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        n_init<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hierarchical"</span>: AgglomerativeClustering(</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        n_clusters<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        linkage<span class="op">=</span><span class="st">"ward"</span></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dbscan"</span>: DBSCAN(</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        eps<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        min_samples<span class="op">=</span><span class="dv">5</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gmm"</span>: GaussianMixture(</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        n_components<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        covariance_type<span class="op">=</span><span class="st">"full"</span>,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        n_init<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="evaluar-todos-los-métodos" class="level2">
+<h2 data-anchor-id="evaluar-todos-los-métodos">Evaluar todos los métodos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> silhouette_score</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> davies_bouldin_score</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> calinski_harabasz_score</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>labels_by_model <span class="op">=</span> {}</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, model <span class="kw">in</span> models.items():</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> model.fit_predict(</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        X_scaled</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    labels_by_model[name] <span class="op">=</span> labels</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> (</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>    n_clusters <span class="op">=</span> <span class="bu">len</span>(</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>        <span class="bu">set</span>(labels)</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>        {<span class="op">-</span><span class="dv">1</span>}</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    noise_fraction <span class="op">=</span> (</span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>        labels <span class="op">==</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>    ).mean()</span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (</span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>        n_clusters <span class="op">&gt;=</span> <span class="dv">2</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>        <span class="kw">and</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>        mask.<span class="bu">sum</span>() <span class="op">&gt;</span> n_clusters</span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>        silhouette <span class="op">=</span> silhouette_score(</span>
+<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>            X_scaled[mask],</span>
+<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>            labels[mask]</span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a>        davies_bouldin <span class="op">=</span> davies_bouldin_score(</span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a>            X_scaled[mask],</span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a>            labels[mask]</span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a>        calinski_harabasz <span class="op">=</span> calinski_harabasz_score(</span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a>            X_scaled[mask],</span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a>            labels[mask]</span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a>        silhouette <span class="op">=</span> np.nan</span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a>        davies_bouldin <span class="op">=</span> np.nan</span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a>        calinski_harabasz <span class="op">=</span> np.nan</span>
+<span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a>    rows.append(</span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a>            <span class="st">"model"</span>: name,</span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a>            <span class="st">"n_clusters"</span>: n_clusters,</span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a>            <span class="st">"noise_fraction"</span>: noise_fraction,</span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a>            <span class="st">"silhouette"</span>: silhouette,</span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a>            <span class="st">"davies_bouldin"</span>: davies_bouldin,</span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a>            <span class="st">"calinski_harabasz"</span>: calinski_harabasz</span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a>comparison_table <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a>    rows</span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a>display(</span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a>    comparison_table</span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="no-elegir-solo-por-silhouette" class="level2">
+<h2 data-anchor-id="no-elegir-solo-por-silhouette">No elegir solo por silhouette</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>DBSCAN
+Silhouette = 0.62
+Ruido = 55 %
+
+K-means
+Silhouette = 0.48
+Ruido = 0 %</code></pre>
+<p>DBSCAN no es automáticamente mejor.</p>
+</section>
+<section id="comparar-tamaños-de-clusters" class="level2">
+<h2 data-anchor-id="comparar-tamaños-de-clusters">Comparar tamaños de clusters</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>size_tables <span class="op">=</span> {}</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, labels <span class="kw">in</span> labels_by_model.items():</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    size_tables[name] <span class="op">=</span> (</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        pd.Series(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>            labels</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>        .value_counts()</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        .sort_index()</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="visualizar-tamaños" class="level2">
+<h2 data-anchor-id="visualizar-tamaños">Visualizar tamaños</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>size_dataframe <span class="op">=</span> pd.concat(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    size_tables,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    axis<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>).fillna(<span class="dv">0</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>display(</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    size_dataframe</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="comparar-estabilidad" class="level2">
+<h2 data-anchor-id="comparar-estabilidad">Comparar estabilidad</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> adjusted_rand_score</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Para K-means:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>clusterings <span class="op">=</span> []</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">20</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> KMeans(</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>        n_clusters<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        n_init<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>        random_state<span class="op">=</span>seed</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> model.fit_predict(</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>        X_scaled</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    clusterings.append(</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>        labels</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>agreements <span class="op">=</span> []</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="bu">len</span>(clusterings)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        i <span class="op">+</span> <span class="dv">1</span>,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">len</span>(clusterings)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        agreements.append(</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>            adjusted_rand_score(</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>                clusterings[i],</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>                clusterings[j]</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>mean_stability <span class="op">=</span> np.mean(</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    agreements</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="comparar-soluciones-entre-algoritmos" class="level2">
+<h2 data-anchor-id="comparar-soluciones-entre-algoritmos">Comparar soluciones entre algoritmos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pairwise_rows <span class="op">=</span> []</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>model_names <span class="op">=</span> <span class="bu">list</span>(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    labels_by_model.keys()</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">len</span>(model_names)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>        i <span class="op">+</span> <span class="dv">1</span>,</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="bu">len</span>(model_names)</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>        name_a <span class="op">=</span> model_names[i]</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        name_b <span class="op">=</span> model_names[j]</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        ari <span class="op">=</span> adjusted_rand_score(</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>            labels_by_model[name_a],</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>            labels_by_model[name_b]</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>        pairwise_rows.append(</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>            {</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>                <span class="st">"model_a"</span>: name_a,</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>                <span class="st">"model_b"</span>: name_b,</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>                <span class="st">"adjusted_rand_index"</span>: ari</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>pairwise_table <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    pairwise_rows</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>display(</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    pairwise_table</span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="acuerdo-bajo-entre-métodos" class="level2">
+<h2 data-anchor-id="acuerdo-bajo-entre-métodos">Acuerdo bajo entre métodos</h2>
+<p>Un ARI bajo puede indicar:</p>
+<ul>
+<li>Estructura poco clara.</li>
+<li>Algoritmos con supuestos distintos.</li>
+<li>Alta sensibilidad.</li>
+<li>Clusters no robustos.</li>
+<li>Variables mal elegidas.</li>
+</ul>
+</section>
+<section id="visualizar-soluciones-con-pca" class="level2">
+<h2 data-anchor-id="visualizar-soluciones-con-pca">Visualizar soluciones con PCA</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    n_components<span class="op">=</span><span class="dv">2</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>X_pca <span class="op">=</span> pca.fit_transform(</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, labels <span class="kw">in</span> labels_by_model.items():</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    plt.figure(</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    plt.scatter(</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        X_pca[:, <span class="dv">0</span>],</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        X_pca[:, <span class="dv">1</span>],</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        c<span class="op">=</span>labels</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"PC1"</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"PC2"</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>    plt.title(</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>        name</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Precaución
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>La visualización 2D no sustituye la evaluación en el espacio completo.</p>
+</div>
+</div>
+</section>
+<section id="comparar-perfiles-clínicos" class="level2">
+<h2 data-anchor-id="comparar-perfiles-clínicos">Comparar perfiles clínicos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>profile_tables <span class="op">=</span> {}</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, labels <span class="kw">in</span> labels_by_model.items():</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    df_temp <span class="op">=</span> df.copy()</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    df_temp[<span class="st">"cluster"</span>] <span class="op">=</span> labels</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    profile_tables[name] <span class="op">=</span> (</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        df_temp</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        .groupby(<span class="st">"cluster"</span>)[features]</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        .mean()</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="coherencia-clínica" class="level2">
+<h2 data-anchor-id="coherencia-clínica">Coherencia clínica</h2>
+<p>Debe revisarse si los perfiles:</p>
+<ul>
+<li>Son distintos.</li>
+<li>Son comprensibles.</li>
+<li>Son plausibles.</li>
+<li>Se repiten entre métodos.</li>
+<li>Tienen tamaños razonables.</li>
+<li>Se relacionan con outcomes.</li>
+</ul>
+</section>
+<section id="validación-externa" class="level2">
+<h2 data-anchor-id="validación-externa">Validación externa</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>external_rows <span class="op">=</span> []</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> name, labels <span class="kw">in</span> labels_by_model.items():</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    df_temp <span class="op">=</span> df.copy()</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    df_temp[<span class="st">"cluster"</span>] <span class="op">=</span> labels</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    summary <span class="op">=</span> (</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        df_temp</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        .groupby(<span class="st">"cluster"</span>)[</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"future_event"</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>        .mean()</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> cluster_id, event_rate <span class="kw">in</span> summary.items():</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>        external_rows.append(</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>            {</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>                <span class="st">"model"</span>: name,</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>                <span class="st">"cluster"</span>: cluster_id,</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>                <span class="st">"future_event_rate"</span>: event_rate</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>external_table <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    external_rows</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="separación-por-outcomes" class="level2">
+<h2 data-anchor-id="separación-por-outcomes">Separación por outcomes</h2>
+<p>Una solución puede ser útil si identifica grupos con diferencias consistentes en:</p>
+<ul>
+<li>Mortalidad.</li>
+<li>Reingreso.</li>
+<li>Respuesta.</li>
+<li>Progresión.</li>
+<li>Cardiotoxicidad futura.</li>
+</ul>
+</section>
+<section id="evitar-validación-circular" class="level2">
+<h2 data-anchor-id="evitar-validación-circular">Evitar validación circular</h2>
+<pre class="text"><code>Outcome usado para crear clusters
++
+Mismo outcome usado para validar
+→ resultado circular</code></pre>
+</section>
+<section id="datos-mixtos" class="level2">
+<h2 data-anchor-id="datos-mixtos">Datos mixtos</h2>
+<p>Cuando existen variables numéricas y categóricas:</p>
+<ul>
+<li>K-means puede no ser adecuado.</li>
+<li>GMM tampoco directamente.</li>
+<li>Jerárquico con Gower puede ser útil.</li>
+<li>K-prototypes puede ser una alternativa.</li>
+<li>HDBSCAN con distancia adecuada puede explorarse.</li>
+</ul>
+</section>
+<section id="distancia-de-gower" class="level2">
+<h2 data-anchor-id="distancia-de-gower">Distancia de Gower</h2>
+<p>La distancia de Gower combina:</p>
+<ul>
+<li>Variables continuas.</li>
+<li>Binarias.</li>
+<li>Categóricas.</li>
+<li>Ordinales.</li>
+</ul>
+<p>Es especialmente útil en datasets clínicos mixtos.</p>
+</section>
+<section id="alta-dimensionalidad" class="level2">
+<h2 data-anchor-id="alta-dimensionalidad">Alta dimensionalidad</h2>
+<p>Con muchas variables puede ocurrir:</p>
+<ul>
+<li>Distancias poco informativas.</li>
+<li>Clusters inestables.</li>
+<li>Ruido.</li>
+<li>Dificultad de interpretación.</li>
+</ul>
+<p>Opciones:</p>
+<ul>
+<li>Selección de variables.</li>
+<li>PCA.</li>
+<li>Autoencoders.</li>
+<li>Regularización.</li>
+<li>Agrupación por dominios clínicos.</li>
+</ul>
+</section>
+<section id="pca-antes-de-clustering" class="level2">
+<h2 data-anchor-id="pca-antes-de-clustering">PCA antes de clustering</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>pipeline <span class="op">=</span> Pipeline(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"imputer"</span>,</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>            SimpleImputer(</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>                strategy<span class="op">=</span><span class="st">"median"</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"scaler"</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>            StandardScaler()</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"pca"</span>,</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>            PCA(</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>                n_components<span class="op">=</span><span class="fl">0.90</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">"clustering"</span>,</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>            KMeans(</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>                n_clusters<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span>,</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>                n_init<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sensibilidad-a-variables" class="level2">
+<h2 data-anchor-id="sensibilidad-a-variables">Sensibilidad a variables</h2>
+<p>Debe repetirse el análisis con distintos subconjuntos.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>feature_sets <span class="op">=</span> {</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"all"</span>: [</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"troponin"</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ntprobnp"</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"lvef"</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gls"</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"cardiac"</span>: [</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"troponin"</span>,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"ntprobnp"</span>,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"lvef"</span>,</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gls"</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"imaging"</span>: [</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"lvef"</span>,</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"gls"</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="sensibilidad-al-escalado" class="level2">
+<h2 data-anchor-id="sensibilidad-al-escalado">Sensibilidad al escalado</h2>
+<p>Comparar:</p>
+<ul>
+<li><code>StandardScaler</code>.</li>
+<li><code>RobustScaler</code>.</li>
+<li>Transformación logarítmica.</li>
+<li>Sin escalado, solo como comprobación.</li>
+</ul>
+</section>
+<section id="sensibilidad-a-outliers" class="level2">
+<h2 data-anchor-id="sensibilidad-a-outliers">Sensibilidad a outliers</h2>
+<p>Puede repetirse:</p>
+<ul>
+<li>Con todos los casos.</li>
+<li>Sin extremos clínicamente imposibles.</li>
+<li>Con RobustScaler.</li>
+<li>Con métodos robustos.</li>
+<li>Con y sin variables muy sesgadas.</li>
+</ul>
+</section>
+<section id="asignación-de-nuevos-casos" class="level2">
+<h2 data-anchor-id="asignación-de-nuevos-casos">Asignación de nuevos casos</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Método</th>
+<th>Nuevos casos</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>K-means</td>
+<td>Fácil</td>
+</tr>
+<tr class="even">
+<td>GMM</td>
+<td>Fácil</td>
+</tr>
+<tr class="odd">
+<td>Jerárquico</td>
+<td>Difícil</td>
+</tr>
+<tr class="even">
+<td>DBSCAN</td>
+<td>Difícil</td>
+</tr>
+<tr class="odd">
+<td>HDBSCAN</td>
+<td>Posible con herramientas específicas</td>
+</tr>
+<tr class="even">
+<td>Isolation Forest</td>
+<td>Fácil</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="producción" class="level2">
+<h2 data-anchor-id="producción">Producción</h2>
+<p>Cuando el objetivo es desplegar el modelo, suele ser importante:</p>
+<ul>
+<li>Guardar imputador.</li>
+<li>Guardar escalador.</li>
+<li>Guardar modelo.</li>
+<li>Versionar centroides o parámetros.</li>
+<li>Definir reglas para casos nuevos.</li>
+<li>Monitorizar drift.</li>
+</ul>
+</section>
+<section id="interpretabilidad" class="level2">
+<h2 data-anchor-id="interpretabilidad">Interpretabilidad</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Método</th>
+<th>Interpretabilidad</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>K-means</td>
+<td>Alta-moderada</td>
+</tr>
+<tr class="even">
+<td>Jerárquico</td>
+<td>Alta con dendrograma</td>
+</tr>
+<tr class="odd">
+<td>DBSCAN</td>
+<td>Moderada</td>
+</tr>
+<tr class="even">
+<td>HDBSCAN</td>
+<td>Moderada</td>
+</tr>
+<tr class="odd">
+<td>GMM</td>
+<td>Moderada</td>
+</tr>
+<tr class="even">
+<td>Isolation Forest</td>
+<td>Baja-moderada</td>
+</tr>
+<tr class="odd">
+<td>Autoencoder</td>
+<td>Baja</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="coste-computacional" class="level2">
+<h2 data-anchor-id="coste-computacional">Coste computacional</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Método</th>
+<th>Coste aproximado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>K-means</td>
+<td>Bajo</td>
+</tr>
+<tr class="even">
+<td>Jerárquico</td>
+<td>Alto con n grande</td>
+</tr>
+<tr class="odd">
+<td>DBSCAN</td>
+<td>Medio</td>
+</tr>
+<tr class="even">
+<td>HDBSCAN</td>
+<td>Medio-alto</td>
+</tr>
+<tr class="odd">
+<td>GMM</td>
+<td>Medio</td>
+</tr>
+<tr class="even">
+<td>Isolation Forest</td>
+<td>Bajo-medio</td>
+</tr>
+<tr class="odd">
+<td>Autoencoder</td>
+<td>Alto</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="selección-práctica" class="level2">
+<h2 data-anchor-id="selección-práctica">Selección práctica</h2>
+<section id="usa-k-means-cuando" class="level3">
+<h3 data-anchor-id="usa-k-means-cuando">Usa K-means cuando</h3>
+<ul>
+<li>Necesitas una solución rápida.</li>
+<li>Los grupos parecen compactos.</li>
+<li>Quieres asignar nuevos casos.</li>
+<li>La muestra es grande.</li>
+</ul>
+</section>
+<section id="usa-jerárquico-cuando" class="level3">
+<h3 data-anchor-id="usa-jerárquico-cuando">Usa jerárquico cuando</h3>
+<ul>
+<li>Quieres explorar relaciones anidadas.</li>
+<li>Necesitas un dendrograma.</li>
+<li>Trabajas con distancias personalizadas.</li>
+<li>La muestra no es enorme.</li>
+</ul>
+</section>
+<section id="usa-dbscan-cuando" class="level3">
+<h3 data-anchor-id="usa-dbscan-cuando">Usa DBSCAN cuando</h3>
+<ul>
+<li>Esperas formas irregulares.</li>
+<li>Quieres detectar ruido.</li>
+<li>No conoces (K).</li>
+<li>La densidad es relativamente homogénea.</li>
+</ul>
+</section>
+<section id="usa-hdbscan-cuando" class="level3">
+<h3 data-anchor-id="usa-hdbscan-cuando">Usa HDBSCAN cuando</h3>
+<ul>
+<li>Existen densidades diferentes.</li>
+<li>Quieres probabilidades.</li>
+<li>Esperas ruido.</li>
+<li>Buscas mayor flexibilidad.</li>
+</ul>
+</section>
+<section id="usa-gmm-cuando" class="level3">
+<h3 data-anchor-id="usa-gmm-cuando">Usa GMM cuando</h3>
+<ul>
+<li>Esperas solapamiento.</li>
+<li>Quieres pertenencia probabilística.</li>
+<li>Necesitas asignar nuevos casos.</li>
+<li>Los clusters pueden ser elípticos.</li>
+</ul>
+</section>
+<section id="usa-detección-de-anomalías-cuando" class="level3">
+<h3 data-anchor-id="usa-detección-de-anomalías-cuando">Usa detección de anomalías cuando</h3>
+<ul>
+<li>El objetivo es priorizar casos raros.</li>
+<li>No necesitas crear grupos completos.</li>
+<li>Buscas alertas o revisión manual.</li>
+</ul>
+</section>
+</section>
+<section id="tabla-de-decisión-final" class="level2">
+<h2 data-anchor-id="tabla-de-decisión-final">Tabla de decisión final</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Criterio</th>
+<th style="text-align: right;">K-means</th>
+<th style="text-align: right;">Jerárquico</th>
+<th style="text-align: right;">DBSCAN</th>
+<th style="text-align: right;">GMM</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Silhouette</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0.45</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">0.50</td>
+</tr>
+<tr class="even">
+<td>Estabilidad</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Media</td>
+<td style="text-align: right;">Media</td>
+<td style="text-align: right;">Alta</td>
+</tr>
+<tr class="odd">
+<td>Ruido</td>
+<td style="text-align: right;">0 %</td>
+<td style="text-align: right;">0 %</td>
+<td style="text-align: right;">20 %</td>
+<td style="text-align: right;">0 %</td>
+</tr>
+<tr class="even">
+<td>Nuevos casos</td>
+<td style="text-align: right;">Sí</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">No</td>
+<td style="text-align: right;">Sí</td>
+</tr>
+<tr class="odd">
+<td>Interpretabilidad</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Media</td>
+<td style="text-align: right;">Media</td>
+</tr>
+<tr class="even">
+<td>Utilidad clínica</td>
+<td style="text-align: right;">Alta</td>
+<td style="text-align: right;">Moderada</td>
+<td style="text-align: right;">Moderada</td>
+<td style="text-align: right;">Alta</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="no-existe-un-ganador-automático" class="level2">
+<h2 data-anchor-id="no-existe-un-ganador-automático">No existe un ganador automático</h2>
+<p>La decisión debe considerar:</p>
+<ul>
+<li>Objetivo.</li>
+<li>Estabilidad.</li>
+<li>Geometría.</li>
+<li>Ruido.</li>
+<li>Interpretabilidad.</li>
+<li>Producción.</li>
+<li>Validación externa.</li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Regla práctica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Cuando varias soluciones son razonables, suele ser preferible la más estable, interpretable y reproducible.</p>
+</div>
+</div>
+</section>
+<section id="consideraciones-clínicas" class="level2">
+<h2 data-anchor-id="consideraciones-clínicas">Consideraciones clínicas</h2>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Aplicación clínica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El método no supervisado elegido debe producir perfiles reproducibles y útiles, no solo métricas atractivas.</p>
+</div>
+</div>
+<p>Debe revisarse:</p>
+<ul>
+<li>Tamaños.</li>
+<li>Outliers.</li>
+<li>Incertidumbre.</li>
+<li>Outcomes.</li>
+<li>Centros.</li>
+<li>Periodos.</li>
+<li>Sesgos.</li>
+<li>Accionabilidad.</li>
+</ul>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>Elegir un método por popularidad.</li>
+<li>Usar solo silhouette.</li>
+<li>No revisar estabilidad.</li>
+<li>No comparar algoritmos.</li>
+<li>Ignorar ruido.</li>
+<li>Confiar en una proyección 2D.</li>
+<li>No evaluar nuevos casos.</li>
+<li>Incluir variables redundantes.</li>
+<li>No validar externamente.</li>
+<li>Confundir clusters con diagnósticos.</li>
+<li>Elegir el método más complejo.</li>
+<li>No documentar la decisión.</li>
+</ul>
+</section>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Definir objetivo.</li>
+<li>Definir unidad de análisis.</li>
+<li>Seleccionar variables.</li>
+<li>Imputar y escalar.</li>
+<li>Probar varios métodos.</li>
+<li>Evaluar métricas internas.</li>
+<li>Revisar ruido y tamaños.</li>
+<li>Analizar estabilidad.</li>
+<li>Comparar perfiles.</li>
+<li>Validar con outcomes externos.</li>
+<li>Evaluar producción.</li>
+<li>Elegir la solución más útil.</li>
+</ol>
+</section>
+<section id="checklist-para-proyectos" class="level2">
+<h2 data-anchor-id="checklist-para-proyectos">Checklist para proyectos</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">He definido el objetivo.</label></li>
+<li><label><input type="checkbox">He definido la unidad de análisis.</label></li>
+<li><label><input type="checkbox">He comparado varios métodos.</label></li>
+<li><label><input type="checkbox">He usado el mismo preprocesamiento.</label></li>
+<li><label><input type="checkbox">He calculado métricas internas.</label></li>
+<li><label><input type="checkbox">He reportado ruido.</label></li>
+<li><label><input type="checkbox">He evaluado tamaños.</label></li>
+<li><label><input type="checkbox">He revisado estabilidad.</label></li>
+<li><label><input type="checkbox">He comparado perfiles.</label></li>
+<li><label><input type="checkbox">He evaluado incertidumbre.</label></li>
+<li><label><input type="checkbox">He considerado nuevos casos.</label></li>
+<li><label><input type="checkbox">He evaluado coste computacional.</label></li>
+<li><label><input type="checkbox">He validado con outcomes externos.</label></li>
+<li><label><input type="checkbox">He considerado replicación.</label></li>
+<li><label><input type="checkbox">He justificado la elección final.</label></li>
+</ul>
+</section>
+<section id="cierre-de-la-sección" class="level2">
+<h2 data-anchor-id="cierre-de-la-sección">Cierre de la sección</h2>
+<p>El aprendizaje no supervisado es especialmente útil para:</p>
+<ul>
+<li>Explorar datos.</li>
+<li>Generar hipótesis.</li>
+<li>Descubrir perfiles.</li>
+<li>Detectar anomalías.</li>
+<li>Reducir complejidad.</li>
+</ul>
+<p>Pero sus resultados deben interpretarse con más cautela que una predicción supervisada.</p>
+</section>
+<section id="recursos" class="level2">
+<h2 data-anchor-id="recursos">Recursos</h2>
+<section id="documentación" class="level3">
+<h3 data-anchor-id="documentación">Documentación</h3>
+<ul>
+<li><code>KMeans</code>.</li>
+<li><code>AgglomerativeClustering</code>.</li>
+<li><code>DBSCAN</code>.</li>
+<li>HDBSCAN.</li>
+<li><code>GaussianMixture</code>.</li>
+<li><code>IsolationForest</code>.</li>
+<li><code>silhouette_score</code>.</li>
+<li><code>adjusted_rand_score</code>.</li>
+<li><code>PCA</code>.</li>
+</ul>
+</section>
+<section id="material-del-máster" class="level3">
+<h3 data-anchor-id="material-del-máster">Material del máster</h3>
+<p>Añadir aquí:</p>
+<ul>
+<li>Presentación correspondiente.</li>
+<li>Diapositivas relevantes.</li>
+<li>Ejercicios realizados.</li>
+<li>Apuntes de Notion.</li>
+</ul>
+</section>
+</section>
+<section id="notas-personales" class="level2">
+<h2 data-anchor-id="notas-personales">Notas personales</h2>
+<p>Añade aquí tus comparaciones, tablas de decisión, estabilidad y método final.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/pablolongan\.github\.io\/health-data-science-handbook\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
