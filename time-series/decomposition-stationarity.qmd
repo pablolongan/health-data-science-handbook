@@ -1,0 +1,1195 @@
+---
+title: "Descomposición y estacionariedad"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Una serie temporal puede contener:
+
+- Tendencia.
+- Estacionalidad.
+- Ciclos.
+- Ruido.
+- Cambios estructurales.
+
+La descomposición separa estos componentes.
+
+La estacionariedad describe una serie cuyas propiedades estadísticas permanecen aproximadamente estables en el tiempo.
+
+Muchos modelos clásicos funcionan mejor cuando la serie es estacionaria.
+:::
+
+## Componentes de una serie temporal
+
+Una serie puede representarse de forma simplificada como:
+
+$$
+y_t
+=
+T_t
++
+S_t
++
+R_t
+$$
+
+donde:
+
+- \(T_t\) es la tendencia.
+- \(S_t\) es la estacionalidad.
+- \(R_t\) es el residuo.
+
+Esta es una descomposición aditiva.
+
+## Tendencia
+
+La tendencia es un cambio sostenido a largo plazo.
+
+```text
+Valor
+  │
+  │             /
+  │          /
+  │       /
+  │    /
+  └──────────────── Tiempo
+```
+
+Puede ser:
+
+- Creciente.
+- Decreciente.
+- Lineal.
+- Curva.
+- Cambiante.
+
+## Estacionalidad
+
+La estacionalidad es un patrón que se repite con una frecuencia relativamente fija.
+
+Ejemplos:
+
+- Variación horaria.
+- Ciclo día-noche.
+- Patrón semanal.
+- Patrón mensual.
+- Patrón anual.
+
+## Ciclos
+
+Los ciclos son oscilaciones que no tienen necesariamente una frecuencia fija.
+
+Ejemplos:
+
+- Cambios económicos.
+- Oleadas epidémicas.
+- Cambios asistenciales.
+- Periodos de tratamiento.
+
+## Residuo
+
+El residuo contiene la variación que no explican la tendencia ni la estacionalidad.
+
+```text
+Serie observada
+-
+tendencia
+-
+estacionalidad
+=
+residuo
+```
+
+::: {.callout-note}
+## Idea clave
+
+Un residuo aparentemente aleatorio sugiere que la descomposición ha capturado buena parte de la estructura.
+:::
+
+## Preparar una serie
+
+```python
+import pandas as pd
+
+series = (
+    df
+    .set_index("datetime")[
+        "value"
+    ]
+    .sort_index()
+)
+```
+
+## Revisar frecuencia
+
+```python
+print(
+    pd.infer_freq(
+        series.index
+    )
+)
+```
+
+Para muchos métodos de descomposición conviene trabajar con frecuencia regular.
+
+## Resampling
+
+```python
+daily_series = (
+    series
+    .resample("D")
+    .mean()
+)
+```
+
+## Revisar valores ausentes
+
+```python
+print(
+    daily_series
+    .isna()
+    .sum()
+)
+```
+
+## Imputación simple
+
+```python
+daily_series = (
+    daily_series
+    .interpolate(
+        method="time"
+    )
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+La imputación debe estar justificada y no debe introducir información futura en un workflow predictivo.
+:::
+
+## Visualizar la serie
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(
+    figsize=(12, 5)
+)
+
+plt.plot(
+    daily_series.index,
+    daily_series.values
+)
+
+plt.xlabel(
+    "Fecha"
+)
+
+plt.ylabel(
+    "Valor"
+)
+
+plt.title(
+    "Serie temporal"
+)
+
+plt.show()
+```
+
+## Descomposición aditiva
+
+La descomposición aditiva es adecuada cuando la amplitud estacional se mantiene aproximadamente constante.
+
+$$
+y_t
+=
+T_t
++
+S_t
++
+R_t
+$$
+
+Ejemplo conceptual:
+
+```text
+Nivel bajo
+→ oscilación de ±5
+
+Nivel alto
+→ oscilación de ±5
+```
+
+## seasonal_decompose
+
+```python
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+decomposition = seasonal_decompose(
+    daily_series,
+    model="additive",
+    period=7
+)
+```
+
+## Visualizar componentes
+
+```python
+decomposition.plot()
+
+plt.show()
+```
+
+## Acceder a los componentes
+
+```python
+trend = decomposition.trend
+
+seasonal = decomposition.seasonal
+
+residual = decomposition.resid
+```
+
+## Descomposición multiplicativa
+
+Es adecuada cuando la amplitud estacional aumenta con el nivel.
+
+$$
+y_t
+=
+T_t
+\times
+S_t
+\times
+R_t
+$$
+
+Ejemplo conceptual:
+
+```text
+Nivel bajo
+→ oscilación pequeña
+
+Nivel alto
+→ oscilación grande
+```
+
+## Aplicar modelo multiplicativo
+
+```python
+decomposition = seasonal_decompose(
+    daily_series,
+    model="multiplicative",
+    period=7
+)
+```
+
+## Requisito práctico
+
+Una descomposición multiplicativa necesita valores positivos.
+
+Si existen ceros o valores negativos, debe utilizarse otra estrategia.
+
+## Aditiva frente a multiplicativa
+
+| Aspecto | Aditiva | Multiplicativa |
+|---|---|---|
+| Amplitud estacional | Constante | Proporcional al nivel |
+| Valores cero | Posibles | Problemáticos |
+| Fórmula | Suma | Producto |
+| Interpretación | Diferencias absolutas | Cambios relativos |
+
+## Transformación logarítmica
+
+Una serie multiplicativa puede transformarse en aditiva mediante logaritmo.
+
+$$
+\log(y_t)
+=
+\log(T_t)
++
+\log(S_t)
++
+\log(R_t)
+$$
+
+```python
+import numpy as np
+
+log_series = np.log(
+    daily_series
+)
+```
+
+## STL
+
+STL significa Seasonal-Trend decomposition using LOESS.
+
+Es un método flexible para separar:
+
+- Tendencia.
+- Estacionalidad.
+- Residuo.
+
+```python
+from statsmodels.tsa.seasonal import STL
+
+stl = STL(
+    daily_series,
+    period=7
+)
+
+stl_result = stl.fit()
+```
+
+## Visualizar STL
+
+```python
+stl_result.plot()
+
+plt.show()
+```
+
+## Acceder a componentes STL
+
+```python
+trend = stl_result.trend
+
+seasonal = stl_result.seasonal
+
+residual = stl_result.resid
+```
+
+## STL robusto
+
+```python
+stl = STL(
+    daily_series,
+    period=7,
+    robust=True
+)
+
+stl_result = stl.fit()
+```
+
+La opción robusta reduce la influencia de valores extremos sobre la tendencia y la estacionalidad.
+
+## Ventajas de STL
+
+- Flexible.
+- Permite tendencia no lineal.
+- Puede ser robusto a outliers.
+- Útil con estacionalidad estable.
+- Fácil de interpretar.
+
+## Limitaciones de STL
+
+- Requiere elegir un periodo.
+- No resuelve automáticamente cambios estructurales.
+- Necesita frecuencia suficientemente regular.
+- No sustituye la validación predictiva.
+
+## Elegir el periodo
+
+Ejemplos:
+
+```text
+Datos horarios con ciclo diario
+→ period = 24
+
+Datos diarios con ciclo semanal
+→ period = 7
+
+Datos mensuales con ciclo anual
+→ period = 12
+```
+
+::: {.callout-warning}
+## Error frecuente
+
+Confundir número de observaciones con unidad temporal.
+:::
+
+## Varias estacionalidades
+
+Una serie horaria puede contener:
+
+- Ciclo diario.
+- Ciclo semanal.
+- Ciclo anual.
+
+Una única descomposición STL clásica modela una estacionalidad principal.
+
+Para varias estacionalidades pueden considerarse:
+
+- MSTL.
+- Modelos de Fourier.
+- TBATS.
+- Prophet.
+- Modelos de machine learning con variables de calendario.
+
+## Suavizado de tendencia
+
+Una media móvil puede utilizarse como aproximación de tendencia.
+
+```python
+trend_7 = (
+    daily_series
+    .rolling(
+        window=7,
+        center=True
+    )
+    .mean()
+)
+```
+
+## Media móvil centrada
+
+El uso de `center=True` incluye valores futuros.
+
+Es adecuado para análisis descriptivo retrospectivo.
+
+No es adecuado como feature predictiva en tiempo real.
+
+::: {.callout-caution}
+## Precaución
+
+Una tendencia centrada puede generar leakage si se utiliza para predecir.
+:::
+
+## Eliminar tendencia
+
+Una forma sencilla es restar la tendencia.
+
+```python
+detrended = (
+    daily_series
+    -
+    trend_7
+)
+```
+
+## Eliminar estacionalidad
+
+```python
+seasonally_adjusted = (
+    daily_series
+    -
+    stl_result.seasonal
+)
+```
+
+## Serie desestacionalizada
+
+La serie ajustada permite estudiar:
+
+- Tendencia.
+- Cambios estructurales.
+- Comparaciones entre periodos.
+- Modelos posteriores.
+
+## ¿Qué es estacionariedad?
+
+Una serie es débilmente estacionaria cuando mantiene aproximadamente:
+
+- Media constante.
+- Varianza constante.
+- Autocovarianza dependiente del lag, no del tiempo concreto.
+
+```text
+Media estable
+Varianza estable
+Dependencia temporal estable
+```
+
+## Serie no estacionaria
+
+Puede presentar:
+
+- Tendencia.
+- Estacionalidad.
+- Varianza cambiante.
+- Cambios de nivel.
+- Rupturas estructurales.
+
+## ¿Por qué importa?
+
+Muchos modelos clásicos como ARMA y ciertas formulaciones ARIMA se apoyan en una serie estacionaria después de las transformaciones necesarias.
+
+## Inspección visual
+
+```python
+plt.figure(
+    figsize=(12, 5)
+)
+
+plt.plot(
+    daily_series
+)
+
+plt.title(
+    "Inspección visual de estacionariedad"
+)
+
+plt.show()
+```
+
+Busca:
+
+- Tendencia.
+- Cambios de varianza.
+- Cambios de nivel.
+- Estacionalidad.
+- Rupturas.
+
+## Media y varianza móviles
+
+```python
+rolling_mean = (
+    daily_series
+    .rolling(
+        window=30
+    )
+    .mean()
+)
+
+rolling_std = (
+    daily_series
+    .rolling(
+        window=30
+    )
+    .std()
+)
+```
+
+```python
+plt.figure(
+    figsize=(12, 6)
+)
+
+plt.plot(
+    daily_series,
+    label="Serie"
+)
+
+plt.plot(
+    rolling_mean,
+    label="Media móvil"
+)
+
+plt.plot(
+    rolling_std,
+    label="Desviación móvil"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## Augmented Dickey-Fuller
+
+El test ADF evalúa la presencia de raíz unitaria.
+
+Hipótesis:
+
+```text
+H₀
+→ existe raíz unitaria
+→ serie no estacionaria
+
+H₁
+→ serie estacionaria
+```
+
+## Aplicar ADF
+
+```python
+from statsmodels.tsa.stattools import adfuller
+
+adf_result = adfuller(
+    daily_series.dropna(),
+    autolag="AIC"
+)
+```
+
+## Interpretar ADF
+
+```python
+adf_statistic = adf_result[0]
+
+p_value = adf_result[1]
+
+used_lags = adf_result[2]
+
+n_observations = adf_result[3]
+
+critical_values = adf_result[4]
+```
+
+```python
+print(
+    "ADF statistic:",
+    adf_statistic
+)
+
+print(
+    "p-value:",
+    p_value
+)
+
+print(
+    "Critical values:",
+    critical_values
+)
+```
+
+Interpretación habitual:
+
+```text
+p < 0.05
+→ rechazar H₀
+→ evidencia compatible con estacionariedad
+```
+
+## KPSS
+
+El test KPSS utiliza hipótesis opuestas.
+
+```text
+H₀
+→ serie estacionaria
+
+H₁
+→ serie no estacionaria
+```
+
+## Aplicar KPSS
+
+```python
+from statsmodels.tsa.stattools import kpss
+
+kpss_result = kpss(
+    daily_series.dropna(),
+    regression="c",
+    nlags="auto"
+)
+```
+
+## Interpretar KPSS
+
+```python
+kpss_statistic = kpss_result[0]
+
+p_value = kpss_result[1]
+
+used_lags = kpss_result[2]
+
+critical_values = kpss_result[3]
+```
+
+```python
+print(
+    "KPSS statistic:",
+    kpss_statistic
+)
+
+print(
+    "p-value:",
+    p_value
+)
+```
+
+Interpretación habitual:
+
+```text
+p < 0.05
+→ rechazar H₀
+→ evidencia de no estacionariedad
+```
+
+## Combinar ADF y KPSS
+
+| ADF | KPSS | Interpretación orientativa |
+|---|---|---|
+| Rechaza H₀ | No rechaza H₀ | Compatible con estacionariedad |
+| No rechaza H₀ | Rechaza H₀ | Compatible con no estacionariedad |
+| No rechaza H₀ | No rechaza H₀ | Resultado inconcluso |
+| Rechaza H₀ | Rechaza H₀ | Posible cambio estructural o problema de especificación |
+
+::: {.callout-note}
+## Buena práctica
+
+Combina inspección visual, ADF, KPSS y conocimiento del dominio.
+:::
+
+## Diferenciación
+
+La primera diferencia es:
+
+$$
+\Delta y_t
+=
+y_t-y_{t-1}
+$$
+
+```python
+first_difference = (
+    daily_series
+    .diff()
+    .dropna()
+)
+```
+
+## Visualizar la primera diferencia
+
+```python
+plt.figure(
+    figsize=(12, 5)
+)
+
+plt.plot(
+    first_difference
+)
+
+plt.title(
+    "Primera diferencia"
+)
+
+plt.show()
+```
+
+## Segunda diferencia
+
+```python
+second_difference = (
+    daily_series
+    .diff()
+    .diff()
+    .dropna()
+)
+```
+
+## Riesgo de sobrediferenciación
+
+Aplicar demasiadas diferencias puede:
+
+- Aumentar ruido.
+- Eliminar señal.
+- Crear autocorrelación negativa.
+- Empeorar forecasts.
+
+::: {.callout-warning}
+## Regla práctica
+
+Utiliza el mínimo número de diferencias necesario.
+:::
+
+## Diferencia estacional
+
+Para datos diarios con ciclo semanal:
+
+$$
+\Delta_7 y_t
+=
+y_t-y_{t-7}
+$$
+
+```python
+seasonal_difference = (
+    daily_series
+    .diff(
+        7
+    )
+    .dropna()
+)
+```
+
+## Diferenciación regular y estacional
+
+```python
+transformed_series = (
+    daily_series
+    .diff()
+    .diff(
+        7
+    )
+    .dropna()
+)
+```
+
+## Transformación logarítmica y diferencia
+
+```python
+log_difference = (
+    np.log(
+        daily_series
+    )
+    .diff()
+    .dropna()
+)
+```
+
+Esto aproxima una tasa de crecimiento.
+
+## Box-Cox
+
+Box-Cox puede estabilizar la varianza.
+
+```python
+from scipy.stats import boxcox
+
+transformed_values, lambda_value = boxcox(
+    daily_series.dropna()
+)
+```
+
+Requiere valores positivos.
+
+## Autocorrelación
+
+La autocorrelación mide la relación entre la serie y sus valores pasados.
+
+$$
+Corr
+\left(
+y_t,
+y_{t-k}
+\right)
+$$
+
+## ACF
+
+```python
+from statsmodels.graphics.tsaplots import plot_acf
+
+plot_acf(
+    daily_series.dropna(),
+    lags=40
+)
+
+plt.show()
+```
+
+## Interpretar ACF
+
+Puede mostrar:
+
+- Persistencia.
+- Estacionalidad.
+- Decaimiento lento.
+- Estructura MA.
+- No estacionariedad.
+
+## PACF
+
+La autocorrelación parcial mide la relación con un lag controlando los lags intermedios.
+
+```python
+from statsmodels.graphics.tsaplots import plot_pacf
+
+plot_pacf(
+    daily_series.dropna(),
+    lags=40,
+    method="ywm"
+)
+
+plt.show()
+```
+
+## ACF y PACF
+
+Se utilizan como guía para identificar:
+
+- Orden autoregresivo.
+- Orden de media móvil.
+- Estacionalidad.
+- Necesidad de diferenciación.
+
+No deben interpretarse como reglas automáticas.
+
+## Patrón de tendencia en ACF
+
+Una ACF que disminuye lentamente puede sugerir:
+
+- Tendencia.
+- Raíz unitaria.
+- No estacionariedad.
+
+## Patrón estacional en ACF
+
+Picos en:
+
+```text
+lag 7
+lag 14
+lag 21
+```
+
+pueden sugerir estacionalidad semanal en datos diarios.
+
+## Residuos de descomposición
+
+```python
+residual = (
+    stl_result
+    .resid
+    .dropna()
+)
+```
+
+## Revisar residuos
+
+```python
+plot_acf(
+    residual,
+    lags=40
+)
+
+plt.show()
+```
+
+Si persiste autocorrelación, queda estructura temporal sin explicar.
+
+## Ljung-Box
+
+Evalúa autocorrelación conjunta en varios lags.
+
+```python
+from statsmodels.stats.diagnostic import acorr_ljungbox
+
+ljung_box = acorr_ljungbox(
+    residual,
+    lags=[
+        7,
+        14,
+        21
+    ],
+    return_df=True
+)
+
+display(
+    ljung_box
+)
+```
+
+Hipótesis:
+
+```text
+H₀
+→ no existe autocorrelación conjunta
+```
+
+Un p-value pequeño sugiere dependencia residual.
+
+## Ruido blanco
+
+Un residuo parecido a ruido blanco tiene:
+
+- Media aproximadamente 0.
+- Varianza estable.
+- Poca autocorrelación.
+- Distribución sin patrones temporales claros.
+
+## Cambio estructural
+
+Una serie puede cambiar de comportamiento por:
+
+- Nuevo protocolo.
+- Nueva máquina.
+- Cambio poblacional.
+- Pandemia.
+- Cambio de codificación.
+- Intervención clínica.
+
+## Visualizar cambios
+
+```python
+plt.figure(
+    figsize=(12, 5)
+)
+
+plt.plot(
+    daily_series
+)
+
+plt.axvline(
+    pd.Timestamp(
+        "2025-01-01"
+    ),
+    linestyle="--"
+)
+
+plt.show()
+```
+
+## Cambio de nivel
+
+```text
+Antes
+→ media 50
+
+Después
+→ media 70
+```
+
+## Cambio de pendiente
+
+```text
+Antes
+→ estable
+
+Después
+→ tendencia creciente
+```
+
+## Cambio de varianza
+
+```text
+Antes
+→ poca dispersión
+
+Después
+→ alta variabilidad
+```
+
+## Estacionariedad local
+
+Una serie puede no ser estacionaria globalmente, pero sí dentro de ventanas o periodos concretos.
+
+Esto puede justificar:
+
+- Modelos con ventana móvil.
+- Retraining periódico.
+- Segmentación temporal.
+- Modelos de cambio de régimen.
+
+## Estacionariedad y machine learning
+
+Los modelos de árboles no exigen estacionariedad de la misma forma que ARIMA.
+
+Pero siguen siendo sensibles a:
+
+- Drift.
+- Cambios de distribución.
+- Tendencias no representadas.
+- Extrapolación.
+- Leakage temporal.
+
+## Descomposición como feature engineering
+
+Pueden utilizarse:
+
+- Tendencia estimada.
+- Componente estacional.
+- Residuo.
+- Índice estacional.
+- Distancia a tendencia.
+
+Pero solo si pueden calcularse con información disponible en tiempo real.
+
+## Descomposición retrospectiva vs predictiva
+
+```text
+Descomposición centrada
+→ usa pasado y futuro
+→ adecuada para análisis descriptivo
+
+Descomposición causal
+→ usa solo pasado
+→ necesaria para predicción en tiempo real
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Una tendencia o estacionalidad puede reflejar tanto biología como organización asistencial.
+:::
+
+Ejemplos:
+
+- Cambios por ciclos de tratamiento.
+- Más pruebas en pacientes inestables.
+- Patrones semanales de actividad.
+- Cambios por protocolos.
+- Diferencias entre centros.
+
+## Errores frecuentes
+
+- No definir el periodo.
+- Aplicar descomposición a una serie irregular sin revisar.
+- Confundir ciclo con estacionalidad.
+- Usar una media centrada como feature predictiva.
+- Interpretar un test aislado.
+- Diferenciar demasiadas veces.
+- Ignorar cambios estructurales.
+- No revisar ACF de residuos.
+- Usar modelo multiplicativo con ceros.
+- No estabilizar varianza.
+- Ignorar múltiples estacionalidades.
+- Confundir estacionariedad con ausencia total de estructura.
+
+## Flujo recomendado
+
+1. Visualizar la serie.
+2. Confirmar frecuencia.
+3. Revisar valores ausentes.
+4. Identificar tendencia.
+5. Identificar estacionalidad.
+6. Aplicar STL.
+7. Revisar residuos.
+8. Evaluar ADF y KPSS.
+9. Probar transformaciones.
+10. Aplicar diferenciación mínima.
+11. Revisar ACF y PACF.
+12. Documentar cambios estructurales.
+
+## Checklist para proyectos
+
+- [ ] He definido la frecuencia.
+- [ ] He justificado el periodo.
+- [ ] He visualizado la serie.
+- [ ] He evaluado tendencia.
+- [ ] He evaluado estacionalidad.
+- [ ] He aplicado descomposición.
+- [ ] He revisado residuos.
+- [ ] He ejecutado ADF.
+- [ ] He ejecutado KPSS.
+- [ ] He revisado ACF.
+- [ ] He revisado PACF.
+- [ ] He aplicado el mínimo de diferencias.
+- [ ] He considerado transformación logarítmica.
+- [ ] He revisado cambios estructurales.
+- [ ] He evitado usar información futura.
+
+## Recursos
+
+### Documentación
+
+- `seasonal_decompose`.
+- `STL`.
+- `adfuller`.
+- `kpss`.
+- `plot_acf`.
+- `plot_pacf`.
+- `acorr_ljungbox`.
+- `Series.diff`.
+- `Series.rolling`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus periodos, descomposiciones, tests, transformaciones y decisiones metodológicas.

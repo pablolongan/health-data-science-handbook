@@ -1,0 +1,1287 @@
+---
+title: "Fundamentos de series temporales"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Antes de modelar una serie temporal hay que definir correctamente:
+
+- Qué representa cada observación.
+- Con qué frecuencia se mide.
+- Qué horizonte se quiere predecir.
+- Qué información estaba disponible en cada instante.
+- Cómo se construyen lags y ventanas.
+- Cómo se separan train, validation y test.
+
+La mayor parte de los errores en forecasting aparece antes de entrenar el modelo.
+:::
+
+## ¿Qué define una serie temporal?
+
+Una serie temporal contiene una variable observada a lo largo del tiempo.
+
+$$
+y_1, y_2, y_3, \ldots, y_t
+$$
+
+donde cada valor está asociado a un instante temporal.
+
+Ejemplos:
+
+- Presión arterial cada hora.
+- Ocupación hospitalaria cada día.
+- Biomarcador en cada visita.
+- Número de ingresos por semana.
+- Frecuencia cardiaca cada minuto.
+
+## Unidad de análisis
+
+Antes de empezar, define qué representa cada fila.
+
+Puede ser:
+
+- Un paciente en un instante.
+- Un episodio.
+- Una visita.
+- Un día.
+- Una hora.
+- Una ventana temporal.
+- Una medición de sensor.
+
+::: {.callout-warning}
+## Importante
+
+La unidad de análisis determina cómo deben construirse las variables y cómo debe hacerse la validación.
+:::
+
+## Estructura básica
+
+```python
+import pandas as pd
+
+df = pd.DataFrame(
+    {
+        "patient_id": [
+            1,
+            1,
+            1,
+            2,
+            2
+        ],
+        "datetime": [
+            "2026-01-01 08:00",
+            "2026-01-01 12:00",
+            "2026-01-01 16:00",
+            "2026-01-01 09:00",
+            "2026-01-01 15:00"
+        ],
+        "heart_rate": [
+            88,
+            92,
+            95,
+            80,
+            84
+        ]
+    }
+)
+```
+
+## Convertir fechas
+
+```python
+df["datetime"] = pd.to_datetime(
+    df["datetime"]
+)
+```
+
+## Ordenar correctamente
+
+```python
+df = df.sort_values(
+    [
+        "patient_id",
+        "datetime"
+    ]
+)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+Nunca construyas lags o ventanas antes de ordenar por entidad y tiempo.
+:::
+
+## Índice temporal
+
+En una única serie:
+
+```python
+series = (
+    df
+    .set_index("datetime")
+    .sort_index()
+)
+```
+
+En múltiples pacientes conviene mantener `patient_id` como columna o usar un índice múltiple.
+
+```python
+panel = (
+    df
+    .set_index(
+        [
+            "patient_id",
+            "datetime"
+        ]
+    )
+    .sort_index()
+)
+```
+
+## Frecuencia temporal
+
+La frecuencia indica cada cuánto se observa la serie.
+
+Ejemplos:
+
+```text
+minuto
+hora
+día
+semana
+mes
+visita
+```
+
+## Frecuencia regular
+
+```text
+08:00
+09:00
+10:00
+11:00
+```
+
+## Frecuencia irregular
+
+```text
+Día 0
+Día 3
+Día 11
+Día 45
+```
+
+La irregularidad es frecuente en datos clínicos.
+
+## Inferir frecuencia
+
+```python
+frequency = pd.infer_freq(
+    series.index
+)
+
+print(
+    frequency
+)
+```
+
+Puede devolver `None` si los intervalos no son regulares.
+
+## Diferencias temporales
+
+```python
+df[
+    "time_since_previous"
+] = (
+    df
+    .groupby("patient_id")[
+        "datetime"
+    ]
+    .diff()
+)
+```
+
+## Convertir a horas
+
+```python
+df[
+    "hours_since_previous"
+] = (
+    df[
+        "time_since_previous"
+    ]
+    .dt
+    .total_seconds()
+    /
+    3600
+)
+```
+
+## Revisar regularidad
+
+```python
+interval_summary = (
+    df
+    .groupby("patient_id")[
+        "hours_since_previous"
+    ]
+    .describe()
+)
+
+display(
+    interval_summary
+)
+```
+
+## Resampling
+
+Resampling cambia la frecuencia temporal.
+
+Ejemplo: pasar de mediciones horarias a resumen diario.
+
+```python
+daily = (
+    series["heart_rate"]
+    .resample("D")
+    .mean()
+)
+```
+
+## Agregaciones
+
+```python
+daily_summary = (
+    series["heart_rate"]
+    .resample("D")
+    .agg(
+        [
+            "count",
+            "mean",
+            "median",
+            "min",
+            "max",
+            "std"
+        ]
+    )
+)
+```
+
+## Resampling por paciente
+
+```python
+daily_by_patient = (
+    df
+    .set_index("datetime")
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .resample("D")
+    .mean()
+    .reset_index()
+)
+```
+
+## Elegir agregación
+
+La agregación depende del significado clínico.
+
+Ejemplos:
+
+- Frecuencia cardiaca: media, mínimo, máximo.
+- Troponina: máximo.
+- Dosis administrada: suma.
+- Presencia de evento: máximo o `any`.
+- Número de alertas: conteo.
+
+## Pérdida de información
+
+Resampling puede ocultar:
+
+- Picos.
+- Variabilidad.
+- Cambios rápidos.
+- Eventos breves.
+- Orden intra-periodo.
+
+::: {.callout-caution}
+## Precaución
+
+Una media diaria puede ocultar un episodio clínicamente importante de pocos minutos.
+:::
+
+## Valores ausentes tras resampling
+
+```python
+missing_days = (
+    daily
+    .isna()
+    .sum()
+)
+```
+
+## Forward fill
+
+```python
+daily_ffill = (
+    daily
+    .ffill()
+)
+```
+
+## Backward fill
+
+```python
+daily_bfill = (
+    daily
+    .bfill()
+)
+```
+
+## Interpolación temporal
+
+```python
+daily_interpolated = (
+    daily
+    .interpolate(
+        method="time"
+    )
+)
+```
+
+## Riesgo de backward fill
+
+Backward fill utiliza una observación futura para rellenar una pasada.
+
+En forecasting puede introducir leakage.
+
+```text
+Valor del día 5
+→ usado para imputar día 4
+```
+
+## Missingness informativa
+
+La ausencia de una medición puede contener información.
+
+Ejemplos:
+
+- No se solicita analítica porque el paciente está estable.
+- Se repite una prueba por sospecha clínica.
+- Hay más mediciones en pacientes graves.
+
+Puede añadirse una variable indicadora.
+
+```python
+df[
+    "heart_rate_missing"
+] = (
+    df["heart_rate"]
+    .isna()
+    .astype(int)
+)
+```
+
+## Lags
+
+Un lag representa un valor pasado.
+
+```python
+df[
+    "heart_rate_lag_1"
+] = (
+    df
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .shift(1)
+)
+```
+
+## Varios lags
+
+```python
+lags = [
+    1,
+    2,
+    3,
+    6
+]
+
+for lag in lags:
+
+    df[
+        f"heart_rate_lag_{lag}"
+    ] = (
+        df
+        .groupby("patient_id")[
+            "heart_rate"
+        ]
+        .shift(lag)
+    )
+```
+
+## Interpretación de lag
+
+```text
+lag 1
+→ observación anterior
+
+lag 2
+→ dos observaciones atrás
+```
+
+::: {.callout-warning}
+## Importante
+
+En series irregulares, un lag representa observaciones anteriores, no necesariamente horas o días concretos.
+:::
+
+## Lags basados en tiempo
+
+Para obtener el valor de hace 24 horas puede ser necesario:
+
+- Resamplear a frecuencia horaria.
+- Hacer una unión temporal.
+- Construir ventanas por tiempo.
+- Usar `merge_asof`.
+
+## merge_asof
+
+```python
+current = df.sort_values(
+    "datetime"
+)
+
+past = (
+    df[
+        [
+            "patient_id",
+            "datetime",
+            "heart_rate"
+        ]
+    ]
+    .rename(
+        columns={
+            "heart_rate":
+            "heart_rate_previous"
+        }
+    )
+    .sort_values(
+        "datetime"
+    )
+)
+```
+
+```python
+merged = pd.merge_asof(
+    current,
+    past,
+    on="datetime",
+    by="patient_id",
+    direction="backward",
+    allow_exact_matches=False
+)
+```
+
+## Diferencias
+
+```python
+df[
+    "heart_rate_diff_1"
+] = (
+    df
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .diff(1)
+)
+```
+
+## Cambio porcentual
+
+```python
+df[
+    "heart_rate_pct_change"
+] = (
+    df
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .pct_change()
+)
+```
+
+## Rolling windows
+
+Una ventana móvil resume observaciones recientes.
+
+```python
+df[
+    "heart_rate_rolling_mean_3"
+] = (
+    df
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .transform(
+        lambda series:
+        series
+        .shift(1)
+        .rolling(
+            window=3
+        )
+        .mean()
+    )
+)
+```
+
+## Por qué usar shift
+
+Sin `shift(1)`, la ventana incluye el valor actual.
+
+Si ese valor forma parte del target o no estaría disponible, aparece leakage.
+
+## Variabilidad móvil
+
+```python
+df[
+    "heart_rate_rolling_std_3"
+] = (
+    df
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .transform(
+        lambda series:
+        series
+        .shift(1)
+        .rolling(
+            window=3
+        )
+        .std()
+    )
+)
+```
+
+## Mínimo y máximo
+
+```python
+df[
+    "heart_rate_rolling_min_3"
+] = (
+    df
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .transform(
+        lambda series:
+        series
+        .shift(1)
+        .rolling(
+            window=3
+        )
+        .min()
+    )
+)
+```
+
+```python
+df[
+    "heart_rate_rolling_max_3"
+] = (
+    df
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .transform(
+        lambda series:
+        series
+        .shift(1)
+        .rolling(
+            window=3
+        )
+        .max()
+    )
+)
+```
+
+## Ventanas basadas en tiempo
+
+```python
+df_time = (
+    df
+    .set_index("datetime")
+    .sort_index()
+)
+```
+
+```python
+rolling_24h = (
+    df_time
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .rolling("24h")
+    .mean()
+)
+```
+
+## Ventanas de observaciones vs ventanas temporales
+
+```text
+Últimas 3 observaciones
+≠
+Últimas 24 horas
+```
+
+En datos irregulares pueden producir resultados muy distintos.
+
+## Pendiente reciente
+
+Puede estimarse la tendencia de una ventana.
+
+```python
+import numpy as np
+
+def calculate_slope(
+    values
+):
+
+    if len(values) < 2:
+        return np.nan
+
+    x = np.arange(
+        len(values)
+    )
+
+    return np.polyfit(
+        x,
+        values,
+        1
+    )[0]
+```
+
+```python
+df[
+    "heart_rate_slope_4"
+] = (
+    df
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .transform(
+        lambda series:
+        series
+        .shift(1)
+        .rolling(
+            window=4
+        )
+        .apply(
+            calculate_slope,
+            raw=True
+        )
+    )
+)
+```
+
+## Variables de calendario
+
+```python
+df["hour"] = (
+    df["datetime"]
+    .dt
+    .hour
+)
+
+df["day_of_week"] = (
+    df["datetime"]
+    .dt
+    .dayofweek
+)
+
+df["month"] = (
+    df["datetime"]
+    .dt
+    .month
+)
+
+df["is_weekend"] = (
+    df["day_of_week"]
+    .isin(
+        [
+            5,
+            6
+        ]
+    )
+    .astype(int)
+)
+```
+
+## Codificación cíclica
+
+```python
+import numpy as np
+
+df["hour_sin"] = np.sin(
+    2
+    *
+    np.pi
+    *
+    df["hour"]
+    /
+    24
+)
+
+df["hour_cos"] = np.cos(
+    2
+    *
+    np.pi
+    *
+    df["hour"]
+    /
+    24
+)
+```
+
+## Target temporal
+
+El target debe alinearse con el horizonte.
+
+Ejemplo: predecir frecuencia cardiaca de la siguiente observación.
+
+```python
+df[
+    "target_next_heart_rate"
+] = (
+    df
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .shift(-1)
+)
+```
+
+## Target a varios pasos
+
+```python
+for horizon in [
+    1,
+    2,
+    3
+]:
+
+    df[
+        f"target_horizon_{horizon}"
+    ] = (
+        df
+        .groupby("patient_id")[
+            "heart_rate"
+        ]
+        .shift(
+            -horizon
+        )
+    )
+```
+
+## Clasificación futura
+
+Ejemplo: evento en las próximas 24 horas.
+
+```python
+df[
+    "event_next_24h"
+] = (
+    df[
+        "future_event_time"
+    ]
+    <=
+    (
+        df["datetime"]
+        +
+        pd.Timedelta(
+            hours=24
+        )
+    )
+).astype(int)
+```
+
+La lógica debe revisar también que el evento ocurra después del momento actual.
+
+## Tiempo índice
+
+En algunos modelos conviene añadir una variable temporal relativa.
+
+```python
+df[
+    "hours_from_start"
+] = (
+    df["datetime"]
+    -
+    df
+    .groupby("patient_id")[
+        "datetime"
+    ]
+    .transform("min")
+).dt.total_seconds() / 3600
+```
+
+## Variables estáticas
+
+```python
+static_features = [
+    "sex",
+    "diagnosis",
+    "center"
+]
+```
+
+## Variables dinámicas
+
+```python
+dynamic_features = [
+    "heart_rate",
+    "troponin",
+    "lvef"
+]
+```
+
+## Datos en formato wide
+
+```text
+patient_id
+heart_rate_t0
+heart_rate_t1
+heart_rate_t2
+```
+
+Ventajas:
+
+- Fácil para modelos tabulares.
+- Útil con ventanas fijas.
+
+Limitaciones:
+
+- Difícil con longitudes variables.
+- Muchas columnas.
+- Poco flexible.
+
+## Datos en formato long
+
+```text
+patient_id | datetime | variable | value
+```
+
+Ventajas:
+
+- Flexible.
+- Adecuado para series irregulares.
+- Más natural para análisis longitudinal.
+
+## Construir una tabla de modelado
+
+```python
+modeling_features = [
+    "heart_rate_lag_1",
+    "heart_rate_lag_2",
+    "heart_rate_rolling_mean_3",
+    "heart_rate_rolling_std_3",
+    "hours_since_previous",
+    "hour_sin",
+    "hour_cos"
+]
+
+target = "target_next_heart_rate"
+```
+
+```python
+modeling_df = (
+    df[
+        modeling_features
+        +
+        [
+            target,
+            "patient_id",
+            "datetime"
+        ]
+    ]
+    .dropna(
+        subset=[
+            target
+        ]
+    )
+)
+```
+
+## Split temporal global
+
+```python
+cutoff_train = pd.Timestamp(
+    "2025-01-01"
+)
+
+cutoff_validation = pd.Timestamp(
+    "2025-07-01"
+)
+```
+
+```python
+train = modeling_df.loc[
+    modeling_df["datetime"]
+    <
+    cutoff_train
+]
+
+validation = modeling_df.loc[
+    (
+        modeling_df["datetime"]
+        >=
+        cutoff_train
+    )
+    &
+    (
+        modeling_df["datetime"]
+        <
+        cutoff_validation
+    )
+]
+
+test = modeling_df.loc[
+    modeling_df["datetime"]
+    >=
+    cutoff_validation
+]
+```
+
+## Split por paciente y tiempo
+
+Con varias filas por paciente puede ser necesario evitar que información casi idéntica aparezca en train y test.
+
+Opciones:
+
+- Pacientes completamente separados.
+- Periodos separados dentro de paciente.
+- Evaluación en pacientes nuevos.
+- Evaluación futura en pacientes conocidos.
+
+## Dos preguntas distintas
+
+```text
+Generalización a pacientes nuevos
+≠
+Generalización a tiempos futuros del mismo paciente
+```
+
+La validación debe reflejar la pregunta real.
+
+## Leakage por normalización
+
+Incorrecto:
+
+```python
+scaler.fit(
+    modeling_df[modeling_features]
+)
+```
+
+Correcto:
+
+```python
+scaler.fit(
+    train[modeling_features]
+)
+```
+
+Después:
+
+```python
+X_train_scaled = scaler.transform(
+    train[modeling_features]
+)
+
+X_validation_scaled = scaler.transform(
+    validation[modeling_features]
+)
+
+X_test_scaled = scaler.transform(
+    test[modeling_features]
+)
+```
+
+## Leakage por agregación
+
+Una variable como:
+
+```text
+media de toda la estancia
+```
+
+no puede utilizarse para predecir en el ingreso.
+
+Debe calcularse solo con datos disponibles hasta el momento de predicción.
+
+## Leakage por labels
+
+Ejemplo:
+
+```text
+Target
+→ deterioro en 24 h
+
+Feature
+→ medicación iniciada después del deterioro
+```
+
+Esto puede revelar indirectamente el outcome.
+
+## Revisar disponibilidad
+
+Para cada feature documenta:
+
+- Fecha y hora de generación.
+- Fecha y hora de disponibilidad.
+- Posibles retrasos.
+- Correcciones posteriores.
+- Si se actualiza retrospectivamente.
+
+## Baseline temporal
+
+Antes de entrenar modelos complejos:
+
+```python
+validation[
+    "naive_prediction"
+] = (
+    validation[
+        "heart_rate_lag_1"
+    ]
+)
+```
+
+## Evaluar baseline
+
+```python
+from sklearn.metrics import mean_absolute_error
+
+baseline_mae = mean_absolute_error(
+    validation[target],
+    validation[
+        "naive_prediction"
+    ]
+)
+```
+
+## Dataset supervisado temporal
+
+Una serie temporal puede convertirse en un problema tabular:
+
+```text
+Lags
+Rolling features
+Calendario
+Variables estáticas
+        ↓
+Modelo supervisado
+        ↓
+Predicción futura
+```
+
+## Pipeline temporal
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Ridge
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            Ridge(
+                alpha=1.0
+            )
+        )
+    ]
+)
+```
+
+## Entrenar
+
+```python
+pipeline.fit(
+    train[modeling_features],
+    train[target]
+)
+```
+
+## Validar
+
+```python
+validation_prediction = pipeline.predict(
+    validation[modeling_features]
+)
+```
+
+## Comparar con baseline
+
+```python
+model_mae = mean_absolute_error(
+    validation[target],
+    validation_prediction
+)
+
+print(
+    "Baseline MAE:",
+    baseline_mae
+)
+
+print(
+    "Model MAE:",
+    model_mae
+)
+```
+
+## Errores por horizonte
+
+```python
+horizon_results = []
+
+for horizon in [
+    1,
+    2,
+    3
+]:
+
+    target_column = (
+        f"target_horizon_{horizon}"
+    )
+
+    valid_rows = validation[
+        target_column
+    ].notna()
+
+    prediction = models[
+        horizon
+    ].predict(
+        validation.loc[
+            valid_rows,
+            modeling_features
+        ]
+    )
+
+    horizon_results.append(
+        {
+            "horizon": horizon,
+            "mae": mean_absolute_error(
+                validation.loc[
+                    valid_rows,
+                    target_column
+                ],
+                prediction
+            )
+        }
+    )
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+La preparación temporal debe reproducir exactamente la información disponible en el momento real de uso.
+:::
+
+Debe definirse:
+
+- Momento de predicción.
+- Horizonte.
+- Latencia de cada variable.
+- Frecuencia de actualización.
+- Acción esperada.
+- Unidad de análisis.
+- Política ante datos ausentes.
+
+## Errores frecuentes
+
+- No ordenar por tiempo.
+- Crear lags sin agrupar por paciente.
+- Confundir observaciones con horas.
+- Incluir el valor actual en rolling features.
+- Usar backward fill.
+- Ajustar scaler con todo el dataset.
+- Mezclar pacientes sin justificar.
+- Definir mal el target futuro.
+- Ignorar retrasos de disponibilidad.
+- No crear baseline temporal.
+- Resamplear sin revisar pérdida de información.
+- Confundir frecuencia de medición con horizonte.
+
+## Flujo recomendado
+
+1. Definir entidad y tiempo.
+2. Convertir fechas.
+3. Ordenar.
+4. Revisar frecuencia.
+5. Decidir si resamplear.
+6. Crear lags.
+7. Crear ventanas con `shift`.
+8. Definir target y horizonte.
+9. Separar por tiempo.
+10. Ajustar preprocesamiento en train.
+11. Comparar con baseline.
+12. Documentar disponibilidad.
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad de análisis.
+- [ ] He convertido fechas correctamente.
+- [ ] He ordenado por entidad y tiempo.
+- [ ] He revisado regularidad.
+- [ ] He justificado el resampling.
+- [ ] He creado lags por entidad.
+- [ ] He desplazado rolling features.
+- [ ] He definido el horizonte.
+- [ ] He alineado correctamente el target.
+- [ ] He evitado backward fill inapropiado.
+- [ ] He separado por tiempo.
+- [ ] He ajustado scaler solo con train.
+- [ ] He creado un baseline temporal.
+- [ ] He documentado latencia de variables.
+- [ ] He revisado leakage.
+
+## Recursos
+
+### Documentación
+
+- `pandas.to_datetime`.
+- `resample`.
+- `shift`.
+- `rolling`.
+- `merge_asof`.
+- `TimeSeriesSplit`.
+- `StandardScaler`.
+- Feature engineering temporal.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus frecuencias, lags, ventanas, horizontes y decisiones de preparación.

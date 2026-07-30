@@ -2,15 +2,1271 @@
 title: "Series temporales"
 ---
 
-Esta sección reúne métodos para analizar y predecir datos ordenados en el tiempo.
+::: {.callout-tip}
+## Resumen en 30 segundos
 
-## Contenidos previstos
+Una serie temporal es una secuencia de observaciones ordenadas en el tiempo.
 
-Esta sección se irá ampliando progresivamente con:
+El orden importa.
 
-- Fundamentos teóricos.
-- Cuándo utilizar cada técnica.
-- Código listo para adaptar.
-- Interpretación de resultados.
-- Errores frecuentes.
-- Consideraciones específicas en datos clínicos.
+En estos problemas no debe mezclarse información futura con el pasado.
+
+Los objetivos principales son:
+
+- Describir evolución.
+- Detectar patrones.
+- Predecir valores futuros.
+- Detectar cambios.
+- Identificar anomalías temporales.
+:::
+
+## ¿Qué es una serie temporal?
+
+Una serie temporal contiene observaciones registradas a lo largo del tiempo.
+
+Ejemplos:
+
+- Frecuencia cardiaca cada minuto.
+- Presión arterial cada hora.
+- Ingresos hospitalarios por día.
+- Biomarcadores por visita.
+- Ocupación de camas por semana.
+- Ventas mensuales.
+- Temperatura de un sensor.
+
+```text
+Tiempo
+──────────────────────────────→
+
+y₁  y₂  y₃  y₄  y₅  ...  yₜ
+```
+
+::: {.callout-note}
+## Idea clave
+
+En series temporales, el orden de las observaciones forma parte de los datos.
+:::
+
+## Diferencia con datos tabulares
+
+En datos tabulares suele asumirse que las filas son intercambiables.
+
+En series temporales:
+
+```text
+Pasado
+→ presente
+→ futuro
+```
+
+Cambiar el orden destruye información.
+
+## Tipos de problemas
+
+## Forecasting
+
+Predecir valores futuros.
+
+Ejemplos:
+
+- Ocupación de camas mañana.
+- Duración de estancia restante.
+- Biomarcador en la siguiente visita.
+- Demanda asistencial la próxima semana.
+
+## Clasificación temporal
+
+Predecir una categoría a partir de una secuencia.
+
+Ejemplos:
+
+- Deterioro en las próximas 6 horas.
+- Arritmia: sí o no.
+- Reingreso en 30 días.
+- Cambio de estado clínico.
+
+## Detección de anomalías
+
+Identificar patrones temporales inusuales.
+
+Ejemplos:
+
+- Cambio brusco de sensor.
+- Deterioro inesperado.
+- Error de registro.
+- Ruptura de tendencia.
+
+## Imputación temporal
+
+Estimar valores ausentes aprovechando observaciones anteriores y posteriores.
+
+## Segmentación
+
+Dividir una serie en periodos con comportamiento diferente.
+
+## Componentes de una serie temporal
+
+Una serie puede contener:
+
+- Nivel.
+- Tendencia.
+- Estacionalidad.
+- Ciclos.
+- Ruido.
+- Cambios estructurales.
+
+## Nivel
+
+Es el valor medio alrededor del cual fluctúa la serie.
+
+## Tendencia
+
+Es un cambio sostenido a largo plazo.
+
+```text
+Valores
+   │
+   │        /
+   │      /
+   │    /
+   │  /
+   └──────────── Tiempo
+```
+
+## Estacionalidad
+
+Es un patrón que se repite con frecuencia conocida.
+
+Ejemplos:
+
+- Ciclo diario.
+- Ciclo semanal.
+- Ciclo anual.
+- Mayor actividad en días laborables.
+
+## Ciclo
+
+Es una oscilación de duración variable, no necesariamente fija.
+
+## Ruido
+
+Variación no explicada por los componentes anteriores.
+
+## Frecuencia temporal
+
+Debe identificarse la frecuencia de observación.
+
+Ejemplos:
+
+```text
+1 minuto
+1 hora
+1 día
+1 semana
+1 visita
+```
+
+Una serie puede ser:
+
+- Regular.
+- Irregular.
+
+## Serie regular
+
+Las observaciones están separadas por intervalos constantes.
+
+```text
+08:00
+09:00
+10:00
+11:00
+```
+
+## Serie irregular
+
+Los intervalos son variables.
+
+```text
+Día 0
+Día 7
+Día 23
+Día 90
+```
+
+Esto es frecuente en datos clínicos longitudinales.
+
+## Preparar fechas
+
+```python
+import pandas as pd
+
+df["datetime"] = pd.to_datetime(
+    df["datetime"]
+)
+```
+
+## Ordenar
+
+```python
+df = df.sort_values(
+    [
+        "patient_id",
+        "datetime"
+    ]
+)
+```
+
+## Usar fecha como índice
+
+```python
+time_series = (
+    df
+    .set_index("datetime")
+    .sort_index()
+)
+```
+
+## Revisar frecuencia
+
+```python
+print(
+    pd.infer_freq(
+        time_series.index
+    )
+)
+```
+
+Puede devolver `None` si la serie es irregular.
+
+## Resampling
+
+```python
+daily_series = (
+    time_series["value"]
+    .resample("D")
+    .mean()
+)
+```
+
+Otras frecuencias:
+
+```text
+h  → hora
+D  → día
+W  → semana
+ME → fin de mes
+```
+
+## Agregación temporal
+
+```python
+weekly_summary = (
+    time_series["value"]
+    .resample("W")
+    .agg(
+        [
+            "mean",
+            "median",
+            "min",
+            "max",
+            "std"
+        ]
+    )
+)
+```
+
+## Visualización básica
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(
+    figsize=(12, 5)
+)
+
+plt.plot(
+    daily_series.index,
+    daily_series.values
+)
+
+plt.xlabel(
+    "Fecha"
+)
+
+plt.ylabel(
+    "Valor"
+)
+
+plt.title(
+    "Serie temporal"
+)
+
+plt.show()
+```
+
+## Valores ausentes
+
+```python
+missing_count = (
+    daily_series
+    .isna()
+    .sum()
+)
+```
+
+Opciones:
+
+- No imputar.
+- Forward fill.
+- Backward fill.
+- Interpolación.
+- Modelos temporales.
+- Imputación por contexto clínico.
+
+## Forward fill
+
+```python
+filled_series = (
+    daily_series
+    .ffill()
+)
+```
+
+## Interpolación temporal
+
+```python
+interpolated_series = (
+    daily_series
+    .interpolate(
+        method="time"
+    )
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+Imputar hacia atrás puede introducir información futura.
+:::
+
+## Lags
+
+Un lag representa un valor pasado.
+
+```python
+df["value_lag_1"] = (
+    df["value"]
+    .shift(1)
+)
+```
+
+## Varios lags
+
+```python
+for lag in [
+    1,
+    2,
+    3,
+    7
+]:
+
+    df[
+        f"value_lag_{lag}"
+    ] = (
+        df["value"]
+        .shift(lag)
+    )
+```
+
+## Rolling windows
+
+```python
+df[
+    "rolling_mean_7"
+] = (
+    df["value"]
+    .rolling(
+        window=7
+    )
+    .mean()
+)
+```
+
+## Estadísticos móviles
+
+```python
+df[
+    "rolling_std_7"
+] = (
+    df["value"]
+    .rolling(
+        window=7
+    )
+    .std()
+)
+
+df[
+    "rolling_min_7"
+] = (
+    df["value"]
+    .rolling(
+        window=7
+    )
+    .min()
+)
+
+df[
+    "rolling_max_7"
+] = (
+    df["value"]
+    .rolling(
+        window=7
+    )
+    .max()
+)
+```
+
+## Evitar leakage en rolling features
+
+Para predecir el tiempo \(t\), la ventana debe contener solo información anterior.
+
+```python
+df[
+    "rolling_mean_7"
+] = (
+    df["value"]
+    .shift(1)
+    .rolling(
+        window=7
+    )
+    .mean()
+)
+```
+
+::: {.callout-important}
+## Regla práctica
+
+Aplica `shift(1)` antes de calcular estadísticas si no debe incluirse el valor actual.
+:::
+
+## Variables de calendario
+
+```python
+df["year"] = (
+    df["datetime"]
+    .dt
+    .year
+)
+
+df["month"] = (
+    df["datetime"]
+    .dt
+    .month
+)
+
+df["day_of_week"] = (
+    df["datetime"]
+    .dt
+    .dayofweek
+)
+
+df["hour"] = (
+    df["datetime"]
+    .dt
+    .hour
+)
+```
+
+## Variables cíclicas
+
+El mes 12 y el mes 1 están próximos.
+
+Puede representarse con seno y coseno.
+
+```python
+import numpy as np
+
+df["month_sin"] = np.sin(
+    2
+    *
+    np.pi
+    *
+    df["month"]
+    /
+    12
+)
+
+df["month_cos"] = np.cos(
+    2
+    *
+    np.pi
+    *
+    df["month"]
+    /
+    12
+)
+```
+
+## Horizonte de predicción
+
+Debe definirse cuánto futuro se quiere predecir.
+
+Ejemplos:
+
+```text
+1 hora
+6 horas
+24 horas
+7 días
+30 días
+1 visita
+```
+
+## Forecast horizon
+
+```text
+Tiempo de predicción
+        │
+        ├── t + 1
+        ├── t + 2
+        └── t + H
+```
+
+## Predicción one-step
+
+Predice el siguiente instante.
+
+## Predicción multi-step
+
+Predice varios pasos futuros.
+
+## Estrategia recursiva
+
+Utiliza predicciones anteriores para predecir pasos posteriores.
+
+```text
+Predice t+1
+→ usa predicción para t+2
+→ usa predicciones para t+3
+```
+
+Puede acumular error.
+
+## Estrategia directa
+
+Entrena un modelo distinto para cada horizonte.
+
+```text
+Modelo 1 → t+1
+Modelo 2 → t+2
+Modelo 3 → t+3
+```
+
+## Estrategia multi-output
+
+Un único modelo predice varios horizontes.
+
+## Split temporal
+
+No debe usarse un split aleatorio si el objetivo es predecir el futuro.
+
+```text
+Train
+────────────
+
+Validation
+            ──────
+
+Test
+                  ──────
+```
+
+## Split por fecha
+
+```python
+train = df.loc[
+    df["datetime"]
+    <
+    "2025-01-01"
+]
+
+validation = df.loc[
+    (
+        df["datetime"]
+        >=
+        "2025-01-01"
+    )
+    &
+    (
+        df["datetime"]
+        <
+        "2025-07-01"
+    )
+]
+
+test = df.loc[
+    df["datetime"]
+    >=
+    "2025-07-01"
+]
+```
+
+## TimeSeriesSplit
+
+```python
+from sklearn.model_selection import TimeSeriesSplit
+
+cv = TimeSeriesSplit(
+    n_splits=5
+)
+```
+
+## Ventana expansiva
+
+```text
+Fold 1
+Train: [1 2 3]
+Test:          [4]
+
+Fold 2
+Train: [1 2 3 4]
+Test:            [5]
+```
+
+## Ventana deslizante
+
+```text
+Fold 1
+Train: [1 2 3]
+Test:          [4]
+
+Fold 2
+Train:   [2 3 4]
+Test:            [5]
+```
+
+Puede ser útil cuando los datos antiguos pierden relevancia.
+
+## Gap temporal
+
+```python
+cv = TimeSeriesSplit(
+    n_splits=5,
+    gap=7
+)
+```
+
+El gap evita que observaciones muy próximas aparezcan en train y validation.
+
+## Baselines temporales
+
+Todo forecasting debe compararse con baselines.
+
+## Naive forecast
+
+```python
+y_pred_naive = (
+    y_test
+    .shift(1)
+)
+```
+
+## Último valor
+
+```text
+Predicción futura
+=
+último valor observado
+```
+
+## Media histórica
+
+```python
+historical_mean = (
+    y_train.mean()
+)
+```
+
+## Seasonal naive
+
+```text
+Predicción de hoy
+=
+valor del mismo día de la semana anterior
+```
+
+## Media móvil
+
+```python
+rolling_baseline = (
+    y_train
+    .rolling(
+        window=7
+    )
+    .mean()
+)
+```
+
+## Métricas de forecasting
+
+- MAE.
+- RMSE.
+- MAPE.
+- sMAPE.
+- MASE.
+- WAPE.
+
+## MAE
+
+```python
+from sklearn.metrics import mean_absolute_error
+
+mae = mean_absolute_error(
+    y_test,
+    y_pred
+)
+```
+
+## RMSE
+
+```python
+from sklearn.metrics import root_mean_squared_error
+
+rmse = root_mean_squared_error(
+    y_test,
+    y_pred
+)
+```
+
+## MAPE
+
+$$
+MAPE
+=
+\frac{100}{n}
+\sum
+\left|
+\frac{
+y_t-\hat{y}_t
+}{
+y_t
+}
+\right|
+$$
+
+Problemas:
+
+- No funciona bien con ceros.
+- Puede explotar con valores pequeños.
+- Es asimétrica.
+
+## sMAPE
+
+Utiliza una escala simétrica aproximada.
+
+También puede ser inestable cerca de cero.
+
+## MASE
+
+Compara el error con un baseline naive.
+
+```text
+MASE < 1
+→ mejor que naive
+
+MASE > 1
+→ peor que naive
+```
+
+## Evaluación por horizonte
+
+No debe reportarse solo una métrica global.
+
+```text
+Horizonte 1 día
+Horizonte 3 días
+Horizonte 7 días
+```
+
+El error suele aumentar con el horizonte.
+
+## Intervalos de predicción
+
+Una predicción útil debería incluir incertidumbre.
+
+```text
+Predicción central
++
+límite inferior
++
+límite superior
+```
+
+## Cobertura
+
+Un intervalo del 95 % debería contener aproximadamente el 95 % de observaciones futuras, bajo las condiciones del modelo.
+
+## Descomposición
+
+Una serie puede descomponerse en:
+
+$$
+y_t
+=
+T_t
++
+S_t
++
+R_t
+$$
+
+donde:
+
+- \(T_t\): tendencia.
+- \(S_t\): estacionalidad.
+- \(R_t\): residuo.
+
+## STL
+
+```python
+from statsmodels.tsa.seasonal import STL
+
+decomposition = STL(
+    daily_series,
+    period=7
+).fit()
+```
+
+```python
+decomposition.plot()
+
+plt.show()
+```
+
+## Estacionariedad
+
+Una serie estacionaria mantiene aproximadamente:
+
+- Media constante.
+- Varianza constante.
+- Dependencia temporal estable.
+
+Muchos modelos clásicos requieren estacionariedad.
+
+## Diferenciación
+
+```python
+differenced = (
+    daily_series
+    .diff()
+    .dropna()
+)
+```
+
+## Autocorrelación
+
+Mide la relación entre una serie y sus valores pasados.
+
+## ACF
+
+```python
+from statsmodels.graphics.tsaplots import plot_acf
+
+plot_acf(
+    daily_series.dropna(),
+    lags=30
+)
+
+plt.show()
+```
+
+## PACF
+
+```python
+from statsmodels.graphics.tsaplots import plot_pacf
+
+plot_pacf(
+    daily_series.dropna(),
+    lags=30
+)
+
+plt.show()
+```
+
+## Modelos clásicos
+
+- Exponential smoothing.
+- Holt.
+- Holt-Winters.
+- ARIMA.
+- SARIMA.
+- Modelos de estado.
+- Prophet.
+
+## Modelos de machine learning
+
+- Regresión lineal con lags.
+- Random forest.
+- Gradient boosting.
+- XGBoost.
+- LightGBM.
+- CatBoost.
+
+## Deep learning temporal
+
+- RNN.
+- LSTM.
+- GRU.
+- Temporal CNN.
+- Transformers.
+- Temporal Fusion Transformer.
+
+## Regresión con lags
+
+```python
+features = [
+    "value_lag_1",
+    "value_lag_2",
+    "value_lag_7",
+    "rolling_mean_7",
+    "day_of_week"
+]
+
+X = df[features]
+
+y = df["value"]
+```
+
+## Pipeline temporal
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+model = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "regressor",
+            HistGradientBoostingRegressor(
+                learning_rate=0.05,
+                max_iter=300,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Evaluar con TimeSeriesSplit
+
+```python
+from sklearn.model_selection import cross_validate
+
+scores = cross_validate(
+    estimator=model,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring={
+        "mae": "neg_mean_absolute_error",
+        "rmse": "neg_root_mean_squared_error"
+    }
+)
+```
+
+## Series por paciente
+
+En datos clínicos puede haber múltiples series.
+
+```text
+Paciente 1
+→ serie propia
+
+Paciente 2
+→ serie propia
+
+Paciente 3
+→ serie propia
+```
+
+Debe decidirse si el modelo es:
+
+- Individual.
+- Global.
+- Por centro.
+- Por población.
+
+## Modelo global
+
+Entrena con múltiples series y añade identificadores o características estáticas.
+
+Ventajas:
+
+- Más datos.
+- Aprende patrones compartidos.
+- Puede generalizar a pacientes nuevos.
+
+## Datos estáticos y dinámicos
+
+### Estáticos
+
+- Sexo.
+- Diagnóstico.
+- Centro.
+- Genética.
+
+### Dinámicos
+
+- Biomarcadores.
+- Signos vitales.
+- Tratamientos.
+- Estado clínico.
+
+## Irregularidad clínica
+
+Las visitas no ocurren a intervalos regulares.
+
+Opciones:
+
+- Resampling.
+- Tiempo desde última observación.
+- Modelos para eventos irregulares.
+- Features por ventanas.
+- Modelos multiestado.
+- Joint models.
+
+## Tiempo desde última medición
+
+```python
+df[
+    "time_since_previous_measurement"
+] = (
+    df
+    .groupby("patient_id")[
+        "datetime"
+    ]
+    .diff()
+    .dt
+    .total_seconds()
+    /
+    3600
+)
+```
+
+## Censura
+
+En salud puede ocurrir que:
+
+- El seguimiento termine.
+- El evento no ocurra.
+- El paciente abandone.
+- La observación se interrumpa.
+
+En estos casos puede ser más adecuado:
+
+- Survival analysis.
+- Time-to-event.
+- Modelos multiestado.
+- Joint longitudinal-survival models.
+
+## Forecasting frente a time-to-event
+
+```text
+Forecasting
+→ ¿qué valor tendrá?
+
+Time-to-event
+→ ¿cuándo ocurrirá?
+```
+
+## Leakage temporal
+
+Ejemplos frecuentes:
+
+- Usar el valor futuro para imputar.
+- Calcular rolling mean con el punto actual.
+- Normalizar con todo el periodo.
+- Seleccionar variables usando test.
+- Crear target con información posterior mal alineada.
+- Mezclar episodios del mismo paciente.
+
+::: {.callout-caution}
+## Precaución
+
+El leakage temporal puede producir resultados artificialmente excelentes.
+:::
+
+## Drift temporal
+
+Con el tiempo cambian:
+
+- Protocolos.
+- Equipos.
+- Población.
+- Tratamientos.
+- Codificación.
+- Prevalencia.
+- Estacionalidad.
+
+Debe monitorizarse:
+
+- Error por periodo.
+- Distribución de features.
+- Calibración.
+- Frecuencia de alertas.
+- Residuos.
+
+## Backtesting
+
+Backtesting simula cómo habría funcionado el modelo en distintos momentos históricos.
+
+```text
+Entrenar hasta enero
+→ predecir febrero
+
+Entrenar hasta febrero
+→ predecir marzo
+
+Entrenar hasta marzo
+→ predecir abril
+```
+
+## Errores por periodo
+
+```python
+evaluation_df = pd.DataFrame(
+    {
+        "datetime": test_dates,
+        "y_true": y_test,
+        "y_pred": y_pred
+    }
+)
+```
+
+```python
+monthly_mae = (
+    evaluation_df
+    .set_index("datetime")
+    .resample("ME")
+    .apply(
+        lambda group:
+        mean_absolute_error(
+            group["y_true"],
+            group["y_pred"]
+        )
+    )
+)
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Una predicción temporal solo es útil si llega con suficiente antelación para modificar una decisión.
+:::
+
+Debe definirse:
+
+- Momento de predicción.
+- Horizonte.
+- Frecuencia de actualización.
+- Latencia.
+- Acción clínica.
+- Coste de falsas alertas.
+- Disponibilidad de datos.
+- Estrategia de monitorización.
+
+## Errores frecuentes
+
+- Hacer split aleatorio.
+- No ordenar por tiempo.
+- Usar información futura.
+- No comparar con naive.
+- Evaluar solo un horizonte.
+- Ignorar irregularidad.
+- Imputar hacia atrás.
+- No usar gap.
+- Mezclar pacientes.
+- Reportar solo RMSE.
+- Ignorar intervalos.
+- No revisar drift.
+
+## Flujo recomendado
+
+1. Definir la serie.
+2. Definir unidad temporal.
+3. Definir momento de predicción.
+4. Definir horizonte.
+5. Explorar tendencia y estacionalidad.
+6. Crear baseline.
+7. Crear features temporales.
+8. Dividir por tiempo.
+9. Aplicar backtesting.
+10. Evaluar por horizonte.
+11. Cuantificar incertidumbre.
+12. Monitorizar drift.
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad temporal.
+- [ ] He ordenado los datos.
+- [ ] He definido el horizonte.
+- [ ] He definido el momento de predicción.
+- [ ] He creado un baseline naive.
+- [ ] He evitado información futura.
+- [ ] He calculado lags correctamente.
+- [ ] He desplazado rolling features.
+- [ ] He realizado split temporal.
+- [ ] He aplicado backtesting.
+- [ ] He evaluado varios horizontes.
+- [ ] He revisado intervalos de predicción.
+- [ ] He considerado irregularidad.
+- [ ] He revisado pacientes repetidos.
+- [ ] He planificado monitorización de drift.
+
+## Próximos documentos
+
+Esta sección se completará con:
+
+1. Fundamentos y preparación temporal.
+2. Descomposición y estacionariedad.
+3. Exponential smoothing.
+4. ARIMA y SARIMA.
+5. Feature engineering temporal.
+6. Machine learning para forecasting.
+7. Evaluación y backtesting.
+8. Series temporales clínicas.
+
+## Recursos
+
+### Documentación
+
+- `pandas.resample`.
+- `TimeSeriesSplit`.
+- `STL`.
+- ACF y PACF.
+- ARIMA.
+- Exponential smoothing.
+- Métricas de forecasting.
+- Backtesting.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus series, horizontes, baselines, features y decisiones temporales.
