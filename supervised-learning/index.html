@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -72,6 +107,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -416,7 +480,54 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#contenidos-previstos" id="toc-contenidos-previstos" class="nav-link active" data-scroll-target="#contenidos-previstos">Contenidos previstos</a></li>
+  <li><a href="#qué-es-el-aprendizaje-supervisado" id="toc-qué-es-el-aprendizaje-supervisado" class="nav-link active" data-scroll-target="#qué-es-el-aprendizaje-supervisado">¿Qué es el aprendizaje supervisado?</a></li>
+  <li><a href="#tipos-de-problemas" id="toc-tipos-de-problemas" class="nav-link" data-scroll-target="#tipos-de-problemas">Tipos de problemas</a></li>
+  <li><a href="#regresión" id="toc-regresión" class="nav-link" data-scroll-target="#regresión">Regresión</a></li>
+  <li><a href="#clasificación" id="toc-clasificación" class="nav-link" data-scroll-target="#clasificación">Clasificación</a></li>
+  <li><a href="#clasificación-probabilística" id="toc-clasificación-probabilística" class="nav-link" data-scroll-target="#clasificación-probabilística">Clasificación probabilística</a></li>
+  <li><a href="#variables-predictoras-y-target" id="toc-variables-predictoras-y-target" class="nav-link" data-scroll-target="#variables-predictoras-y-target">Variables predictoras y target</a></li>
+  <li><a href="#unidad-de-análisis" id="toc-unidad-de-análisis" class="nav-link" data-scroll-target="#unidad-de-análisis">Unidad de análisis</a></li>
+  <li><a href="#momento-de-predicción" id="toc-momento-de-predicción" class="nav-link" data-scroll-target="#momento-de-predicción">Momento de predicción</a></li>
+  <li><a href="#flujo-de-trabajo" id="toc-flujo-de-trabajo" class="nav-link" data-scroll-target="#flujo-de-trabajo">Flujo de trabajo</a></li>
+  <li><a href="#entrenar-y-predecir" id="toc-entrenar-y-predecir" class="nav-link" data-scroll-target="#entrenar-y-predecir">Entrenar y predecir</a></li>
+  <li><a href="#evaluar-regresión" id="toc-evaluar-regresión" class="nav-link" data-scroll-target="#evaluar-regresión">Evaluar regresión</a></li>
+  <li><a href="#evaluar-clasificación" id="toc-evaluar-clasificación" class="nav-link" data-scroll-target="#evaluar-clasificación">Evaluar clasificación</a></li>
+  <li><a href="#modelos-incluidos-en-esta-sección" id="toc-modelos-incluidos-en-esta-sección" class="nav-link" data-scroll-target="#modelos-incluidos-en-esta-sección">Modelos incluidos en esta sección</a>
+  <ul class="collapse">
+  <li><a href="#regresión-lineal" id="toc-regresión-lineal" class="nav-link" data-scroll-target="#regresión-lineal">Regresión lineal</a></li>
+  <li><a href="#regresión-logística" id="toc-regresión-logística" class="nav-link" data-scroll-target="#regresión-logística">Regresión logística</a></li>
+  <li><a href="#árboles-de-decisión" id="toc-árboles-de-decisión" class="nav-link" data-scroll-target="#árboles-de-decisión">Árboles de decisión</a></li>
+  <li><a href="#random-forest" id="toc-random-forest" class="nav-link" data-scroll-target="#random-forest">Random forest</a></li>
+  <li><a href="#gradient-boosting" id="toc-gradient-boosting" class="nav-link" data-scroll-target="#gradient-boosting">Gradient boosting</a></li>
+  <li><a href="#support-vector-machines" id="toc-support-vector-machines" class="nav-link" data-scroll-target="#support-vector-machines">Support Vector Machines</a></li>
+  <li><a href="#comparación-de-modelos" id="toc-comparación-de-modelos" class="nav-link" data-scroll-target="#comparación-de-modelos">Comparación de modelos</a></li>
+  </ul></li>
+  <li><a href="#interpretabilidad-frente-a-complejidad" id="toc-interpretabilidad-frente-a-complejidad" class="nav-link" data-scroll-target="#interpretabilidad-frente-a-complejidad">Interpretabilidad frente a complejidad</a></li>
+  <li><a href="#no-existe-un-mejor-modelo-universal" id="toc-no-existe-un-mejor-modelo-universal" class="nav-link" data-scroll-target="#no-existe-un-mejor-modelo-universal">No existe un mejor modelo universal</a></li>
+  <li><a href="#baseline" id="toc-baseline" class="nav-link" data-scroll-target="#baseline">Baseline</a>
+  <ul class="collapse">
+  <li><a href="#clasificación-1" id="toc-clasificación-1" class="nav-link" data-scroll-target="#clasificación-1">Clasificación</a></li>
+  <li><a href="#regresión-1" id="toc-regresión-1" class="nav-link" data-scroll-target="#regresión-1">Regresión</a></li>
+  </ul></li>
+  <li><a href="#deep-learning" id="toc-deep-learning" class="nav-link" data-scroll-target="#deep-learning">Deep learning</a></li>
+  <li><a href="#pipeline-completo" id="toc-pipeline-completo" class="nav-link" data-scroll-target="#pipeline-completo">Pipeline completo</a></li>
+  <li><a href="#validación-cruzada" id="toc-validación-cruzada" class="nav-link" data-scroll-target="#validación-cruzada">Validación cruzada</a></li>
+  <li><a href="#ajuste-de-hiperparámetros" id="toc-ajuste-de-hiperparámetros" class="nav-link" data-scroll-target="#ajuste-de-hiperparámetros">Ajuste de hiperparámetros</a></li>
+  <li><a href="#predicción-frente-a-inferencia" id="toc-predicción-frente-a-inferencia" class="nav-link" data-scroll-target="#predicción-frente-a-inferencia">Predicción frente a inferencia</a>
+  <ul class="collapse">
+  <li><a href="#predicción" id="toc-predicción" class="nav-link" data-scroll-target="#predicción">Predicción</a></li>
+  <li><a href="#inferencia" id="toc-inferencia" class="nav-link" data-scroll-target="#inferencia">Inferencia</a></li>
+  </ul></li>
+  <li><a href="#evaluación-interna-y-externa" id="toc-evaluación-interna-y-externa" class="nav-link" data-scroll-target="#evaluación-interna-y-externa">Evaluación interna y externa</a>
+  <ul class="collapse">
+  <li><a href="#interna" id="toc-interna" class="nav-link" data-scroll-target="#interna">Interna</a></li>
+  <li><a href="#externa" id="toc-externa" class="nav-link" data-scroll-target="#externa">Externa</a></li>
+  </ul></li>
+  <li><a href="#datos-clínicos" id="toc-datos-clínicos" class="nav-link" data-scroll-target="#datos-clínicos">Datos clínicos</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#checklist-para-proyectos" id="toc-checklist-para-proyectos" class="nav-link" data-scroll-target="#checklist-para-proyectos">Checklist para proyectos</a></li>
+  <li><a href="#próximos-documentos" id="toc-próximos-documentos" class="nav-link" data-scroll-target="#próximos-documentos">Próximos documentos</a></li>
   </ul>
 </nav>
     </div>
@@ -442,18 +553,584 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Esta sección reúne modelos que aprenden a predecir una variable objetivo a partir de ejemplos etiquetados.</p>
-<section id="contenidos-previstos" class="level2">
-<h2 data-anchor-id="contenidos-previstos">Contenidos previstos</h2>
-<p>Esta sección se irá ampliando progresivamente con:</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El aprendizaje supervisado utiliza ejemplos con una respuesta conocida para aprender a predecir nuevos casos.</p>
+<p>Los dos grandes tipos de problema son:</p>
 <ul>
-<li>Fundamentos teóricos.</li>
-<li>Cuándo utilizar cada técnica.</li>
-<li>Código listo para adaptar.</li>
-<li>Interpretación de resultados.</li>
-<li>Errores frecuentes.</li>
-<li>Consideraciones específicas en datos clínicos.</li>
+<li>Regresión: predecir valores numéricos.</li>
+<li>Clasificación: predecir categorías o probabilidades.</li>
 </ul>
+<p>El objetivo no es memorizar train, sino generalizar a datos nuevos.</p>
+</div>
+</div>
+<section id="qué-es-el-aprendizaje-supervisado" class="level2">
+<h2 data-anchor-id="qué-es-el-aprendizaje-supervisado">¿Qué es el aprendizaje supervisado?</h2>
+<p>En aprendizaje supervisado se dispone de:</p>
+<ul>
+<li>Variables predictoras, también llamadas features.</li>
+<li>Una variable objetivo, también llamada target.</li>
+<li>Ejemplos donde el target ya es conocido.</li>
+</ul>
+<p>El modelo aprende una función:</p>
+<p><span class="math display">\[
+\hat{y} = f(X)
+\]</span></p>
+<p>donde:</p>
+<ul>
+<li><span class="math inline">\(X\)</span> contiene las variables predictoras.</li>
+<li><span class="math inline">\(y\)</span> es el valor real.</li>
+<li><span class="math inline">\(\hat{y}\)</span> es la predicción.</li>
+<li><span class="math inline">\(f\)</span> es el modelo aprendido.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El modelo aprende a partir de ejemplos etiquetados.</p>
+</div>
+</div>
+</section>
+<section id="tipos-de-problemas" class="level2">
+<h2 data-anchor-id="tipos-de-problemas">Tipos de problemas</h2>
+</section>
+<section id="regresión" class="level2">
+<h2 data-anchor-id="regresión">Regresión</h2>
+<p>La regresión predice una variable numérica continua.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Duración de estancia.</li>
+<li>Coste hospitalario.</li>
+<li>Fracción de eyección.</li>
+<li>Presión arterial.</li>
+<li>Edad.</li>
+<li>Nivel de biomarcador.</li>
+</ul>
+<pre class="text"><code>Edad + diagnóstico + tratamiento
+                ↓
+        Días de ingreso</code></pre>
+</section>
+<section id="clasificación" class="level2">
+<h2 data-anchor-id="clasificación">Clasificación</h2>
+<p>La clasificación predice una categoría.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Reingreso: sí o no.</li>
+<li>Evento adverso: sí o no.</li>
+<li>Riesgo bajo, medio o alto.</li>
+<li>Diagnóstico A, B o C.</li>
+<li>Respuesta al tratamiento.</li>
+</ul>
+<pre class="text"><code>Edad + analítica + tratamiento
+                ↓
+      Evento cardiovascular</code></pre>
+</section>
+<section id="clasificación-probabilística" class="level2">
+<h2 data-anchor-id="clasificación-probabilística">Clasificación probabilística</h2>
+<p>Muchos modelos generan una probabilidad:</p>
+<pre class="text"><code>Riesgo predicho = 0.27</code></pre>
+<p>Después se aplica un umbral:</p>
+<pre class="text"><code>0.27 ≥ 0.20
+→ clase positiva</code></pre>
+</section>
+<section id="variables-predictoras-y-target" class="level2">
+<h2 data-anchor-id="variables-predictoras-y-target">Variables predictoras y target</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"age"</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"weight"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"troponin"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ntprobnp"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"center"</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>target <span class="op">=</span> <span class="st">"cardiotoxicity"</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[features]</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[target]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="unidad-de-análisis" class="level2">
+<h2 data-anchor-id="unidad-de-análisis">Unidad de análisis</h2>
+<p>Cada fila puede representar:</p>
+<ul>
+<li>Paciente.</li>
+<li>Visita.</li>
+<li>Ingreso.</li>
+<li>Episodio.</li>
+<li>Prueba.</li>
+<li>Ventana temporal.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>La unidad de análisis determina cómo deben hacerse el split, la validación y la interpretación.</p>
+</div>
+</div>
+</section>
+<section id="momento-de-predicción" class="level2">
+<h2 data-anchor-id="momento-de-predicción">Momento de predicción</h2>
+<p>Debe definirse cuándo se genera la predicción.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>En el ingreso.</li>
+<li>A las 24 horas.</li>
+<li>Al inicio del tratamiento.</li>
+<li>Antes de una intervención.</li>
+</ul>
+<p>Solo pueden utilizarse variables disponibles en ese momento.</p>
+</section>
+<section id="flujo-de-trabajo" class="level2">
+<h2 data-anchor-id="flujo-de-trabajo">Flujo de trabajo</h2>
+<pre class="text"><code>Definir pregunta
+      ↓
+Definir target
+      ↓
+Definir unidad de análisis
+      ↓
+Definir momento de predicción
+      ↓
+Separar train / validation / test
+      ↓
+Preprocesamiento
+      ↓
+Entrenamiento
+      ↓
+Validación
+      ↓
+Selección de modelo
+      ↓
+Evaluación final</code></pre>
+</section>
+<section id="entrenar-y-predecir" class="level2">
+<h2 data-anchor-id="entrenar-y-predecir">Entrenar y predecir</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>model.fit(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    X_train,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    y_train</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>y_pred <span class="op">=</span> model.predict(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    X_test</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>En clasificación probabilística:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>y_probability <span class="op">=</span> model.predict_proba(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    X_test</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>)[:, <span class="dv">1</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="evaluar-regresión" class="level2">
+<h2 data-anchor-id="evaluar-regresión">Evaluar regresión</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_absolute_error</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> root_mean_squared_error</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> r2_score</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>mae <span class="op">=</span> mean_absolute_error(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    y_test,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    y_pred</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>rmse <span class="op">=</span> root_mean_squared_error(</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    y_test,</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    y_pred</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>r2 <span class="op">=</span> r2_score(</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    y_test,</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    y_pred</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="evaluar-clasificación" class="level2">
+<h2 data-anchor-id="evaluar-clasificación">Evaluar clasificación</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> roc_auc_score</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> average_precision_score</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> balanced_accuracy_score</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>roc_auc <span class="op">=</span> roc_auc_score(</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    y_test,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    y_probability</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>average_precision <span class="op">=</span> average_precision_score(</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    y_test,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    y_probability</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>balanced_accuracy <span class="op">=</span> balanced_accuracy_score(</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    y_test,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    y_pred</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="modelos-incluidos-en-esta-sección" class="level2">
+<h2 data-anchor-id="modelos-incluidos-en-esta-sección">Modelos incluidos en esta sección</h2>
+<section id="regresión-lineal" class="level3">
+<h3 data-anchor-id="regresión-lineal">Regresión lineal</h3>
+<p>Modelo interpretable para relaciones lineales.</p>
+</section>
+<section id="regresión-logística" class="level3">
+<h3 data-anchor-id="regresión-logística">Regresión logística</h3>
+<p>Modelo de clasificación que estima probabilidades.</p>
+</section>
+<section id="árboles-de-decisión" class="level3">
+<h3 data-anchor-id="árboles-de-decisión">Árboles de decisión</h3>
+<p>Modelos basados en reglas y particiones.</p>
+</section>
+<section id="random-forest" class="level3">
+<h3 data-anchor-id="random-forest">Random forest</h3>
+<p>Ensemble de múltiples árboles mediante bagging.</p>
+</section>
+<section id="gradient-boosting" class="level3">
+<h3 data-anchor-id="gradient-boosting">Gradient boosting</h3>
+<p>Árboles secuenciales que corrigen errores anteriores.</p>
+</section>
+<section id="support-vector-machines" class="level3">
+<h3 data-anchor-id="support-vector-machines">Support Vector Machines</h3>
+<p>Modelos que buscan fronteras de máximo margen.</p>
+</section>
+<section id="comparación-de-modelos" class="level3">
+<h3 data-anchor-id="comparación-de-modelos">Comparación de modelos</h3>
+<p>Página final para comparar rendimiento, calibración, interpretabilidad y coste.</p>
+</section>
+</section>
+<section id="interpretabilidad-frente-a-complejidad" class="level2">
+<h2 data-anchor-id="interpretabilidad-frente-a-complejidad">Interpretabilidad frente a complejidad</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Modelo</th>
+<th>Interpretabilidad</th>
+<th>No linealidad</th>
+<th>Escalado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Regresión lineal</td>
+<td>Alta</td>
+<td>Baja</td>
+<td>Recomendado con regularización</td>
+</tr>
+<tr class="even">
+<td>Regresión logística</td>
+<td>Alta</td>
+<td>Baja</td>
+<td>Recomendado</td>
+</tr>
+<tr class="odd">
+<td>Árbol</td>
+<td>Alta-moderada</td>
+<td>Sí</td>
+<td>No necesario</td>
+</tr>
+<tr class="even">
+<td>Random forest</td>
+<td>Moderada-baja</td>
+<td>Sí</td>
+<td>No necesario</td>
+</tr>
+<tr class="odd">
+<td>Gradient boosting</td>
+<td>Baja</td>
+<td>Sí</td>
+<td>Normalmente no</td>
+</tr>
+<tr class="even">
+<td>SVM lineal</td>
+<td>Moderada</td>
+<td>Baja</td>
+<td>Necesario</td>
+</tr>
+<tr class="odd">
+<td>SVM con kernel</td>
+<td>Baja</td>
+<td>Sí</td>
+<td>Necesario</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="no-existe-un-mejor-modelo-universal" class="level2">
+<h2 data-anchor-id="no-existe-un-mejor-modelo-universal">No existe un mejor modelo universal</h2>
+<p>La elección depende de:</p>
+<ul>
+<li>Tipo de target.</li>
+<li>Tamaño de muestra.</li>
+<li>Número de variables.</li>
+<li>No linealidad.</li>
+<li>Desbalance.</li>
+<li>Necesidad de interpretación.</li>
+<li>Coste computacional.</li>
+<li>Requisitos clínicos.</li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Regla práctica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Empieza por un baseline simple antes de utilizar modelos complejos.</p>
+</div>
+</div>
+</section>
+<section id="baseline" class="level2">
+<h2 data-anchor-id="baseline">Baseline</h2>
+<section id="clasificación-1" class="level3">
+<h3 data-anchor-id="clasificación-1">Clasificación</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.dummy <span class="im">import</span> DummyClassifier</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> DummyClassifier(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    strategy<span class="op">=</span><span class="st">"most_frequent"</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="regresión-1" class="level3">
+<h3 data-anchor-id="regresión-1">Regresión</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.dummy <span class="im">import</span> DummyRegressor</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> DummyRegressor(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    strategy<span class="op">=</span><span class="st">"mean"</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+</section>
+<section id="deep-learning" class="level2">
+<h2 data-anchor-id="deep-learning">Deep learning</h2>
+<p>Las redes neuronales también pueden utilizarse para clasificación y regresión.</p>
+<p>Se estudian en una sección separada porque requieren conceptos propios:</p>
+<ul>
+<li>Capas.</li>
+<li>Activaciones.</li>
+<li>Backpropagation.</li>
+<li>Optimizadores.</li>
+<li>Batches.</li>
+<li>Epochs.</li>
+<li>Regularización.</li>
+<li>Hardware.</li>
+</ul>
+<p><a href="../deep-learning/index.html">Ir a Deep Learning</a></p>
+</section>
+<section id="pipeline-completo" class="level2">
+<h2 data-anchor-id="pipeline-completo">Pipeline completo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>pipeline <span class="op">=</span> Pipeline(</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"preprocessor"</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>            preprocessor</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">"classifier"</span>,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>            LogisticRegression(</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>                max_iter<span class="op">=</span><span class="dv">1000</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="validación-cruzada" class="level2">
+<h2 data-anchor-id="validación-cruzada">Validación cruzada</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_validate</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> StratifiedKFold</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>cv <span class="op">=</span> StratifiedKFold(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    n_splits<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    shuffle<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> cross_validate(</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    estimator<span class="op">=</span>pipeline,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    X<span class="op">=</span>X,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span>y,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span>cv,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    scoring<span class="op">=</span>{</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"roc_auc"</span>: <span class="st">"roc_auc"</span>,</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"average_precision"</span>: <span class="st">"average_precision"</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ajuste-de-hiperparámetros" class="level2">
+<h2 data-anchor-id="ajuste-de-hiperparámetros">Ajuste de hiperparámetros</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> GridSearchCV</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>param_grid <span class="op">=</span> {</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"classifier__C"</span>: [</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0.01</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0.1</span>,</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        <span class="dv">10</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>search <span class="op">=</span> GridSearchCV(</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    estimator<span class="op">=</span>pipeline,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    param_grid<span class="op">=</span>param_grid,</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    cv<span class="op">=</span>cv,</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    scoring<span class="op">=</span><span class="st">"roc_auc"</span>,</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    n_jobs<span class="op">=-</span><span class="dv">1</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>search.fit(</span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    X_train,</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    y_train</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="predicción-frente-a-inferencia" class="level2">
+<h2 data-anchor-id="predicción-frente-a-inferencia">Predicción frente a inferencia</h2>
+<section id="predicción" class="level3">
+<h3 data-anchor-id="predicción">Predicción</h3>
+<p>Busca buenas predicciones en datos nuevos.</p>
+</section>
+<section id="inferencia" class="level3">
+<h3 data-anchor-id="inferencia">Inferencia</h3>
+<p>Busca entender asociaciones o estimar efectos.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un modelo predictivo no demuestra causalidad.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="evaluación-interna-y-externa" class="level2">
+<h2 data-anchor-id="evaluación-interna-y-externa">Evaluación interna y externa</h2>
+<section id="interna" class="level3">
+<h3 data-anchor-id="interna">Interna</h3>
+<ul>
+<li>Cross-validation.</li>
+<li>Holdout.</li>
+<li>Bootstrap.</li>
+</ul>
+</section>
+<section id="externa" class="level3">
+<h3 data-anchor-id="externa">Externa</h3>
+<ul>
+<li>Otro centro.</li>
+<li>Otro periodo.</li>
+<li>Otra población.</li>
+<li>Cohorte prospectiva.</li>
+</ul>
+</section>
+</section>
+<section id="datos-clínicos" class="level2">
+<h2 data-anchor-id="datos-clínicos">Datos clínicos</h2>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Aplicación clínica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El rendimiento del modelo debe interpretarse junto con el momento de uso, el coste de los errores y el workflow.</p>
+</div>
+</div>
+<p>Antes de desplegar un modelo debe evaluarse:</p>
+<ul>
+<li>Qué decisión modifica.</li>
+<li>Quién lo utilizará.</li>
+<li>Cuándo aparece la predicción.</li>
+<li>Qué ocurre ante una alerta.</li>
+<li>Qué coste tienen FP y FN.</li>
+<li>Cómo se monitoriza el drift.</li>
+</ul>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>No definir el target.</li>
+<li>No definir el momento de predicción.</li>
+<li>Mezclar pacientes entre train y test.</li>
+<li>Utilizar información futura.</li>
+<li>Evaluar solo en train.</li>
+<li>No comparar con baseline.</li>
+<li>Elegir modelo por una única métrica.</li>
+<li>Ajustar hiperparámetros con test.</li>
+<li>No evaluar calibración.</li>
+<li>Confundir importancia con causalidad.</li>
+<li>Elegir el modelo más complejo automáticamente.</li>
+</ul>
+</section>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Definir el problema.</li>
+<li>Definir regresión o clasificación.</li>
+<li>Definir unidad de análisis.</li>
+<li>Definir momento de predicción.</li>
+<li>Crear baseline.</li>
+<li>Preparar pipeline.</li>
+<li>Entrenar modelos simples.</li>
+<li>Validar con folds adecuados.</li>
+<li>Ajustar hiperparámetros.</li>
+<li>Comparar modelos.</li>
+<li>Evaluar una vez en test.</li>
+<li>Interpretar utilidad clínica.</li>
+</ol>
+</section>
+<section id="checklist-para-proyectos" class="level2">
+<h2 data-anchor-id="checklist-para-proyectos">Checklist para proyectos</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">He definido el target.</label></li>
+<li><label><input type="checkbox">He definido la unidad de análisis.</label></li>
+<li><label><input type="checkbox">He definido el momento de predicción.</label></li>
+<li><label><input type="checkbox">He identificado si es regresión o clasificación.</label></li>
+<li><label><input type="checkbox">He creado un baseline.</label></li>
+<li><label><input type="checkbox">He separado train y test.</label></li>
+<li><label><input type="checkbox">El preprocesamiento está dentro del pipeline.</label></li>
+<li><label><input type="checkbox">He usado validación cruzada adecuada.</label></li>
+<li><label><input type="checkbox">He comparado varios modelos.</label></li>
+<li><label><input type="checkbox">He revisado overfitting.</label></li>
+<li><label><input type="checkbox">He evaluado calibración cuando corresponde.</label></li>
+<li><label><input type="checkbox">He mantenido el test sin tocar.</label></li>
+<li><label><input type="checkbox">He considerado validación externa.</label></li>
+<li><label><input type="checkbox">He interpretado utilidad clínica.</label></li>
+<li><label><input type="checkbox">He documentado el modelo final.</label></li>
+</ul>
+</section>
+<section id="próximos-documentos" class="level2">
+<h2 data-anchor-id="próximos-documentos">Próximos documentos</h2>
+<p>Esta sección se completará con:</p>
+<ol type="1">
+<li>Regresión lineal.</li>
+<li>Regresión logística.</li>
+<li>Árboles de decisión.</li>
+<li>Random forest.</li>
+<li>Gradient boosting.</li>
+<li>Support Vector Machines.</li>
+<li>Comparación de modelos.</li>
+</ol>
 
 
 </section>

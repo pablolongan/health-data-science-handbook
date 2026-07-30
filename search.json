@@ -8804,7 +8804,7 @@
     "href": "supervised-learning/index.html",
     "title": "Aprendizaje supervisado",
     "section": "",
-    "text": "Esta sección reúne modelos que aprenden a predecir una variable objetivo a partir de ejemplos etiquetados.",
+    "text": "TipResumen en 30 segundos\n\n\n\nEl aprendizaje supervisado utiliza ejemplos con una respuesta conocida para aprender a predecir nuevos casos.\nLos dos grandes tipos de problema son:\n\nRegresión: predecir valores numéricos.\nClasificación: predecir categorías o probabilidades.\n\nEl objetivo no es memorizar train, sino generalizar a datos nuevos.",
     "crumbs": [
       "Sobre el proyecto",
       "Aprendizaje supervisado",
@@ -8812,11 +8812,323 @@
     ]
   },
   {
-    "objectID": "supervised-learning/index.html#contenidos-previstos",
-    "href": "supervised-learning/index.html#contenidos-previstos",
+    "objectID": "supervised-learning/index.html#qué-es-el-aprendizaje-supervisado",
+    "href": "supervised-learning/index.html#qué-es-el-aprendizaje-supervisado",
     "title": "Aprendizaje supervisado",
-    "section": "Contenidos previstos",
-    "text": "Contenidos previstos\nEsta sección se irá ampliando progresivamente con:\n\nFundamentos teóricos.\nCuándo utilizar cada técnica.\nCódigo listo para adaptar.\nInterpretación de resultados.\nErrores frecuentes.\nConsideraciones específicas en datos clínicos.",
+    "section": "¿Qué es el aprendizaje supervisado?",
+    "text": "¿Qué es el aprendizaje supervisado?\nEn aprendizaje supervisado se dispone de:\n\nVariables predictoras, también llamadas features.\nUna variable objetivo, también llamada target.\nEjemplos donde el target ya es conocido.\n\nEl modelo aprende una función:\n\\[\n\\hat{y} = f(X)\n\\]\ndonde:\n\n\\(X\\) contiene las variables predictoras.\n\\(y\\) es el valor real.\n\\(\\hat{y}\\) es la predicción.\n\\(f\\) es el modelo aprendido.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nEl modelo aprende a partir de ejemplos etiquetados.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#tipos-de-problemas",
+    "href": "supervised-learning/index.html#tipos-de-problemas",
+    "title": "Aprendizaje supervisado",
+    "section": "Tipos de problemas",
+    "text": "Tipos de problemas",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#regresión",
+    "href": "supervised-learning/index.html#regresión",
+    "title": "Aprendizaje supervisado",
+    "section": "Regresión",
+    "text": "Regresión\nLa regresión predice una variable numérica continua.\nEjemplos:\n\nDuración de estancia.\nCoste hospitalario.\nFracción de eyección.\nPresión arterial.\nEdad.\nNivel de biomarcador.\n\nEdad + diagnóstico + tratamiento\n                ↓\n        Días de ingreso",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#clasificación",
+    "href": "supervised-learning/index.html#clasificación",
+    "title": "Aprendizaje supervisado",
+    "section": "Clasificación",
+    "text": "Clasificación\nLa clasificación predice una categoría.\nEjemplos:\n\nReingreso: sí o no.\nEvento adverso: sí o no.\nRiesgo bajo, medio o alto.\nDiagnóstico A, B o C.\nRespuesta al tratamiento.\n\nEdad + analítica + tratamiento\n                ↓\n      Evento cardiovascular",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#clasificación-probabilística",
+    "href": "supervised-learning/index.html#clasificación-probabilística",
+    "title": "Aprendizaje supervisado",
+    "section": "Clasificación probabilística",
+    "text": "Clasificación probabilística\nMuchos modelos generan una probabilidad:\nRiesgo predicho = 0.27\nDespués se aplica un umbral:\n0.27 ≥ 0.20\n→ clase positiva",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#variables-predictoras-y-target",
+    "href": "supervised-learning/index.html#variables-predictoras-y-target",
+    "title": "Aprendizaje supervisado",
+    "section": "Variables predictoras y target",
+    "text": "Variables predictoras y target\nfeatures = [\n    \"age\",\n    \"weight\",\n    \"troponin\",\n    \"ntprobnp\",\n    \"center\"\n]\n\ntarget = \"cardiotoxicity\"\n\nX = df[features]\ny = df[target]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#unidad-de-análisis",
+    "href": "supervised-learning/index.html#unidad-de-análisis",
+    "title": "Aprendizaje supervisado",
+    "section": "Unidad de análisis",
+    "text": "Unidad de análisis\nCada fila puede representar:\n\nPaciente.\nVisita.\nIngreso.\nEpisodio.\nPrueba.\nVentana temporal.\n\n\n\n\n\n\n\nWarningImportante\n\n\n\nLa unidad de análisis determina cómo deben hacerse el split, la validación y la interpretación.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#momento-de-predicción",
+    "href": "supervised-learning/index.html#momento-de-predicción",
+    "title": "Aprendizaje supervisado",
+    "section": "Momento de predicción",
+    "text": "Momento de predicción\nDebe definirse cuándo se genera la predicción.\nEjemplos:\n\nEn el ingreso.\nA las 24 horas.\nAl inicio del tratamiento.\nAntes de una intervención.\n\nSolo pueden utilizarse variables disponibles en ese momento.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#flujo-de-trabajo",
+    "href": "supervised-learning/index.html#flujo-de-trabajo",
+    "title": "Aprendizaje supervisado",
+    "section": "Flujo de trabajo",
+    "text": "Flujo de trabajo\nDefinir pregunta\n      ↓\nDefinir target\n      ↓\nDefinir unidad de análisis\n      ↓\nDefinir momento de predicción\n      ↓\nSeparar train / validation / test\n      ↓\nPreprocesamiento\n      ↓\nEntrenamiento\n      ↓\nValidación\n      ↓\nSelección de modelo\n      ↓\nEvaluación final",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#entrenar-y-predecir",
+    "href": "supervised-learning/index.html#entrenar-y-predecir",
+    "title": "Aprendizaje supervisado",
+    "section": "Entrenar y predecir",
+    "text": "Entrenar y predecir\nmodel.fit(\n    X_train,\n    y_train\n)\n\ny_pred = model.predict(\n    X_test\n)\nEn clasificación probabilística:\ny_probability = model.predict_proba(\n    X_test\n)[:, 1]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#evaluar-regresión",
+    "href": "supervised-learning/index.html#evaluar-regresión",
+    "title": "Aprendizaje supervisado",
+    "section": "Evaluar regresión",
+    "text": "Evaluar regresión\nfrom sklearn.metrics import mean_absolute_error\nfrom sklearn.metrics import root_mean_squared_error\nfrom sklearn.metrics import r2_score\n\nmae = mean_absolute_error(\n    y_test,\n    y_pred\n)\n\nrmse = root_mean_squared_error(\n    y_test,\n    y_pred\n)\n\nr2 = r2_score(\n    y_test,\n    y_pred\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#evaluar-clasificación",
+    "href": "supervised-learning/index.html#evaluar-clasificación",
+    "title": "Aprendizaje supervisado",
+    "section": "Evaluar clasificación",
+    "text": "Evaluar clasificación\nfrom sklearn.metrics import roc_auc_score\nfrom sklearn.metrics import average_precision_score\nfrom sklearn.metrics import balanced_accuracy_score\n\nroc_auc = roc_auc_score(\n    y_test,\n    y_probability\n)\n\naverage_precision = average_precision_score(\n    y_test,\n    y_probability\n)\n\nbalanced_accuracy = balanced_accuracy_score(\n    y_test,\n    y_pred\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#modelos-incluidos-en-esta-sección",
+    "href": "supervised-learning/index.html#modelos-incluidos-en-esta-sección",
+    "title": "Aprendizaje supervisado",
+    "section": "Modelos incluidos en esta sección",
+    "text": "Modelos incluidos en esta sección\n\nRegresión lineal\nModelo interpretable para relaciones lineales.\n\n\nRegresión logística\nModelo de clasificación que estima probabilidades.\n\n\nÁrboles de decisión\nModelos basados en reglas y particiones.\n\n\nRandom forest\nEnsemble de múltiples árboles mediante bagging.\n\n\nGradient boosting\nÁrboles secuenciales que corrigen errores anteriores.\n\n\nSupport Vector Machines\nModelos que buscan fronteras de máximo margen.\n\n\nComparación de modelos\nPágina final para comparar rendimiento, calibración, interpretabilidad y coste.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#interpretabilidad-frente-a-complejidad",
+    "href": "supervised-learning/index.html#interpretabilidad-frente-a-complejidad",
+    "title": "Aprendizaje supervisado",
+    "section": "Interpretabilidad frente a complejidad",
+    "text": "Interpretabilidad frente a complejidad\n\n\n\nModelo\nInterpretabilidad\nNo linealidad\nEscalado\n\n\n\n\nRegresión lineal\nAlta\nBaja\nRecomendado con regularización\n\n\nRegresión logística\nAlta\nBaja\nRecomendado\n\n\nÁrbol\nAlta-moderada\nSí\nNo necesario\n\n\nRandom forest\nModerada-baja\nSí\nNo necesario\n\n\nGradient boosting\nBaja\nSí\nNormalmente no\n\n\nSVM lineal\nModerada\nBaja\nNecesario\n\n\nSVM con kernel\nBaja\nSí\nNecesario",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#no-existe-un-mejor-modelo-universal",
+    "href": "supervised-learning/index.html#no-existe-un-mejor-modelo-universal",
+    "title": "Aprendizaje supervisado",
+    "section": "No existe un mejor modelo universal",
+    "text": "No existe un mejor modelo universal\nLa elección depende de:\n\nTipo de target.\nTamaño de muestra.\nNúmero de variables.\nNo linealidad.\nDesbalance.\nNecesidad de interpretación.\nCoste computacional.\nRequisitos clínicos.\n\n\n\n\n\n\n\nImportantRegla práctica\n\n\n\nEmpieza por un baseline simple antes de utilizar modelos complejos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#baseline",
+    "href": "supervised-learning/index.html#baseline",
+    "title": "Aprendizaje supervisado",
+    "section": "Baseline",
+    "text": "Baseline\n\nClasificación\nfrom sklearn.dummy import DummyClassifier\n\nbaseline = DummyClassifier(\n    strategy=\"most_frequent\"\n)\n\n\nRegresión\nfrom sklearn.dummy import DummyRegressor\n\nbaseline = DummyRegressor(\n    strategy=\"mean\"\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#deep-learning",
+    "href": "supervised-learning/index.html#deep-learning",
+    "title": "Aprendizaje supervisado",
+    "section": "Deep learning",
+    "text": "Deep learning\nLas redes neuronales también pueden utilizarse para clasificación y regresión.\nSe estudian en una sección separada porque requieren conceptos propios:\n\nCapas.\nActivaciones.\nBackpropagation.\nOptimizadores.\nBatches.\nEpochs.\nRegularización.\nHardware.\n\nIr a Deep Learning",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#pipeline-completo",
+    "href": "supervised-learning/index.html#pipeline-completo",
+    "title": "Aprendizaje supervisado",
+    "section": "Pipeline completo",
+    "text": "Pipeline completo\nfrom sklearn.pipeline import Pipeline\nfrom sklearn.linear_model import LogisticRegression\n\npipeline = Pipeline(\n    steps=[\n        (\n            \"preprocessor\",\n            preprocessor\n        ),\n        (\n            \"classifier\",\n            LogisticRegression(\n                max_iter=1000,\n                random_state=42\n            )\n        )\n    ]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#validación-cruzada",
+    "href": "supervised-learning/index.html#validación-cruzada",
+    "title": "Aprendizaje supervisado",
+    "section": "Validación cruzada",
+    "text": "Validación cruzada\nfrom sklearn.model_selection import cross_validate\nfrom sklearn.model_selection import StratifiedKFold\n\ncv = StratifiedKFold(\n    n_splits=5,\n    shuffle=True,\n    random_state=42\n)\n\nscores = cross_validate(\n    estimator=pipeline,\n    X=X,\n    y=y,\n    cv=cv,\n    scoring={\n        \"roc_auc\": \"roc_auc\",\n        \"average_precision\": \"average_precision\"\n    }\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#ajuste-de-hiperparámetros",
+    "href": "supervised-learning/index.html#ajuste-de-hiperparámetros",
+    "title": "Aprendizaje supervisado",
+    "section": "Ajuste de hiperparámetros",
+    "text": "Ajuste de hiperparámetros\nfrom sklearn.model_selection import GridSearchCV\n\nparam_grid = {\n    \"classifier__C\": [\n        0.01,\n        0.1,\n        1,\n        10\n    ]\n}\n\nsearch = GridSearchCV(\n    estimator=pipeline,\n    param_grid=param_grid,\n    cv=cv,\n    scoring=\"roc_auc\",\n    n_jobs=-1\n)\n\nsearch.fit(\n    X_train,\n    y_train\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#predicción-frente-a-inferencia",
+    "href": "supervised-learning/index.html#predicción-frente-a-inferencia",
+    "title": "Aprendizaje supervisado",
+    "section": "Predicción frente a inferencia",
+    "text": "Predicción frente a inferencia\n\nPredicción\nBusca buenas predicciones en datos nuevos.\n\n\nInferencia\nBusca entender asociaciones o estimar efectos.\n\n\n\n\n\n\nWarningImportante\n\n\n\nUn modelo predictivo no demuestra causalidad.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#evaluación-interna-y-externa",
+    "href": "supervised-learning/index.html#evaluación-interna-y-externa",
+    "title": "Aprendizaje supervisado",
+    "section": "Evaluación interna y externa",
+    "text": "Evaluación interna y externa\n\nInterna\n\nCross-validation.\nHoldout.\nBootstrap.\n\n\n\nExterna\n\nOtro centro.\nOtro periodo.\nOtra población.\nCohorte prospectiva.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#datos-clínicos",
+    "href": "supervised-learning/index.html#datos-clínicos",
+    "title": "Aprendizaje supervisado",
+    "section": "Datos clínicos",
+    "text": "Datos clínicos\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nEl rendimiento del modelo debe interpretarse junto con el momento de uso, el coste de los errores y el workflow.\n\n\nAntes de desplegar un modelo debe evaluarse:\n\nQué decisión modifica.\nQuién lo utilizará.\nCuándo aparece la predicción.\nQué ocurre ante una alerta.\nQué coste tienen FP y FN.\nCómo se monitoriza el drift.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#errores-frecuentes",
+    "href": "supervised-learning/index.html#errores-frecuentes",
+    "title": "Aprendizaje supervisado",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nNo definir el target.\nNo definir el momento de predicción.\nMezclar pacientes entre train y test.\nUtilizar información futura.\nEvaluar solo en train.\nNo comparar con baseline.\nElegir modelo por una única métrica.\nAjustar hiperparámetros con test.\nNo evaluar calibración.\nConfundir importancia con causalidad.\nElegir el modelo más complejo automáticamente.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#flujo-recomendado",
+    "href": "supervised-learning/index.html#flujo-recomendado",
+    "title": "Aprendizaje supervisado",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nDefinir el problema.\nDefinir regresión o clasificación.\nDefinir unidad de análisis.\nDefinir momento de predicción.\nCrear baseline.\nPreparar pipeline.\nEntrenar modelos simples.\nValidar con folds adecuados.\nAjustar hiperparámetros.\nComparar modelos.\nEvaluar una vez en test.\nInterpretar utilidad clínica.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#checklist-para-proyectos",
+    "href": "supervised-learning/index.html#checklist-para-proyectos",
+    "title": "Aprendizaje supervisado",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe definido el target.\nHe definido la unidad de análisis.\nHe definido el momento de predicción.\nHe identificado si es regresión o clasificación.\nHe creado un baseline.\nHe separado train y test.\nEl preprocesamiento está dentro del pipeline.\nHe usado validación cruzada adecuada.\nHe comparado varios modelos.\nHe revisado overfitting.\nHe evaluado calibración cuando corresponde.\nHe mantenido el test sin tocar.\nHe considerado validación externa.\nHe interpretado utilidad clínica.\nHe documentado el modelo final.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Aprendizaje supervisado",
+      "Introducción"
+    ]
+  },
+  {
+    "objectID": "supervised-learning/index.html#próximos-documentos",
+    "href": "supervised-learning/index.html#próximos-documentos",
+    "title": "Aprendizaje supervisado",
+    "section": "Próximos documentos",
+    "text": "Próximos documentos\nEsta sección se completará con:\n\nRegresión lineal.\nRegresión logística.\nÁrboles de decisión.\nRandom forest.\nGradient boosting.\nSupport Vector Machines.\nComparación de modelos.",
     "crumbs": [
       "Sobre el proyecto",
       "Aprendizaje supervisado",
