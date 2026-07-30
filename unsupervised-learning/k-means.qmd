@@ -1,0 +1,1150 @@
+---
+title: "K-means"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+K-means divide las observaciones en \(K\) grupos.
+
+Cada grupo se representa mediante un centroide.
+
+El algoritmo intenta minimizar la distancia entre cada observación y el centroide de su cluster.
+
+Es rápido y fácil de aplicar, pero funciona mejor cuando los grupos son compactos, aproximadamente esféricos y de tamaño similar.
+:::
+
+## ¿Qué es K-means?
+
+K-means es un algoritmo de clustering no supervisado.
+
+Su objetivo es asignar cada observación a uno de \(K\) clusters.
+
+```text
+Observaciones
+     ↓
+K-means
+     ↓
+Cluster 0
+Cluster 1
+Cluster 2
+```
+
+Cada cluster se representa mediante un centroide.
+
+## Centroide
+
+El centroide es la media de las observaciones asignadas a un cluster.
+
+Para dos variables:
+
+$$
+\mu_k
+=
+\left(
+\bar{x}_{1k},
+\bar{x}_{2k}
+\right)
+$$
+
+En más dimensiones, el centroide contiene la media de cada variable.
+
+::: {.callout-note}
+## Idea clave
+
+K-means agrupa por proximidad a centroides.
+:::
+
+## Objetivo matemático
+
+K-means intenta minimizar la suma de distancias cuadráticas dentro de cada cluster.
+
+$$
+\sum_{k=1}^{K}
+\sum_{x_i \in C_k}
+\left\|
+x_i - \mu_k
+\right\|^2
+$$
+
+donde:
+
+- \(K\) es el número de clusters.
+- \(C_k\) es el conjunto de observaciones del cluster \(k\).
+- \(\mu_k\) es su centroide.
+- \(x_i\) es una observación.
+
+## Cómo funciona
+
+El proceso básico es:
+
+1. Inicializar \(K\) centroides.
+2. Asignar cada observación al centroide más cercano.
+3. Recalcular cada centroide.
+4. Repetir hasta convergencia.
+
+```text
+Inicialización
+     ↓
+Asignación
+     ↓
+Actualización de centroides
+     ↓
+Repetición
+     ↓
+Convergencia
+```
+
+## Ejemplo conceptual
+
+Supongamos que utilizamos:
+
+- Edad.
+- Troponina.
+- NT-proBNP.
+- FEVI.
+
+K-means podría producir:
+
+```text
+Cluster 0
+- menor edad
+- biomarcadores bajos
+- FEVI preservada
+
+Cluster 1
+- biomarcadores elevados
+- FEVI reducida
+
+Cluster 2
+- perfil intermedio
+```
+
+Estos nombres no los genera el algoritmo.
+
+Deben interpretarse después.
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "troponin",
+    "ntprobnp",
+    "lvef",
+    "gls"
+]
+
+X = df[features]
+```
+
+## Imputar valores ausentes
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+X_imputed = imputer.fit_transform(
+    X
+)
+```
+
+## Escalar
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(
+    X_imputed
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+K-means depende de distancias, por lo que el escalado suele ser imprescindible.
+:::
+
+## Entrenar K-means
+
+```python
+from sklearn.cluster import KMeans
+
+model = KMeans(
+    n_clusters=3,
+    random_state=42,
+    n_init="auto"
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+## Añadir clusters al dataframe
+
+```python
+df_clustered = df.copy()
+
+df_clustered["cluster"] = clusters
+```
+
+## Centroides
+
+```python
+centroids_scaled = (
+    model.cluster_centers_
+)
+```
+
+Estos centroides están en escala estandarizada.
+
+## Recuperar unidades originales
+
+```python
+centroids_original = (
+    scaler.inverse_transform(
+        centroids_scaled
+    )
+)
+```
+
+```python
+import pandas as pd
+
+centroid_table = pd.DataFrame(
+    centroids_original,
+    columns=features
+)
+
+centroid_table["cluster"] = (
+    centroid_table.index
+)
+
+display(
+    centroid_table
+)
+```
+
+## Etiquetas de cluster
+
+Las etiquetas:
+
+```text
+0
+1
+2
+```
+
+no tienen un orden clínico.
+
+El cluster 2 no es necesariamente más grave que el cluster 1.
+
+::: {.callout-note}
+## Idea clave
+
+Los números de cluster son identificadores arbitrarios.
+:::
+
+## Distancia al centroide
+
+Puede calcularse con:
+
+```python
+distances = model.transform(
+    X_scaled
+)
+```
+
+Cada fila contiene la distancia a cada centroide.
+
+## Cluster asignado
+
+```python
+assigned_cluster = distances.argmin(
+    axis=1
+)
+```
+
+## Inercia
+
+La inercia es la suma de distancias cuadráticas dentro de los clusters.
+
+```python
+print(
+    model.inertia_
+)
+```
+
+Valores más bajos indican grupos más compactos.
+
+Pero la inercia siempre disminuye al aumentar \(K\).
+
+## Elegir el número de clusters
+
+No existe una única regla perfecta.
+
+Puede combinarse:
+
+- Método del codo.
+- Silhouette score.
+- Davies-Bouldin.
+- Calinski-Harabasz.
+- Estabilidad.
+- Interpretabilidad clínica.
+
+## Método del codo
+
+```python
+import matplotlib.pyplot as plt
+
+k_values = range(
+    2,
+    11
+)
+
+inertias = []
+
+for k in k_values:
+
+    model = KMeans(
+        n_clusters=k,
+        random_state=42,
+        n_init="auto"
+    )
+
+    model.fit(
+        X_scaled
+    )
+
+    inertias.append(
+        model.inertia_
+    )
+
+plt.figure(
+    figsize=(8, 5)
+)
+
+plt.plot(
+    k_values,
+    inertias,
+    marker="o"
+)
+
+plt.xlabel(
+    "Número de clusters"
+)
+
+plt.ylabel(
+    "Inercia"
+)
+
+plt.title(
+    "Método del codo"
+)
+
+plt.show()
+```
+
+## Interpretar el codo
+
+Se busca un punto donde añadir más clusters produce mejoras pequeñas.
+
+```text
+K pequeño
+→ grupos demasiado generales
+
+K grande
+→ grupos demasiado fragmentados
+```
+
+::: {.callout-warning}
+## Limitación
+
+A veces no existe un codo claro.
+:::
+
+## Silhouette score
+
+```python
+from sklearn.metrics import silhouette_score
+
+score = silhouette_score(
+    X_scaled,
+    clusters
+)
+
+print(
+    score
+)
+```
+
+Interpretación aproximada:
+
+```text
+Cercano a 1
+→ clusters compactos y separados
+
+Cercano a 0
+→ clusters solapados
+
+Negativo
+→ asignaciones poco adecuadas
+```
+
+## Comparar varios valores de K
+
+```python
+from sklearn.metrics import davies_bouldin_score
+from sklearn.metrics import calinski_harabasz_score
+
+rows = []
+
+for k in range(
+    2,
+    11
+):
+
+    model = KMeans(
+        n_clusters=k,
+        random_state=42,
+        n_init="auto"
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    rows.append(
+        {
+            "n_clusters": k,
+            "inertia": model.inertia_,
+            "silhouette": silhouette_score(
+                X_scaled,
+                labels
+            ),
+            "davies_bouldin": davies_bouldin_score(
+                X_scaled,
+                labels
+            ),
+            "calinski_harabasz": calinski_harabasz_score(
+                X_scaled,
+                labels
+            )
+        }
+    )
+
+evaluation_table = pd.DataFrame(
+    rows
+)
+
+display(
+    evaluation_table
+)
+```
+
+## Inicialización
+
+K-means puede converger a soluciones distintas según los centroides iniciales.
+
+Una inicialización habitual es:
+
+```python
+init="k-means++"
+```
+
+```python
+model = KMeans(
+    n_clusters=3,
+    init="k-means++",
+    random_state=42,
+    n_init="auto"
+)
+```
+
+K-means++ intenta elegir centroides iniciales bien separados.
+
+## Múltiples inicializaciones
+
+`n_init` controla cuántas soluciones iniciales se prueban.
+
+```python
+model = KMeans(
+    n_clusters=3,
+    n_init=20,
+    random_state=42
+)
+```
+
+El algoritmo conserva la mejor solución según inercia.
+
+## Random state
+
+```python
+random_state=42
+```
+
+Permite reproducir la inicialización.
+
+No garantiza que los clusters tengan significado clínico.
+
+## Convergencia
+
+```python
+print(
+    model.n_iter_
+)
+```
+
+Indica cuántas iteraciones fueron necesarias.
+
+## Máximo de iteraciones
+
+```python
+model = KMeans(
+    n_clusters=3,
+    max_iter=500,
+    random_state=42,
+    n_init="auto"
+)
+```
+
+## Tolerancia
+
+```python
+tol=1e-4
+```
+
+Controla cuándo se considera que los centroides han convergido.
+
+## Pipeline
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "kmeans",
+            KMeans(
+                n_clusters=3,
+                random_state=42,
+                n_init="auto"
+            )
+        )
+    ]
+)
+```
+
+## Obtener clusters desde pipeline
+
+```python
+clusters = pipeline.fit_predict(
+    X
+)
+```
+
+## Variables categóricas
+
+K-means trabaja con distancias euclídeas y está pensado principalmente para variables numéricas.
+
+One-hot encoding puede utilizarse, pero debe hacerse con cautela.
+
+```python
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+```
+
+## Problema con categóricas
+
+Tras one-hot encoding:
+
+- Las variables con muchas categorías pueden dominar.
+- La distancia euclídea puede perder sentido.
+- Los centroides no representan categorías reales.
+
+Para datos mixtos pueden considerarse otros métodos:
+
+- K-prototypes.
+- Gower distance.
+- Clustering jerárquico.
+- Modelos probabilísticos.
+
+## Variables correlacionadas
+
+Si varias variables contienen información muy similar, pueden pesar de forma excesiva.
+
+Ejemplos:
+
+- Peso y superficie corporal.
+- FEVI Simpson y FEVI modo M.
+- Varios biomarcadores correlacionados.
+
+Puede considerarse:
+
+- Eliminar redundancias.
+- Seleccionar variables.
+- Aplicar PCA.
+- Revisar correlaciones.
+
+## PCA antes de K-means
+
+```python
+from sklearn.decomposition import PCA
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "pca",
+            PCA(
+                n_components=0.90
+            )
+        ),
+        (
+            "kmeans",
+            KMeans(
+                n_clusters=3,
+                random_state=42,
+                n_init="auto"
+            )
+        )
+    ]
+)
+```
+
+Ventajas:
+
+- Reduce dimensionalidad.
+- Elimina parte de la redundancia.
+- Puede reducir ruido.
+
+Limitaciones:
+
+- Dificulta interpretación.
+- Puede eliminar variables clínicamente relevantes.
+- Los componentes son combinaciones de variables.
+
+## Visualizar con PCA
+
+```python
+pca = PCA(
+    n_components=2
+)
+
+X_pca = pca.fit_transform(
+    X_scaled
+)
+```
+
+```python
+plt.figure(
+    figsize=(8, 6)
+)
+
+plt.scatter(
+    X_pca[:, 0],
+    X_pca[:, 1],
+    c=clusters
+)
+
+plt.xlabel(
+    "PC1"
+)
+
+plt.ylabel(
+    "PC2"
+)
+
+plt.title(
+    "Clusters de K-means proyectados en PCA"
+)
+
+plt.show()
+```
+
+::: {.callout-warning}
+## Precaución
+
+Una proyección en dos dimensiones puede ocultar información del espacio original.
+:::
+
+## Visualizar centroides en PCA
+
+```python
+centroids_pca = pca.transform(
+    model.cluster_centers_
+)
+
+plt.figure(
+    figsize=(8, 6)
+)
+
+plt.scatter(
+    X_pca[:, 0],
+    X_pca[:, 1],
+    c=clusters
+)
+
+plt.scatter(
+    centroids_pca[:, 0],
+    centroids_pca[:, 1],
+    marker="X",
+    s=200
+)
+
+plt.xlabel(
+    "PC1"
+)
+
+plt.ylabel(
+    "PC2"
+)
+
+plt.title(
+    "Clusters y centroides"
+)
+
+plt.show()
+```
+
+## Describir los clusters
+
+```python
+cluster_summary = (
+    df_clustered
+    .groupby("cluster")[features]
+    .agg(
+        [
+            "count",
+            "mean",
+            "median",
+            "std"
+        ]
+    )
+)
+
+display(
+    cluster_summary
+)
+```
+
+## Tamaño de los clusters
+
+```python
+cluster_sizes = (
+    df_clustered["cluster"]
+    .value_counts()
+    .sort_index()
+)
+
+display(
+    cluster_sizes
+)
+```
+
+Clusters muy pequeños pueden representar:
+
+- Un subtipo raro.
+- Ruido.
+- Outliers.
+- Un valor de \(K\) demasiado alto.
+
+## Distribución de categóricas
+
+```python
+diagnosis_distribution = pd.crosstab(
+    df_clustered["cluster"],
+    df_clustered["diagnosis"],
+    normalize="index"
+)
+
+display(
+    diagnosis_distribution
+)
+```
+
+## Radar chart
+
+Los perfiles pueden visualizarse mediante gráficos radiales.
+
+Sin embargo, las tablas y heatmaps suelen ser más fáciles de comparar.
+
+## Heatmap de centroides
+
+```python
+centroid_scaled_table = pd.DataFrame(
+    model.cluster_centers_,
+    columns=features
+)
+
+plt.figure(
+    figsize=(10, 5)
+)
+
+plt.imshow(
+    centroid_scaled_table,
+    aspect="auto"
+)
+
+plt.xticks(
+    range(
+        len(features)
+    ),
+    features,
+    rotation=45,
+    ha="right"
+)
+
+plt.yticks(
+    range(
+        len(centroid_scaled_table)
+    ),
+    centroid_scaled_table.index
+)
+
+plt.xlabel(
+    "Variable"
+)
+
+plt.ylabel(
+    "Cluster"
+)
+
+plt.title(
+    "Perfil estandarizado de centroides"
+)
+
+plt.colorbar(
+    label="Valor estandarizado"
+)
+
+plt.tight_layout()
+
+plt.show()
+```
+
+## Estabilidad ante seeds
+
+```python
+from sklearn.metrics import adjusted_rand_score
+
+clusterings = []
+
+for seed in range(
+    20
+):
+
+    model = KMeans(
+        n_clusters=3,
+        random_state=seed,
+        n_init=10
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    clusterings.append(
+        labels
+    )
+```
+
+```python
+agreements = []
+
+reference = clusterings[0]
+
+for labels in clusterings[1:]:
+
+    agreements.append(
+        adjusted_rand_score(
+            reference,
+            labels
+        )
+    )
+
+print(
+    sum(agreements)
+    /
+    len(agreements)
+)
+```
+
+## Estabilidad mediante bootstrap
+
+Puede repetirse el clustering en submuestras.
+
+Después se evalúa si los mismos pacientes tienden a agruparse juntos.
+
+Esto es especialmente importante cuando:
+
+- La muestra es pequeña.
+- Los clusters son solapados.
+- Existen muchas variables.
+
+## Validación con variables externas
+
+Una vez creados los clusters puede evaluarse su relación con outcomes externos.
+
+Ejemplos:
+
+- Mortalidad.
+- Reingreso.
+- Cardiotoxicidad posterior.
+- Respuesta al tratamiento.
+- Duración de estancia.
+
+```python
+outcome_table = pd.crosstab(
+    df_clustered["cluster"],
+    df_clustered["future_event"],
+    normalize="index"
+)
+
+display(
+    outcome_table
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+La variable externa no debe haber sido utilizada para construir los clusters.
+:::
+
+## Limitaciones geométricas
+
+K-means funciona mejor cuando los clusters son:
+
+- Compactos.
+- Aproximadamente esféricos.
+- De tamaño similar.
+- De densidad similar.
+
+Puede fallar cuando:
+
+- Los grupos tienen formas curvas.
+- Existen densidades distintas.
+- Hay clusters muy pequeños.
+- Existen muchos outliers.
+- Las variables no siguen una geometría euclídea útil.
+
+## Ejemplo de forma problemática
+
+```text
+○ ○ ○ ○ ○
+        ●
+      ●
+    ●
+  ●
+●
+```
+
+Dos grupos curvos pueden ser difíciles de representar con centroides.
+
+## Sensibilidad a outliers
+
+Un outlier puede desplazar el centroide.
+
+```text
+Cluster compacto
++
+Observación extrema
+→ centroide desplazado
+```
+
+Puede revisarse:
+
+- Distribución de variables.
+- Robust scaling.
+- Winsorization justificada.
+- Algoritmos alternativos.
+- K-medoids.
+
+## K-medoids
+
+K-medoids utiliza observaciones reales como centros.
+
+Es más robusto ante outliers, pero suele ser más costoso.
+
+## MiniBatchKMeans
+
+Para datasets grandes:
+
+```python
+from sklearn.cluster import MiniBatchKMeans
+
+model = MiniBatchKMeans(
+    n_clusters=3,
+    batch_size=1024,
+    random_state=42,
+    n_init="auto"
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+Ventajas:
+
+- Más rápido.
+- Menor memoria.
+- Aproximación útil en grandes volúmenes.
+
+## Nuevas observaciones
+
+K-means permite asignar nuevos casos al centroide más cercano.
+
+```python
+new_clusters = model.predict(
+    X_new_scaled
+)
+```
+
+El preprocesamiento debe ser exactamente el mismo que en entrenamiento.
+
+## Drift de clusters
+
+Con el tiempo puede cambiar:
+
+- La distribución de variables.
+- El tamaño de los clusters.
+- La distancia a centroides.
+- El perfil clínico de cada grupo.
+
+Debe monitorizarse cuando se usa de forma operativa.
+
+## K-means no es clasificación
+
+Aunque `predict()` asigne un cluster, no significa que exista una etiqueta real.
+
+```text
+Cluster 0
+≠
+Diagnóstico 0
+```
+
+::: {.callout-caution}
+## Precaución
+
+No debe tratarse un cluster exploratorio como una categoría clínica validada.
+:::
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+K-means puede generar hipótesis sobre perfiles de pacientes, pero los grupos deben validarse antes de utilizarlos para tomar decisiones.
+:::
+
+Debe revisarse:
+
+- Plausibilidad de los centroides.
+- Tamaño de cada cluster.
+- Estabilidad.
+- Reproducibilidad.
+- Outcomes externos.
+- Utilidad clínica.
+- Generalización entre centros.
+- Sensibilidad a variables incluidas.
+
+## Errores frecuentes
+
+- No escalar.
+- Elegir \(K\) solo por el codo.
+- Interpretar etiquetas como ordinales.
+- No revisar estabilidad.
+- Usar variables categóricas sin cautela.
+- Incluir identificadores.
+- Incluir outcomes futuros.
+- Ignorar outliers.
+- Elegir variables redundantes.
+- Interpretar clusters como diagnósticos.
+- Validar en los mismos datos sin replicación.
+- Confiar solo en una proyección 2D.
+
+## Flujo recomendado
+
+1. Definir objetivo exploratorio.
+2. Definir unidad de análisis.
+3. Seleccionar variables.
+4. Imputar valores ausentes.
+5. Escalar.
+6. Probar varios valores de \(K\).
+7. Comparar métricas.
+8. Revisar estabilidad.
+9. Describir centroides.
+10. Validar con outcomes externos.
+11. Replicar en otra cohorte.
+12. Interpretar clínicamente.
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad de análisis.
+- [ ] He justificado las variables.
+- [ ] He eliminado identificadores.
+- [ ] He imputado.
+- [ ] He escalado.
+- [ ] He probado varios valores de \(K\).
+- [ ] He revisado inercia.
+- [ ] He calculado silhouette score.
+- [ ] He revisado estabilidad.
+- [ ] He inspeccionado tamaños.
+- [ ] He descrito centroides.
+- [ ] He revisado outliers.
+- [ ] He validado con variables externas.
+- [ ] He considerado una cohorte independiente.
+- [ ] He evitado interpretar clusters como diagnósticos.
+
+## Recursos
+
+### Documentación
+
+- `KMeans`.
+- `MiniBatchKMeans`.
+- `StandardScaler`.
+- `silhouette_score`.
+- `davies_bouldin_score`.
+- `calinski_harabasz_score`.
+- `adjusted_rand_score`.
+- `PCA`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus valores de \(K\), centroides, métricas, perfiles clínicos y decisiones metodológicas.

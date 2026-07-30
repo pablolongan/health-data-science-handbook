@@ -2,15 +2,1074 @@
 title: "Aprendizaje no supervisado"
 ---
 
-Esta sección reúne técnicas para descubrir patrones, grupos y estructuras sin una variable objetivo.
+::: {.callout-tip}
+## Resumen en 30 segundos
 
-## Contenidos previstos
+El aprendizaje no supervisado trabaja con datos sin una variable objetivo conocida.
 
-Esta sección se irá ampliando progresivamente con:
+Se utiliza para descubrir estructura en los datos:
 
-- Fundamentos teóricos.
-- Cuándo utilizar cada técnica.
-- Código listo para adaptar.
-- Interpretación de resultados.
-- Errores frecuentes.
-- Consideraciones específicas en datos clínicos.
+- Agrupar observaciones.
+- Reducir dimensionalidad.
+- Detectar anomalías.
+- Explorar patrones latentes.
+- Visualizar poblaciones complejas.
+
+No predice necesariamente una etiqueta clínica conocida.
+:::
+
+## ¿Qué es el aprendizaje no supervisado?
+
+En aprendizaje no supervisado se dispone de variables predictoras, pero no de un target conocido.
+
+```text
+Datos sin etiqueta
+        ↓
+Algoritmo no supervisado
+        ↓
+Estructura, grupos o representaciones
+```
+
+Ejemplos:
+
+- Identificar perfiles de pacientes.
+- Encontrar subtipos clínicos.
+- Agrupar tratamientos.
+- Detectar observaciones atípicas.
+- Resumir cientos de variables.
+- Visualizar datos de alta dimensión.
+
+## Diferencia con aprendizaje supervisado
+
+| Aspecto | Supervisado | No supervisado |
+|---|---|---|
+| Target conocido | Sí | No |
+| Objetivo | Predecir | Descubrir estructura |
+| Evaluación | Métricas contra y real | Métricas internas e interpretación |
+| Ejemplo | Predecir reingreso | Agrupar perfiles clínicos |
+| Riesgo principal | Overfitting | Encontrar patrones sin utilidad real |
+
+::: {.callout-note}
+## Idea clave
+
+El algoritmo puede encontrar grupos matemáticamente claros que no tengan significado clínico.
+:::
+
+## Tipos principales
+
+## Clustering
+
+Agrupa observaciones similares.
+
+Ejemplo:
+
+```text
+Pacientes
+   │
+   ├── Grupo 1: bajo riesgo
+   ├── Grupo 2: inflamatorio
+   └── Grupo 3: deterioro funcional
+```
+
+Algoritmos habituales:
+
+- K-means.
+- Clustering jerárquico.
+- DBSCAN.
+- Gaussian Mixture Models.
+- HDBSCAN.
+
+## Reducción dimensional
+
+Transforma muchas variables en menos dimensiones.
+
+Ejemplo:
+
+```text
+50 variables
+     ↓
+2 componentes principales
+```
+
+Métodos habituales:
+
+- PCA.
+- t-SNE.
+- UMAP.
+- Autoencoders.
+
+## Detección de anomalías
+
+Busca observaciones poco frecuentes o distintas al resto.
+
+Aplicaciones:
+
+- Errores de datos.
+- Casos clínicos raros.
+- Fallos de sensores.
+- Episodios inusuales.
+- Posible fraude.
+
+## Representaciones latentes
+
+Algunos métodos buscan variables ocultas que expliquen patrones observados.
+
+Ejemplos:
+
+- Factores latentes.
+- Componentes principales.
+- Embeddings.
+- Autoencoders.
+
+## Flujo de trabajo
+
+```text
+Definir objetivo exploratorio
+        ↓
+Seleccionar variables
+        ↓
+Limpiar datos
+        ↓
+Escalar
+        ↓
+Aplicar algoritmo
+        ↓
+Evaluar estabilidad
+        ↓
+Interpretar resultados
+        ↓
+Validar externamente
+```
+
+## Definir la unidad de análisis
+
+Cada fila puede representar:
+
+- Paciente.
+- Ingreso.
+- Visita.
+- Episodio.
+- Prueba.
+- Tratamiento.
+- Ventana temporal.
+
+::: {.callout-warning}
+## Importante
+
+No es lo mismo agrupar pacientes que agrupar visitas del mismo paciente.
+:::
+
+## Selección de variables
+
+Las variables deben elegirse según el objetivo.
+
+Ejemplo:
+
+```python
+features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp",
+    "lvef",
+    "gls"
+]
+
+X = df[features]
+```
+
+Debe evitarse:
+
+- Incluir variables duplicadas.
+- Mezclar variables futuras.
+- Añadir identificadores.
+- Incluir variables irrelevantes.
+- Introducir variables que definan artificialmente los grupos.
+
+## Escalado
+
+El escalado suele ser esencial.
+
+Ejemplo:
+
+```text
+Edad        → 0 a 18
+NT-proBNP   → 10 a 5000
+FEVI        → 20 a 80
+```
+
+Sin escalado, NT-proBNP podría dominar las distancias.
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(
+    X
+)
+```
+
+## Imputación
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+X_imputed = imputer.fit_transform(
+    X
+)
+```
+
+## Pipeline básico
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.cluster import KMeans
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "clustering",
+            KMeans(
+                n_clusters=3,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## K-means
+
+K-means divide los datos en $K$ grupos.
+
+Cada grupo se representa mediante un centroide.
+
+```python
+from sklearn.cluster import KMeans
+
+model = KMeans(
+    n_clusters=3,
+    random_state=42,
+    n_init="auto"
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+## Clustering jerárquico
+
+Construye una jerarquía de grupos.
+
+```python
+from sklearn.cluster import AgglomerativeClustering
+
+model = AgglomerativeClustering(
+    n_clusters=3
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+## DBSCAN
+
+Agrupa regiones densas y puede identificar ruido.
+
+```python
+from sklearn.cluster import DBSCAN
+
+model = DBSCAN(
+    eps=0.5,
+    min_samples=5
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+Las observaciones con etiqueta `-1` suelen considerarse ruido.
+
+## Gaussian Mixture Models
+
+Modelan los datos como una combinación de distribuciones gaussianas.
+
+```python
+from sklearn.mixture import GaussianMixture
+
+model = GaussianMixture(
+    n_components=3,
+    random_state=42
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+También producen probabilidades de pertenencia.
+
+```python
+cluster_probability = model.predict_proba(
+    X_scaled
+)
+```
+
+## PCA
+
+PCA busca combinaciones lineales que expliquen la mayor variabilidad.
+
+```python
+from sklearn.decomposition import PCA
+
+pca = PCA(
+    n_components=2
+)
+
+X_pca = pca.fit_transform(
+    X_scaled
+)
+```
+
+## Varianza explicada
+
+```python
+print(
+    pca.explained_variance_ratio_
+)
+
+print(
+    pca.explained_variance_ratio_.sum()
+)
+```
+
+## t-SNE
+
+t-SNE se utiliza principalmente para visualización.
+
+```python
+from sklearn.manifold import TSNE
+
+tsne = TSNE(
+    n_components=2,
+    perplexity=30,
+    random_state=42
+)
+
+X_tsne = tsne.fit_transform(
+    X_scaled
+)
+```
+
+::: {.callout-warning}
+## Precaución
+
+Las distancias globales en t-SNE no deben interpretarse de forma directa.
+:::
+
+## UMAP
+
+UMAP produce representaciones de baja dimensión y suele preservar estructura local.
+
+Puede utilizarse para:
+
+- Visualización.
+- Exploración.
+- Preprocesamiento.
+
+Debe interpretarse con cautela.
+
+## Isolation Forest
+
+```python
+from sklearn.ensemble import IsolationForest
+
+model = IsolationForest(
+    contamination=0.02,
+    random_state=42
+)
+
+anomaly_label = model.fit_predict(
+    X_scaled
+)
+```
+
+```text
+1  → observación normal
+-1 → posible anomalía
+```
+
+## Local Outlier Factor
+
+```python
+from sklearn.neighbors import LocalOutlierFactor
+
+model = LocalOutlierFactor(
+    n_neighbors=20,
+    contamination=0.02
+)
+
+anomaly_label = model.fit_predict(
+    X_scaled
+)
+```
+
+## Métricas de clustering
+
+No existe una única métrica perfecta.
+
+Las más comunes son:
+
+- Silhouette score.
+- Davies-Bouldin index.
+- Calinski-Harabasz score.
+- Inercia.
+- Estabilidad de clusters.
+
+## Silhouette score
+
+```python
+from sklearn.metrics import silhouette_score
+
+score = silhouette_score(
+    X_scaled,
+    clusters
+)
+```
+
+Interpretación aproximada:
+
+```text
+Cercano a 1
+→ clusters bien separados
+
+Cercano a 0
+→ clusters solapados
+
+Negativo
+→ asignaciones problemáticas
+```
+
+## Davies-Bouldin index
+
+```python
+from sklearn.metrics import davies_bouldin_score
+
+score = davies_bouldin_score(
+    X_scaled,
+    clusters
+)
+```
+
+Valores más bajos suelen ser mejores.
+
+## Calinski-Harabasz score
+
+```python
+from sklearn.metrics import calinski_harabasz_score
+
+score = calinski_harabasz_score(
+    X_scaled,
+    clusters
+)
+```
+
+Valores más altos suelen indicar mejor separación.
+
+## Inercia
+
+En K-means:
+
+```python
+print(
+    model.inertia_
+)
+```
+
+La inercia disminuye al aumentar $K$.
+
+Por eso no debe utilizarse sola.
+
+## Método del codo
+
+```python
+import matplotlib.pyplot as plt
+
+k_values = range(
+    2,
+    11
+)
+
+inertias = []
+
+for k in k_values:
+
+    model = KMeans(
+        n_clusters=k,
+        random_state=42,
+        n_init="auto"
+    )
+
+    model.fit(
+        X_scaled
+    )
+
+    inertias.append(
+        model.inertia_
+    )
+
+plt.figure(
+    figsize=(8, 5)
+)
+
+plt.plot(
+    k_values,
+    inertias,
+    marker="o"
+)
+
+plt.xlabel(
+    "Número de clusters"
+)
+
+plt.ylabel(
+    "Inercia"
+)
+
+plt.title(
+    "Método del codo"
+)
+
+plt.show()
+```
+
+## Evaluar varios números de clusters
+
+```python
+rows = []
+
+for k in range(
+    2,
+    11
+):
+
+    model = KMeans(
+        n_clusters=k,
+        random_state=42,
+        n_init="auto"
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    rows.append(
+        {
+            "n_clusters": k,
+            "silhouette": silhouette_score(
+                X_scaled,
+                labels
+            ),
+            "davies_bouldin": davies_bouldin_score(
+                X_scaled,
+                labels
+            ),
+            "calinski_harabasz": calinski_harabasz_score(
+                X_scaled,
+                labels
+            )
+        }
+    )
+
+evaluation_table = pd.DataFrame(
+    rows
+)
+```
+
+## Visualizar clusters
+
+```python
+plt.figure(
+    figsize=(8, 6)
+)
+
+plt.scatter(
+    X_pca[:, 0],
+    X_pca[:, 1],
+    c=clusters
+)
+
+plt.xlabel(
+    "PC1"
+)
+
+plt.ylabel(
+    "PC2"
+)
+
+plt.title(
+    "Clusters proyectados en PCA"
+)
+
+plt.show()
+```
+
+## Interpretar clusters
+
+Después de crear clusters debe describirse cada grupo.
+
+```python
+df_clustered = df.copy()
+
+df_clustered["cluster"] = clusters
+```
+
+```python
+cluster_summary = (
+    df_clustered
+    .groupby("cluster")[features]
+    .agg(
+        [
+            "mean",
+            "median",
+            "std"
+        ]
+    )
+)
+
+display(
+    cluster_summary
+)
+```
+
+## Variables categóricas por cluster
+
+```python
+distribution = pd.crosstab(
+    df_clustered["cluster"],
+    df_clustered["diagnosis"],
+    normalize="index"
+)
+
+display(
+    distribution
+)
+```
+
+## Estabilidad de clusters
+
+Un clustering útil debería ser relativamente estable ante:
+
+- Cambios de seed.
+- Submuestras.
+- Pequeños cambios en variables.
+- Diferentes periodos.
+- Diferentes centros.
+
+## Repetir K-means
+
+```python
+clusterings = []
+
+for seed in range(
+    20
+):
+
+    model = KMeans(
+        n_clusters=3,
+        random_state=seed,
+        n_init="auto"
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    clusterings.append(
+        labels
+    )
+```
+
+## Adjusted Rand Index
+
+Permite comparar dos clusterings.
+
+```python
+from sklearn.metrics import adjusted_rand_score
+
+agreement = adjusted_rand_score(
+    clusterings[0],
+    clusterings[1]
+)
+```
+
+## Validación externa de clusters
+
+Aunque el algoritmo no use target, puede evaluarse después si los grupos se relacionan con variables externas.
+
+Ejemplos:
+
+- Mortalidad.
+- Reingreso.
+- Respuesta al tratamiento.
+- Complicaciones.
+- Evolución temporal.
+
+::: {.callout-warning}
+## Importante
+
+Estas variables externas no deben utilizarse para construir los clusters si se quieren usar para validación.
+:::
+
+## Leakage en aprendizaje no supervisado
+
+También puede existir leakage.
+
+Ejemplos:
+
+- Escalar antes de separar una cohorte externa.
+- Usar variables futuras.
+- Incluir outcomes en clustering.
+- Ajustar PCA con todo el dataset antes de validación.
+- Elegir hiperparámetros usando test.
+
+## Clustering longitudinal
+
+Con datos repetidos puede agruparse:
+
+- Pacientes completos.
+- Trayectorias.
+- Visitas.
+- Cambios entre visitas.
+- Ventanas temporales.
+
+Debe evitarse tratar todas las visitas como independientes cuando pertenecen al mismo paciente.
+
+## Clustering de trayectorias
+
+Ejemplos:
+
+```text
+Trayectoria estable
+Trayectoria con deterioro temprano
+Trayectoria con recuperación
+Trayectoria fluctuante
+```
+
+Puede requerir métodos específicos:
+
+- Dynamic Time Warping.
+- Modelos de clases latentes.
+- Functional clustering.
+- Sequence clustering.
+
+## Reducción dimensional antes de clustering
+
+Puede ser útil cuando hay muchas variables.
+
+```text
+Variables originales
+        ↓
+PCA
+        ↓
+K-means
+```
+
+Pero puede perder información relevante.
+
+## Pipeline PCA + K-means
+
+```python
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "pca",
+            PCA(
+                n_components=0.90
+            )
+        ),
+        (
+            "clustering",
+            KMeans(
+                n_clusters=3,
+                random_state=42,
+                n_init="auto"
+            )
+        )
+    ]
+)
+```
+
+## Curvas y dendrogramas
+
+El clustering jerárquico puede visualizarse mediante dendrogramas.
+
+```python
+from scipy.cluster.hierarchy import linkage
+from scipy.cluster.hierarchy import dendrogram
+
+linkage_matrix = linkage(
+    X_scaled,
+    method="ward"
+)
+
+plt.figure(
+    figsize=(12, 6)
+)
+
+dendrogram(
+    linkage_matrix
+)
+
+plt.xlabel(
+    "Observaciones"
+)
+
+plt.ylabel(
+    "Distancia"
+)
+
+plt.title(
+    "Dendrograma"
+)
+
+plt.show()
+```
+
+## Elegir algoritmo
+
+| Método | Forma de clusters | Necesita K | Detecta ruido | Escalabilidad |
+|---|---|---|---|---|
+| K-means | Aproximadamente esférica | Sí | No | Alta |
+| Jerárquico | Flexible | No siempre | No | Media-baja |
+| DBSCAN | Arbitraria | No | Sí | Media |
+| GMM | Elíptica y probabilística | Sí | No | Media |
+| HDBSCAN | Arbitraria | No | Sí | Media |
+
+## K-means
+
+Adecuado cuando:
+
+- Los clusters son compactos.
+- Las variables son continuas.
+- Se conoce aproximadamente $K$.
+- Se necesita velocidad.
+
+## Clustering jerárquico
+
+Adecuado cuando:
+
+- Se busca una estructura jerárquica.
+- El dataset no es enorme.
+- Se quiere visualizar un dendrograma.
+
+## DBSCAN
+
+Adecuado cuando:
+
+- Existen regiones densas.
+- Los clusters tienen formas irregulares.
+- Se desea detectar ruido.
+
+## Gaussian Mixture Models
+
+Adecuado cuando:
+
+- Se quieren probabilidades de pertenencia.
+- Los clusters pueden solaparse.
+- Se asume una estructura aproximadamente gaussiana.
+
+## Detección de anomalías
+
+Una anomalía puede ser:
+
+- Un error de registro.
+- Una observación rara válida.
+- Un cambio clínico real.
+- Un fallo de sensor.
+- Un caso extremo.
+
+::: {.callout-caution}
+## Precaución
+
+Anomalía matemática no significa error.
+:::
+
+## Evaluar anomalías
+
+Cuando no hay etiquetas, puede revisarse:
+
+- Distribución de scores.
+- Casos extremos.
+- Validación clínica.
+- Estabilidad.
+- Porcentaje detectado.
+- Sensibilidad a hiperparámetros.
+
+## Score de Isolation Forest
+
+```python
+anomaly_score = model.decision_function(
+    X_scaled
+)
+```
+
+Valores más bajos suelen indicar mayor anomalía.
+
+## Interpretabilidad
+
+Los resultados deben traducirse a perfiles comprensibles.
+
+Ejemplo:
+
+```text
+Cluster 0
+- menor edad
+- FEVI normal
+- biomarcadores bajos
+
+Cluster 1
+- NT-proBNP alto
+- FEVI reducida
+- mayor exposición acumulada
+
+Cluster 2
+- alteración de strain
+- FEVI preservada
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Los clusters deben considerarse hipótesis exploratorias hasta demostrar estabilidad, reproducibilidad y utilidad.
+:::
+
+Debe revisarse:
+
+- Plausibilidad clínica.
+- Tamaño de cada cluster.
+- Estabilidad.
+- Reproducibilidad en otra cohorte.
+- Asociación con outcomes externos.
+- Utilidad para decisiones.
+- Riesgo de estigmatización o simplificación.
+
+## Errores frecuentes
+
+- No escalar.
+- Elegir $K$ solo por el codo.
+- Interpretar una visualización como evidencia.
+- Usar t-SNE para medir distancias globales.
+- No revisar estabilidad.
+- Incluir identificadores.
+- Incluir outcomes futuros.
+- Tratar visitas como pacientes independientes.
+- Confiar en una única métrica.
+- Poner nombres clínicos demasiado pronto.
+- Confundir cluster con diagnóstico.
+- No validar externamente.
+
+## Flujo recomendado
+
+1. Definir objetivo exploratorio.
+2. Definir unidad de análisis.
+3. Seleccionar variables.
+4. Imputar y escalar.
+5. Explorar PCA.
+6. Probar varios algoritmos.
+7. Comparar métricas internas.
+8. Revisar estabilidad.
+9. Describir clusters.
+10. Validar con variables externas.
+11. Replicar en otra cohorte.
+12. Interpretar clínicamente.
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad de análisis.
+- [ ] He justificado las variables.
+- [ ] He eliminado identificadores.
+- [ ] He evitado variables futuras.
+- [ ] He imputado correctamente.
+- [ ] He escalado.
+- [ ] He probado más de un algoritmo.
+- [ ] He probado varios valores de hiperparámetros.
+- [ ] He calculado métricas internas.
+- [ ] He revisado estabilidad.
+- [ ] He descrito los clusters.
+- [ ] He evaluado tamaños.
+- [ ] He validado con variables externas.
+- [ ] He considerado una cohorte externa.
+- [ ] He evitado interpretaciones causales.
+
+## Próximos documentos
+
+Esta sección se completará con:
+
+1. K-means.
+2. Clustering jerárquico.
+3. DBSCAN y clustering basado en densidad.
+4. Gaussian Mixture Models.
+5. Evaluación de clustering.
+6. Detección de anomalías.
+7. Comparación de métodos no supervisados.
+
+## Recursos
+
+### Documentación
+
+- `KMeans`.
+- `AgglomerativeClustering`.
+- `DBSCAN`.
+- `GaussianMixture`.
+- `PCA`.
+- `TSNE`.
+- `IsolationForest`.
+- `LocalOutlierFactor`.
+- `silhouette_score`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus clustering, perfiles clínicos, anomalías y decisiones metodológicas.
