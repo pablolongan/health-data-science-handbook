@@ -2,15 +2,516 @@
 title: "Aprendizaje supervisado"
 ---
 
-Esta sección reúne modelos que aprenden a predecir una variable objetivo a partir de ejemplos etiquetados.
+::: {.callout-tip}
+## Resumen en 30 segundos
 
-## Contenidos previstos
+El aprendizaje supervisado utiliza ejemplos con una respuesta conocida para aprender a predecir nuevos casos.
 
-Esta sección se irá ampliando progresivamente con:
+Los dos grandes tipos de problema son:
 
-- Fundamentos teóricos.
-- Cuándo utilizar cada técnica.
-- Código listo para adaptar.
-- Interpretación de resultados.
-- Errores frecuentes.
-- Consideraciones específicas en datos clínicos.
+- Regresión: predecir valores numéricos.
+- Clasificación: predecir categorías o probabilidades.
+
+El objetivo no es memorizar train, sino generalizar a datos nuevos.
+:::
+
+## ¿Qué es el aprendizaje supervisado?
+
+En aprendizaje supervisado se dispone de:
+
+- Variables predictoras, también llamadas features.
+- Una variable objetivo, también llamada target.
+- Ejemplos donde el target ya es conocido.
+
+El modelo aprende una función:
+
+$$
+\hat{y} = f(X)
+$$
+
+donde:
+
+- $X$ contiene las variables predictoras.
+- $y$ es el valor real.
+- $\hat{y}$ es la predicción.
+- $f$ es el modelo aprendido.
+
+::: {.callout-note}
+## Idea clave
+
+El modelo aprende a partir de ejemplos etiquetados.
+:::
+
+## Tipos de problemas
+
+## Regresión
+
+La regresión predice una variable numérica continua.
+
+Ejemplos:
+
+- Duración de estancia.
+- Coste hospitalario.
+- Fracción de eyección.
+- Presión arterial.
+- Edad.
+- Nivel de biomarcador.
+
+```text
+Edad + diagnóstico + tratamiento
+                ↓
+        Días de ingreso
+```
+
+## Clasificación
+
+La clasificación predice una categoría.
+
+Ejemplos:
+
+- Reingreso: sí o no.
+- Evento adverso: sí o no.
+- Riesgo bajo, medio o alto.
+- Diagnóstico A, B o C.
+- Respuesta al tratamiento.
+
+```text
+Edad + analítica + tratamiento
+                ↓
+      Evento cardiovascular
+```
+
+## Clasificación probabilística
+
+Muchos modelos generan una probabilidad:
+
+```text
+Riesgo predicho = 0.27
+```
+
+Después se aplica un umbral:
+
+```text
+0.27 ≥ 0.20
+→ clase positiva
+```
+
+## Variables predictoras y target
+
+```python
+features = [
+    "age",
+    "weight",
+    "troponin",
+    "ntprobnp",
+    "center"
+]
+
+target = "cardiotoxicity"
+
+X = df[features]
+y = df[target]
+```
+
+## Unidad de análisis
+
+Cada fila puede representar:
+
+- Paciente.
+- Visita.
+- Ingreso.
+- Episodio.
+- Prueba.
+- Ventana temporal.
+
+::: {.callout-warning}
+## Importante
+
+La unidad de análisis determina cómo deben hacerse el split, la validación y la interpretación.
+:::
+
+## Momento de predicción
+
+Debe definirse cuándo se genera la predicción.
+
+Ejemplos:
+
+- En el ingreso.
+- A las 24 horas.
+- Al inicio del tratamiento.
+- Antes de una intervención.
+
+Solo pueden utilizarse variables disponibles en ese momento.
+
+## Flujo de trabajo
+
+```text
+Definir pregunta
+      ↓
+Definir target
+      ↓
+Definir unidad de análisis
+      ↓
+Definir momento de predicción
+      ↓
+Separar train / validation / test
+      ↓
+Preprocesamiento
+      ↓
+Entrenamiento
+      ↓
+Validación
+      ↓
+Selección de modelo
+      ↓
+Evaluación final
+```
+
+## Entrenar y predecir
+
+```python
+model.fit(
+    X_train,
+    y_train
+)
+
+y_pred = model.predict(
+    X_test
+)
+```
+
+En clasificación probabilística:
+
+```python
+y_probability = model.predict_proba(
+    X_test
+)[:, 1]
+```
+
+## Evaluar regresión
+
+```python
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import root_mean_squared_error
+from sklearn.metrics import r2_score
+
+mae = mean_absolute_error(
+    y_test,
+    y_pred
+)
+
+rmse = root_mean_squared_error(
+    y_test,
+    y_pred
+)
+
+r2 = r2_score(
+    y_test,
+    y_pred
+)
+```
+
+## Evaluar clasificación
+
+```python
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import average_precision_score
+from sklearn.metrics import balanced_accuracy_score
+
+roc_auc = roc_auc_score(
+    y_test,
+    y_probability
+)
+
+average_precision = average_precision_score(
+    y_test,
+    y_probability
+)
+
+balanced_accuracy = balanced_accuracy_score(
+    y_test,
+    y_pred
+)
+```
+
+## Modelos incluidos en esta sección
+
+### Regresión lineal
+
+Modelo interpretable para relaciones lineales.
+
+### Regresión logística
+
+Modelo de clasificación que estima probabilidades.
+
+### Árboles de decisión
+
+Modelos basados en reglas y particiones.
+
+### Random forest
+
+Ensemble de múltiples árboles mediante bagging.
+
+### Gradient boosting
+
+Árboles secuenciales que corrigen errores anteriores.
+
+### Support Vector Machines
+
+Modelos que buscan fronteras de máximo margen.
+
+### Comparación de modelos
+
+Página final para comparar rendimiento, calibración, interpretabilidad y coste.
+
+## Interpretabilidad frente a complejidad
+
+| Modelo | Interpretabilidad | No linealidad | Escalado |
+|---|---|---|---|
+| Regresión lineal | Alta | Baja | Recomendado con regularización |
+| Regresión logística | Alta | Baja | Recomendado |
+| Árbol | Alta-moderada | Sí | No necesario |
+| Random forest | Moderada-baja | Sí | No necesario |
+| Gradient boosting | Baja | Sí | Normalmente no |
+| SVM lineal | Moderada | Baja | Necesario |
+| SVM con kernel | Baja | Sí | Necesario |
+
+## No existe un mejor modelo universal
+
+La elección depende de:
+
+- Tipo de target.
+- Tamaño de muestra.
+- Número de variables.
+- No linealidad.
+- Desbalance.
+- Necesidad de interpretación.
+- Coste computacional.
+- Requisitos clínicos.
+
+::: {.callout-important}
+## Regla práctica
+
+Empieza por un baseline simple antes de utilizar modelos complejos.
+:::
+
+## Baseline
+
+### Clasificación
+
+```python
+from sklearn.dummy import DummyClassifier
+
+baseline = DummyClassifier(
+    strategy="most_frequent"
+)
+```
+
+### Regresión
+
+```python
+from sklearn.dummy import DummyRegressor
+
+baseline = DummyRegressor(
+    strategy="mean"
+)
+```
+
+## Deep learning
+
+Las redes neuronales también pueden utilizarse para clasificación y regresión.
+
+Se estudian en una sección separada porque requieren conceptos propios:
+
+- Capas.
+- Activaciones.
+- Backpropagation.
+- Optimizadores.
+- Batches.
+- Epochs.
+- Regularización.
+- Hardware.
+
+[Ir a Deep Learning](../deep-learning/index.qmd)
+
+## Pipeline completo
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "classifier",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Validación cruzada
+
+```python
+from sklearn.model_selection import cross_validate
+from sklearn.model_selection import StratifiedKFold
+
+cv = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+scores = cross_validate(
+    estimator=pipeline,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring={
+        "roc_auc": "roc_auc",
+        "average_precision": "average_precision"
+    }
+)
+```
+
+## Ajuste de hiperparámetros
+
+```python
+from sklearn.model_selection import GridSearchCV
+
+param_grid = {
+    "classifier__C": [
+        0.01,
+        0.1,
+        1,
+        10
+    ]
+}
+
+search = GridSearchCV(
+    estimator=pipeline,
+    param_grid=param_grid,
+    cv=cv,
+    scoring="roc_auc",
+    n_jobs=-1
+)
+
+search.fit(
+    X_train,
+    y_train
+)
+```
+
+## Predicción frente a inferencia
+
+### Predicción
+
+Busca buenas predicciones en datos nuevos.
+
+### Inferencia
+
+Busca entender asociaciones o estimar efectos.
+
+::: {.callout-warning}
+## Importante
+
+Un modelo predictivo no demuestra causalidad.
+:::
+
+## Evaluación interna y externa
+
+### Interna
+
+- Cross-validation.
+- Holdout.
+- Bootstrap.
+
+### Externa
+
+- Otro centro.
+- Otro periodo.
+- Otra población.
+- Cohorte prospectiva.
+
+## Datos clínicos
+
+::: {.callout-note}
+## Aplicación clínica
+
+El rendimiento del modelo debe interpretarse junto con el momento de uso, el coste de los errores y el workflow.
+:::
+
+Antes de desplegar un modelo debe evaluarse:
+
+- Qué decisión modifica.
+- Quién lo utilizará.
+- Cuándo aparece la predicción.
+- Qué ocurre ante una alerta.
+- Qué coste tienen FP y FN.
+- Cómo se monitoriza el drift.
+
+## Errores frecuentes
+
+- No definir el target.
+- No definir el momento de predicción.
+- Mezclar pacientes entre train y test.
+- Utilizar información futura.
+- Evaluar solo en train.
+- No comparar con baseline.
+- Elegir modelo por una única métrica.
+- Ajustar hiperparámetros con test.
+- No evaluar calibración.
+- Confundir importancia con causalidad.
+- Elegir el modelo más complejo automáticamente.
+
+## Flujo recomendado
+
+1. Definir el problema.
+2. Definir regresión o clasificación.
+3. Definir unidad de análisis.
+4. Definir momento de predicción.
+5. Crear baseline.
+6. Preparar pipeline.
+7. Entrenar modelos simples.
+8. Validar con folds adecuados.
+9. Ajustar hiperparámetros.
+10. Comparar modelos.
+11. Evaluar una vez en test.
+12. Interpretar utilidad clínica.
+
+## Checklist para proyectos
+
+- [ ] He definido el target.
+- [ ] He definido la unidad de análisis.
+- [ ] He definido el momento de predicción.
+- [ ] He identificado si es regresión o clasificación.
+- [ ] He creado un baseline.
+- [ ] He separado train y test.
+- [ ] El preprocesamiento está dentro del pipeline.
+- [ ] He usado validación cruzada adecuada.
+- [ ] He comparado varios modelos.
+- [ ] He revisado overfitting.
+- [ ] He evaluado calibración cuando corresponde.
+- [ ] He mantenido el test sin tocar.
+- [ ] He considerado validación externa.
+- [ ] He interpretado utilidad clínica.
+- [ ] He documentado el modelo final.
+
+## Próximos documentos
+
+Esta sección se completará con:
+
+1. Regresión lineal.
+2. Regresión logística.
+3. Árboles de decisión.
+4. Random forest.
+5. Gradient boosting.
+6. Support Vector Machines.
+7. Comparación de modelos.
