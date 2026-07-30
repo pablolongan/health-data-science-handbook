@@ -1,0 +1,1232 @@
+---
+title: "Gaussian Mixture Models"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Los Gaussian Mixture Models, o GMM, representan los datos como una combinación de varias distribuciones gaussianas.
+
+A diferencia de K-means:
+
+- Permiten clusters elípticos.
+- Producen probabilidades de pertenencia.
+- Modelan solapamiento entre grupos.
+- Estiman medias y covarianzas.
+
+Son útiles cuando los clusters no son perfectamente separados.
+:::
+
+## ¿Qué es un Gaussian Mixture Model?
+
+Un Gaussian Mixture Model asume que los datos proceden de una mezcla de varias distribuciones gaussianas.
+
+$$
+p(x)
+=
+\sum_{k=1}^{K}
+\pi_k
+\mathcal{N}
+\left(
+x
+\mid
+\mu_k,
+\Sigma_k
+\right)
+$$
+
+donde:
+
+- \(K\) es el número de componentes.
+- \(\pi_k\) es el peso del componente.
+- \(\mu_k\) es su media.
+- \(\Sigma_k\) es su matriz de covarianza.
+- \(\mathcal{N}\) representa una distribución gaussiana.
+
+::: {.callout-note}
+## Idea clave
+
+Cada observación puede pertenecer parcialmente a varios clusters.
+:::
+
+## Clustering duro y blando
+
+## Clustering duro
+
+Cada observación recibe una única etiqueta.
+
+```text
+Paciente A
+→ cluster 1
+```
+
+## Clustering blando
+
+Cada observación recibe probabilidades de pertenencia.
+
+```text
+Paciente A
+→ cluster 0: 0.10
+→ cluster 1: 0.75
+→ cluster 2: 0.15
+```
+
+GMM permite clustering blando.
+
+## Comparación con K-means
+
+K-means asigna cada observación al centroide más cercano.
+
+GMM modela:
+
+- Forma.
+- Dispersión.
+- Orientación.
+- Solapamiento.
+
+| Aspecto | K-means | GMM |
+|---|---|---|
+| Pertenencia | Dura | Probabilística |
+| Forma de clusters | Esférica | Elíptica |
+| Covarianza | No | Sí |
+| Solapamiento | Limitado | Sí |
+| Complejidad | Baja | Mayor |
+| Interpretabilidad | Alta | Moderada |
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "troponin",
+    "ntprobnp",
+    "lvef",
+    "gls"
+]
+
+X = df[features]
+```
+
+## Imputar valores ausentes
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+X_imputed = imputer.fit_transform(
+    X
+)
+```
+
+## Escalar
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(
+    X_imputed
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+El escalado suele ser esencial porque GMM modela distancias y covarianzas.
+:::
+
+## Entrenar un GMM
+
+```python
+from sklearn.mixture import GaussianMixture
+
+model = GaussianMixture(
+    n_components=3,
+    covariance_type="full",
+    random_state=42
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+## Añadir clusters al dataframe
+
+```python
+df_clustered = df.copy()
+
+df_clustered["cluster"] = clusters
+```
+
+## Probabilidades de pertenencia
+
+```python
+membership_probability = model.predict_proba(
+    X_scaled
+)
+```
+
+Cada fila contiene la probabilidad de pertenecer a cada componente.
+
+## Guardar probabilidades
+
+```python
+for cluster_id in range(
+    model.n_components
+):
+
+    df_clustered[
+        f"cluster_{cluster_id}_probability"
+    ] = membership_probability[
+        :,
+        cluster_id
+    ]
+```
+
+## Probabilidad máxima
+
+```python
+df_clustered[
+    "maximum_membership_probability"
+] = membership_probability.max(
+    axis=1
+)
+```
+
+Valores bajos indican asignaciones más inciertas.
+
+## Incertidumbre de pertenencia
+
+```text
+0.99
+→ asignación muy clara
+
+0.55
+→ asignación incierta
+```
+
+Puede ser útil identificar:
+
+- Casos fronterizos.
+- Pacientes con perfiles mixtos.
+- Observaciones atípicas.
+- Solapamiento entre clusters.
+
+## Parámetros aprendidos
+
+## Pesos de mezcla
+
+```python
+print(
+    model.weights_
+)
+```
+
+Representan la proporción estimada de cada componente.
+
+## Medias
+
+```python
+print(
+    model.means_
+)
+```
+
+## Covarianzas
+
+```python
+print(
+    model.covariances_
+)
+```
+
+## Recuperar medias en unidades originales
+
+```python
+means_original = scaler.inverse_transform(
+    model.means_
+)
+```
+
+```python
+import pandas as pd
+
+means_table = pd.DataFrame(
+    means_original,
+    columns=features
+)
+
+means_table["component"] = (
+    means_table.index
+)
+
+display(
+    means_table
+)
+```
+
+## Tipos de covarianza
+
+El parámetro `covariance_type` controla la forma de los clusters.
+
+## Full
+
+```python
+covariance_type="full"
+```
+
+Cada componente tiene su propia matriz de covarianza completa.
+
+Permite:
+
+- Distintas orientaciones.
+- Distintas formas.
+- Distintos tamaños.
+
+Es la opción más flexible.
+
+## Tied
+
+```python
+covariance_type="tied"
+```
+
+Todos los componentes comparten una matriz de covarianza.
+
+Puede ser útil con muestras pequeñas.
+
+## Diag
+
+```python
+covariance_type="diag"
+```
+
+Cada componente tiene una covarianza diagonal.
+
+Asume que las variables son independientes dentro de cada componente.
+
+## Spherical
+
+```python
+covariance_type="spherical"
+```
+
+Cada componente tiene una única varianza.
+
+Produce clusters aproximadamente esféricos.
+
+## Comparación
+
+| Tipo | Flexibilidad | Parámetros | Riesgo de overfitting |
+|---|---:|---:|---:|
+| `spherical` | Baja | Pocos | Bajo |
+| `diag` | Moderada | Moderados | Moderado |
+| `tied` | Moderada | Moderados | Moderado |
+| `full` | Alta | Muchos | Alto |
+
+## Algoritmo EM
+
+GMM se ajusta mediante Expectation-Maximization.
+
+## Expectation step
+
+Calcula la probabilidad de pertenencia de cada observación a cada componente.
+
+## Maximization step
+
+Actualiza:
+
+- Pesos.
+- Medias.
+- Covarianzas.
+
+El proceso se repite hasta convergencia.
+
+```text
+Inicialización
+      ↓
+Expectation
+      ↓
+Maximization
+      ↓
+Repetición
+      ↓
+Convergencia
+```
+
+## Convergencia
+
+```python
+print(
+    model.converged_
+)
+
+print(
+    model.n_iter_
+)
+```
+
+## Máximo de iteraciones
+
+```python
+model = GaussianMixture(
+    n_components=3,
+    max_iter=500,
+    random_state=42
+)
+```
+
+## Tolerancia
+
+```python
+tol=1e-3
+```
+
+Controla cuándo se considera que el algoritmo ha convergido.
+
+## Inicialización
+
+```python
+init_params="kmeans"
+```
+
+La inicialización puede influir en la solución final.
+
+## Múltiples inicializaciones
+
+```python
+model = GaussianMixture(
+    n_components=3,
+    n_init=10,
+    random_state=42
+)
+```
+
+El modelo conserva la solución con mayor log-likelihood.
+
+::: {.callout-note}
+## Regla práctica
+
+Usar varias inicializaciones mejora la estabilidad.
+:::
+
+## Log-likelihood
+
+GMM maximiza la probabilidad de los datos bajo el modelo.
+
+```python
+average_log_likelihood = model.score(
+    X_scaled
+)
+
+print(
+    average_log_likelihood
+)
+```
+
+Valores mayores indican mejor ajuste, pero modelos más complejos tienden a mejorar siempre.
+
+Por eso se utilizan AIC y BIC.
+
+## AIC
+
+```python
+aic = model.aic(
+    X_scaled
+)
+
+print(
+    aic
+)
+```
+
+AIC penaliza la complejidad del modelo.
+
+Valores menores son preferibles.
+
+## BIC
+
+```python
+bic = model.bic(
+    X_scaled
+)
+
+print(
+    bic
+)
+```
+
+BIC penaliza más fuertemente la complejidad.
+
+Valores menores son preferibles.
+
+## Elegir número de componentes
+
+```python
+rows = []
+
+for n_components in range(
+    1,
+    11
+):
+
+    model = GaussianMixture(
+        n_components=n_components,
+        covariance_type="full",
+        n_init=10,
+        random_state=42
+    )
+
+    model.fit(
+        X_scaled
+    )
+
+    rows.append(
+        {
+            "n_components": n_components,
+            "aic": model.aic(
+                X_scaled
+            ),
+            "bic": model.bic(
+                X_scaled
+            ),
+            "converged": model.converged_
+        }
+    )
+
+evaluation_table = pd.DataFrame(
+    rows
+)
+
+display(
+    evaluation_table
+)
+```
+
+## Visualizar AIC y BIC
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(
+    figsize=(8, 5)
+)
+
+plt.plot(
+    evaluation_table[
+        "n_components"
+    ],
+    evaluation_table[
+        "aic"
+    ],
+    marker="o",
+    label="AIC"
+)
+
+plt.plot(
+    evaluation_table[
+        "n_components"
+    ],
+    evaluation_table[
+        "bic"
+    ],
+    marker="o",
+    label="BIC"
+)
+
+plt.xlabel(
+    "Número de componentes"
+)
+
+plt.ylabel(
+    "Criterio"
+)
+
+plt.title(
+    "Selección del número de componentes"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## Comparar tipos de covarianza
+
+```python
+covariance_types = [
+    "full",
+    "tied",
+    "diag",
+    "spherical"
+]
+
+rows = []
+
+for covariance_type in covariance_types:
+
+    for n_components in range(
+        1,
+        8
+    ):
+
+        model = GaussianMixture(
+            n_components=n_components,
+            covariance_type=covariance_type,
+            n_init=10,
+            random_state=42
+        )
+
+        model.fit(
+            X_scaled
+        )
+
+        rows.append(
+            {
+                "covariance_type": covariance_type,
+                "n_components": n_components,
+                "aic": model.aic(
+                    X_scaled
+                ),
+                "bic": model.bic(
+                    X_scaled
+                )
+            }
+        )
+
+comparison_table = pd.DataFrame(
+    rows
+)
+```
+
+## Silhouette score
+
+Puede calcularse sobre las etiquetas duras.
+
+```python
+from sklearn.metrics import silhouette_score
+
+labels = model.predict(
+    X_scaled
+)
+
+score = silhouette_score(
+    X_scaled,
+    labels
+)
+```
+
+Pero GMM es probabilístico, por lo que silhouette no captura toda la información.
+
+## Entropía de pertenencia
+
+La incertidumbre puede resumirse mediante entropía.
+
+```python
+import numpy as np
+
+membership_entropy = -np.sum(
+    membership_probability
+    *
+    np.log(
+        membership_probability
+        +
+        1e-12
+    ),
+    axis=1
+)
+```
+
+Valores altos indican mayor incertidumbre.
+
+## Visualizar con PCA
+
+```python
+from sklearn.decomposition import PCA
+
+pca = PCA(
+    n_components=2
+)
+
+X_pca = pca.fit_transform(
+    X_scaled
+)
+```
+
+```python
+plt.figure(
+    figsize=(8, 6)
+)
+
+plt.scatter(
+    X_pca[:, 0],
+    X_pca[:, 1],
+    c=clusters
+)
+
+plt.xlabel(
+    "PC1"
+)
+
+plt.ylabel(
+    "PC2"
+)
+
+plt.title(
+    "Componentes de GMM proyectados en PCA"
+)
+
+plt.show()
+```
+
+## Visualizar incertidumbre
+
+```python
+plt.figure(
+    figsize=(8, 6)
+)
+
+plt.scatter(
+    X_pca[:, 0],
+    X_pca[:, 1],
+    c=df_clustered[
+        "maximum_membership_probability"
+    ]
+)
+
+plt.xlabel(
+    "PC1"
+)
+
+plt.ylabel(
+    "PC2"
+)
+
+plt.title(
+    "Probabilidad máxima de pertenencia"
+)
+
+plt.colorbar(
+    label="Probabilidad máxima"
+)
+
+plt.show()
+```
+
+## Describir componentes
+
+```python
+component_summary = (
+    df_clustered
+    .groupby("cluster")[features]
+    .agg(
+        [
+            "count",
+            "mean",
+            "median",
+            "std"
+        ]
+    )
+)
+
+display(
+    component_summary
+)
+```
+
+## Tamaño de los componentes
+
+```python
+component_sizes = (
+    df_clustered["cluster"]
+    .value_counts()
+    .sort_index()
+)
+
+display(
+    component_sizes
+)
+```
+
+## Variables categóricas por componente
+
+```python
+diagnosis_distribution = pd.crosstab(
+    df_clustered["cluster"],
+    df_clustered["diagnosis"],
+    normalize="index"
+)
+
+display(
+    diagnosis_distribution
+)
+```
+
+## Casos fronterizos
+
+```python
+uncertain_cases = (
+    df_clustered
+    .sort_values(
+        "maximum_membership_probability"
+    )
+    .head(20)
+)
+
+display(
+    uncertain_cases
+)
+```
+
+Estos casos pueden ser clínicamente interesantes.
+
+## Pipeline conceptual
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "gmm",
+            GaussianMixture(
+                n_components=3,
+                covariance_type="full",
+                n_init=10,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Limitación de Pipeline
+
+`GaussianMixture` no implementa exactamente la misma interfaz que un transformador estándar en todos los workflows.
+
+En proyectos reales puede ser más cómodo:
+
+1. Ajustar imputador.
+2. Ajustar escalador.
+3. Ajustar GMM.
+4. Guardar los tres objetos.
+
+## Nuevas observaciones
+
+A diferencia del clustering jerárquico y DBSCAN, GMM sí permite asignar nuevos casos.
+
+```python
+new_cluster = model.predict(
+    X_new_scaled
+)
+```
+
+## Probabilidades en nuevos casos
+
+```python
+new_probability = model.predict_proba(
+    X_new_scaled
+)
+```
+
+Esto facilita su uso operativo.
+
+## Score de nuevas observaciones
+
+```python
+new_log_likelihood = model.score_samples(
+    X_new_scaled
+)
+```
+
+Valores bajos pueden indicar observaciones poco compatibles con el modelo.
+
+## Detección de anomalías
+
+Puede fijarse un umbral sobre el log-likelihood.
+
+```python
+threshold = np.percentile(
+    model.score_samples(
+        X_scaled
+    ),
+    1
+)
+```
+
+```python
+anomaly_label = (
+    model.score_samples(
+        X_scaled
+    )
+    <
+    threshold
+)
+```
+
+::: {.callout-caution}
+## Precaución
+
+Una baja probabilidad bajo el modelo no implica necesariamente un error.
+:::
+
+## Regularización de covarianza
+
+En muestras pequeñas pueden aparecer matrices de covarianza inestables.
+
+```python
+model = GaussianMixture(
+    n_components=3,
+    reg_covar=1e-6,
+    random_state=42
+)
+```
+
+`reg_covar` añade regularización a la diagonal.
+
+## Problemas de convergencia
+
+Puede ocurrir cuando:
+
+- Hay demasiados componentes.
+- La muestra es pequeña.
+- Existen variables redundantes.
+- Hay outliers extremos.
+- La covarianza es demasiado flexible.
+- La inicialización es mala.
+
+Posibles soluciones:
+
+- Aumentar `n_init`.
+- Reducir componentes.
+- Usar `diag` o `tied`.
+- Aumentar `reg_covar`.
+- Aplicar PCA.
+- Revisar outliers.
+
+## PCA antes de GMM
+
+```python
+from sklearn.decomposition import PCA
+
+pca = PCA(
+    n_components=0.90
+)
+
+X_reduced = pca.fit_transform(
+    X_scaled
+)
+
+model = GaussianMixture(
+    n_components=3,
+    covariance_type="full",
+    n_init=10,
+    random_state=42
+)
+
+clusters = model.fit_predict(
+    X_reduced
+)
+```
+
+Ventajas:
+
+- Reduce dimensionalidad.
+- Puede mejorar estabilidad.
+- Disminuye número de parámetros.
+
+Limitaciones:
+
+- Reduce interpretabilidad.
+- Puede eliminar estructura clínica.
+- Cambia la geometría original.
+
+## Sensibilidad a outliers
+
+Los outliers pueden alterar:
+
+- Medias.
+- Covarianzas.
+- Pesos de componentes.
+- Número óptimo de componentes.
+
+Debe revisarse:
+
+- Distribución de variables.
+- Robust scaling.
+- Casos extremos.
+- Validez clínica.
+- Modelos alternativos.
+
+## Estabilidad
+
+Debe evaluarse ante:
+
+- Diferentes seeds.
+- Diferentes submuestras.
+- Distintos tipos de covarianza.
+- Diferentes números de componentes.
+- Cambios de variables.
+
+## Comparar seeds
+
+```python
+from sklearn.metrics import adjusted_rand_score
+
+clusterings = []
+
+for seed in range(
+    20
+):
+
+    model = GaussianMixture(
+        n_components=3,
+        covariance_type="full",
+        n_init=5,
+        random_state=seed
+    )
+
+    labels = model.fit_predict(
+        X_scaled
+    )
+
+    clusterings.append(
+        labels
+    )
+```
+
+```python
+agreements = []
+
+reference = clusterings[0]
+
+for labels in clusterings[1:]:
+
+    agreements.append(
+        adjusted_rand_score(
+            reference,
+            labels
+        )
+    )
+
+print(
+    np.mean(
+        agreements
+    )
+)
+```
+
+## Validación externa
+
+Los componentes pueden compararse con outcomes no utilizados.
+
+Ejemplos:
+
+- Cardiotoxicidad futura.
+- Mortalidad.
+- Reingreso.
+- Respuesta.
+- Duración de estancia.
+
+```python
+outcome_distribution = pd.crosstab(
+    df_clustered["cluster"],
+    df_clustered["future_event"],
+    normalize="index"
+)
+
+display(
+    outcome_distribution
+)
+```
+
+## Interpretar probabilidades
+
+Una pertenencia de:
+
+```text
+0.60 al cluster 1
+0.40 al cluster 2
+```
+
+puede representar:
+
+- Perfil mixto.
+- Caso fronterizo.
+- Transición entre estados.
+- Solapamiento real.
+- Incertidumbre del modelo.
+
+Esto puede ser más informativo que una etiqueta dura.
+
+## GMM y estados clínicos
+
+En algunos contextos, los componentes pueden interpretarse como estados latentes.
+
+Ejemplos:
+
+```text
+Estado 0
+→ función normal
+
+Estado 1
+→ alteración subclínica
+
+Estado 2
+→ disfunción
+```
+
+::: {.callout-warning}
+## Importante
+
+Los componentes no equivalen automáticamente a estados clínicos reales.
+:::
+
+## Comparación con K-means
+
+| Aspecto | K-means | GMM |
+|---|---|---|
+| Pertenencia | Dura | Probabilística |
+| Forma | Esférica | Elíptica |
+| Covarianza | No | Sí |
+| Nuevos casos | Sí | Sí |
+| Solapamiento | Limitado | Sí |
+| Coste | Bajo | Moderado |
+
+## Comparación con DBSCAN
+
+| Aspecto | GMM | DBSCAN |
+|---|---|---|
+| Necesita K | Sí | No |
+| Probabilidades | Sí | No |
+| Detecta ruido | Indirectamente | Sí |
+| Formas arbitrarias | Limitado | Sí |
+| Densidades variables | Parcial | Limitado |
+| Nuevos casos | Sí | Difícil |
+
+## Ventajas
+
+- Pertenencia probabilística.
+- Modela solapamiento.
+- Permite clusters elípticos.
+- Asigna nuevos casos.
+- Permite AIC y BIC.
+- Puede utilizarse para anomalías.
+- Ofrece incertidumbre individual.
+
+## Limitaciones
+
+- Asume componentes aproximadamente gaussianos.
+- Sensible a inicialización.
+- Sensible a outliers.
+- Puede sobreajustar con demasiados componentes.
+- Requiere elegir covarianza.
+- Puede ser inestable en alta dimensión.
+- La interpretación clínica no está garantizada.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+GMM es especialmente útil cuando los perfiles se solapan y se desea cuantificar la incertidumbre de pertenencia.
+:::
+
+Debe revisarse:
+
+- Probabilidad máxima.
+- Casos fronterizos.
+- Tamaño de componentes.
+- Estabilidad.
+- Plausibilidad clínica.
+- Reproducibilidad.
+- Outcomes externos.
+- Generalización entre centros.
+
+## Errores frecuentes
+
+- No escalar.
+- Elegir componentes solo por silhouette.
+- Ignorar AIC y BIC.
+- Usar `full` con muestra pequeña.
+- No revisar convergencia.
+- No usar múltiples inicializaciones.
+- Interpretar componentes como diagnósticos.
+- Ignorar casos inciertos.
+- No revisar outliers.
+- No evaluar estabilidad.
+- Usar demasiadas variables correlacionadas.
+- Confundir probabilidad de pertenencia con riesgo clínico.
+
+## Flujo recomendado
+
+1. Definir unidad de análisis.
+2. Seleccionar variables.
+3. Imputar.
+4. Escalar.
+5. Probar varios números de componentes.
+6. Comparar AIC y BIC.
+7. Comparar tipos de covarianza.
+8. Revisar convergencia.
+9. Analizar probabilidades.
+10. Revisar estabilidad.
+11. Validar externamente.
+12. Interpretar clínicamente.
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad de análisis.
+- [ ] He justificado las variables.
+- [ ] He eliminado identificadores.
+- [ ] He imputado.
+- [ ] He escalado.
+- [ ] He probado varios componentes.
+- [ ] He comparado AIC.
+- [ ] He comparado BIC.
+- [ ] He probado tipos de covarianza.
+- [ ] He usado varias inicializaciones.
+- [ ] He revisado convergencia.
+- [ ] He revisado probabilidades de pertenencia.
+- [ ] He inspeccionado casos inciertos.
+- [ ] He evaluado estabilidad.
+- [ ] He validado con outcomes externos.
+
+## Recursos
+
+### Documentación
+
+- `GaussianMixture`.
+- `predict_proba`.
+- `score_samples`.
+- `aic`.
+- `bic`.
+- `adjusted_rand_score`.
+- `PCA`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus componentes, covarianzas, probabilidades, AIC, BIC y perfiles clínicos.
