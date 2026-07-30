@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -72,6 +107,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -378,6 +442,12 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/k-means.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">K-means</span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -458,7 +528,69 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#contenidos-previstos" id="toc-contenidos-previstos" class="nav-link active" data-scroll-target="#contenidos-previstos">Contenidos previstos</a></li>
+  <li><a href="#qué-es-el-aprendizaje-no-supervisado" id="toc-qué-es-el-aprendizaje-no-supervisado" class="nav-link active" data-scroll-target="#qué-es-el-aprendizaje-no-supervisado">¿Qué es el aprendizaje no supervisado?</a></li>
+  <li><a href="#diferencia-con-aprendizaje-supervisado" id="toc-diferencia-con-aprendizaje-supervisado" class="nav-link" data-scroll-target="#diferencia-con-aprendizaje-supervisado">Diferencia con aprendizaje supervisado</a></li>
+  <li><a href="#tipos-principales" id="toc-tipos-principales" class="nav-link" data-scroll-target="#tipos-principales">Tipos principales</a></li>
+  <li><a href="#clustering" id="toc-clustering" class="nav-link" data-scroll-target="#clustering">Clustering</a></li>
+  <li><a href="#reducción-dimensional" id="toc-reducción-dimensional" class="nav-link" data-scroll-target="#reducción-dimensional">Reducción dimensional</a></li>
+  <li><a href="#detección-de-anomalías" id="toc-detección-de-anomalías" class="nav-link" data-scroll-target="#detección-de-anomalías">Detección de anomalías</a></li>
+  <li><a href="#representaciones-latentes" id="toc-representaciones-latentes" class="nav-link" data-scroll-target="#representaciones-latentes">Representaciones latentes</a></li>
+  <li><a href="#flujo-de-trabajo" id="toc-flujo-de-trabajo" class="nav-link" data-scroll-target="#flujo-de-trabajo">Flujo de trabajo</a></li>
+  <li><a href="#definir-la-unidad-de-análisis" id="toc-definir-la-unidad-de-análisis" class="nav-link" data-scroll-target="#definir-la-unidad-de-análisis">Definir la unidad de análisis</a></li>
+  <li><a href="#selección-de-variables" id="toc-selección-de-variables" class="nav-link" data-scroll-target="#selección-de-variables">Selección de variables</a></li>
+  <li><a href="#escalado" id="toc-escalado" class="nav-link" data-scroll-target="#escalado">Escalado</a></li>
+  <li><a href="#imputación" id="toc-imputación" class="nav-link" data-scroll-target="#imputación">Imputación</a></li>
+  <li><a href="#pipeline-básico" id="toc-pipeline-básico" class="nav-link" data-scroll-target="#pipeline-básico">Pipeline básico</a></li>
+  <li><a href="#k-means" id="toc-k-means" class="nav-link" data-scroll-target="#k-means">K-means</a></li>
+  <li><a href="#clustering-jerárquico" id="toc-clustering-jerárquico" class="nav-link" data-scroll-target="#clustering-jerárquico">Clustering jerárquico</a></li>
+  <li><a href="#dbscan" id="toc-dbscan" class="nav-link" data-scroll-target="#dbscan">DBSCAN</a></li>
+  <li><a href="#gaussian-mixture-models" id="toc-gaussian-mixture-models" class="nav-link" data-scroll-target="#gaussian-mixture-models">Gaussian Mixture Models</a></li>
+  <li><a href="#pca" id="toc-pca" class="nav-link" data-scroll-target="#pca">PCA</a></li>
+  <li><a href="#varianza-explicada" id="toc-varianza-explicada" class="nav-link" data-scroll-target="#varianza-explicada">Varianza explicada</a></li>
+  <li><a href="#t-sne" id="toc-t-sne" class="nav-link" data-scroll-target="#t-sne">t-SNE</a></li>
+  <li><a href="#umap" id="toc-umap" class="nav-link" data-scroll-target="#umap">UMAP</a></li>
+  <li><a href="#isolation-forest" id="toc-isolation-forest" class="nav-link" data-scroll-target="#isolation-forest">Isolation Forest</a></li>
+  <li><a href="#local-outlier-factor" id="toc-local-outlier-factor" class="nav-link" data-scroll-target="#local-outlier-factor">Local Outlier Factor</a></li>
+  <li><a href="#métricas-de-clustering" id="toc-métricas-de-clustering" class="nav-link" data-scroll-target="#métricas-de-clustering">Métricas de clustering</a></li>
+  <li><a href="#silhouette-score" id="toc-silhouette-score" class="nav-link" data-scroll-target="#silhouette-score">Silhouette score</a></li>
+  <li><a href="#davies-bouldin-index" id="toc-davies-bouldin-index" class="nav-link" data-scroll-target="#davies-bouldin-index">Davies-Bouldin index</a></li>
+  <li><a href="#calinski-harabasz-score" id="toc-calinski-harabasz-score" class="nav-link" data-scroll-target="#calinski-harabasz-score">Calinski-Harabasz score</a></li>
+  <li><a href="#inercia" id="toc-inercia" class="nav-link" data-scroll-target="#inercia">Inercia</a></li>
+  <li><a href="#método-del-codo" id="toc-método-del-codo" class="nav-link" data-scroll-target="#método-del-codo">Método del codo</a></li>
+  <li><a href="#evaluar-varios-números-de-clusters" id="toc-evaluar-varios-números-de-clusters" class="nav-link" data-scroll-target="#evaluar-varios-números-de-clusters">Evaluar varios números de clusters</a></li>
+  <li><a href="#visualizar-clusters" id="toc-visualizar-clusters" class="nav-link" data-scroll-target="#visualizar-clusters">Visualizar clusters</a></li>
+  <li><a href="#interpretar-clusters" id="toc-interpretar-clusters" class="nav-link" data-scroll-target="#interpretar-clusters">Interpretar clusters</a></li>
+  <li><a href="#variables-categóricas-por-cluster" id="toc-variables-categóricas-por-cluster" class="nav-link" data-scroll-target="#variables-categóricas-por-cluster">Variables categóricas por cluster</a></li>
+  <li><a href="#estabilidad-de-clusters" id="toc-estabilidad-de-clusters" class="nav-link" data-scroll-target="#estabilidad-de-clusters">Estabilidad de clusters</a></li>
+  <li><a href="#repetir-k-means" id="toc-repetir-k-means" class="nav-link" data-scroll-target="#repetir-k-means">Repetir K-means</a></li>
+  <li><a href="#adjusted-rand-index" id="toc-adjusted-rand-index" class="nav-link" data-scroll-target="#adjusted-rand-index">Adjusted Rand Index</a></li>
+  <li><a href="#validación-externa-de-clusters" id="toc-validación-externa-de-clusters" class="nav-link" data-scroll-target="#validación-externa-de-clusters">Validación externa de clusters</a></li>
+  <li><a href="#leakage-en-aprendizaje-no-supervisado" id="toc-leakage-en-aprendizaje-no-supervisado" class="nav-link" data-scroll-target="#leakage-en-aprendizaje-no-supervisado">Leakage en aprendizaje no supervisado</a></li>
+  <li><a href="#clustering-longitudinal" id="toc-clustering-longitudinal" class="nav-link" data-scroll-target="#clustering-longitudinal">Clustering longitudinal</a></li>
+  <li><a href="#clustering-de-trayectorias" id="toc-clustering-de-trayectorias" class="nav-link" data-scroll-target="#clustering-de-trayectorias">Clustering de trayectorias</a></li>
+  <li><a href="#reducción-dimensional-antes-de-clustering" id="toc-reducción-dimensional-antes-de-clustering" class="nav-link" data-scroll-target="#reducción-dimensional-antes-de-clustering">Reducción dimensional antes de clustering</a></li>
+  <li><a href="#pipeline-pca-k-means" id="toc-pipeline-pca-k-means" class="nav-link" data-scroll-target="#pipeline-pca-k-means">Pipeline PCA + K-means</a></li>
+  <li><a href="#curvas-y-dendrogramas" id="toc-curvas-y-dendrogramas" class="nav-link" data-scroll-target="#curvas-y-dendrogramas">Curvas y dendrogramas</a></li>
+  <li><a href="#elegir-algoritmo" id="toc-elegir-algoritmo" class="nav-link" data-scroll-target="#elegir-algoritmo">Elegir algoritmo</a></li>
+  <li><a href="#k-means-1" id="toc-k-means-1" class="nav-link" data-scroll-target="#k-means-1">K-means</a></li>
+  <li><a href="#clustering-jerárquico-1" id="toc-clustering-jerárquico-1" class="nav-link" data-scroll-target="#clustering-jerárquico-1">Clustering jerárquico</a></li>
+  <li><a href="#dbscan-1" id="toc-dbscan-1" class="nav-link" data-scroll-target="#dbscan-1">DBSCAN</a></li>
+  <li><a href="#gaussian-mixture-models-1" id="toc-gaussian-mixture-models-1" class="nav-link" data-scroll-target="#gaussian-mixture-models-1">Gaussian Mixture Models</a></li>
+  <li><a href="#detección-de-anomalías-1" id="toc-detección-de-anomalías-1" class="nav-link" data-scroll-target="#detección-de-anomalías-1">Detección de anomalías</a></li>
+  <li><a href="#evaluar-anomalías" id="toc-evaluar-anomalías" class="nav-link" data-scroll-target="#evaluar-anomalías">Evaluar anomalías</a></li>
+  <li><a href="#score-de-isolation-forest" id="toc-score-de-isolation-forest" class="nav-link" data-scroll-target="#score-de-isolation-forest">Score de Isolation Forest</a></li>
+  <li><a href="#interpretabilidad" id="toc-interpretabilidad" class="nav-link" data-scroll-target="#interpretabilidad">Interpretabilidad</a></li>
+  <li><a href="#consideraciones-clínicas" id="toc-consideraciones-clínicas" class="nav-link" data-scroll-target="#consideraciones-clínicas">Consideraciones clínicas</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#checklist-para-proyectos" id="toc-checklist-para-proyectos" class="nav-link" data-scroll-target="#checklist-para-proyectos">Checklist para proyectos</a></li>
+  <li><a href="#próximos-documentos" id="toc-próximos-documentos" class="nav-link" data-scroll-target="#próximos-documentos">Próximos documentos</a></li>
+  <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
+  <ul class="collapse">
+  <li><a href="#documentación" id="toc-documentación" class="nav-link" data-scroll-target="#documentación">Documentación</a></li>
+  <li><a href="#material-del-máster" id="toc-material-del-máster" class="nav-link" data-scroll-target="#material-del-máster">Material del máster</a></li>
+  </ul></li>
+  <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
   </ul>
 </nav>
     </div>
@@ -484,18 +616,1110 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Esta sección reúne técnicas para descubrir patrones, grupos y estructuras sin una variable objetivo.</p>
-<section id="contenidos-previstos" class="level2">
-<h2 data-anchor-id="contenidos-previstos">Contenidos previstos</h2>
-<p>Esta sección se irá ampliando progresivamente con:</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El aprendizaje no supervisado trabaja con datos sin una variable objetivo conocida.</p>
+<p>Se utiliza para descubrir estructura en los datos:</p>
 <ul>
-<li>Fundamentos teóricos.</li>
-<li>Cuándo utilizar cada técnica.</li>
-<li>Código listo para adaptar.</li>
-<li>Interpretación de resultados.</li>
-<li>Errores frecuentes.</li>
-<li>Consideraciones específicas en datos clínicos.</li>
+<li>Agrupar observaciones.</li>
+<li>Reducir dimensionalidad.</li>
+<li>Detectar anomalías.</li>
+<li>Explorar patrones latentes.</li>
+<li>Visualizar poblaciones complejas.</li>
 </ul>
+<p>No predice necesariamente una etiqueta clínica conocida.</p>
+</div>
+</div>
+<section id="qué-es-el-aprendizaje-no-supervisado" class="level2">
+<h2 data-anchor-id="qué-es-el-aprendizaje-no-supervisado">¿Qué es el aprendizaje no supervisado?</h2>
+<p>En aprendizaje no supervisado se dispone de variables predictoras, pero no de un target conocido.</p>
+<pre class="text"><code>Datos sin etiqueta
+        ↓
+Algoritmo no supervisado
+        ↓
+Estructura, grupos o representaciones</code></pre>
+<p>Ejemplos:</p>
+<ul>
+<li>Identificar perfiles de pacientes.</li>
+<li>Encontrar subtipos clínicos.</li>
+<li>Agrupar tratamientos.</li>
+<li>Detectar observaciones atípicas.</li>
+<li>Resumir cientos de variables.</li>
+<li>Visualizar datos de alta dimensión.</li>
+</ul>
+</section>
+<section id="diferencia-con-aprendizaje-supervisado" class="level2">
+<h2 data-anchor-id="diferencia-con-aprendizaje-supervisado">Diferencia con aprendizaje supervisado</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Aspecto</th>
+<th>Supervisado</th>
+<th>No supervisado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Target conocido</td>
+<td>Sí</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Objetivo</td>
+<td>Predecir</td>
+<td>Descubrir estructura</td>
+</tr>
+<tr class="odd">
+<td>Evaluación</td>
+<td>Métricas contra y real</td>
+<td>Métricas internas e interpretación</td>
+</tr>
+<tr class="even">
+<td>Ejemplo</td>
+<td>Predecir reingreso</td>
+<td>Agrupar perfiles clínicos</td>
+</tr>
+<tr class="odd">
+<td>Riesgo principal</td>
+<td>Overfitting</td>
+<td>Encontrar patrones sin utilidad real</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El algoritmo puede encontrar grupos matemáticamente claros que no tengan significado clínico.</p>
+</div>
+</div>
+</section>
+<section id="tipos-principales" class="level2">
+<h2 data-anchor-id="tipos-principales">Tipos principales</h2>
+</section>
+<section id="clustering" class="level2">
+<h2 data-anchor-id="clustering">Clustering</h2>
+<p>Agrupa observaciones similares.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Pacientes
+   │
+   ├── Grupo 1: bajo riesgo
+   ├── Grupo 2: inflamatorio
+   └── Grupo 3: deterioro funcional</code></pre>
+<p>Algoritmos habituales:</p>
+<ul>
+<li>K-means.</li>
+<li>Clustering jerárquico.</li>
+<li>DBSCAN.</li>
+<li>Gaussian Mixture Models.</li>
+<li>HDBSCAN.</li>
+</ul>
+</section>
+<section id="reducción-dimensional" class="level2">
+<h2 data-anchor-id="reducción-dimensional">Reducción dimensional</h2>
+<p>Transforma muchas variables en menos dimensiones.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>50 variables
+     ↓
+2 componentes principales</code></pre>
+<p>Métodos habituales:</p>
+<ul>
+<li>PCA.</li>
+<li>t-SNE.</li>
+<li>UMAP.</li>
+<li>Autoencoders.</li>
+</ul>
+</section>
+<section id="detección-de-anomalías" class="level2">
+<h2 data-anchor-id="detección-de-anomalías">Detección de anomalías</h2>
+<p>Busca observaciones poco frecuentes o distintas al resto.</p>
+<p>Aplicaciones:</p>
+<ul>
+<li>Errores de datos.</li>
+<li>Casos clínicos raros.</li>
+<li>Fallos de sensores.</li>
+<li>Episodios inusuales.</li>
+<li>Posible fraude.</li>
+</ul>
+</section>
+<section id="representaciones-latentes" class="level2">
+<h2 data-anchor-id="representaciones-latentes">Representaciones latentes</h2>
+<p>Algunos métodos buscan variables ocultas que expliquen patrones observados.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Factores latentes.</li>
+<li>Componentes principales.</li>
+<li>Embeddings.</li>
+<li>Autoencoders.</li>
+</ul>
+</section>
+<section id="flujo-de-trabajo" class="level2">
+<h2 data-anchor-id="flujo-de-trabajo">Flujo de trabajo</h2>
+<pre class="text"><code>Definir objetivo exploratorio
+        ↓
+Seleccionar variables
+        ↓
+Limpiar datos
+        ↓
+Escalar
+        ↓
+Aplicar algoritmo
+        ↓
+Evaluar estabilidad
+        ↓
+Interpretar resultados
+        ↓
+Validar externamente</code></pre>
+</section>
+<section id="definir-la-unidad-de-análisis" class="level2">
+<h2 data-anchor-id="definir-la-unidad-de-análisis">Definir la unidad de análisis</h2>
+<p>Cada fila puede representar:</p>
+<ul>
+<li>Paciente.</li>
+<li>Ingreso.</li>
+<li>Visita.</li>
+<li>Episodio.</li>
+<li>Prueba.</li>
+<li>Tratamiento.</li>
+<li>Ventana temporal.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>No es lo mismo agrupar pacientes que agrupar visitas del mismo paciente.</p>
+</div>
+</div>
+</section>
+<section id="selección-de-variables" class="level2">
+<h2 data-anchor-id="selección-de-variables">Selección de variables</h2>
+<p>Las variables deben elegirse según el objetivo.</p>
+<p>Ejemplo:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>features <span class="op">=</span> [</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"age"</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"weight"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"troponin"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ntprobnp"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"lvef"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gls"</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df[features]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Debe evitarse:</p>
+<ul>
+<li>Incluir variables duplicadas.</li>
+<li>Mezclar variables futuras.</li>
+<li>Añadir identificadores.</li>
+<li>Incluir variables irrelevantes.</li>
+<li>Introducir variables que definan artificialmente los grupos.</li>
+</ul>
+</section>
+<section id="escalado" class="level2">
+<h2 data-anchor-id="escalado">Escalado</h2>
+<p>El escalado suele ser esencial.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Edad        → 0 a 18
+NT-proBNP   → 10 a 5000
+FEVI        → 20 a 80</code></pre>
+<p>Sin escalado, NT-proBNP podría dominar las distancias.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>X_scaled <span class="op">=</span> scaler.fit_transform(</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    X</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="imputación" class="level2">
+<h2 data-anchor-id="imputación">Imputación</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.impute <span class="im">import</span> SimpleImputer</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>imputer <span class="op">=</span> SimpleImputer(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    strategy<span class="op">=</span><span class="st">"median"</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>X_imputed <span class="op">=</span> imputer.fit_transform(</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    X</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="pipeline-básico" class="level2">
+<h2 data-anchor-id="pipeline-básico">Pipeline básico</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> Pipeline</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>pipeline <span class="op">=</span> Pipeline(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"imputer"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>            SimpleImputer(</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                strategy<span class="op">=</span><span class="st">"median"</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"scaler"</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>            StandardScaler()</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"clustering"</span>,</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>            KMeans(</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>                n_clusters<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="k-means" class="level2">
+<h2 data-anchor-id="k-means">K-means</h2>
+<p>K-means divide los datos en <span class="math inline">\(K\)</span> grupos.</p>
+<p>Cada grupo se representa mediante un centroide.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> KMeans(</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    n_clusters<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    n_init<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>clusters <span class="op">=</span> model.fit_predict(</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="clustering-jerárquico" class="level2">
+<h2 data-anchor-id="clustering-jerárquico">Clustering jerárquico</h2>
+<p>Construye una jerarquía de grupos.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> AgglomerativeClustering</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AgglomerativeClustering(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    n_clusters<span class="op">=</span><span class="dv">3</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>clusters <span class="op">=</span> model.fit_predict(</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="dbscan" class="level2">
+<h2 data-anchor-id="dbscan">DBSCAN</h2>
+<p>Agrupa regiones densas y puede identificar ruido.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> DBSCAN</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> DBSCAN(</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    eps<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    min_samples<span class="op">=</span><span class="dv">5</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>clusters <span class="op">=</span> model.fit_predict(</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Las observaciones con etiqueta <code>-1</code> suelen considerarse ruido.</p>
+</section>
+<section id="gaussian-mixture-models" class="level2">
+<h2 data-anchor-id="gaussian-mixture-models">Gaussian Mixture Models</h2>
+<p>Modelan los datos como una combinación de distribuciones gaussianas.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.mixture <span class="im">import</span> GaussianMixture</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> GaussianMixture(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    n_components<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>clusters <span class="op">=</span> model.fit_predict(</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>También producen probabilidades de pertenencia.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>cluster_probability <span class="op">=</span> model.predict_proba(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="pca" class="level2">
+<h2 data-anchor-id="pca">PCA</h2>
+<p>PCA busca combinaciones lineales que expliquen la mayor variabilidad.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    n_components<span class="op">=</span><span class="dv">2</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>X_pca <span class="op">=</span> pca.fit_transform(</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="varianza-explicada" class="level2">
+<h2 data-anchor-id="varianza-explicada">Varianza explicada</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    pca.explained_variance_ratio_</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    pca.explained_variance_ratio_.<span class="bu">sum</span>()</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="t-sne" class="level2">
+<h2 data-anchor-id="t-sne">t-SNE</h2>
+<p>t-SNE se utiliza principalmente para visualización.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> TSNE</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>tsne <span class="op">=</span> TSNE(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    n_components<span class="op">=</span><span class="dv">2</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    perplexity<span class="op">=</span><span class="dv">30</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>X_tsne <span class="op">=</span> tsne.fit_transform(</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Precaución
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Las distancias globales en t-SNE no deben interpretarse de forma directa.</p>
+</div>
+</div>
+</section>
+<section id="umap" class="level2">
+<h2 data-anchor-id="umap">UMAP</h2>
+<p>UMAP produce representaciones de baja dimensión y suele preservar estructura local.</p>
+<p>Puede utilizarse para:</p>
+<ul>
+<li>Visualización.</li>
+<li>Exploración.</li>
+<li>Preprocesamiento.</li>
+</ul>
+<p>Debe interpretarse con cautela.</p>
+</section>
+<section id="isolation-forest" class="level2">
+<h2 data-anchor-id="isolation-forest">Isolation Forest</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.ensemble <span class="im">import</span> IsolationForest</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> IsolationForest(</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    contamination<span class="op">=</span><span class="fl">0.02</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>anomaly_label <span class="op">=</span> model.fit_predict(</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>1  → observación normal
+-1 → posible anomalía</code></pre>
+</section>
+<section id="local-outlier-factor" class="level2">
+<h2 data-anchor-id="local-outlier-factor">Local Outlier Factor</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.neighbors <span class="im">import</span> LocalOutlierFactor</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LocalOutlierFactor(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    n_neighbors<span class="op">=</span><span class="dv">20</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    contamination<span class="op">=</span><span class="fl">0.02</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>anomaly_label <span class="op">=</span> model.fit_predict(</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="métricas-de-clustering" class="level2">
+<h2 data-anchor-id="métricas-de-clustering">Métricas de clustering</h2>
+<p>No existe una única métrica perfecta.</p>
+<p>Las más comunes son:</p>
+<ul>
+<li>Silhouette score.</li>
+<li>Davies-Bouldin index.</li>
+<li>Calinski-Harabasz score.</li>
+<li>Inercia.</li>
+<li>Estabilidad de clusters.</li>
+</ul>
+</section>
+<section id="silhouette-score" class="level2">
+<h2 data-anchor-id="silhouette-score">Silhouette score</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> silhouette_score</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> silhouette_score(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    X_scaled,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    clusters</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Interpretación aproximada:</p>
+<pre class="text"><code>Cercano a 1
+→ clusters bien separados
+
+Cercano a 0
+→ clusters solapados
+
+Negativo
+→ asignaciones problemáticas</code></pre>
+</section>
+<section id="davies-bouldin-index" class="level2">
+<h2 data-anchor-id="davies-bouldin-index">Davies-Bouldin index</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> davies_bouldin_score</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> davies_bouldin_score(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    X_scaled,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    clusters</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Valores más bajos suelen ser mejores.</p>
+</section>
+<section id="calinski-harabasz-score" class="level2">
+<h2 data-anchor-id="calinski-harabasz-score">Calinski-Harabasz score</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> calinski_harabasz_score</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>score <span class="op">=</span> calinski_harabasz_score(</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    X_scaled,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    clusters</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Valores más altos suelen indicar mejor separación.</p>
+</section>
+<section id="inercia" class="level2">
+<h2 data-anchor-id="inercia">Inercia</h2>
+<p>En K-means:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    model.inertia_</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>La inercia disminuye al aumentar <span class="math inline">\(K\)</span>.</p>
+<p>Por eso no debe utilizarse sola.</p>
+</section>
+<section id="método-del-codo" class="level2">
+<h2 data-anchor-id="método-del-codo">Método del codo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>k_values <span class="op">=</span> <span class="bu">range</span>(</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">11</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>inertias <span class="op">=</span> []</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> k_values:</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> KMeans(</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>        n_clusters<span class="op">=</span>k,</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        random_state<span class="op">=</span><span class="dv">42</span>,</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>        n_init<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    model.fit(</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>        X_scaled</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>    inertias.append(</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>        model.inertia_</span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>plt.figure(</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>)</span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>plt.plot(</span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>    k_values,</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>    inertias,</span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>    marker<span class="op">=</span><span class="st">"o"</span></span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>plt.xlabel(</span>
+<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Número de clusters"</span></span>
+<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-40"><a href="#cb26-40" aria-hidden="true" tabindex="-1"></a>plt.ylabel(</span>
+<span id="cb26-41"><a href="#cb26-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Inercia"</span></span>
+<span id="cb26-42"><a href="#cb26-42" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-43"><a href="#cb26-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-44"><a href="#cb26-44" aria-hidden="true" tabindex="-1"></a>plt.title(</span>
+<span id="cb26-45"><a href="#cb26-45" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Método del codo"</span></span>
+<span id="cb26-46"><a href="#cb26-46" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-47"><a href="#cb26-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-48"><a href="#cb26-48" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="evaluar-varios-números-de-clusters" class="level2">
+<h2 data-anchor-id="evaluar-varios-números-de-clusters">Evaluar varios números de clusters</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> []</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">11</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> KMeans(</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>        n_clusters<span class="op">=</span>k,</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>        random_state<span class="op">=</span><span class="dv">42</span>,</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>        n_init<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> model.fit_predict(</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>        X_scaled</span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>    rows.append(</span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>            <span class="st">"n_clusters"</span>: k,</span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>            <span class="st">"silhouette"</span>: silhouette_score(</span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>                X_scaled,</span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>                labels</span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>            <span class="st">"davies_bouldin"</span>: davies_bouldin_score(</span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>                X_scaled,</span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>                labels</span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>            ),</span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>            <span class="st">"calinski_harabasz"</span>: calinski_harabasz_score(</span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>                X_scaled,</span>
+<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>                labels</span>
+<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>evaluation_table <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a>    rows</span>
+<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="visualizar-clusters" class="level2">
+<h2 data-anchor-id="visualizar-clusters">Visualizar clusters</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>plt.figure(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>plt.scatter(</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    X_pca[:, <span class="dv">0</span>],</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    X_pca[:, <span class="dv">1</span>],</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    c<span class="op">=</span>clusters</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>plt.xlabel(</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"PC1"</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>plt.ylabel(</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">"PC2"</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>plt.title(</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Clusters proyectados en PCA"</span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretar-clusters" class="level2">
+<h2 data-anchor-id="interpretar-clusters">Interpretar clusters</h2>
+<p>Después de crear clusters debe describirse cada grupo.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>df_clustered <span class="op">=</span> df.copy()</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>df_clustered[<span class="st">"cluster"</span>] <span class="op">=</span> clusters</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>cluster_summary <span class="op">=</span> (</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    df_clustered</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    .groupby(<span class="st">"cluster"</span>)[features]</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    .agg(</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"mean"</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"median"</span>,</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"std"</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>display(</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>    cluster_summary</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="variables-categóricas-por-cluster" class="level2">
+<h2 data-anchor-id="variables-categóricas-por-cluster">Variables categóricas por cluster</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>distribution <span class="op">=</span> pd.crosstab(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    df_clustered[<span class="st">"cluster"</span>],</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    df_clustered[<span class="st">"diagnosis"</span>],</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    normalize<span class="op">=</span><span class="st">"index"</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>display(</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    distribution</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="estabilidad-de-clusters" class="level2">
+<h2 data-anchor-id="estabilidad-de-clusters">Estabilidad de clusters</h2>
+<p>Un clustering útil debería ser relativamente estable ante:</p>
+<ul>
+<li>Cambios de seed.</li>
+<li>Submuestras.</li>
+<li>Pequeños cambios en variables.</li>
+<li>Diferentes periodos.</li>
+<li>Diferentes centros.</li>
+</ul>
+</section>
+<section id="repetir-k-means" class="level2">
+<h2 data-anchor-id="repetir-k-means">Repetir K-means</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>clusterings <span class="op">=</span> []</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">20</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> KMeans(</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>        n_clusters<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>        random_state<span class="op">=</span>seed,</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>        n_init<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    labels <span class="op">=</span> model.fit_predict(</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>        X_scaled</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>    clusterings.append(</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>        labels</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="adjusted-rand-index" class="level2">
+<h2 data-anchor-id="adjusted-rand-index">Adjusted Rand Index</h2>
+<p>Permite comparar dos clusterings.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> adjusted_rand_score</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>agreement <span class="op">=</span> adjusted_rand_score(</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    clusterings[<span class="dv">0</span>],</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    clusterings[<span class="dv">1</span>]</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="validación-externa-de-clusters" class="level2">
+<h2 data-anchor-id="validación-externa-de-clusters">Validación externa de clusters</h2>
+<p>Aunque el algoritmo no use target, puede evaluarse después si los grupos se relacionan con variables externas.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Mortalidad.</li>
+<li>Reingreso.</li>
+<li>Respuesta al tratamiento.</li>
+<li>Complicaciones.</li>
+<li>Evolución temporal.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Estas variables externas no deben utilizarse para construir los clusters si se quieren usar para validación.</p>
+</div>
+</div>
+</section>
+<section id="leakage-en-aprendizaje-no-supervisado" class="level2">
+<h2 data-anchor-id="leakage-en-aprendizaje-no-supervisado">Leakage en aprendizaje no supervisado</h2>
+<p>También puede existir leakage.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Escalar antes de separar una cohorte externa.</li>
+<li>Usar variables futuras.</li>
+<li>Incluir outcomes en clustering.</li>
+<li>Ajustar PCA con todo el dataset antes de validación.</li>
+<li>Elegir hiperparámetros usando test.</li>
+</ul>
+</section>
+<section id="clustering-longitudinal" class="level2">
+<h2 data-anchor-id="clustering-longitudinal">Clustering longitudinal</h2>
+<p>Con datos repetidos puede agruparse:</p>
+<ul>
+<li>Pacientes completos.</li>
+<li>Trayectorias.</li>
+<li>Visitas.</li>
+<li>Cambios entre visitas.</li>
+<li>Ventanas temporales.</li>
+</ul>
+<p>Debe evitarse tratar todas las visitas como independientes cuando pertenecen al mismo paciente.</p>
+</section>
+<section id="clustering-de-trayectorias" class="level2">
+<h2 data-anchor-id="clustering-de-trayectorias">Clustering de trayectorias</h2>
+<p>Ejemplos:</p>
+<pre class="text"><code>Trayectoria estable
+Trayectoria con deterioro temprano
+Trayectoria con recuperación
+Trayectoria fluctuante</code></pre>
+<p>Puede requerir métodos específicos:</p>
+<ul>
+<li>Dynamic Time Warping.</li>
+<li>Modelos de clases latentes.</li>
+<li>Functional clustering.</li>
+<li>Sequence clustering.</li>
+</ul>
+</section>
+<section id="reducción-dimensional-antes-de-clustering" class="level2">
+<h2 data-anchor-id="reducción-dimensional-antes-de-clustering">Reducción dimensional antes de clustering</h2>
+<p>Puede ser útil cuando hay muchas variables.</p>
+<pre class="text"><code>Variables originales
+        ↓
+PCA
+        ↓
+K-means</code></pre>
+<p>Pero puede perder información relevante.</p>
+</section>
+<section id="pipeline-pca-k-means" class="level2">
+<h2 data-anchor-id="pipeline-pca-k-means">Pipeline PCA + K-means</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>pipeline <span class="op">=</span> Pipeline(</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    steps<span class="op">=</span>[</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"imputer"</span>,</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>            SimpleImputer(</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>                strategy<span class="op">=</span><span class="st">"median"</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"scaler"</span>,</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>            StandardScaler()</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"pca"</span>,</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>            PCA(</span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a>                n_components<span class="op">=</span><span class="fl">0.90</span></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>            <span class="st">"clustering"</span>,</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a>            KMeans(</span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>                n_clusters<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>                random_state<span class="op">=</span><span class="dv">42</span>,</span>
+<span id="cb36-27"><a href="#cb36-27" aria-hidden="true" tabindex="-1"></a>                n_init<span class="op">=</span><span class="st">"auto"</span></span>
+<span id="cb36-28"><a href="#cb36-28" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb36-29"><a href="#cb36-29" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb36-30"><a href="#cb36-30" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb36-31"><a href="#cb36-31" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="curvas-y-dendrogramas" class="level2">
+<h2 data-anchor-id="curvas-y-dendrogramas">Curvas y dendrogramas</h2>
+<p>El clustering jerárquico puede visualizarse mediante dendrogramas.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.cluster.hierarchy <span class="im">import</span> linkage</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.cluster.hierarchy <span class="im">import</span> dendrogram</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>linkage_matrix <span class="op">=</span> linkage(</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    X_scaled,</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    method<span class="op">=</span><span class="st">"ward"</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>plt.figure(</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>)</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>dendrogram(</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>    linkage_matrix</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>plt.xlabel(</span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Observaciones"</span></span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a>plt.ylabel(</span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Distancia"</span></span>
+<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-24"><a href="#cb37-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-25"><a href="#cb37-25" aria-hidden="true" tabindex="-1"></a>plt.title(</span>
+<span id="cb37-26"><a href="#cb37-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Dendrograma"</span></span>
+<span id="cb37-27"><a href="#cb37-27" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb37-28"><a href="#cb37-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-29"><a href="#cb37-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="elegir-algoritmo" class="level2">
+<h2 data-anchor-id="elegir-algoritmo">Elegir algoritmo</h2>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Método</th>
+<th>Forma de clusters</th>
+<th>Necesita K</th>
+<th>Detecta ruido</th>
+<th>Escalabilidad</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>K-means</td>
+<td>Aproximadamente esférica</td>
+<td>Sí</td>
+<td>No</td>
+<td>Alta</td>
+</tr>
+<tr class="even">
+<td>Jerárquico</td>
+<td>Flexible</td>
+<td>No siempre</td>
+<td>No</td>
+<td>Media-baja</td>
+</tr>
+<tr class="odd">
+<td>DBSCAN</td>
+<td>Arbitraria</td>
+<td>No</td>
+<td>Sí</td>
+<td>Media</td>
+</tr>
+<tr class="even">
+<td>GMM</td>
+<td>Elíptica y probabilística</td>
+<td>Sí</td>
+<td>No</td>
+<td>Media</td>
+</tr>
+<tr class="odd">
+<td>HDBSCAN</td>
+<td>Arbitraria</td>
+<td>No</td>
+<td>Sí</td>
+<td>Media</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="k-means-1" class="level2">
+<h2 data-anchor-id="k-means-1">K-means</h2>
+<p>Adecuado cuando:</p>
+<ul>
+<li>Los clusters son compactos.</li>
+<li>Las variables son continuas.</li>
+<li>Se conoce aproximadamente <span class="math inline">\(K\)</span>.</li>
+<li>Se necesita velocidad.</li>
+</ul>
+</section>
+<section id="clustering-jerárquico-1" class="level2">
+<h2 data-anchor-id="clustering-jerárquico-1">Clustering jerárquico</h2>
+<p>Adecuado cuando:</p>
+<ul>
+<li>Se busca una estructura jerárquica.</li>
+<li>El dataset no es enorme.</li>
+<li>Se quiere visualizar un dendrograma.</li>
+</ul>
+</section>
+<section id="dbscan-1" class="level2">
+<h2 data-anchor-id="dbscan-1">DBSCAN</h2>
+<p>Adecuado cuando:</p>
+<ul>
+<li>Existen regiones densas.</li>
+<li>Los clusters tienen formas irregulares.</li>
+<li>Se desea detectar ruido.</li>
+</ul>
+</section>
+<section id="gaussian-mixture-models-1" class="level2">
+<h2 data-anchor-id="gaussian-mixture-models-1">Gaussian Mixture Models</h2>
+<p>Adecuado cuando:</p>
+<ul>
+<li>Se quieren probabilidades de pertenencia.</li>
+<li>Los clusters pueden solaparse.</li>
+<li>Se asume una estructura aproximadamente gaussiana.</li>
+</ul>
+</section>
+<section id="detección-de-anomalías-1" class="level2">
+<h2 data-anchor-id="detección-de-anomalías-1">Detección de anomalías</h2>
+<p>Una anomalía puede ser:</p>
+<ul>
+<li>Un error de registro.</li>
+<li>Una observación rara válida.</li>
+<li>Un cambio clínico real.</li>
+<li>Un fallo de sensor.</li>
+<li>Un caso extremo.</li>
+</ul>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Caution</span>Precaución
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Anomalía matemática no significa error.</p>
+</div>
+</div>
+</section>
+<section id="evaluar-anomalías" class="level2">
+<h2 data-anchor-id="evaluar-anomalías">Evaluar anomalías</h2>
+<p>Cuando no hay etiquetas, puede revisarse:</p>
+<ul>
+<li>Distribución de scores.</li>
+<li>Casos extremos.</li>
+<li>Validación clínica.</li>
+<li>Estabilidad.</li>
+<li>Porcentaje detectado.</li>
+<li>Sensibilidad a hiperparámetros.</li>
+</ul>
+</section>
+<section id="score-de-isolation-forest" class="level2">
+<h2 data-anchor-id="score-de-isolation-forest">Score de Isolation Forest</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>anomaly_score <span class="op">=</span> model.decision_function(</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    X_scaled</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Valores más bajos suelen indicar mayor anomalía.</p>
+</section>
+<section id="interpretabilidad" class="level2">
+<h2 data-anchor-id="interpretabilidad">Interpretabilidad</h2>
+<p>Los resultados deben traducirse a perfiles comprensibles.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Cluster 0
+- menor edad
+- FEVI normal
+- biomarcadores bajos
+
+Cluster 1
+- NT-proBNP alto
+- FEVI reducida
+- mayor exposición acumulada
+
+Cluster 2
+- alteración de strain
+- FEVI preservada</code></pre>
+</section>
+<section id="consideraciones-clínicas" class="level2">
+<h2 data-anchor-id="consideraciones-clínicas">Consideraciones clínicas</h2>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Aplicación clínica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Los clusters deben considerarse hipótesis exploratorias hasta demostrar estabilidad, reproducibilidad y utilidad.</p>
+</div>
+</div>
+<p>Debe revisarse:</p>
+<ul>
+<li>Plausibilidad clínica.</li>
+<li>Tamaño de cada cluster.</li>
+<li>Estabilidad.</li>
+<li>Reproducibilidad en otra cohorte.</li>
+<li>Asociación con outcomes externos.</li>
+<li>Utilidad para decisiones.</li>
+<li>Riesgo de estigmatización o simplificación.</li>
+</ul>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>No escalar.</li>
+<li>Elegir <span class="math inline">\(K\)</span> solo por el codo.</li>
+<li>Interpretar una visualización como evidencia.</li>
+<li>Usar t-SNE para medir distancias globales.</li>
+<li>No revisar estabilidad.</li>
+<li>Incluir identificadores.</li>
+<li>Incluir outcomes futuros.</li>
+<li>Tratar visitas como pacientes independientes.</li>
+<li>Confiar en una única métrica.</li>
+<li>Poner nombres clínicos demasiado pronto.</li>
+<li>Confundir cluster con diagnóstico.</li>
+<li>No validar externamente.</li>
+</ul>
+</section>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Definir objetivo exploratorio.</li>
+<li>Definir unidad de análisis.</li>
+<li>Seleccionar variables.</li>
+<li>Imputar y escalar.</li>
+<li>Explorar PCA.</li>
+<li>Probar varios algoritmos.</li>
+<li>Comparar métricas internas.</li>
+<li>Revisar estabilidad.</li>
+<li>Describir clusters.</li>
+<li>Validar con variables externas.</li>
+<li>Replicar en otra cohorte.</li>
+<li>Interpretar clínicamente.</li>
+</ol>
+</section>
+<section id="checklist-para-proyectos" class="level2">
+<h2 data-anchor-id="checklist-para-proyectos">Checklist para proyectos</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">He definido la unidad de análisis.</label></li>
+<li><label><input type="checkbox">He justificado las variables.</label></li>
+<li><label><input type="checkbox">He eliminado identificadores.</label></li>
+<li><label><input type="checkbox">He evitado variables futuras.</label></li>
+<li><label><input type="checkbox">He imputado correctamente.</label></li>
+<li><label><input type="checkbox">He escalado.</label></li>
+<li><label><input type="checkbox">He probado más de un algoritmo.</label></li>
+<li><label><input type="checkbox">He probado varios valores de hiperparámetros.</label></li>
+<li><label><input type="checkbox">He calculado métricas internas.</label></li>
+<li><label><input type="checkbox">He revisado estabilidad.</label></li>
+<li><label><input type="checkbox">He descrito los clusters.</label></li>
+<li><label><input type="checkbox">He evaluado tamaños.</label></li>
+<li><label><input type="checkbox">He validado con variables externas.</label></li>
+<li><label><input type="checkbox">He considerado una cohorte externa.</label></li>
+<li><label><input type="checkbox">He evitado interpretaciones causales.</label></li>
+</ul>
+</section>
+<section id="próximos-documentos" class="level2">
+<h2 data-anchor-id="próximos-documentos">Próximos documentos</h2>
+<p>Esta sección se completará con:</p>
+<ol type="1">
+<li>K-means.</li>
+<li>Clustering jerárquico.</li>
+<li>DBSCAN y clustering basado en densidad.</li>
+<li>Gaussian Mixture Models.</li>
+<li>Evaluación de clustering.</li>
+<li>Detección de anomalías.</li>
+<li>Comparación de métodos no supervisados.</li>
+</ol>
+</section>
+<section id="recursos" class="level2">
+<h2 data-anchor-id="recursos">Recursos</h2>
+<section id="documentación" class="level3">
+<h3 data-anchor-id="documentación">Documentación</h3>
+<ul>
+<li><code>KMeans</code>.</li>
+<li><code>AgglomerativeClustering</code>.</li>
+<li><code>DBSCAN</code>.</li>
+<li><code>GaussianMixture</code>.</li>
+<li><code>PCA</code>.</li>
+<li><code>TSNE</code>.</li>
+<li><code>IsolationForest</code>.</li>
+<li><code>LocalOutlierFactor</code>.</li>
+<li><code>silhouette_score</code>.</li>
+</ul>
+</section>
+<section id="material-del-máster" class="level3">
+<h3 data-anchor-id="material-del-máster">Material del máster</h3>
+<p>Añadir aquí:</p>
+<ul>
+<li>Presentación correspondiente.</li>
+<li>Diapositivas relevantes.</li>
+<li>Ejercicios realizados.</li>
+<li>Apuntes de Notion.</li>
+</ul>
+</section>
+</section>
+<section id="notas-personales" class="level2">
+<h2 data-anchor-id="notas-personales">Notas personales</h2>
+<p>Añade aquí tus clustering, perfiles clínicos, anomalías y decisiones metodológicas.</p>
 
 
 </section>
