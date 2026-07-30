@@ -1,0 +1,1101 @@
+---
+title: "DBSCAN y clustering basado en densidad"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+DBSCAN agrupa observaciones que se encuentran en regiones densas.
+
+A diferencia de K-means:
+
+- No necesita fijar el número de clusters.
+- Puede detectar clusters con formas irregulares.
+- Identifica observaciones como ruido.
+
+Sus dos hiperparámetros principales son:
+
+- `eps`: radio del vecindario.
+- `min_samples`: mínimo de puntos para considerar una región densa.
+:::
+
+## ¿Qué es DBSCAN?
+
+DBSCAN significa:
+
+```text
+Density-Based Spatial Clustering
+of Applications with Noise
+```
+
+El algoritmo busca regiones densas separadas por zonas con baja densidad.
+
+```text
+Región densa A      ruido       Región densa B
+
+● ● ● ● ●            ×          ○ ○ ○ ○
+ ● ● ●                          ○ ○ ○ ○ ○
+```
+
+::: {.callout-note}
+## Idea clave
+
+DBSCAN define clusters por densidad, no por centroides.
+:::
+
+## Tipos de observaciones
+
+DBSCAN clasifica las observaciones en tres tipos.
+
+## Core points
+
+Son observaciones con suficientes vecinos dentro del radio `eps`.
+
+## Border points
+
+Están cerca de un core point, pero no tienen suficientes vecinos para ser core.
+
+## Noise points
+
+No pertenecen a ninguna región densa.
+
+En scikit-learn reciben la etiqueta:
+
+```text
+-1
+```
+
+## Hiperparámetros principales
+
+## eps
+
+`eps` define el radio máximo del vecindario.
+
+```python
+eps=0.5
+```
+
+```text
+eps pequeño
+→ muchos clusters pequeños
+→ más ruido
+
+eps grande
+→ clusters más grandes
+→ posible fusión de grupos
+```
+
+## min_samples
+
+`min_samples` define cuántas observaciones deben existir en un vecindario para considerar un punto como core.
+
+```python
+min_samples=5
+```
+
+```text
+min_samples pequeño
+→ más sensibilidad a pequeños grupos
+→ mayor riesgo de ruido agrupado
+
+min_samples grande
+→ clusters más densos
+→ más observaciones como ruido
+```
+
+## Preparar los datos
+
+```python
+features = [
+    "age",
+    "troponin",
+    "ntprobnp",
+    "lvef",
+    "gls"
+]
+
+X = df[features]
+```
+
+## Imputar valores ausentes
+
+```python
+from sklearn.impute import SimpleImputer
+
+imputer = SimpleImputer(
+    strategy="median"
+)
+
+X_imputed = imputer.fit_transform(
+    X
+)
+```
+
+## Escalar
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+X_scaled = scaler.fit_transform(
+    X_imputed
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+DBSCAN depende de distancias, por lo que el escalado suele ser esencial.
+:::
+
+## Entrenar DBSCAN
+
+```python
+from sklearn.cluster import DBSCAN
+
+model = DBSCAN(
+    eps=0.5,
+    min_samples=5
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+## Añadir clusters al dataframe
+
+```python
+df_clustered = df.copy()
+
+df_clustered["cluster"] = clusters
+```
+
+## Inspeccionar etiquetas
+
+```python
+print(
+    sorted(
+        set(clusters)
+    )
+)
+```
+
+Ejemplo:
+
+```text
+[-1, 0, 1, 2]
+```
+
+Esto significa:
+
+- Tres clusters.
+- Un grupo de observaciones etiquetadas como ruido.
+
+## Número de clusters
+
+```python
+unique_labels = set(
+    clusters
+)
+
+n_clusters = len(
+    unique_labels
+    -
+    {-1}
+)
+
+print(
+    n_clusters
+)
+```
+
+## Número de observaciones de ruido
+
+```python
+n_noise = (
+    clusters == -1
+).sum()
+
+print(
+    n_noise
+)
+```
+
+## Proporción de ruido
+
+```python
+noise_proportion = (
+    clusters == -1
+).mean()
+
+print(
+    noise_proportion
+)
+```
+
+## Visualizar con PCA
+
+```python
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+
+pca = PCA(
+    n_components=2
+)
+
+X_pca = pca.fit_transform(
+    X_scaled
+)
+```
+
+```python
+plt.figure(
+    figsize=(8, 6)
+)
+
+plt.scatter(
+    X_pca[:, 0],
+    X_pca[:, 1],
+    c=clusters
+)
+
+plt.xlabel(
+    "PC1"
+)
+
+plt.ylabel(
+    "PC2"
+)
+
+plt.title(
+    "Clusters de DBSCAN proyectados en PCA"
+)
+
+plt.show()
+```
+
+## Visualizar ruido por separado
+
+```python
+is_noise = (
+    clusters == -1
+)
+
+plt.figure(
+    figsize=(8, 6)
+)
+
+plt.scatter(
+    X_pca[
+        ~is_noise,
+        0
+    ],
+    X_pca[
+        ~is_noise,
+        1
+    ],
+    c=clusters[
+        ~is_noise
+    ]
+)
+
+plt.scatter(
+    X_pca[
+        is_noise,
+        0
+    ],
+    X_pca[
+        is_noise,
+        1
+    ],
+    marker="x"
+)
+
+plt.xlabel(
+    "PC1"
+)
+
+plt.ylabel(
+    "PC2"
+)
+
+plt.title(
+    "Clusters y observaciones de ruido"
+)
+
+plt.show()
+```
+
+## Elegir eps
+
+Una estrategia habitual es utilizar el gráfico de k-distancias.
+
+El proceso es:
+
+1. Elegir `min_samples`.
+2. Calcular la distancia al vecino número `k`.
+3. Ordenar las distancias.
+4. Buscar un cambio de pendiente.
+
+## Gráfico de k-distancias
+
+```python
+from sklearn.neighbors import NearestNeighbors
+import numpy as np
+
+min_samples = 5
+
+neighbors = NearestNeighbors(
+    n_neighbors=min_samples
+)
+
+neighbors.fit(
+    X_scaled
+)
+
+distances, indices = neighbors.kneighbors(
+    X_scaled
+)
+```
+
+```python
+k_distances = np.sort(
+    distances[:, -1]
+)
+```
+
+```python
+plt.figure(
+    figsize=(8, 5)
+)
+
+plt.plot(
+    k_distances
+)
+
+plt.xlabel(
+    "Observaciones ordenadas"
+)
+
+plt.ylabel(
+    f"Distancia al vecino {min_samples}"
+)
+
+plt.title(
+    "Gráfico de k-distancias"
+)
+
+plt.show()
+```
+
+## Interpretación del gráfico
+
+Se busca una zona de codo.
+
+```text
+Distancias pequeñas
+→ regiones densas
+
+Aumento pronunciado
+→ transición hacia ruido
+```
+
+El valor de `eps` puede aproximarse alrededor de ese cambio.
+
+::: {.callout-warning}
+## Limitación
+
+El codo puede no ser claro, especialmente en alta dimensión.
+:::
+
+## Probar combinaciones
+
+```python
+import pandas as pd
+
+eps_values = [
+    0.2,
+    0.3,
+    0.4,
+    0.5,
+    0.6,
+    0.8,
+    1.0
+]
+
+min_samples_values = [
+    3,
+    5,
+    10,
+    15
+]
+
+rows = []
+
+for eps in eps_values:
+
+    for min_samples in min_samples_values:
+
+        model = DBSCAN(
+            eps=eps,
+            min_samples=min_samples
+        )
+
+        labels = model.fit_predict(
+            X_scaled
+        )
+
+        unique_labels = set(
+            labels
+        )
+
+        n_clusters = len(
+            unique_labels
+            -
+            {-1}
+        )
+
+        noise_fraction = (
+            labels == -1
+        ).mean()
+
+        rows.append(
+            {
+                "eps": eps,
+                "min_samples": min_samples,
+                "n_clusters": n_clusters,
+                "noise_fraction": noise_fraction
+            }
+        )
+
+parameter_table = pd.DataFrame(
+    rows
+)
+
+display(
+    parameter_table
+)
+```
+
+## Silhouette score
+
+Puede calcularse excluyendo el ruido.
+
+```python
+from sklearn.metrics import silhouette_score
+
+mask = (
+    clusters != -1
+)
+
+if len(
+    set(
+        clusters[mask]
+    )
+) >= 2:
+
+    score = silhouette_score(
+        X_scaled[mask],
+        clusters[mask]
+    )
+
+    print(
+        score
+    )
+```
+
+::: {.callout-caution}
+## Precaución
+
+Excluir ruido puede hacer que el score parezca mejor, por lo que debe reportarse también la proporción de ruido.
+:::
+
+## Davies-Bouldin
+
+```python
+from sklearn.metrics import davies_bouldin_score
+
+if len(
+    set(
+        clusters[mask]
+    )
+) >= 2:
+
+    score = davies_bouldin_score(
+        X_scaled[mask],
+        clusters[mask]
+    )
+```
+
+## Calinski-Harabasz
+
+```python
+from sklearn.metrics import calinski_harabasz_score
+
+if len(
+    set(
+        clusters[mask]
+    )
+) >= 2:
+
+    score = calinski_harabasz_score(
+        X_scaled[mask],
+        clusters[mask]
+    )
+```
+
+## Métrica de distancia
+
+DBSCAN permite distintas métricas.
+
+```python
+model = DBSCAN(
+    eps=0.5,
+    min_samples=5,
+    metric="euclidean"
+)
+```
+
+Otras opciones:
+
+- `"manhattan"`.
+- `"cosine"`.
+- Distancia precomputada.
+
+## Distancia euclídea
+
+Es la opción habitual para variables continuas escaladas.
+
+## Distancia Manhattan
+
+Puede ser útil cuando:
+
+- Existen muchos valores extremos.
+- Se trabaja en espacios de alta dimensión.
+- La geometría euclídea no resulta adecuada.
+
+## Distancia coseno
+
+Puede ser útil cuando importa el patrón relativo más que la magnitud.
+
+## Matriz de distancias precomputada
+
+```python
+model = DBSCAN(
+    eps=0.5,
+    min_samples=5,
+    metric="precomputed"
+)
+
+clusters = model.fit_predict(
+    distance_matrix
+)
+```
+
+Esto permite utilizar:
+
+- Distancia de Gower.
+- Distancias específicas del dominio.
+- Distancias entre trayectorias.
+
+## Variables categóricas
+
+DBSCAN no está diseñado directamente para categóricas con distancia euclídea.
+
+En datos mixtos puede considerarse:
+
+- Distancia de Gower.
+- Encoding con cautela.
+- Métodos alternativos.
+- Clustering jerárquico con distancia precomputada.
+
+## Alta dimensionalidad
+
+En alta dimensión, las distancias tienden a parecerse entre sí.
+
+Esto se conoce como curse of dimensionality.
+
+Consecuencias:
+
+- Dificultad para elegir `eps`.
+- Menor contraste entre regiones densas.
+- Más sensibilidad a ruido.
+- Clusters menos claros.
+
+## PCA antes de DBSCAN
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "pca",
+            PCA(
+                n_components=0.90
+            )
+        ),
+        (
+            "dbscan",
+            DBSCAN(
+                eps=0.5,
+                min_samples=5
+            )
+        )
+    ]
+)
+```
+
+Ventajas:
+
+- Reduce dimensionalidad.
+- Puede disminuir ruido.
+- Facilita cálculo de distancias.
+
+Limitaciones:
+
+- Puede perder estructura relevante.
+- Los componentes reducen interpretabilidad.
+- `eps` debe ajustarse de nuevo.
+
+## Pipeline básico
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "dbscan",
+            DBSCAN(
+                eps=0.5,
+                min_samples=5
+            )
+        )
+    ]
+)
+```
+
+## Limitación para nuevos casos
+
+DBSCAN de scikit-learn no ofrece `predict()` para asignar directamente nuevas observaciones.
+
+Esto dificulta:
+
+- Producción.
+- Clasificación de nuevos pacientes.
+- Monitorización continua.
+
+Puede aproximarse asignando nuevos casos a core points, pero requiere lógica adicional.
+
+## Core samples
+
+```python
+core_indices = (
+    model.core_sample_indices_
+)
+```
+
+```python
+core_samples = (
+    model.components_
+)
+```
+
+## Clusters con formas arbitrarias
+
+DBSCAN puede detectar formas curvas o no esféricas.
+
+```text
+○ ○ ○ ○
+      ○
+      ○
+      ○
+
+● ● ●
+●
+● ● ●
+```
+
+Esto es una ventaja respecto a K-means.
+
+## Densidades diferentes
+
+DBSCAN puede fallar cuando existen clusters con densidades muy distintas.
+
+Ejemplo:
+
+```text
+Cluster A
+→ muy compacto
+
+Cluster B
+→ disperso
+```
+
+Un único `eps` puede ser:
+
+- Demasiado pequeño para B.
+- Demasiado grande para A.
+
+::: {.callout-important}
+## Idea clave
+
+DBSCAN asume que una única escala de densidad es razonable para todo el dataset.
+:::
+
+## HDBSCAN
+
+HDBSCAN extiende DBSCAN para trabajar mejor con densidades variables.
+
+Características:
+
+- No necesita un único `eps`.
+- Construye una jerarquía de densidad.
+- Identifica ruido.
+- Produce probabilidades de pertenencia.
+- Suele ser más robusto.
+
+## Ejemplo con HDBSCAN
+
+```python
+from hdbscan import HDBSCAN
+
+model = HDBSCAN(
+    min_cluster_size=10,
+    min_samples=5
+)
+
+clusters = model.fit_predict(
+    X_scaled
+)
+```
+
+## Probabilidad de pertenencia
+
+```python
+membership_probability = (
+    model.probabilities_
+)
+```
+
+Valores bajos pueden indicar asignaciones inciertas.
+
+## Outlier scores
+
+```python
+outlier_scores = (
+    model.outlier_scores_
+)
+```
+
+Valores altos indican mayor atipicidad.
+
+## Hiperparámetros de HDBSCAN
+
+### min_cluster_size
+
+Tamaño mínimo de un cluster.
+
+```python
+min_cluster_size=10
+```
+
+### min_samples
+
+Controla cuán conservadora es la detección de densidad.
+
+Valores altos suelen generar más ruido.
+
+## Comparación DBSCAN y HDBSCAN
+
+| Aspecto | DBSCAN | HDBSCAN |
+|---|---|---|
+| Necesita `eps` | Sí | No necesariamente |
+| Densidades variables | Limitado | Mejor |
+| Ruido | Sí | Sí |
+| Probabilidad de pertenencia | No | Sí |
+| Jerarquía | No | Sí |
+| Facilidad inicial | Alta | Media |
+
+## Describir clusters
+
+```python
+cluster_summary = (
+    df_clustered
+    .loc[
+        df_clustered["cluster"] != -1
+    ]
+    .groupby("cluster")[features]
+    .agg(
+        [
+            "count",
+            "mean",
+            "median",
+            "std"
+        ]
+    )
+)
+
+display(
+    cluster_summary
+)
+```
+
+## Describir ruido
+
+```python
+noise_summary = (
+    df_clustered
+    .loc[
+        df_clustered["cluster"] == -1,
+        features
+    ]
+    .describe()
+)
+
+display(
+    noise_summary
+)
+```
+
+## Interpretar ruido
+
+El ruido puede representar:
+
+- Errores de datos.
+- Pacientes raros.
+- Perfiles clínicos extremos.
+- Valores mal escalados.
+- Casos con información incompleta.
+- Subgrupos demasiado pequeños.
+
+::: {.callout-caution}
+## Precaución
+
+No debe eliminarse el ruido automáticamente.
+:::
+
+## Estabilidad
+
+Debe comprobarse cómo cambian los resultados ante:
+
+- Variaciones pequeñas de `eps`.
+- Cambios en `min_samples`.
+- Distintas variables.
+- Diferentes seeds en pasos previos.
+- Submuestras.
+- Nuevos periodos.
+
+## Comparar clusterings
+
+```python
+from sklearn.metrics import adjusted_rand_score
+
+agreement = adjusted_rand_score(
+    labels_a,
+    labels_b
+)
+```
+
+## Validación externa
+
+Los clusters pueden compararse con outcomes no utilizados.
+
+Ejemplos:
+
+- Cardiotoxicidad futura.
+- Mortalidad.
+- Reingreso.
+- Respuesta al tratamiento.
+- Duración de estancia.
+
+```python
+outcome_distribution = pd.crosstab(
+    df_clustered["cluster"],
+    df_clustered["future_event"],
+    normalize="index"
+)
+
+display(
+    outcome_distribution
+)
+```
+
+## Detección de anomalías
+
+DBSCAN puede utilizarse como detector de anomalías:
+
+```text
+cluster >= 0
+→ observación agrupada
+
+cluster = -1
+→ posible anomalía
+```
+
+Pero su objetivo principal es clustering.
+
+Para anomalías puras también pueden considerarse:
+
+- Isolation Forest.
+- Local Outlier Factor.
+- One-Class SVM.
+- Autoencoders.
+
+## Comparación con K-means
+
+| Aspecto | K-means | DBSCAN |
+|---|---|---|
+| Necesita K | Sí | No |
+| Usa centroides | Sí | No |
+| Detecta ruido | No | Sí |
+| Formas irregulares | Limitado | Sí |
+| Densidades variables | Limitado | Limitado |
+| Nuevos casos | Fácil | Difícil |
+| Escalabilidad | Alta | Media |
+
+## Comparación con clustering jerárquico
+
+| Aspecto | Jerárquico | DBSCAN |
+|---|---|---|
+| Jerarquía | Sí | No |
+| Ruido | No directamente | Sí |
+| Formas arbitrarias | Depende del linkage | Sí |
+| Nuevos casos | Difícil | Difícil |
+| Densidad | No central | Central |
+| Coste | Alto en n grande | Variable |
+
+## Ventajas
+
+- No necesita fijar número de clusters.
+- Detecta ruido.
+- Captura formas arbitrarias.
+- No depende de centroides.
+- Puede funcionar bien con regiones densas.
+- Es útil para explorar outliers.
+
+## Limitaciones
+
+- Sensible a `eps`.
+- Dificultad con densidades diferentes.
+- Sensible al escalado.
+- Problemas en alta dimensión.
+- Difícil asignar casos nuevos.
+- Puede producir mucho ruido.
+- La selección de hiperparámetros no es automática.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+DBSCAN puede ser útil para detectar subgrupos densos y perfiles atípicos, pero el ruido debe interpretarse clínicamente.
+:::
+
+Debe revisarse:
+
+- Proporción de ruido.
+- Estabilidad.
+- Características de los core points.
+- Perfiles de border points.
+- Casos extremos.
+- Reproducibilidad.
+- Outcomes externos.
+- Diferencias entre centros.
+
+## Errores frecuentes
+
+- No escalar.
+- Elegir `eps` al azar.
+- No revisar el gráfico de k-distancias.
+- Interpretar ruido como error automáticamente.
+- Ignorar alta dimensionalidad.
+- Aplicar PCA sin reevaluar hiperparámetros.
+- No reportar proporción de ruido.
+- Calcular métricas sin excluir ruido.
+- Usar un único `eps` con densidades muy distintas.
+- No comparar con HDBSCAN.
+- No revisar estabilidad.
+- Interpretar clusters como diagnósticos.
+
+## Flujo recomendado
+
+1. Definir unidad de análisis.
+2. Seleccionar variables.
+3. Imputar.
+4. Escalar.
+5. Elegir `min_samples`.
+6. Revisar gráfico de k-distancias.
+7. Probar varios valores de `eps`.
+8. Reportar clusters y ruido.
+9. Evaluar métricas internas.
+10. Revisar estabilidad.
+11. Comparar con HDBSCAN.
+12. Validar externamente.
+
+## Checklist para proyectos
+
+- [ ] He definido la unidad de análisis.
+- [ ] He justificado las variables.
+- [ ] He eliminado identificadores.
+- [ ] He imputado.
+- [ ] He escalado.
+- [ ] He elegido `min_samples`.
+- [ ] He revisado k-distancias.
+- [ ] He probado varios `eps`.
+- [ ] He reportado número de clusters.
+- [ ] He reportado proporción de ruido.
+- [ ] He calculado métricas sin ruido.
+- [ ] He inspeccionado anomalías.
+- [ ] He revisado estabilidad.
+- [ ] He comparado con HDBSCAN.
+- [ ] He validado con outcomes externos.
+
+## Recursos
+
+### Documentación
+
+- `DBSCAN`.
+- `NearestNeighbors`.
+- `silhouette_score`.
+- `adjusted_rand_score`.
+- HDBSCAN.
+- `PCA`.
+- Distancias precomputadas.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus valores de `eps`, `min_samples`, proporción de ruido, clusters y decisiones metodológicas.
