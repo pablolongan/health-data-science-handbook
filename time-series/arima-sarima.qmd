@@ -1,0 +1,1073 @@
+---
+title: "ARIMA y SARIMA"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+ARIMA modela una serie temporal mediante tres componentes:
+
+- AR: dependencia de valores pasados.
+- I: diferenciación para lograr estacionariedad.
+- MA: dependencia de errores pasados.
+
+SARIMA añade estacionalidad.
+
+SARIMAX permite además incorporar variables externas.
+:::
+
+## ¿Qué significa ARIMA?
+
+ARIMA significa:
+
+```text
+AutoRegressive
+Integrated
+Moving Average
+```
+
+Se representa como:
+
+$$
+ARIMA(p,d,q)
+$$
+
+donde:
+
+- \(p\): orden autoregresivo.
+- \(d\): número de diferencias.
+- \(q\): orden de media móvil.
+
+::: {.callout-note}
+## Idea clave
+
+ARIMA combina memoria de la propia serie, diferenciación y errores pasados.
+:::
+
+## Componente AR
+
+El componente autoregresivo utiliza valores pasados.
+
+Un AR(1) puede escribirse como:
+
+$$
+y_t
+=
+c
++
+\phi_1 y_{t-1}
++
+\varepsilon_t
+$$
+
+Interpretación:
+
+```text
+Valor actual
+≈
+constante
++
+valor anterior
++
+error
+```
+
+## AR(p)
+
+$$
+y_t
+=
+c
++
+\phi_1 y_{t-1}
++
+\phi_2 y_{t-2}
++
+\cdots
++
+\phi_p y_{t-p}
++
+\varepsilon_t
+$$
+
+## Componente I
+
+La parte integrada aplica diferencias.
+
+Primera diferencia:
+
+$$
+\Delta y_t
+=
+y_t-y_{t-1}
+$$
+
+```python
+differenced = (
+    series
+    .diff()
+    .dropna()
+)
+```
+
+## Componente MA
+
+El componente de media móvil utiliza errores pasados.
+
+Un MA(1) puede escribirse como:
+
+$$
+y_t
+=
+\mu
++
+\varepsilon_t
++
+\theta_1 \varepsilon_{t-1}
+$$
+
+## ARIMA completo
+
+Un ARIMA combina:
+
+- Lags de la serie.
+- Diferenciación.
+- Lags de los errores.
+
+## Preparar la serie
+
+```python
+import pandas as pd
+
+series = (
+    df
+    .set_index("datetime")[
+        "value"
+    ]
+    .sort_index()
+)
+```
+
+## Regularizar frecuencia
+
+```python
+daily_series = (
+    series
+    .resample("D")
+    .mean()
+)
+```
+
+## Tratar ausentes
+
+```python
+daily_series = (
+    daily_series
+    .interpolate(
+        method="time"
+    )
+)
+```
+
+## Split temporal
+
+```python
+train = daily_series.loc[
+    daily_series.index
+    <
+    "2025-07-01"
+]
+
+test = daily_series.loc[
+    daily_series.index
+    >=
+    "2025-07-01"
+]
+```
+
+## Revisar estacionariedad
+
+```python
+from statsmodels.tsa.stattools import adfuller
+
+adf_result = adfuller(
+    train.dropna(),
+    autolag="AIC"
+)
+
+print(
+    adf_result[1]
+)
+```
+
+## Diferenciación
+
+```python
+train_diff = (
+    train
+    .diff()
+    .dropna()
+)
+```
+
+## Elegir d
+
+Una guía práctica:
+
+```text
+Serie estacionaria
+→ d = 0
+
+Una diferencia suficiente
+→ d = 1
+
+Dos diferencias necesarias
+→ d = 2
+```
+
+::: {.callout-warning}
+## Precaución
+
+Valores altos de `d` pueden sobrediferenciar la serie.
+:::
+
+## ACF y PACF
+
+ACF y PACF ayudan a orientar la elección de \(p\) y \(q\).
+
+## ACF
+
+```python
+from statsmodels.graphics.tsaplots import plot_acf
+import matplotlib.pyplot as plt
+
+plot_acf(
+    train_diff,
+    lags=40
+)
+
+plt.show()
+```
+
+## PACF
+
+```python
+from statsmodels.graphics.tsaplots import plot_pacf
+
+plot_pacf(
+    train_diff,
+    lags=40,
+    method="ywm"
+)
+
+plt.show()
+```
+
+## Interpretación orientativa
+
+```text
+PACF corta tras lag p
+→ posible AR(p)
+
+ACF corta tras lag q
+→ posible MA(q)
+
+Ambas decaen
+→ posible ARMA
+```
+
+No son reglas absolutas.
+
+## Entrenar ARIMA
+
+```python
+from statsmodels.tsa.arima.model import ARIMA
+
+model = ARIMA(
+    train,
+    order=(
+        1,
+        1,
+        1
+    )
+)
+
+fitted_model = model.fit()
+```
+
+## Resumen del modelo
+
+```python
+print(
+    fitted_model.summary()
+)
+```
+
+## Forecast
+
+```python
+forecast_result = fitted_model.get_forecast(
+    steps=len(test)
+)
+```
+
+## Predicción media
+
+```python
+forecast_mean = (
+    forecast_result
+    .predicted_mean
+)
+```
+
+## Intervalo de confianza
+
+```python
+forecast_interval = (
+    forecast_result
+    .conf_int(
+        alpha=0.05
+    )
+)
+```
+
+## Visualizar forecast
+
+```python
+plt.figure(
+    figsize=(12, 5)
+)
+
+plt.plot(
+    train.index,
+    train.values,
+    label="Train"
+)
+
+plt.plot(
+    test.index,
+    test.values,
+    label="Test"
+)
+
+plt.plot(
+    forecast_mean.index,
+    forecast_mean.values,
+    label="Forecast"
+)
+
+plt.fill_between(
+    forecast_interval.index,
+    forecast_interval.iloc[
+        :,
+        0
+    ],
+    forecast_interval.iloc[
+        :,
+        1
+    ],
+    alpha=0.2
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## Evaluar
+
+```python
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import root_mean_squared_error
+
+mae = mean_absolute_error(
+    test,
+    forecast_mean
+)
+
+rmse = root_mean_squared_error(
+    test,
+    forecast_mean
+)
+```
+
+## Comparar con baseline
+
+```python
+naive_forecast = pd.Series(
+    train.iloc[-1],
+    index=test.index
+)
+
+naive_mae = mean_absolute_error(
+    test,
+    naive_forecast
+)
+```
+
+## Selección de órdenes
+
+Puede probarse una cuadrícula de valores.
+
+```python
+import itertools
+import pandas as pd
+
+p_values = range(
+    0,
+    4
+)
+
+d_values = range(
+    0,
+    3
+)
+
+q_values = range(
+    0,
+    4
+)
+
+rows = []
+
+for p, d, q in itertools.product(
+    p_values,
+    d_values,
+    q_values
+):
+
+    try:
+
+        model = ARIMA(
+            train,
+            order=(
+                p,
+                d,
+                q
+            )
+        )
+
+        fitted = model.fit()
+
+        rows.append(
+            {
+                "p": p,
+                "d": d,
+                "q": q,
+                "aic": fitted.aic,
+                "bic": fitted.bic
+            }
+        )
+
+    except Exception:
+
+        continue
+
+order_table = pd.DataFrame(
+    rows
+).sort_values(
+    "aic"
+)
+
+display(
+    order_table.head(10)
+)
+```
+
+## AIC y BIC
+
+Valores menores suelen ser preferibles.
+
+Pero la selección final debe basarse también en:
+
+- Backtesting.
+- Estabilidad.
+- Residuos.
+- Interpretabilidad.
+- Error por horizonte.
+
+## Diagnóstico de residuos
+
+```python
+residuals = (
+    fitted_model
+    .resid
+    .dropna()
+)
+```
+
+## Visualizar residuos
+
+```python
+plt.figure(
+    figsize=(12, 4)
+)
+
+plt.plot(
+    residuals
+)
+
+plt.axhline(
+    0,
+    linestyle="--"
+)
+
+plt.title(
+    "Residuos del modelo"
+)
+
+plt.show()
+```
+
+## ACF residual
+
+```python
+plot_acf(
+    residuals,
+    lags=30
+)
+
+plt.show()
+```
+
+## Ljung-Box
+
+```python
+from statsmodels.stats.diagnostic import acorr_ljungbox
+
+ljung_box = acorr_ljungbox(
+    residuals,
+    lags=[
+        7,
+        14,
+        21
+    ],
+    return_df=True
+)
+
+display(
+    ljung_box
+)
+```
+
+## Residuos ideales
+
+Deberían mostrar:
+
+- Media cercana a 0.
+- Varianza estable.
+- Poca autocorrelación.
+- Ausencia de estructura clara.
+
+## SARIMA
+
+SARIMA añade una componente estacional.
+
+Se representa como:
+
+$$
+SARIMA(p,d,q)(P,D,Q)_s
+$$
+
+donde:
+
+- \(P\): orden AR estacional.
+- \(D\): diferenciación estacional.
+- \(Q\): orden MA estacional.
+- \(s\): periodo estacional.
+
+## Ejemplo semanal
+
+Con datos diarios y ciclo semanal:
+
+```text
+s = 7
+```
+
+## SARIMAX
+
+En `statsmodels`, SARIMA se implementa mediante `SARIMAX`.
+
+```python
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+
+model = SARIMAX(
+    train,
+    order=(
+        1,
+        1,
+        1
+    ),
+    seasonal_order=(
+        1,
+        1,
+        1,
+        7
+    ),
+    enforce_stationarity=False,
+    enforce_invertibility=False
+)
+
+fitted_model = model.fit(
+    disp=False
+)
+```
+
+## Forecast SARIMA
+
+```python
+forecast_result = fitted_model.get_forecast(
+    steps=len(test)
+)
+
+forecast_mean = (
+    forecast_result
+    .predicted_mean
+)
+
+forecast_interval = (
+    forecast_result
+    .conf_int()
+)
+```
+
+## Diferenciación estacional
+
+$$
+\Delta_s y_t
+=
+y_t-y_{t-s}
+$$
+
+```python
+seasonal_difference = (
+    train
+    .diff(
+        7
+    )
+    .dropna()
+)
+```
+
+## Elegir D
+
+```text
+Sin estacionalidad no estacionaria
+→ D = 0
+
+Una diferencia estacional suficiente
+→ D = 1
+```
+
+## ACF estacional
+
+Picos en:
+
+```text
+lag 7
+lag 14
+lag 21
+```
+
+pueden sugerir estructura semanal.
+
+## Comparar ARIMA y SARIMA
+
+```python
+results = pd.DataFrame(
+    [
+        {
+            "model": "ARIMA",
+            "mae": arima_mae,
+            "aic": arima_model.aic
+        },
+        {
+            "model": "SARIMA",
+            "mae": sarima_mae,
+            "aic": sarima_model.aic
+        }
+    ]
+)
+```
+
+## SARIMAX con variables externas
+
+SARIMAX puede incorporar variables exógenas.
+
+Ejemplos:
+
+- Festivos.
+- Temperatura.
+- Intervenciones.
+- Día de la semana.
+- Cambios de protocolo.
+- Tratamientos.
+
+## Preparar exógenas
+
+```python
+exogenous_features = [
+    "is_weekend",
+    "holiday",
+    "temperature"
+]
+
+X_train = train_df[
+    exogenous_features
+]
+
+X_test = test_df[
+    exogenous_features
+]
+```
+
+## Entrenar SARIMAX
+
+```python
+model = SARIMAX(
+    train_df["target"],
+    exog=X_train,
+    order=(
+        1,
+        1,
+        1
+    ),
+    seasonal_order=(
+        1,
+        1,
+        1,
+        7
+    ),
+    enforce_stationarity=False,
+    enforce_invertibility=False
+)
+
+fitted_model = model.fit(
+    disp=False
+)
+```
+
+## Forecast con exógenas
+
+```python
+forecast_result = fitted_model.get_forecast(
+    steps=len(test_df),
+    exog=X_test
+)
+```
+
+## Requisito clave
+
+Para predecir el futuro deben conocerse también los valores futuros de las variables externas.
+
+```text
+Festivo futuro
+→ conocido
+
+Temperatura futura
+→ requiere forecast o escenario
+
+Tratamiento futuro
+→ puede no conocerse
+```
+
+::: {.callout-warning}
+## Importante
+
+No incluyas variables exógenas futuras que no estarán disponibles en producción.
+:::
+
+## Variables de intervención
+
+Puede modelarse un cambio de protocolo.
+
+```python
+df[
+    "post_protocol_change"
+] = (
+    df.index
+    >=
+    pd.Timestamp(
+        "2025-01-01"
+    )
+).astype(int)
+```
+
+## Variable pulso
+
+```python
+df[
+    "special_event"
+] = (
+    df.index
+    ==
+    pd.Timestamp(
+        "2025-03-15"
+    )
+).astype(int)
+```
+
+## Regresión con errores ARIMA
+
+SARIMAX puede interpretarse como:
+
+```text
+Regresión con variables externas
++
+estructura temporal en los errores
+```
+
+## Backtesting
+
+La selección debe evaluarse en varios cortes temporales.
+
+```python
+forecast_horizon = 7
+
+rows = []
+
+for cutoff in range(
+    100,
+    len(daily_series)
+    -
+    forecast_horizon,
+    7
+):
+
+    train_fold = daily_series.iloc[
+        :cutoff
+    ]
+
+    test_fold = daily_series.iloc[
+        cutoff:
+        cutoff
+        +
+        forecast_horizon
+    ]
+
+    model = SARIMAX(
+        train_fold,
+        order=(
+            1,
+            1,
+            1
+        ),
+        seasonal_order=(
+            1,
+            1,
+            1,
+            7
+        ),
+        enforce_stationarity=False,
+        enforce_invertibility=False
+    )
+
+    fitted = model.fit(
+        disp=False
+    )
+
+    forecast = fitted.forecast(
+        steps=forecast_horizon
+    )
+
+    rows.append(
+        {
+            "cutoff": train_fold.index[-1],
+            "mae": mean_absolute_error(
+                test_fold,
+                forecast
+            )
+        }
+    )
+```
+
+## Error por horizonte
+
+```python
+horizon_errors = {
+    horizon: []
+    for horizon in range(
+        1,
+        8
+    )
+}
+```
+
+Debe analizarse si el modelo funciona bien:
+
+- A corto plazo.
+- A medio plazo.
+- En todos los periodos.
+- Solo durante periodos estables.
+
+## Actualización del modelo
+
+ARIMA puede actualizarse al recibir nuevos datos.
+
+Opciones:
+
+- Reentrenar completamente.
+- Actualizar estado.
+- Usar ventana móvil.
+- Reestimar periódicamente.
+
+## Cambio estructural
+
+ARIMA y SARIMA pueden fallar ante:
+
+- Cambio de protocolo.
+- Pandemia.
+- Nueva tecnología.
+- Cambio de población.
+- Ruptura de tendencia.
+
+Puede ser necesario añadir:
+
+- Variables de intervención.
+- Ventanas móviles.
+- Retraining.
+- Modelos de régimen.
+
+## Supuesto de linealidad
+
+ARIMA modela relaciones lineales con el pasado.
+
+Puede no capturar:
+
+- Umbrales.
+- Interacciones complejas.
+- Cambios abruptos.
+- Relaciones no lineales.
+
+## Ventajas
+
+- Interpretables.
+- Bien establecidos.
+- Útiles con autocorrelación.
+- Permiten intervalos.
+- SARIMA maneja estacionalidad.
+- SARIMAX incorpora variables externas.
+- Buenos baselines clásicos.
+
+## Limitaciones
+
+- Requieren frecuencia regular.
+- Sensibles a especificación.
+- Pueden ser costosos al buscar órdenes.
+- No manejan fácilmente múltiples series.
+- Asumen estructura lineal.
+- Dificultad con varias estacionalidades.
+- Sensibles a cambios estructurales.
+
+## Comparación con exponential smoothing
+
+| Aspecto | Exponential smoothing | ARIMA |
+|---|---|---|
+| Nivel y tendencia | Directo | Mediante dinámica |
+| Estacionalidad | Holt-Winters | SARIMA |
+| Autocorrelación | Implícita | Explícita |
+| Exógenas | Limitado | SARIMAX |
+| Interpretación | Componentes | Coeficientes y lags |
+| Selección | Suavizado | Órdenes p,d,q |
+
+## Comparación con machine learning
+
+| Aspecto | ARIMA/SARIMA | Machine learning |
+|---|---|---|
+| Relación temporal | Explícita | Mediante features |
+| No linealidad | Limitada | Alta |
+| Exógenas | Sí | Sí |
+| Datos pequeños | Bueno | Variable |
+| Interpretabilidad | Moderada | Variable |
+| Múltiples series | Menos natural | Más flexible |
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+ARIMA y SARIMA suelen ser más adecuados para series agregadas o señales regulares que para seguimientos clínicos muy irregulares.
+:::
+
+Ejemplos:
+
+- Demanda asistencial diaria.
+- Ocupación de camas.
+- Volumen de urgencias.
+- Consumo de recursos.
+- Señales fisiológicas regulares.
+- Biomarcadores agregados por periodo.
+
+## Errores frecuentes
+
+- No revisar estacionariedad.
+- Elegir órdenes solo por ACF/PACF.
+- Elegir modelo solo por AIC.
+- No comparar con naive.
+- No revisar residuos.
+- Ignorar estacionalidad.
+- Usar exógenas futuras desconocidas.
+- No hacer backtesting.
+- Sobrediferenciar.
+- Usar demasiados parámetros.
+- Ignorar cambios estructurales.
+- No evaluar intervalos.
+
+## Flujo recomendado
+
+1. Visualizar la serie.
+2. Revisar estacionariedad.
+3. Definir `d`.
+4. Revisar ACF y PACF.
+5. Probar órdenes pequeños.
+6. Comparar AIC y BIC.
+7. Aplicar backtesting.
+8. Revisar residuos.
+9. Añadir estacionalidad si procede.
+10. Considerar exógenas.
+11. Evaluar intervalos.
+12. Comparar con naive.
+
+## Checklist para proyectos
+
+- [ ] He definido la frecuencia.
+- [ ] He separado train y test temporalmente.
+- [ ] He revisado estacionariedad.
+- [ ] He justificado `d`.
+- [ ] He revisado ACF.
+- [ ] He revisado PACF.
+- [ ] He probado órdenes pequeños.
+- [ ] He comparado AIC y BIC.
+- [ ] He revisado residuos.
+- [ ] He aplicado Ljung-Box.
+- [ ] He comparado con naive.
+- [ ] He probado SARIMA si hay estacionalidad.
+- [ ] He validado exógenas disponibles.
+- [ ] He aplicado backtesting.
+- [ ] He evaluado intervalos.
+
+## Recursos
+
+### Documentación
+
+- `ARIMA`.
+- `SARIMAX`.
+- `adfuller`.
+- `plot_acf`.
+- `plot_pacf`.
+- `acorr_ljungbox`.
+- `get_forecast`.
+- `conf_int`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus órdenes ARIMA, términos estacionales, exógenas, diagnósticos y métricas.

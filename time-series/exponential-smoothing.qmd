@@ -1,0 +1,1121 @@
+---
+title: "Exponential smoothing"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Los métodos de exponential smoothing generan predicciones dando más peso a las observaciones recientes.
+
+Incluyen:
+
+- Simple Exponential Smoothing.
+- Método de Holt.
+- Holt-Winters.
+- Tendencia amortiguada.
+
+Son modelos muy útiles como baseline y funcionan especialmente bien cuando la serie presenta nivel, tendencia y estacionalidad relativamente estables.
+:::
+
+## ¿Qué es exponential smoothing?
+
+Exponential smoothing es una familia de modelos de forecasting.
+
+La idea central es sencilla:
+
+```text
+Observaciones recientes
+→ mayor peso
+
+Observaciones antiguas
+→ menor peso
+```
+
+Los pesos disminuyen exponencialmente con el tiempo.
+
+::: {.callout-note}
+## Idea clave
+
+El modelo resume la historia mediante componentes actualizados de nivel, tendencia y estacionalidad.
+:::
+
+## Tipos principales
+
+## Simple Exponential Smoothing
+
+Adecuado cuando la serie tiene:
+
+- Nivel.
+- Sin tendencia clara.
+- Sin estacionalidad clara.
+
+## Holt
+
+Adecuado cuando existe:
+
+- Nivel.
+- Tendencia.
+- Sin estacionalidad.
+
+## Holt-Winters
+
+Adecuado cuando existe:
+
+- Nivel.
+- Tendencia.
+- Estacionalidad.
+
+## Tendencia amortiguada
+
+Adecuada cuando la tendencia existe, pero no se espera que continúe indefinidamente con la misma intensidad.
+
+## Preparar la serie
+
+```python
+import pandas as pd
+
+series = (
+    df
+    .set_index("datetime")[
+        "value"
+    ]
+    .sort_index()
+)
+```
+
+## Regularizar frecuencia
+
+```python
+daily_series = (
+    series
+    .resample("D")
+    .mean()
+)
+```
+
+## Revisar valores ausentes
+
+```python
+print(
+    daily_series
+    .isna()
+    .sum()
+)
+```
+
+## Imputación temporal
+
+```python
+daily_series = (
+    daily_series
+    .interpolate(
+        method="time"
+    )
+)
+```
+
+::: {.callout-warning}
+## Importante
+
+En producción, la imputación debe utilizar solo información disponible en el momento de predicción.
+:::
+
+## Separar train y test
+
+```python
+train = daily_series.loc[
+    daily_series.index
+    <
+    "2025-07-01"
+]
+
+test = daily_series.loc[
+    daily_series.index
+    >=
+    "2025-07-01"
+]
+```
+
+## Baseline naive
+
+```python
+naive_forecast = pd.Series(
+    train.iloc[-1],
+    index=test.index
+)
+```
+
+## Evaluar baseline
+
+```python
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import root_mean_squared_error
+
+naive_mae = mean_absolute_error(
+    test,
+    naive_forecast
+)
+
+naive_rmse = root_mean_squared_error(
+    test,
+    naive_forecast
+)
+```
+
+## Simple Exponential Smoothing
+
+La actualización del nivel es:
+
+$$
+\ell_t
+=
+\alpha y_t
++
+(1-\alpha)\ell_{t-1}
+$$
+
+donde:
+
+- \(y_t\) es el valor observado.
+- \(\ell_t\) es el nivel estimado.
+- \(\alpha\) es el parámetro de suavizado.
+
+## Interpretar alpha
+
+```text
+alpha cercano a 1
+→ gran peso a observaciones recientes
+→ modelo más reactivo
+
+alpha cercano a 0
+→ mayor suavizado
+→ modelo más estable
+```
+
+## Entrenar SES
+
+```python
+from statsmodels.tsa.holtwinters import SimpleExpSmoothing
+
+model = SimpleExpSmoothing(
+    train,
+    initialization_method="estimated"
+)
+
+fitted_model = model.fit(
+    optimized=True
+)
+```
+
+## Forecast
+
+```python
+forecast = fitted_model.forecast(
+    len(test)
+)
+```
+
+## Evaluar SES
+
+```python
+ses_mae = mean_absolute_error(
+    test,
+    forecast
+)
+
+ses_rmse = root_mean_squared_error(
+    test,
+    forecast
+)
+```
+
+## Fijar alpha manualmente
+
+```python
+fitted_model = model.fit(
+    smoothing_level=0.30,
+    optimized=False
+)
+```
+
+## Inspeccionar parámetros
+
+```python
+print(
+    fitted_model.params
+)
+```
+
+## Visualizar
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(
+    figsize=(12, 5)
+)
+
+plt.plot(
+    train.index,
+    train.values,
+    label="Train"
+)
+
+plt.plot(
+    test.index,
+    test.values,
+    label="Test"
+)
+
+plt.plot(
+    forecast.index,
+    forecast.values,
+    label="Forecast"
+)
+
+plt.xlabel(
+    "Fecha"
+)
+
+plt.ylabel(
+    "Valor"
+)
+
+plt.title(
+    "Simple Exponential Smoothing"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## Método de Holt
+
+Holt añade una componente de tendencia.
+
+El modelo actualiza:
+
+- Nivel.
+- Tendencia.
+
+Una formulación habitual es:
+
+$$
+\ell_t
+=
+\alpha y_t
++
+(1-\alpha)
+(\ell_{t-1}+b_{t-1})
+$$
+
+$$
+b_t
+=
+\beta
+(\ell_t-\ell_{t-1})
++
+(1-\beta)b_{t-1}
+$$
+
+## Entrenar Holt
+
+```python
+from statsmodels.tsa.holtwinters import Holt
+
+model = Holt(
+    train,
+    initialization_method="estimated"
+)
+
+fitted_model = model.fit(
+    optimized=True
+)
+```
+
+## Forecast con Holt
+
+```python
+forecast = fitted_model.forecast(
+    len(test)
+)
+```
+
+## Tendencia exponencial
+
+```python
+model = Holt(
+    train,
+    exponential=True,
+    initialization_method="estimated"
+)
+```
+
+La tendencia exponencial puede ser útil cuando el crecimiento es proporcional.
+
+Requiere valores positivos.
+
+## Tendencia amortiguada
+
+```python
+model = Holt(
+    train,
+    damped_trend=True,
+    initialization_method="estimated"
+)
+
+fitted_model = model.fit(
+    optimized=True
+)
+```
+
+## ¿Por qué amortiguar?
+
+Una tendencia lineal indefinida puede producir forecasts poco realistas.
+
+```text
+Tendencia no amortiguada
+→ crecimiento continuo
+
+Tendencia amortiguada
+→ crecimiento que se estabiliza
+```
+
+::: {.callout-note}
+## Regla práctica
+
+La tendencia amortiguada suele ser una alternativa razonable para horizontes largos.
+:::
+
+## Holt-Winters
+
+Holt-Winters añade una componente estacional.
+
+Puede ser:
+
+- Aditiva.
+- Multiplicativa.
+
+## Estacionalidad aditiva
+
+Adecuada cuando la amplitud estacional es aproximadamente constante.
+
+```python
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+
+model = ExponentialSmoothing(
+    train,
+    trend="add",
+    seasonal="add",
+    seasonal_periods=7,
+    initialization_method="estimated"
+)
+
+fitted_model = model.fit(
+    optimized=True
+)
+```
+
+## Forecast aditivo
+
+```python
+forecast = fitted_model.forecast(
+    len(test)
+)
+```
+
+## Estacionalidad multiplicativa
+
+Adecuada cuando la amplitud estacional aumenta con el nivel.
+
+```python
+model = ExponentialSmoothing(
+    train,
+    trend="add",
+    seasonal="mul",
+    seasonal_periods=7,
+    initialization_method="estimated"
+)
+
+fitted_model = model.fit(
+    optimized=True
+)
+```
+
+## Requisito multiplicativo
+
+La estacionalidad multiplicativa requiere valores positivos.
+
+## Tendencia y estacionalidad multiplicativas
+
+```python
+model = ExponentialSmoothing(
+    train,
+    trend="mul",
+    seasonal="mul",
+    seasonal_periods=7,
+    initialization_method="estimated"
+)
+```
+
+Debe utilizarse con cautela porque puede producir crecimiento muy rápido.
+
+## Holt-Winters amortiguado
+
+```python
+model = ExponentialSmoothing(
+    train,
+    trend="add",
+    damped_trend=True,
+    seasonal="add",
+    seasonal_periods=7,
+    initialization_method="estimated"
+)
+
+fitted_model = model.fit(
+    optimized=True
+)
+```
+
+## Parámetros de suavizado
+
+Los principales parámetros son:
+
+- \(\alpha\): nivel.
+- \(\beta\): tendencia.
+- \(\gamma\): estacionalidad.
+- \(\phi\): amortiguación.
+
+## Interpretación
+
+```text
+alpha alto
+→ nivel muy reactivo
+
+beta alto
+→ tendencia muy reactiva
+
+gamma alto
+→ estacionalidad muy reactiva
+
+phi bajo
+→ tendencia más amortiguada
+```
+
+## Inspeccionar componentes
+
+```python
+level = fitted_model.level
+
+trend = fitted_model.trend
+
+seasonal = fitted_model.season
+```
+
+## Visualizar componentes estimados
+
+```python
+plt.figure(
+    figsize=(12, 5)
+)
+
+plt.plot(
+    fitted_model.level,
+    label="Nivel"
+)
+
+plt.plot(
+    fitted_model.trend,
+    label="Tendencia"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## Seleccionar periodo estacional
+
+Ejemplos:
+
+```text
+Datos horarios con ciclo diario
+→ 24
+
+Datos diarios con ciclo semanal
+→ 7
+
+Datos mensuales con ciclo anual
+→ 12
+```
+
+## Varias estacionalidades
+
+Holt-Winters clásico modela una sola estacionalidad.
+
+Para varias estacionalidades pueden considerarse:
+
+- MSTL.
+- TBATS.
+- Prophet.
+- Variables de Fourier.
+- Machine learning.
+
+## Comparar modelos
+
+```python
+candidate_models = {
+    "ses": SimpleExpSmoothing(
+        train,
+        initialization_method="estimated"
+    ),
+    "holt": Holt(
+        train,
+        initialization_method="estimated"
+    ),
+    "holt_damped": Holt(
+        train,
+        damped_trend=True,
+        initialization_method="estimated"
+    ),
+    "holt_winters": ExponentialSmoothing(
+        train,
+        trend="add",
+        seasonal="add",
+        seasonal_periods=7,
+        initialization_method="estimated"
+    )
+}
+```
+
+## Evaluación de candidatos
+
+```python
+import pandas as pd
+
+rows = []
+
+for name, model in candidate_models.items():
+
+    fitted = model.fit(
+        optimized=True
+    )
+
+    forecast = fitted.forecast(
+        len(test)
+    )
+
+    rows.append(
+        {
+            "model": name,
+            "mae": mean_absolute_error(
+                test,
+                forecast
+            ),
+            "rmse": root_mean_squared_error(
+                test,
+                forecast
+            ),
+            "aic": fitted.aic,
+            "bic": fitted.bic
+        }
+    )
+
+comparison_table = pd.DataFrame(
+    rows
+).sort_values(
+    "mae"
+)
+
+display(
+    comparison_table
+)
+```
+
+## AIC y BIC
+
+AIC y BIC ayudan a comparar ajuste y complejidad.
+
+Valores menores suelen ser preferibles.
+
+No sustituyen la validación temporal.
+
+::: {.callout-warning}
+## Importante
+
+El modelo con menor AIC no es necesariamente el que mejor predice datos futuros.
+:::
+
+## Evaluación temporal
+
+No debe usarse un split aleatorio.
+
+Puede aplicarse backtesting.
+
+```text
+Train 1
+→ Test 1
+
+Train 2 más largo
+→ Test 2
+
+Train 3 más largo
+→ Test 3
+```
+
+## Backtesting manual
+
+```python
+from sklearn.metrics import mean_absolute_error
+
+forecast_horizon = 7
+
+predictions = []
+observations = []
+
+for cutoff in range(
+    60,
+    len(daily_series)
+    -
+    forecast_horizon
+):
+
+    train_fold = daily_series.iloc[
+        :cutoff
+    ]
+
+    test_fold = daily_series.iloc[
+        cutoff:
+        cutoff
+        +
+        forecast_horizon
+    ]
+
+    model = ExponentialSmoothing(
+        train_fold,
+        trend="add",
+        seasonal="add",
+        seasonal_periods=7,
+        initialization_method="estimated"
+    )
+
+    fitted = model.fit(
+        optimized=True
+    )
+
+    forecast = fitted.forecast(
+        forecast_horizon
+    )
+
+    predictions.extend(
+        forecast.values
+    )
+
+    observations.extend(
+        test_fold.values
+    )
+```
+
+```python
+backtest_mae = mean_absolute_error(
+    observations,
+    predictions
+)
+```
+
+## Ventana expansiva
+
+Cada fold añade nuevas observaciones al train.
+
+## Ventana deslizante
+
+Puede limitarse el historial.
+
+```python
+window_size = 180
+
+train_fold = daily_series.iloc[
+    cutoff
+    -
+    window_size:
+    cutoff
+]
+```
+
+Esto puede ser útil cuando los datos antiguos pierden relevancia.
+
+## Evaluación por horizonte
+
+```python
+horizon_errors = {
+    1: [],
+    2: [],
+    3: [],
+    7: []
+}
+```
+
+Debe analizarse si el error crece con el horizonte.
+
+## Residuos
+
+```python
+residuals = (
+    fitted_model.resid
+)
+```
+
+## Visualizar residuos
+
+```python
+plt.figure(
+    figsize=(12, 4)
+)
+
+plt.plot(
+    residuals
+)
+
+plt.axhline(
+    0,
+    linestyle="--"
+)
+
+plt.title(
+    "Residuos"
+)
+
+plt.show()
+```
+
+## ACF de residuos
+
+```python
+from statsmodels.graphics.tsaplots import plot_acf
+
+plot_acf(
+    residuals.dropna(),
+    lags=30
+)
+
+plt.show()
+```
+
+## Ljung-Box
+
+```python
+from statsmodels.stats.diagnostic import acorr_ljungbox
+
+ljung_box = acorr_ljungbox(
+    residuals.dropna(),
+    lags=[
+        7,
+        14,
+        21
+    ],
+    return_df=True
+)
+
+display(
+    ljung_box
+)
+```
+
+Un p-value pequeño sugiere autocorrelación residual.
+
+## Residuos y modelo incompleto
+
+Si queda autocorrelación puede faltar:
+
+- Tendencia.
+- Estacionalidad.
+- Cambio estructural.
+- Variables externas.
+- Otra dinámica temporal.
+
+## Intervalos de predicción
+
+Las clases Holt-Winters tradicionales no siempre ofrecen intervalos completos de forma directa en todos los workflows.
+
+Una aproximación simple puede basarse en la desviación de los residuos.
+
+```python
+import numpy as np
+
+residual_std = residuals.std()
+
+lower = (
+    forecast
+    -
+    1.96
+    *
+    residual_std
+)
+
+upper = (
+    forecast
+    +
+    1.96
+    *
+    residual_std
+)
+```
+
+::: {.callout-caution}
+## Precaución
+
+Esta aproximación asume error aproximadamente constante y normal.
+:::
+
+## Bootstrap de residuos
+
+Una alternativa es simular trayectorias añadiendo residuos re-muestreados.
+
+```python
+rng = np.random.default_rng(
+    42
+)
+
+simulations = []
+
+for _ in range(
+    1000
+):
+
+    sampled_residuals = rng.choice(
+        residuals.dropna(),
+        size=len(forecast),
+        replace=True
+    )
+
+    simulations.append(
+        forecast.values
+        +
+        sampled_residuals
+    )
+```
+
+## Intervalos simulados
+
+```python
+simulation_array = np.array(
+    simulations
+)
+
+lower = np.percentile(
+    simulation_array,
+    2.5,
+    axis=0
+)
+
+upper = np.percentile(
+    simulation_array,
+    97.5,
+    axis=0
+)
+```
+
+## Variables externas
+
+Exponential smoothing clásico utiliza únicamente la serie objetivo.
+
+No incorpora directamente:
+
+- Festivos.
+- Tratamientos.
+- Temperatura.
+- Centro.
+- Cambios de protocolo.
+
+Para variables externas pueden utilizarse:
+
+- Regresión dinámica.
+- SARIMAX.
+- Prophet.
+- Machine learning.
+- Modelos híbridos.
+
+## Cambios estructurales
+
+Estos modelos pueden adaptarse lentamente tras:
+
+- Cambios de protocolo.
+- Pandemias.
+- Nueva tecnología.
+- Cambios organizativos.
+
+Puede ser necesario:
+
+- Reentrenar.
+- Usar ventana móvil.
+- Añadir intervención.
+- Cambiar modelo.
+
+## Ventajas
+
+- Simples.
+- Interpretables.
+- Rápidos.
+- Buenos baselines.
+- Funcionan bien con nivel, tendencia y estacionalidad.
+- Requieren pocos datos.
+- Fáciles de actualizar.
+
+## Limitaciones
+
+- Una sola estacionalidad principal.
+- Sin variables externas en la formulación básica.
+- Sensibles a cambios estructurales.
+- Pueden extrapolar tendencias de forma poco realista.
+- Requieren frecuencia regular.
+- Menos flexibles ante relaciones complejas.
+
+## Comparación con naive
+
+Un modelo complejo debe superar claramente:
+
+- Último valor.
+- Media.
+- Seasonal naive.
+
+## Seasonal naive
+
+Para estacionalidad semanal:
+
+```python
+seasonal_naive = (
+    test
+    .copy()
+)
+
+seasonal_naive[:] = daily_series.shift(
+    7
+).loc[
+    test.index
+]
+```
+
+## Comparar métricas
+
+```python
+results = pd.DataFrame(
+    {
+        "model": [
+            "naive",
+            "seasonal_naive",
+            "holt_winters"
+        ],
+        "mae": [
+            naive_mae,
+            mean_absolute_error(
+                test,
+                seasonal_naive
+            ),
+            mean_absolute_error(
+                test,
+                forecast
+            )
+        ]
+    }
+)
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Exponential smoothing es especialmente útil para previsiones agregadas y operativas, como demanda, ocupación o actividad asistencial.
+:::
+
+Ejemplos:
+
+- Ocupación de camas.
+- Número de urgencias.
+- Demanda de personal.
+- Uso de recursos.
+- Volumen de pruebas.
+- Consumo de medicación.
+
+Debe revisarse:
+
+- Horizonte.
+- Frecuencia.
+- Estacionalidad.
+- Cambios de protocolo.
+- Cobertura de intervalos.
+- Error en periodos críticos.
+
+## Errores frecuentes
+
+- No comparar con naive.
+- Elegir periodo incorrecto.
+- Usar multiplicativo con ceros.
+- Ignorar varias estacionalidades.
+- Usar split aleatorio.
+- No revisar residuos.
+- Extrapolar tendencia indefinidamente.
+- No evaluar por horizonte.
+- No revisar cambios estructurales.
+- Seleccionar modelo solo por AIC.
+- No cuantificar incertidumbre.
+- Usar imputación con información futura.
+
+## Flujo recomendado
+
+1. Visualizar la serie.
+2. Definir frecuencia.
+3. Identificar tendencia.
+4. Identificar estacionalidad.
+5. Crear naive baseline.
+6. Probar SES.
+7. Probar Holt.
+8. Probar tendencia amortiguada.
+9. Probar Holt-Winters.
+10. Aplicar backtesting.
+11. Revisar residuos.
+12. Evaluar intervalos.
+
+## Checklist para proyectos
+
+- [ ] He definido la frecuencia.
+- [ ] He definido el periodo estacional.
+- [ ] He creado un baseline naive.
+- [ ] He probado SES.
+- [ ] He probado Holt.
+- [ ] He probado tendencia amortiguada.
+- [ ] He probado Holt-Winters.
+- [ ] He comparado modelos en validation.
+- [ ] He aplicado backtesting.
+- [ ] He revisado residuos.
+- [ ] He revisado ACF residual.
+- [ ] He evaluado por horizonte.
+- [ ] He calculado intervalos.
+- [ ] He revisado cambios estructurales.
+- [ ] He comparado con seasonal naive.
+
+## Recursos
+
+### Documentación
+
+- `SimpleExpSmoothing`.
+- `Holt`.
+- `ExponentialSmoothing`.
+- `seasonal_decompose`.
+- `acorr_ljungbox`.
+- Métricas de forecasting.
+- Backtesting temporal.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus modelos SES, Holt, Holt-Winters, periodos, métricas y decisiones.
