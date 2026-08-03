@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Nombre de la técnica – Health Data Science Handbook</title>
+<title>Survival Analysis – Health Data Science Handbook</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -178,7 +178,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Nombre de la técnica</li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../survival-analysis/index.html">Survival Analysis</a></li><li class="breadcrumb-item"><a href="../survival-analysis/index.html">Introducción</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -570,16 +570,16 @@ window.Quarto = {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
  <span class="menu-text">Survival Analysis</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../survival-analysis/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../survival-analysis/index.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -641,32 +641,76 @@ window.Quarto = {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#resumen-en-30-segundos" id="toc-resumen-en-30-segundos" class="nav-link active" data-scroll-target="#resumen-en-30-segundos">Resumen en 30 segundos</a></li>
-  <li><a href="#qué-problema-resuelve" id="toc-qué-problema-resuelve" class="nav-link" data-scroll-target="#qué-problema-resuelve">¿Qué problema resuelve?</a></li>
-  <li><a href="#intuición" id="toc-intuición" class="nav-link" data-scroll-target="#intuición">Intuición</a></li>
-  <li><a href="#fundamentos-teóricos" id="toc-fundamentos-teóricos" class="nav-link" data-scroll-target="#fundamentos-teóricos">Fundamentos teóricos</a>
+  <li><a href="#qué-pregunta-responde" id="toc-qué-pregunta-responde" class="nav-link active" data-scroll-target="#qué-pregunta-responde">¿Qué pregunta responde?</a></li>
+  <li><a href="#ejemplo-clínico" id="toc-ejemplo-clínico" class="nav-link" data-scroll-target="#ejemplo-clínico">Ejemplo clínico</a></li>
+  <li><a href="#elementos-básicos" id="toc-elementos-básicos" class="nav-link" data-scroll-target="#elementos-básicos">Elementos básicos</a></li>
+  <li><a href="#tiempo-hasta-evento" id="toc-tiempo-hasta-evento" class="nav-link" data-scroll-target="#tiempo-hasta-evento">Tiempo hasta evento</a></li>
+  <li><a href="#fecha-de-inicio" id="toc-fecha-de-inicio" class="nav-link" data-scroll-target="#fecha-de-inicio">Fecha de inicio</a></li>
+  <li><a href="#evento" id="toc-evento" class="nav-link" data-scroll-target="#evento">Evento</a></li>
+  <li><a href="#censura" id="toc-censura" class="nav-link" data-scroll-target="#censura">Censura</a></li>
+  <li><a href="#censura-por-la-derecha" id="toc-censura-por-la-derecha" class="nav-link" data-scroll-target="#censura-por-la-derecha">Censura por la derecha</a></li>
+  <li><a href="#motivos-de-censura" id="toc-motivos-de-censura" class="nav-link" data-scroll-target="#motivos-de-censura">Motivos de censura</a></li>
+  <li><a href="#censura-no-informativa" id="toc-censura-no-informativa" class="nav-link" data-scroll-target="#censura-no-informativa">Censura no informativa</a></li>
+  <li><a href="#truncamiento" id="toc-truncamiento" class="nav-link" data-scroll-target="#truncamiento">Truncamiento</a>
   <ul class="collapse">
-  <li><a href="#conceptos-principales" id="toc-conceptos-principales" class="nav-link" data-scroll-target="#conceptos-principales">Conceptos principales</a></li>
-  <li><a href="#formulación-matemática" id="toc-formulación-matemática" class="nav-link" data-scroll-target="#formulación-matemática">Formulación matemática</a></li>
-  <li><a href="#hiperparámetros-principales" id="toc-hiperparámetros-principales" class="nav-link" data-scroll-target="#hiperparámetros-principales">Hiperparámetros principales</a></li>
+  <li><a href="#truncamiento-izquierdo" id="toc-truncamiento-izquierdo" class="nav-link" data-scroll-target="#truncamiento-izquierdo">Truncamiento izquierdo</a></li>
   </ul></li>
-  <li><a href="#supuestos" id="toc-supuestos" class="nav-link" data-scroll-target="#supuestos">Supuestos</a></li>
-  <li><a href="#cuándo-utilizarla" id="toc-cuándo-utilizarla" class="nav-link" data-scroll-target="#cuándo-utilizarla">Cuándo utilizarla</a></li>
-  <li><a href="#cuándo-no-utilizarla" id="toc-cuándo-no-utilizarla" class="nav-link" data-scroll-target="#cuándo-no-utilizarla">Cuándo no utilizarla</a></li>
-  <li><a href="#flujo-de-trabajo-recomendado" id="toc-flujo-de-trabajo-recomendado" class="nav-link" data-scroll-target="#flujo-de-trabajo-recomendado">Flujo de trabajo recomendado</a></li>
-  <li><a href="#código-mínimo" id="toc-código-mínimo" class="nav-link" data-scroll-target="#código-mínimo">Código mínimo</a></li>
-  <li><a href="#implementación-completa" id="toc-implementación-completa" class="nav-link" data-scroll-target="#implementación-completa">Implementación completa</a></li>
-  <li><a href="#interpretación-de-resultados" id="toc-interpretación-de-resultados" class="nav-link" data-scroll-target="#interpretación-de-resultados">Interpretación de resultados</a></li>
-  <li><a href="#evaluación" id="toc-evaluación" class="nav-link" data-scroll-target="#evaluación">Evaluación</a></li>
-  <li><a href="#visualizaciones-recomendadas" id="toc-visualizaciones-recomendadas" class="nav-link" data-scroll-target="#visualizaciones-recomendadas">Visualizaciones recomendadas</a></li>
+  <li><a href="#función-de-supervivencia" id="toc-función-de-supervivencia" class="nav-link" data-scroll-target="#función-de-supervivencia">Función de supervivencia</a></li>
+  <li><a href="#función-de-distribución" id="toc-función-de-distribución" class="nav-link" data-scroll-target="#función-de-distribución">Función de distribución</a></li>
+  <li><a href="#hazard" id="toc-hazard" class="nav-link" data-scroll-target="#hazard">Hazard</a></li>
+  <li><a href="#hazard-no-es-probabilidad" id="toc-hazard-no-es-probabilidad" class="nav-link" data-scroll-target="#hazard-no-es-probabilidad">Hazard no es probabilidad</a></li>
+  <li><a href="#riesgo-acumulado" id="toc-riesgo-acumulado" class="nav-link" data-scroll-target="#riesgo-acumulado">Riesgo acumulado</a></li>
+  <li><a href="#kaplan-meier" id="toc-kaplan-meier" class="nav-link" data-scroll-target="#kaplan-meier">Kaplan-Meier</a></li>
+  <li><a href="#curva-kaplan-meier" id="toc-curva-kaplan-meier" class="nav-link" data-scroll-target="#curva-kaplan-meier">Curva Kaplan-Meier</a></li>
+  <li><a href="#mediana-de-supervivencia" id="toc-mediana-de-supervivencia" class="nav-link" data-scroll-target="#mediana-de-supervivencia">Mediana de supervivencia</a></li>
+  <li><a href="#comparar-grupos" id="toc-comparar-grupos" class="nav-link" data-scroll-target="#comparar-grupos">Comparar grupos</a></li>
+  <li><a href="#log-rank-test" id="toc-log-rank-test" class="nav-link" data-scroll-target="#log-rank-test">Log-rank test</a></li>
+  <li><a href="#modelo-de-cox" id="toc-modelo-de-cox" class="nav-link" data-scroll-target="#modelo-de-cox">Modelo de Cox</a></li>
+  <li><a href="#hazard-ratio" id="toc-hazard-ratio" class="nav-link" data-scroll-target="#hazard-ratio">Hazard ratio</a></li>
+  <li><a href="#ejemplo" id="toc-ejemplo" class="nav-link" data-scroll-target="#ejemplo">Ejemplo</a></li>
+  <li><a href="#riesgos-proporcionales" id="toc-riesgos-proporcionales" class="nav-link" data-scroll-target="#riesgos-proporcionales">Riesgos proporcionales</a></li>
+  <li><a href="#variables-dependientes-del-tiempo" id="toc-variables-dependientes-del-tiempo" class="nav-link" data-scroll-target="#variables-dependientes-del-tiempo">Variables dependientes del tiempo</a></li>
+  <li><a href="#competing-risks" id="toc-competing-risks" class="nav-link" data-scroll-target="#competing-risks">Competing risks</a></li>
+  <li><a href="#función-de-incidencia-acumulada" id="toc-función-de-incidencia-acumulada" class="nav-link" data-scroll-target="#función-de-incidencia-acumulada">Función de incidencia acumulada</a></li>
+  <li><a href="#modelos-principales-de-competing-risks" id="toc-modelos-principales-de-competing-risks" class="nav-link" data-scroll-target="#modelos-principales-de-competing-risks">Modelos principales de competing risks</a></li>
+  <li><a href="#eventos-recurrentes" id="toc-eventos-recurrentes" class="nav-link" data-scroll-target="#eventos-recurrentes">Eventos recurrentes</a></li>
+  <li><a href="#modelos-recurrentes" id="toc-modelos-recurrentes" class="nav-link" data-scroll-target="#modelos-recurrentes">Modelos recurrentes</a></li>
+  <li><a href="#modelos-paramétricos" id="toc-modelos-paramétricos" class="nav-link" data-scroll-target="#modelos-paramétricos">Modelos paramétricos</a></li>
+  <li><a href="#ventajas-paramétricas" id="toc-ventajas-paramétricas" class="nav-link" data-scroll-target="#ventajas-paramétricas">Ventajas paramétricas</a></li>
+  <li><a href="#limitaciones-paramétricas" id="toc-limitaciones-paramétricas" class="nav-link" data-scroll-target="#limitaciones-paramétricas">Limitaciones paramétricas</a></li>
+  <li><a href="#accelerated-failure-time" id="toc-accelerated-failure-time" class="nav-link" data-scroll-target="#accelerated-failure-time">Accelerated Failure Time</a></li>
+  <li><a href="#time-ratio" id="toc-time-ratio" class="nav-link" data-scroll-target="#time-ratio">Time ratio</a></li>
+  <li><a href="#machine-learning-de-supervivencia" id="toc-machine-learning-de-supervivencia" class="nav-link" data-scroll-target="#machine-learning-de-supervivencia">Machine learning de supervivencia</a></li>
+  <li><a href="#random-survival-forest" id="toc-random-survival-forest" class="nav-link" data-scroll-target="#random-survival-forest">Random Survival Forest</a></li>
+  <li><a href="#métricas-de-supervivencia" id="toc-métricas-de-supervivencia" class="nav-link" data-scroll-target="#métricas-de-supervivencia">Métricas de supervivencia</a></li>
+  <li><a href="#concordance-index" id="toc-concordance-index" class="nav-link" data-scroll-target="#concordance-index">Concordance index</a></li>
+  <li><a href="#limitación-del-c-index" id="toc-limitación-del-c-index" class="nav-link" data-scroll-target="#limitación-del-c-index">Limitación del C-index</a></li>
+  <li><a href="#brier-score-temporal" id="toc-brier-score-temporal" class="nav-link" data-scroll-target="#brier-score-temporal">Brier score temporal</a></li>
+  <li><a href="#calibración-temporal" id="toc-calibración-temporal" class="nav-link" data-scroll-target="#calibración-temporal">Calibración temporal</a></li>
+  <li><a href="#predicción-de-riesgo" id="toc-predicción-de-riesgo" class="nav-link" data-scroll-target="#predicción-de-riesgo">Predicción de riesgo</a></li>
+  <li><a href="#preparación-mínima-de-datos" id="toc-preparación-mínima-de-datos" class="nav-link" data-scroll-target="#preparación-mínima-de-datos">Preparación mínima de datos</a></li>
+  <li><a href="#revisar-tiempos" id="toc-revisar-tiempos" class="nav-link" data-scroll-target="#revisar-tiempos">Revisar tiempos</a></li>
+  <li><a href="#revisar-eventos" id="toc-revisar-eventos" class="nav-link" data-scroll-target="#revisar-eventos">Revisar eventos</a></li>
+  <li><a href="#validaciones-básicas" id="toc-validaciones-básicas" class="nav-link" data-scroll-target="#validaciones-básicas">Validaciones básicas</a></li>
+  <li><a href="#una-fila-por-paciente" id="toc-una-fila-por-paciente" class="nav-link" data-scroll-target="#una-fila-por-paciente">Una fila por paciente</a></li>
+  <li><a href="#formato-start-stop" id="toc-formato-start-stop" class="nav-link" data-scroll-target="#formato-start-stop">Formato start-stop</a></li>
+  <li><a href="#time-zero" id="toc-time-zero" class="nav-link" data-scroll-target="#time-zero">Time zero</a></li>
+  <li><a href="#immortal-time-bias" id="toc-immortal-time-bias" class="nav-link" data-scroll-target="#immortal-time-bias">Immortal time bias</a></li>
+  <li><a href="#landmark-analysis" id="toc-landmark-analysis" class="nav-link" data-scroll-target="#landmark-analysis">Landmark analysis</a></li>
+  <li><a href="#dynamic-prediction" id="toc-dynamic-prediction" class="nav-link" data-scroll-target="#dynamic-prediction">Dynamic prediction</a></li>
+  <li><a href="#validación-temporal" id="toc-validación-temporal" class="nav-link" data-scroll-target="#validación-temporal">Validación temporal</a></li>
+  <li><a href="#validación-externa" id="toc-validación-externa" class="nav-link" data-scroll-target="#validación-externa">Validación externa</a></li>
+  <li><a href="#split-por-paciente" id="toc-split-por-paciente" class="nav-link" data-scroll-target="#split-por-paciente">Split por paciente</a></li>
+  <li><a href="#leakage-clínico" id="toc-leakage-clínico" class="nav-link" data-scroll-target="#leakage-clínico">Leakage clínico</a></li>
+  <li><a href="#consideraciones-clínicas" id="toc-consideraciones-clínicas" class="nav-link" data-scroll-target="#consideraciones-clínicas">Consideraciones clínicas</a></li>
   <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
-  <li><a href="#consideraciones-en-datos-clínicos" id="toc-consideraciones-en-datos-clínicos" class="nav-link" data-scroll-target="#consideraciones-en-datos-clínicos">Consideraciones en datos clínicos</a></li>
-  <li><a href="#comparación-con-otras-técnicas" id="toc-comparación-con-otras-técnicas" class="nav-link" data-scroll-target="#comparación-con-otras-técnicas">Comparación con otras técnicas</a></li>
-  <li><a href="#checklist-para-proyectos" id="toc-checklist-para-proyectos" class="nav-link" data-scroll-target="#checklist-para-proyectos">Checklist para proyectos</a></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#itinerario-de-la-sección" id="toc-itinerario-de-la-sección" class="nav-link" data-scroll-target="#itinerario-de-la-sección">Itinerario de la sección</a></li>
+  <li><a href="#checklist-inicial" id="toc-checklist-inicial" class="nav-link" data-scroll-target="#checklist-inicial">Checklist inicial</a></li>
   <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
   <ul class="collapse">
-  <li><a href="#documentación" id="toc-documentación" class="nav-link" data-scroll-target="#documentación">Documentación</a></li>
-  <li><a href="#libros-y-artículos" id="toc-libros-y-artículos" class="nav-link" data-scroll-target="#libros-y-artículos">Libros y artículos</a></li>
+  <li><a href="#conceptos" id="toc-conceptos" class="nav-link" data-scroll-target="#conceptos">Conceptos</a></li>
+  <li><a href="#librerías-de-python" id="toc-librerías-de-python" class="nav-link" data-scroll-target="#librerías-de-python">Librerías de Python</a></li>
   <li><a href="#material-del-máster" id="toc-material-del-máster" class="nav-link" data-scroll-target="#material-del-máster">Material del máster</a></li>
   </ul></li>
   <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
@@ -676,9 +720,9 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../survival-analysis/index.html">Survival Analysis</a></li><li class="breadcrumb-item"><a href="../survival-analysis/index.html">Introducción</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Nombre de la técnica</h1>
+<h1 class="title">Survival Analysis</h1>
 </div>
 
 
@@ -695,277 +739,857 @@ window.Quarto = {
 </header>
 
 
-<section id="resumen-en-30-segundos" class="level2">
-<h2 data-anchor-id="resumen-en-30-segundos">Resumen en 30 segundos</h2>
-<p>Escribe aquí una explicación breve de la técnica: qué hace, qué problema resuelve y cuál es su idea principal.</p>
-</section>
-<section id="qué-problema-resuelve" class="level2">
-<h2 data-anchor-id="qué-problema-resuelve">¿Qué problema resuelve?</h2>
-<p>Describe el tipo de problema para el que se utiliza esta técnica.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Survival analysis estudia el tiempo hasta que ocurre un evento.</p>
+<p>Permite trabajar correctamente cuando:</p>
+<ul>
+<li>Algunos pacientes presentan el evento.</li>
+<li>Otros terminan el seguimiento sin presentarlo.</li>
+<li>Los tiempos de seguimiento son diferentes.</li>
+<li>Existen eventos competidores.</li>
+<li>Las variables cambian durante el seguimiento.</li>
+</ul>
 <p>Ejemplos:</p>
 <ul>
-<li>Reducir dimensionalidad.</li>
-<li>Clasificar observaciones.</li>
-<li>Predecir una variable continua.</li>
-<li>Agrupar observaciones.</li>
-<li>Analizar datos longitudinales.</li>
-<li>Modelar una serie temporal.</li>
+<li>Tiempo hasta fallecimiento.</li>
+<li>Tiempo hasta reingreso.</li>
+<li>Tiempo hasta recaída.</li>
+<li>Tiempo hasta cardiotoxicidad.</li>
+<li>Tiempo hasta progresión.</li>
 </ul>
-</section>
-<section id="intuición" class="level2">
-<h2 data-anchor-id="intuición">Intuición</h2>
-<p>Explica la técnica con lenguaje sencillo, evitando fórmulas al principio.</p>
-<p>Puedes utilizar:</p>
+</div>
+</div>
+<section id="qué-pregunta-responde" class="level2">
+<h2 data-anchor-id="qué-pregunta-responde">¿Qué pregunta responde?</h2>
+<p>En clasificación se pregunta:</p>
+<pre class="text"><code>¿Ocurrirá el evento?</code></pre>
+<p>En survival analysis se pregunta:</p>
+<pre class="text"><code>¿Cuándo ocurrirá el evento?</code></pre>
+<p>Se modelan conjuntamente:</p>
 <ul>
-<li>Una analogía.</li>
-<li>Un ejemplo clínico.</li>
-<li>Una representación visual.</li>
-<li>Una comparación con otra técnica.</li>
+<li>La ocurrencia del evento.</li>
+<li>El tiempo hasta el evento.</li>
+<li>La información incompleta por censura.</li>
 </ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un paciente sin evento al finalizar el estudio no debe tratarse automáticamente como un caso negativo.</p>
+</div>
+</div>
 </section>
-<section id="fundamentos-teóricos" class="level2">
-<h2 data-anchor-id="fundamentos-teóricos">Fundamentos teóricos</h2>
-<p>Explica aquí los conceptos teóricos necesarios para comprender la técnica.</p>
-<section id="conceptos-principales" class="level3">
-<h3 data-anchor-id="conceptos-principales">Conceptos principales</h3>
+<section id="ejemplo-clínico" class="level2">
+<h2 data-anchor-id="ejemplo-clínico">Ejemplo clínico</h2>
+<p>Supongamos que estudiamos cardiotoxicidad.</p>
+<pre class="text"><code>Paciente A
+→ cardiotoxicidad a los 14 meses
+
+Paciente B
+→ sin cardiotoxicidad tras 24 meses
+
+Paciente C
+→ seguimiento perdido a los 9 meses
+
+Paciente D
+→ cardiotoxicidad a los 6 meses</code></pre>
+<p>Los pacientes B y C aportan información aunque no se haya observado el evento.</p>
+</section>
+<section id="elementos-básicos" class="level2">
+<h2 data-anchor-id="elementos-básicos">Elementos básicos</h2>
+<p>Cada observación necesita al menos:</p>
 <ul>
-<li>Concepto 1.</li>
-<li>Concepto 2.</li>
-<li>Concepto 3.</li>
+<li>Tiempo de seguimiento.</li>
+<li>Indicador de evento.</li>
 </ul>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>duration_column <span class="op">=</span> <span class="st">"follow_up_days"</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>event_column <span class="op">=</span> <span class="st">"cardiotoxicity_event"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ejemplo:</p>
+<pre class="text"><code>follow_up_days | event
+----------------------
+120            | 1
+300            | 0
+90             | 0
+45             | 1</code></pre>
 </section>
-<section id="formulación-matemática" class="level3">
-<h3 data-anchor-id="formulación-matemática">Formulación matemática</h3>
-<p>Añade aquí las fórmulas importantes utilizando notación matemática de Quarto.</p>
-<p>Por ejemplo:</p>
+<section id="tiempo-hasta-evento" class="level2">
+<h2 data-anchor-id="tiempo-hasta-evento">Tiempo hasta evento</h2>
+<p>Puede definirse como:</p>
 <p><span class="math display">\[
-y = \beta_0 + \beta_1 x_1 + \cdots + \beta_p x_p
+T
+=
+\text{fecha del evento}
+-
+\text{fecha de inicio}
 \]</span></p>
 </section>
-<section id="hiperparámetros-principales" class="level3">
-<h3 data-anchor-id="hiperparámetros-principales">Hiperparámetros principales</h3>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Hiperparámetro</th>
-<th>Descripción</th>
-<th>Efecto</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>parameter_1</code></td>
-<td>Descripción</td>
-<td>Efecto sobre el modelo</td>
-</tr>
-<tr class="even">
-<td><code>parameter_2</code></td>
-<td>Descripción</td>
-<td>Efecto sobre el modelo</td>
-</tr>
-</tbody>
-</table>
-</section>
-</section>
-<section id="supuestos" class="level2">
-<h2 data-anchor-id="supuestos">Supuestos</h2>
-<p>Enumera los supuestos de la técnica y explica por qué son importantes.</p>
-<ul>
-<li>Supuesto 1.</li>
-<li>Supuesto 2.</li>
-<li>Supuesto 3.</li>
-</ul>
-</section>
-<section id="cuándo-utilizarla" class="level2">
-<h2 data-anchor-id="cuándo-utilizarla">Cuándo utilizarla</h2>
-<p>Esta técnica puede ser adecuada cuando:</p>
-<ul>
-<li>Situación 1.</li>
-<li>Situación 2.</li>
-<li>Situación 3.</li>
-</ul>
-</section>
-<section id="cuándo-no-utilizarla" class="level2">
-<h2 data-anchor-id="cuándo-no-utilizarla">Cuándo no utilizarla</h2>
-<p>Esta técnica puede no ser adecuada cuando:</p>
-<ul>
-<li>Situación 1.</li>
-<li>Situación 2.</li>
-<li>Situación 3.</li>
-</ul>
-</section>
-<section id="flujo-de-trabajo-recomendado" class="level2">
-<h2 data-anchor-id="flujo-de-trabajo-recomendado">Flujo de trabajo recomendado</h2>
-<ol type="1">
-<li>Comprender el problema.</li>
-<li>Seleccionar las variables.</li>
-<li>Separar entrenamiento y prueba.</li>
-<li>Preparar los datos.</li>
-<li>Ajustar la técnica o el modelo.</li>
-<li>Evaluar los resultados.</li>
-<li>Interpretar los resultados.</li>
-<li>Documentar las decisiones.</li>
-</ol>
-</section>
-<section id="código-mínimo" class="level2">
-<h2 data-anchor-id="código-mínimo">Código mínimo</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Importar las librerías necesarias</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Preparar los datos</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Crear la técnica o modelo</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajustar</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Obtener resultados</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="implementación-completa" class="level2">
-<h2 data-anchor-id="implementación-completa">Implementación completa</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Añadir aquí una implementación completa y reproducible.</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Incluir:</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># - imports;</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># - preparación de datos;</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># - pipeline;</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co"># - validación;</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># - evaluación;</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># - interpretación.</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="interpretación-de-resultados" class="level2">
-<h2 data-anchor-id="interpretación-de-resultados">Interpretación de resultados</h2>
-<p>Explica:</p>
-<ul>
-<li>Qué devuelve el método.</li>
-<li>Qué valores deben revisarse.</li>
-<li>Cómo interpretar los resultados.</li>
-<li>Qué conclusiones se pueden extraer.</li>
-<li>Qué conclusiones no se pueden extraer.</li>
-</ul>
-</section>
-<section id="evaluación" class="level2">
-<h2 data-anchor-id="evaluación">Evaluación</h2>
-<p>Describe cómo comprobar si la técnica ha funcionado correctamente.</p>
-<p>Incluye, cuando corresponda:</p>
-<ul>
-<li>Métricas.</li>
-<li>Validación cruzada.</li>
-<li>Diagnósticos.</li>
-<li>Gráficos.</li>
-<li>Comparación con un modelo baseline.</li>
-</ul>
-</section>
-<section id="visualizaciones-recomendadas" class="level2">
-<h2 data-anchor-id="visualizaciones-recomendadas">Visualizaciones recomendadas</h2>
-<p>Incluye aquí los gráficos más útiles para interpretar la técnica.</p>
+<section id="fecha-de-inicio" class="level2">
+<h2 data-anchor-id="fecha-de-inicio">Fecha de inicio</h2>
+<p>Debe definirse clínicamente.</p>
 <p>Ejemplos:</p>
 <ul>
-<li>Distribuciones.</li>
-<li>Matrices de correlación.</li>
-<li>Curvas de aprendizaje.</li>
-<li>Matrices de confusión.</li>
-<li>Gráficos de residuos.</li>
-<li>Varianza explicada.</li>
-<li>Visualización de clusters.</li>
+<li>Fecha de diagnóstico.</li>
+<li>Inicio del tratamiento.</li>
+<li>Alta hospitalaria.</li>
+<li>Primera valoración.</li>
+<li>Inclusión en el estudio.</li>
+<li>Entrada en un estado.</li>
+</ul>
+</section>
+<section id="evento" class="level2">
+<h2 data-anchor-id="evento">Evento</h2>
+<p>Debe definirse con precisión.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Fallecimiento.</li>
+<li>Reingreso.</li>
+<li>Recaída.</li>
+<li>Cardiotoxicidad moderada.</li>
+<li>Primera transición a disfunción.</li>
+<li>Inicio de ventilación mecánica.</li>
+</ul>
+</section>
+<section id="censura" class="level2">
+<h2 data-anchor-id="censura">Censura</h2>
+<p>Existe censura cuando no conocemos el tiempo exacto del evento.</p>
+</section>
+<section id="censura-por-la-derecha" class="level2">
+<h2 data-anchor-id="censura-por-la-derecha">Censura por la derecha</h2>
+<p>Es la más habitual.</p>
+<pre class="text"><code>Inicio
+───────────────|
+               fin del seguimiento
+
+No se observó el evento</code></pre>
+<p>Sabemos que:</p>
+<p><span class="math display">\[
+T
+&gt;
+t_{\text{último seguimiento}}
+\]</span></p>
+</section>
+<section id="motivos-de-censura" class="level2">
+<h2 data-anchor-id="motivos-de-censura">Motivos de censura</h2>
+<ul>
+<li>Fin del estudio.</li>
+<li>Pérdida de seguimiento.</li>
+<li>Retirada.</li>
+<li>Alta.</li>
+<li>Traslado.</li>
+<li>El evento no ocurrió todavía.</li>
+</ul>
+</section>
+<section id="censura-no-informativa" class="level2">
+<h2 data-anchor-id="censura-no-informativa">Censura no informativa</h2>
+<p>Muchos modelos asumen que la censura es independiente del riesgo del evento, condicionada a las variables incluidas.</p>
+<p>Esta hipótesis puede fallar.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Pacientes más graves
+→ abandonan seguimiento con mayor frecuencia</code></pre>
+</section>
+<section id="truncamiento" class="level2">
+<h2 data-anchor-id="truncamiento">Truncamiento</h2>
+<p>El truncamiento es diferente de la censura.</p>
+<section id="truncamiento-izquierdo" class="level3">
+<h3 data-anchor-id="truncamiento-izquierdo">Truncamiento izquierdo</h3>
+<p>Un paciente entra en observación después del inicio de su periodo de riesgo.</p>
+<pre class="text"><code>Inicio del riesgo
+───────
+
+Entrada en estudio
+       ───────────</code></pre>
+<p>El paciente tuvo que sobrevivir hasta entrar.</p>
+</section>
+</section>
+<section id="función-de-supervivencia" class="level2">
+<h2 data-anchor-id="función-de-supervivencia">Función de supervivencia</h2>
+<p>La función de supervivencia es:</p>
+<p><span class="math display">\[
+S(t)
+=
+P(T&gt;t)
+\]</span></p>
+<p>Representa la probabilidad de permanecer libre del evento más allá del tiempo (t).</p>
+<pre class="text"><code>S(0) = 1
+
+S(t)
+↓
+disminuye cuando ocurren eventos</code></pre>
+</section>
+<section id="función-de-distribución" class="level2">
+<h2 data-anchor-id="función-de-distribución">Función de distribución</h2>
+<p><span class="math display">\[
+F(t)
+=
+P(T\leq t)
+\]</span></p>
+<p>y:</p>
+<p><span class="math display">\[
+F(t)
+=
+1-S(t)
+\]</span></p>
+</section>
+<section id="hazard" class="level2">
+<h2 data-anchor-id="hazard">Hazard</h2>
+<p>La función de riesgo instantáneo es:</p>
+<p><span class="math display">\[
+h(t)
+=
+\lim_{\Delta t \to 0}
+\frac{
+P(t\leq T&lt;t+\Delta t\mid T\geq t)
+}{
+\Delta t
+}
+\]</span></p>
+<p>Representa la tasa instantánea del evento entre quienes siguen en riesgo.</p>
+</section>
+<section id="hazard-no-es-probabilidad" class="level2">
+<h2 data-anchor-id="hazard-no-es-probabilidad">Hazard no es probabilidad</h2>
+<p>El hazard:</p>
+<ul>
+<li>Puede superar 1.</li>
+<li>No es una probabilidad directa.</li>
+<li>Describe una tasa instantánea.</li>
+<li>Depende del tiempo.</li>
+</ul>
+</section>
+<section id="riesgo-acumulado" class="level2">
+<h2 data-anchor-id="riesgo-acumulado">Riesgo acumulado</h2>
+<p><span class="math display">\[
+H(t)
+=
+\int_0^t h(u)\,du
+\]</span></p>
+<p>La relación con supervivencia es:</p>
+<p><span class="math display">\[
+S(t)
+=
+e^{-H(t)}
+\]</span></p>
+</section>
+<section id="kaplan-meier" class="level2">
+<h2 data-anchor-id="kaplan-meier">Kaplan-Meier</h2>
+<p>El estimador de Kaplan-Meier estima la función de supervivencia sin asumir una distribución paramétrica concreta.</p>
+<p><span class="math display">\[
+\hat{S}(t)
+=
+\prod_{t_i \leq t}
+\left(
+1-
+\frac{d_i}{n_i}
+\right)
+\]</span></p>
+<p>donde:</p>
+<ul>
+<li>(d_i): eventos en (t_i).</li>
+<li>(n_i): personas en riesgo justo antes de (t_i).</li>
+</ul>
+</section>
+<section id="curva-kaplan-meier" class="level2">
+<h2 data-anchor-id="curva-kaplan-meier">Curva Kaplan-Meier</h2>
+<pre class="text"><code>Supervivencia
+1.0 ──────────┐
+              └──────┐
+                     └─────┐
+                           └──
+0.0 ───────────────────────── Tiempo</code></pre>
+<p>La curva desciende cuando ocurren eventos.</p>
+</section>
+<section id="mediana-de-supervivencia" class="level2">
+<h2 data-anchor-id="mediana-de-supervivencia">Mediana de supervivencia</h2>
+<p>Es el tiempo en el que:</p>
+<p><span class="math display">\[
+S(t)
+=
+0.5
+\]</span></p>
+<p>Puede no alcanzarse si más del 50 % permanece libre del evento.</p>
+</section>
+<section id="comparar-grupos" class="level2">
+<h2 data-anchor-id="comparar-grupos">Comparar grupos</h2>
+<p>Ejemplos:</p>
+<ul>
+<li>Tratamiento A frente a B.</li>
+<li>Hombres frente a mujeres.</li>
+<li>Centro A frente a B.</li>
+<li>Riesgo bajo frente a alto.</li>
+</ul>
+<p>Puede utilizarse:</p>
+<ul>
+<li>Curvas Kaplan-Meier.</li>
+<li>Log-rank test.</li>
+<li>Modelos de Cox.</li>
+<li>Diferencias absolutas de supervivencia.</li>
+</ul>
+</section>
+<section id="log-rank-test" class="level2">
+<h2 data-anchor-id="log-rank-test">Log-rank test</h2>
+<p>Compara las curvas de supervivencia bajo la hipótesis nula de igualdad entre grupos.</p>
+<pre class="text"><code>H₀
+→ las curvas son iguales</code></pre>
+</section>
+<section id="modelo-de-cox" class="level2">
+<h2 data-anchor-id="modelo-de-cox">Modelo de Cox</h2>
+<p>El modelo de riesgos proporcionales de Cox relaciona covariables y hazard.</p>
+<p><span class="math display">\[
+h(t\mid X)
+=
+h_0(t)
+\exp(
+\beta_1X_1
++
+\cdots
++
+\beta_pX_p
+)
+\]</span></p>
+<p>donde:</p>
+<ul>
+<li>(h_0(t)): hazard basal.</li>
+<li>(X): covariables.</li>
+<li>(): coeficientes.</li>
+</ul>
+</section>
+<section id="hazard-ratio" class="level2">
+<h2 data-anchor-id="hazard-ratio">Hazard ratio</h2>
+<p>Para una variable (X_j):</p>
+<p><span class="math display">\[
+HR
+=
+e^{\beta_j}
+\]</span></p>
+<p>Interpretación:</p>
+<pre class="text"><code>HR &gt; 1
+→ mayor hazard
+
+HR &lt; 1
+→ menor hazard
+
+HR = 1
+→ sin asociación</code></pre>
+</section>
+<section id="ejemplo" class="level2">
+<h2 data-anchor-id="ejemplo">Ejemplo</h2>
+<pre class="text"><code>HR = 1.50</code></pre>
+<p>Se interpreta como un hazard instantáneo aproximadamente un 50 % mayor, bajo los supuestos del modelo.</p>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Hazard ratio no equivale directamente a un 50 % más de probabilidad acumulada.</p>
+</div>
+</div>
+</section>
+<section id="riesgos-proporcionales" class="level2">
+<h2 data-anchor-id="riesgos-proporcionales">Riesgos proporcionales</h2>
+<p>Cox asume que la razón de hazards entre dos individuos es aproximadamente constante en el tiempo.</p>
+<pre class="text"><code>HR temprano
+≈
+HR tardío</code></pre>
+<p>Este supuesto debe comprobarse.</p>
+</section>
+<section id="variables-dependientes-del-tiempo" class="level2">
+<h2 data-anchor-id="variables-dependientes-del-tiempo">Variables dependientes del tiempo</h2>
+<p>Algunas variables cambian durante el seguimiento.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Troponina.</li>
+<li>FEVI.</li>
+<li>Tratamiento acumulado.</li>
+<li>Estado clínico.</li>
+<li>Exposición farmacológica.</li>
+<li>Biomarcadores.</li>
+</ul>
+<p>Estas variables requieren una estructura longitudinal adecuada.</p>
+</section>
+<section id="competing-risks" class="level2">
+<h2 data-anchor-id="competing-risks">Competing risks</h2>
+<p>Existen riesgos competitivos cuando otro evento impide o modifica la posibilidad del evento principal.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Evento principal
+→ recaída
+
+Evento competidor
+→ fallecimiento sin recaída</code></pre>
+<p>No debe censurarse automáticamente el evento competidor como si fuera censura independiente.</p>
+</section>
+<section id="función-de-incidencia-acumulada" class="level2">
+<h2 data-anchor-id="función-de-incidencia-acumulada">Función de incidencia acumulada</h2>
+<p>En competing risks se utiliza:</p>
+<p><span class="math display">\[
+CIF_k(t)
+=
+P(T\leq t, J=k)
+\]</span></p>
+<p>Representa la probabilidad acumulada de presentar el evento de tipo (k).</p>
+</section>
+<section id="modelos-principales-de-competing-risks" class="level2">
+<h2 data-anchor-id="modelos-principales-de-competing-risks">Modelos principales de competing risks</h2>
+<ul>
+<li>Cause-specific Cox.</li>
+<li>Fine-Gray.</li>
+<li>Modelos multiestado.</li>
+</ul>
+</section>
+<section id="eventos-recurrentes" class="level2">
+<h2 data-anchor-id="eventos-recurrentes">Eventos recurrentes</h2>
+<p>Un paciente puede experimentar varias veces el mismo evento.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Reingresos.</li>
+<li>Infecciones.</li>
+<li>Crisis.</li>
+<li>Arritmias.</li>
+<li>Hospitalizaciones.</li>
+</ul>
+<p>La primera ocurrencia no siempre resume adecuadamente la trayectoria.</p>
+</section>
+<section id="modelos-recurrentes" class="level2">
+<h2 data-anchor-id="modelos-recurrentes">Modelos recurrentes</h2>
+<ul>
+<li>Andersen-Gill.</li>
+<li>Prentice-Williams-Peterson.</li>
+<li>Modelos de frailty.</li>
+<li>Modelos multiestado.</li>
+<li>Joint frailty models.</li>
+</ul>
+</section>
+<section id="modelos-paramétricos" class="level2">
+<h2 data-anchor-id="modelos-paramétricos">Modelos paramétricos</h2>
+<p>Asumen una forma para la distribución del tiempo.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Exponencial.</li>
+<li>Weibull.</li>
+<li>Gompertz.</li>
+<li>Log-normal.</li>
+<li>Log-logistic.</li>
+</ul>
+</section>
+<section id="ventajas-paramétricas" class="level2">
+<h2 data-anchor-id="ventajas-paramétricas">Ventajas paramétricas</h2>
+<ul>
+<li>Predicciones más suaves.</li>
+<li>Extrapolación temporal.</li>
+<li>Estimación directa de supervivencia.</li>
+<li>Posible interpretación del tiempo.</li>
+</ul>
+</section>
+<section id="limitaciones-paramétricas" class="level2">
+<h2 data-anchor-id="limitaciones-paramétricas">Limitaciones paramétricas</h2>
+<ul>
+<li>Riesgo de especificar mal la distribución.</li>
+<li>Extrapolaciones poco realistas.</li>
+<li>Mayor dependencia de supuestos.</li>
+</ul>
+</section>
+<section id="accelerated-failure-time" class="level2">
+<h2 data-anchor-id="accelerated-failure-time">Accelerated Failure Time</h2>
+<p>Los modelos AFT modelan directamente el tiempo hasta evento.</p>
+<p><span class="math display">\[
+\log(T)
+=
+\beta_0
++
+\beta X
++
+\varepsilon
+\]</span></p>
+</section>
+<section id="time-ratio" class="level2">
+<h2 data-anchor-id="time-ratio">Time ratio</h2>
+<p>En un modelo AFT puede interpretarse:</p>
+<pre class="text"><code>Time ratio &gt; 1
+→ tiempo hasta evento más largo
+
+Time ratio &lt; 1
+→ tiempo hasta evento más corto</code></pre>
+</section>
+<section id="machine-learning-de-supervivencia" class="level2">
+<h2 data-anchor-id="machine-learning-de-supervivencia">Machine learning de supervivencia</h2>
+<p>También existen modelos no lineales:</p>
+<ul>
+<li>Random Survival Forest.</li>
+<li>Gradient Boosting Survival.</li>
+<li>Survival SVM.</li>
+<li>DeepSurv.</li>
+<li>Redes neuronales de supervivencia.</li>
+</ul>
+</section>
+<section id="random-survival-forest" class="level2">
+<h2 data-anchor-id="random-survival-forest">Random Survival Forest</h2>
+<p>Ventajas:</p>
+<ul>
+<li>No linealidad.</li>
+<li>Interacciones.</li>
+<li>Menos supuestos paramétricos.</li>
+<li>Importancia de variables.</li>
+</ul>
+<p>Limitaciones:</p>
+<ul>
+<li>Menor interpretabilidad.</li>
+<li>Requiere tuning.</li>
+<li>Puede necesitar muestras grandes.</li>
+</ul>
+</section>
+<section id="métricas-de-supervivencia" class="level2">
+<h2 data-anchor-id="métricas-de-supervivencia">Métricas de supervivencia</h2>
+<p>No deben utilizarse directamente métricas estándar ignorando censura.</p>
+<p>Métricas habituales:</p>
+<ul>
+<li>Concordance index.</li>
+<li>Time-dependent AUC.</li>
+<li>Brier score.</li>
+<li>Integrated Brier Score.</li>
+<li>Calibración temporal.</li>
+<li>Error de predicción de supervivencia.</li>
+</ul>
+</section>
+<section id="concordance-index" class="level2">
+<h2 data-anchor-id="concordance-index">Concordance index</h2>
+<p>Evalúa si pacientes con mayor riesgo presentan antes el evento.</p>
+<pre class="text"><code>C-index = 0.5
+→ discriminación similar al azar
+
+C-index = 1
+→ orden perfecto</code></pre>
+</section>
+<section id="limitación-del-c-index" class="level2">
+<h2 data-anchor-id="limitación-del-c-index">Limitación del C-index</h2>
+<ul>
+<li>No mide calibración.</li>
+<li>Puede ocultar diferencias por tiempo.</li>
+<li>Depende de pares comparables.</li>
+<li>No indica utilidad clínica.</li>
+</ul>
+</section>
+<section id="brier-score-temporal" class="level2">
+<h2 data-anchor-id="brier-score-temporal">Brier score temporal</h2>
+<p>Evalúa la precisión de probabilidades de supervivencia en un tiempo específico.</p>
+<p>Combina:</p>
+<ul>
+<li>Discriminación.</li>
+<li>Calibración.</li>
+</ul>
+</section>
+<section id="calibración-temporal" class="level2">
+<h2 data-anchor-id="calibración-temporal">Calibración temporal</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>Pacientes con supervivencia predicha del 80 % a 2 años
+→ aproximadamente 80 % deberían estar libres del evento</code></pre>
+<p>Debe evaluarse en varios tiempos.</p>
+</section>
+<section id="predicción-de-riesgo" class="level2">
+<h2 data-anchor-id="predicción-de-riesgo">Predicción de riesgo</h2>
+<p>Un modelo puede producir:</p>
+<ul>
+<li>Risk score.</li>
+<li>Hazard.</li>
+<li>Supervivencia individual.</li>
+<li>Riesgo acumulado.</li>
+<li>Incidencia acumulada.</li>
+</ul>
+<p>No todos son equivalentes.</p>
+</section>
+<section id="preparación-mínima-de-datos" class="level2">
+<h2 data-anchor-id="preparación-mínima-de-datos">Preparación mínima de datos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>survival_df <span class="op">=</span> df[</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"patient_id"</span>,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"follow_up_days"</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"event"</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span>,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sex"</span>,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"treatment"</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>].copy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="revisar-tiempos" class="level2">
+<h2 data-anchor-id="revisar-tiempos">Revisar tiempos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>survival_df[</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"follow_up_days"</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>].describe()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="revisar-eventos" class="level2">
+<h2 data-anchor-id="revisar-eventos">Revisar eventos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>survival_df[</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"event"</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>].value_counts(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    dropna<span class="op">=</span><span class="va">False</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="validaciones-básicas" class="level2">
+<h2 data-anchor-id="validaciones-básicas">Validaciones básicas</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>invalid_times <span class="op">=</span> survival_df.loc[</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    survival_df[</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"follow_up_days"</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>duplicated_patients <span class="op">=</span> (</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    survival_df</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .duplicated(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>        subset<span class="op">=</span>[</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"patient_id"</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">sum</span>()</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="una-fila-por-paciente" class="level2">
+<h2 data-anchor-id="una-fila-por-paciente">Una fila por paciente</h2>
+<p>En un modelo basal clásico suele utilizarse:</p>
+<pre class="text"><code>Una fila
+→ un paciente</code></pre>
+<p>con:</p>
+<ul>
+<li>Tiempo.</li>
+<li>Evento.</li>
+<li>Covariables basales.</li>
+</ul>
+</section>
+<section id="formato-start-stop" class="level2">
+<h2 data-anchor-id="formato-start-stop">Formato start-stop</h2>
+<p>Para variables dependientes del tiempo:</p>
+<pre class="text"><code>patient_id | start | stop | event | covariate</code></pre>
+<p>Ejemplo:</p>
+<pre class="text"><code>1 | 0   | 30  | 0 | 0
+1 | 30  | 60  | 0 | 1
+1 | 60  | 90  | 1 | 1</code></pre>
+</section>
+<section id="time-zero" class="level2">
+<h2 data-anchor-id="time-zero">Time zero</h2>
+<p>La elección del tiempo cero es crítica.</p>
+<p>Puede ser:</p>
+<ul>
+<li>Diagnóstico.</li>
+<li>Inicio de tratamiento.</li>
+<li>Alta.</li>
+<li>Primera exposición.</li>
+<li>Entrada en estado.</li>
+</ul>
+</section>
+<section id="immortal-time-bias" class="level2">
+<h2 data-anchor-id="immortal-time-bias">Immortal time bias</h2>
+<p>Aparece cuando una persona debe sobrevivir un periodo para ser clasificada como expuesta.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Expuesto
+→ definido por recibir tratamiento en día 30
+
+Días 0 a 30
+→ tiempo inmortal si se atribuye a exposición</code></pre>
+</section>
+<section id="landmark-analysis" class="level2">
+<h2 data-anchor-id="landmark-analysis">Landmark analysis</h2>
+<p>Selecciona pacientes libres de evento en un tiempo definido y predice desde ese punto.</p>
+<pre class="text"><code>Inicio
+──────
+
+Landmark
+       │
+       └──── predicción futura</code></pre>
+</section>
+<section id="dynamic-prediction" class="level2">
+<h2 data-anchor-id="dynamic-prediction">Dynamic prediction</h2>
+<p>Actualiza el riesgo utilizando información longitudinal nueva.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Biomarcadores recientes.</li>
+<li>Nueva ecocardiografía.</li>
+<li>Cambio de tratamiento.</li>
+<li>Transición de estado.</li>
+</ul>
+</section>
+<section id="validación-temporal" class="level2">
+<h2 data-anchor-id="validación-temporal">Validación temporal</h2>
+<pre class="text"><code>Cohorte histórica
+→ entrenamiento
+
+Cohorte posterior
+→ validación</code></pre>
+</section>
+<section id="validación-externa" class="level2">
+<h2 data-anchor-id="validación-externa">Validación externa</h2>
+<pre class="text"><code>Hospital A
+→ desarrollo
+
+Hospital B
+→ validación</code></pre>
+</section>
+<section id="split-por-paciente" class="level2">
+<h2 data-anchor-id="split-por-paciente">Split por paciente</h2>
+<p>Cada paciente debe pertenecer a un único conjunto.</p>
+</section>
+<section id="leakage-clínico" class="level2">
+<h2 data-anchor-id="leakage-clínico">Leakage clínico</h2>
+<p>Ejemplos:</p>
+<ul>
+<li>Variables medidas después del inicio del seguimiento.</li>
+<li>Diagnóstico final.</li>
+<li>Tratamiento iniciado como respuesta al evento.</li>
+<li>Duración total.</li>
+<li>Fecha de alta.</li>
+<li>Eventos futuros usados como covariables basales.</li>
+</ul>
+</section>
+<section id="consideraciones-clínicas" class="level2">
+<h2 data-anchor-id="consideraciones-clínicas">Consideraciones clínicas</h2>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Aplicación clínica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Survival analysis resulta especialmente útil cuando el momento del evento y la censura son clínicamente relevantes.</p>
+</div>
+</div>
+<p>Debe definirse:</p>
+<ul>
+<li>Evento.</li>
+<li>Tiempo cero.</li>
+<li>Censura.</li>
+<li>Eventos competidores.</li>
+<li>Horizonte clínico.</li>
+<li>Variables disponibles.</li>
+<li>Población en riesgo.</li>
 </ul>
 </section>
 <section id="errores-frecuentes" class="level2">
 <h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
 <ul>
-<li>Error frecuente 1.</li>
-<li>Error frecuente 2.</li>
-<li>Error frecuente 3.</li>
-<li>Error frecuente 4.</li>
+<li>Tratar censurados como negativos.</li>
+<li>Ignorar tiempos diferentes.</li>
+<li>Elegir mal el tiempo cero.</li>
+<li>No comprobar riesgos proporcionales.</li>
+<li>Interpretar HR como riesgo absoluto.</li>
+<li>Censurar eventos competidores.</li>
+<li>Ignorar truncamiento.</li>
+<li>Usar variables futuras.</li>
+<li>No evaluar calibración.</li>
+<li>Reportar solo C-index.</li>
+<li>No documentar pérdidas.</li>
+<li>No validar externamente.</li>
 </ul>
 </section>
-<section id="consideraciones-en-datos-clínicos" class="level2">
-<h2 data-anchor-id="consideraciones-en-datos-clínicos">Consideraciones en datos clínicos</h2>
-<p>Explica los aspectos específicos que deben tenerse en cuenta en datos sanitarios.</p>
-<p>Por ejemplo:</p>
-<ul>
-<li>Datos ausentes no aleatorios.</li>
-<li>Mediciones repetidas por paciente.</li>
-<li>Diferencias entre centros.</li>
-<li>Cambios en protocolos clínicos.</li>
-<li>Variables recogidas después del desenlace.</li>
-<li>Data leakage.</li>
-<li>Desbalanceo de clases.</li>
-<li>Necesidad de validación externa.</li>
-<li>Interpretabilidad clínica.</li>
-</ul>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Definir población.</li>
+<li>Definir tiempo cero.</li>
+<li>Definir evento.</li>
+<li>Definir censura.</li>
+<li>Revisar competing risks.</li>
+<li>Explorar seguimiento.</li>
+<li>Estimar Kaplan-Meier.</li>
+<li>Comparar grupos.</li>
+<li>Ajustar modelo de Cox.</li>
+<li>Revisar supuestos.</li>
+<li>Evaluar discriminación y calibración.</li>
+<li>Validar externamente.</li>
+</ol>
 </section>
-<section id="comparación-con-otras-técnicas" class="level2">
-<h2 data-anchor-id="comparación-con-otras-técnicas">Comparación con otras técnicas</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Técnica</th>
-<th>Ventajas</th>
-<th>Limitaciones</th>
-<th>Cuándo elegirla</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Técnica actual</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="even">
-<td>Alternativa 1</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="odd">
-<td>Alternativa 2</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
+<section id="itinerario-de-la-sección" class="level2">
+<h2 data-anchor-id="itinerario-de-la-sección">Itinerario de la sección</h2>
+<p>Esta sección se desarrollará con:</p>
+<ol type="1">
+<li>Fundamentos, tiempos y censura.</li>
+<li>Kaplan-Meier y log-rank.</li>
+<li>Modelo de Cox.</li>
+<li>Supuesto de riesgos proporcionales.</li>
+<li>Modelos paramétricos y AFT.</li>
+<li>Variables dependientes del tiempo.</li>
+<li>Competing risks.</li>
+<li>Machine learning de supervivencia.</li>
+<li>Evaluación y calibración.</li>
+<li>Aplicaciones clínicas.</li>
+</ol>
 </section>
-<section id="checklist-para-proyectos" class="level2">
-<h2 data-anchor-id="checklist-para-proyectos">Checklist para proyectos</h2>
-<p>Antes de utilizar esta técnica, comprobar:</p>
+<section id="checklist-inicial" class="level2">
+<h2 data-anchor-id="checklist-inicial">Checklist inicial</h2>
 <ul class="task-list">
-<li><label><input type="checkbox">Entiendo qué problema resuelve.</label></li>
-<li><label><input type="checkbox">He revisado sus supuestos.</label></li>
-<li><label><input type="checkbox">He separado entrenamiento y prueba correctamente.</label></li>
-<li><label><input type="checkbox">El preprocesamiento se ajusta únicamente con entrenamiento.</label></li>
-<li><label><input type="checkbox">He elegido métricas adecuadas.</label></li>
-<li><label><input type="checkbox">He comparado con un baseline.</label></li>
-<li><label><input type="checkbox">He revisado posibles fuentes de data leakage.</label></li>
-<li><label><input type="checkbox">Sé interpretar los resultados.</label></li>
-<li><label><input type="checkbox">He documentado las decisiones.</label></li>
-<li><label><input type="checkbox">He considerado la utilidad clínica.</label></li>
+<li><label><input type="checkbox">He definido el tiempo cero.</label></li>
+<li><label><input type="checkbox">He definido el evento.</label></li>
+<li><label><input type="checkbox">He definido la censura.</label></li>
+<li><label><input type="checkbox">He identificado competing risks.</label></li>
+<li><label><input type="checkbox">He revisado truncamiento.</label></li>
+<li><label><input type="checkbox">He comprobado tiempos negativos.</label></li>
+<li><label><input type="checkbox">He revisado duplicados.</label></li>
+<li><label><input type="checkbox">He definido covariables basales.</label></li>
+<li><label><input type="checkbox">He separado variables temporales.</label></li>
+<li><label><input type="checkbox">He evitado leakage.</label></li>
+<li><label><input type="checkbox">He definido horizontes.</label></li>
+<li><label><input type="checkbox">He planificado validación externa.</label></li>
 </ul>
 </section>
 <section id="recursos" class="level2">
 <h2 data-anchor-id="recursos">Recursos</h2>
-<section id="documentación" class="level3">
-<h3 data-anchor-id="documentación">Documentación</h3>
+<section id="conceptos" class="level3">
+<h3 data-anchor-id="conceptos">Conceptos</h3>
 <ul>
-<li>Añadir documentación oficial.</li>
+<li>Survival function.</li>
+<li>Hazard.</li>
+<li>Cumulative hazard.</li>
+<li>Censoring.</li>
+<li>Truncation.</li>
+<li>Kaplan-Meier.</li>
+<li>Cox proportional hazards.</li>
+<li>Competing risks.</li>
+<li>Time-varying covariates.</li>
+<li>Dynamic prediction.</li>
 </ul>
 </section>
-<section id="libros-y-artículos" class="level3">
-<h3 data-anchor-id="libros-y-artículos">Libros y artículos</h3>
+<section id="librerías-de-python" class="level3">
+<h3 data-anchor-id="librerías-de-python">Librerías de Python</h3>
 <ul>
-<li>Añadir referencias bibliográficas.</li>
+<li><code>lifelines</code>.</li>
+<li><code>scikit-survival</code>.</li>
+<li><code>statsmodels</code>.</li>
+<li><code>pycox</code>.</li>
 </ul>
 </section>
 <section id="material-del-máster" class="level3">
 <h3 data-anchor-id="material-del-máster">Material del máster</h3>
+<p>Añadir aquí:</p>
 <ul>
-<li>Añadir el nombre de las diapositivas o apuntes utilizados.</li>
+<li>Presentación correspondiente.</li>
+<li>Diapositivas relevantes.</li>
+<li>Ejercicios realizados.</li>
+<li>Apuntes de Notion.</li>
 </ul>
 </section>
 </section>
 <section id="notas-personales" class="level2">
 <h2 data-anchor-id="notas-personales">Notas personales</h2>
-<p>Añade aquí tus propias notas, dudas, ejemplos o recordatorios.</p>
+<p>Añade aquí tus definiciones de tiempo cero, evento, censura, horizontes y decisiones clínicas.</p>
 
 
 </section>
