@@ -1,0 +1,1006 @@
+---
+title: "Machine learning para forecasting"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+El forecasting con machine learning convierte una serie temporal en un problema supervisado.
+
+Se crean variables como:
+
+- Lags.
+- Rolling features.
+- Tendencias.
+- Calendario.
+- Variables externas.
+
+Después se entrenan modelos como:
+
+- Regresión lineal.
+- Random forest.
+- Gradient boosting.
+- XGBoost, LightGBM o CatBoost.
+
+La validación debe respetar el tiempo y compararse siempre con baselines.
+:::
+
+## De serie temporal a problema supervisado
+
+La idea es transformar:
+
+```text
+Serie histórica
+```
+
+en:
+
+```text
+Features del pasado
+→ target futuro
+```
+
+Ejemplo:
+
+```text
+Lag 1
+Lag 2
+Media de 7 días
+Día de la semana
+Festivo
+Temperatura
+        ↓
+Modelo
+        ↓
+Demanda de mañana
+```
+
+::: {.callout-note}
+## Idea clave
+
+El modelo no ve el tiempo directamente: ve features construidas a partir del pasado.
+:::
+
+## Preparar el dataset
+
+```python
+features = [
+    "target_lag_1",
+    "target_lag_2",
+    "target_lag_7",
+    "rolling_mean_7",
+    "rolling_std_7",
+    "day_of_week",
+    "is_weekend"
+]
+
+target = "target_next_day"
+```
+
+## Orden temporal
+
+```python
+df = df.sort_values(
+    "datetime"
+)
+```
+
+## Eliminar filas sin target
+
+```python
+modeling_df = (
+    df[
+        [
+            "datetime"
+        ]
+        +
+        features
+        +
+        [
+            target
+        ]
+    ]
+    .dropna(
+        subset=[
+            target
+        ]
+    )
+)
+```
+
+## Split temporal
+
+```python
+train = modeling_df.loc[
+    modeling_df["datetime"]
+    <
+    "2025-01-01"
+]
+
+validation = modeling_df.loc[
+    (
+        modeling_df["datetime"]
+        >=
+        "2025-01-01"
+    )
+    &
+    (
+        modeling_df["datetime"]
+        <
+        "2025-07-01"
+    )
+]
+
+test = modeling_df.loc[
+    modeling_df["datetime"]
+    >=
+    "2025-07-01"
+]
+```
+
+## Separar X e y
+
+```python
+X_train = train[
+    features
+]
+
+y_train = train[
+    target
+]
+
+X_validation = validation[
+    features
+]
+
+y_validation = validation[
+    target
+]
+```
+
+## Baseline naive
+
+```python
+naive_prediction = (
+    validation[
+        "target_lag_1"
+    ]
+)
+```
+
+## Evaluar baseline
+
+```python
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import root_mean_squared_error
+
+naive_mae = mean_absolute_error(
+    y_validation,
+    naive_prediction
+)
+
+naive_rmse = root_mean_squared_error(
+    y_validation,
+    naive_prediction
+)
+```
+
+## Regresión lineal
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+
+linear_model = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            LinearRegression()
+        )
+    ]
+)
+```
+
+## Ridge
+
+```python
+from sklearn.linear_model import Ridge
+
+ridge_model = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            Ridge(
+                alpha=1.0
+            )
+        )
+    ]
+)
+```
+
+## Random forest
+
+```python
+from sklearn.ensemble import RandomForestRegressor
+
+random_forest = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "model",
+            RandomForestRegressor(
+                n_estimators=500,
+                min_samples_leaf=5,
+                random_state=42,
+                n_jobs=-1
+            )
+        )
+    ]
+)
+```
+
+## Gradient boosting
+
+```python
+from sklearn.ensemble import HistGradientBoostingRegressor
+
+gradient_boosting = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "model",
+            HistGradientBoostingRegressor(
+                learning_rate=0.05,
+                max_iter=500,
+                max_leaf_nodes=31,
+                l2_regularization=1.0,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Comparar modelos
+
+```python
+models = {
+    "linear": linear_model,
+    "ridge": ridge_model,
+    "random_forest": random_forest,
+    "gradient_boosting": gradient_boosting
+}
+```
+
+```python
+import pandas as pd
+
+rows = []
+
+for name, model in models.items():
+
+    model.fit(
+        X_train,
+        y_train
+    )
+
+    prediction = model.predict(
+        X_validation
+    )
+
+    rows.append(
+        {
+            "model": name,
+            "mae": mean_absolute_error(
+                y_validation,
+                prediction
+            ),
+            "rmse": root_mean_squared_error(
+                y_validation,
+                prediction
+            )
+        }
+    )
+
+comparison_table = pd.DataFrame(
+    rows
+).sort_values(
+    "mae"
+)
+
+display(
+    comparison_table
+)
+```
+
+## Añadir baseline a la comparación
+
+```python
+comparison_table = pd.concat(
+    [
+        pd.DataFrame(
+            [
+                {
+                    "model": "naive",
+                    "mae": naive_mae,
+                    "rmse": naive_rmse
+                }
+            ]
+        ),
+        comparison_table
+    ],
+    ignore_index=True
+)
+```
+
+## Backtesting con TimeSeriesSplit
+
+```python
+from sklearn.model_selection import TimeSeriesSplit
+
+cv = TimeSeriesSplit(
+    n_splits=5
+)
+```
+
+## Evaluación cruzada temporal
+
+```python
+from sklearn.model_selection import cross_validate
+
+scores = cross_validate(
+    estimator=gradient_boosting,
+    X=modeling_df[features],
+    y=modeling_df[target],
+    cv=cv,
+    scoring={
+        "mae": "neg_mean_absolute_error",
+        "rmse": "neg_root_mean_squared_error"
+    }
+)
+```
+
+## Gap temporal
+
+```python
+cv = TimeSeriesSplit(
+    n_splits=5,
+    gap=7
+)
+```
+
+## Hyperparameter tuning
+
+```python
+from sklearn.model_selection import GridSearchCV
+
+parameter_grid = {
+    "model__learning_rate": [
+        0.01,
+        0.05,
+        0.10
+    ],
+    "model__max_leaf_nodes": [
+        15,
+        31,
+        63
+    ],
+    "model__l2_regularization": [
+        0.0,
+        1.0,
+        5.0
+    ]
+}
+```
+
+```python
+search = GridSearchCV(
+    estimator=gradient_boosting,
+    param_grid=parameter_grid,
+    cv=cv,
+    scoring="neg_mean_absolute_error",
+    n_jobs=-1
+)
+
+search.fit(
+    train[features],
+    train[target]
+)
+```
+
+## Evitar tuning con test
+
+```text
+Train
+→ ajustar
+
+Validation o CV temporal
+→ seleccionar
+
+Test
+→ evaluación final
+```
+
+## Forecast one-step
+
+Predice el siguiente paso utilizando valores reales previos.
+
+```text
+Historia real
+→ predicción t+1
+```
+
+## Forecast multi-step
+
+Existen tres estrategias principales:
+
+- Recursiva.
+- Directa.
+- Multi-output.
+
+## Estrategia recursiva
+
+```text
+Predice t+1
+→ usa esa predicción como lag
+→ predice t+2
+```
+
+Ventaja:
+
+- Un solo modelo.
+
+Limitación:
+
+- Acumula error.
+
+## Estrategia directa
+
+Entrena un modelo por horizonte.
+
+```text
+Modelo h1 → t+1
+Modelo h2 → t+2
+Modelo h3 → t+3
+```
+
+## Preparar targets directos
+
+```python
+for horizon in [
+    1,
+    2,
+    3,
+    7
+]:
+
+    modeling_df[
+        f"target_h{horizon}"
+    ] = (
+        modeling_df[
+            "target_value"
+        ]
+        .shift(
+            -horizon
+        )
+    )
+```
+
+## Entrenar modelos directos
+
+```python
+direct_models = {}
+
+for horizon in [
+    1,
+    2,
+    3,
+    7
+]:
+
+    target_column = (
+        f"target_h{horizon}"
+    )
+
+    valid_rows = (
+        train[target_column]
+        .notna()
+    )
+
+    model = HistGradientBoostingRegressor(
+        learning_rate=0.05,
+        max_iter=300,
+        random_state=42
+    )
+
+    model.fit(
+        train.loc[
+            valid_rows,
+            features
+        ],
+        train.loc[
+            valid_rows,
+            target_column
+        ]
+    )
+
+    direct_models[
+        horizon
+    ] = model
+```
+
+## Estrategia multi-output
+
+```python
+from sklearn.multioutput import MultiOutputRegressor
+
+base_model = RandomForestRegressor(
+    n_estimators=500,
+    random_state=42,
+    n_jobs=-1
+)
+
+multi_output_model = MultiOutputRegressor(
+    base_model
+)
+```
+
+## Comparación de estrategias
+
+| Estrategia | Ventaja | Limitación |
+|---|---|---|
+| Recursiva | Un solo modelo | Acumula error |
+| Directa | Menor acumulación | Muchos modelos |
+| Multi-output | Predice todo junto | Mayor complejidad |
+
+## Modelos globales
+
+Un modelo global aprende de múltiples series.
+
+```text
+Paciente 1
+Paciente 2
+Paciente 3
+      ↓
+Modelo único
+```
+
+Ventajas:
+
+- Más datos.
+- Patrones compartidos.
+- Mejor generalización.
+
+## Variables estáticas
+
+```python
+features = [
+    "target_lag_1",
+    "target_lag_7",
+    "rolling_mean_7",
+    "age",
+    "sex",
+    "diagnosis",
+    "center"
+]
+```
+
+## Pacientes nuevos y conocidos
+
+Deben evaluarse por separado:
+
+```text
+Futuro de pacientes conocidos
+```
+
+y:
+
+```text
+Pacientes completamente nuevos
+```
+
+## Variables externas futuras
+
+Pueden incluirse cuando estarán disponibles.
+
+Ejemplos conocidos:
+
+- Calendario.
+- Festivos.
+- Turnos programados.
+
+Ejemplos inciertos:
+
+- Temperatura.
+- Tratamientos.
+- Demanda externa.
+
+## Importancia por permutación
+
+```python
+from sklearn.inspection import permutation_importance
+
+result = permutation_importance(
+    estimator=gradient_boosting,
+    X=X_validation,
+    y=y_validation,
+    scoring="neg_mean_absolute_error",
+    n_repeats=20,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+## Tabla de importancia
+
+```python
+importance_table = pd.DataFrame(
+    {
+        "feature": features,
+        "importance": result.importances_mean
+    }
+).sort_values(
+    "importance",
+    ascending=False
+)
+```
+
+## Riesgo temporal de la permutación
+
+Permutar filas aleatoriamente rompe estructura temporal.
+
+Puede ser preferible:
+
+- Permutar bloques.
+- Hacer ablation studies.
+- Comparar familias de variables.
+- Analizar importancia por periodo.
+
+## Ablation study
+
+```text
+Modelo 1
+→ solo lags
+
+Modelo 2
+→ lags + rolling
+
+Modelo 3
+→ lags + calendario
+
+Modelo 4
+→ todas las features
+```
+
+## Intervalos con quantile regression
+
+```python
+lower_model = HistGradientBoostingRegressor(
+    loss="quantile",
+    quantile=0.05,
+    random_state=42
+)
+
+median_model = HistGradientBoostingRegressor(
+    loss="quantile",
+    quantile=0.50,
+    random_state=42
+)
+
+upper_model = HistGradientBoostingRegressor(
+    loss="quantile",
+    quantile=0.95,
+    random_state=42
+)
+```
+
+## Entrenar cuantiles
+
+```python
+lower_model.fit(
+    X_train,
+    y_train
+)
+
+median_model.fit(
+    X_train,
+    y_train
+)
+
+upper_model.fit(
+    X_train,
+    y_train
+)
+```
+
+## Cobertura
+
+```python
+lower_prediction = lower_model.predict(
+    X_validation
+)
+
+upper_prediction = upper_model.predict(
+    X_validation
+)
+
+coverage = (
+    (
+        y_validation
+        >=
+        lower_prediction
+    )
+    &
+    (
+        y_validation
+        <=
+        upper_prediction
+    )
+).mean()
+```
+
+## Anchura del intervalo
+
+```python
+mean_interval_width = (
+    upper_prediction
+    -
+    lower_prediction
+).mean()
+```
+
+## Residuos
+
+```python
+prediction = gradient_boosting.predict(
+    X_validation
+)
+
+residuals = (
+    y_validation
+    -
+    prediction
+)
+```
+
+## ACF residual
+
+```python
+from statsmodels.graphics.tsaplots import plot_acf
+import matplotlib.pyplot as plt
+
+plot_acf(
+    residuals,
+    lags=30
+)
+
+plt.show()
+```
+
+Autocorrelación residual indica estructura no capturada.
+
+## Evaluación por horizonte
+
+```python
+horizon_results = pd.DataFrame(
+    {
+        "horizon": horizons,
+        "mae": mae_by_horizon,
+        "rmse": rmse_by_horizon
+    }
+)
+```
+
+## Error en picos
+
+Debe evaluarse si el modelo falla en:
+
+- Valores extremos.
+- Cambios bruscos.
+- Periodos festivos.
+- Alta demanda.
+- Casos clínicos graves.
+
+## Forecasting de conteos
+
+Puede utilizarse regresión de Poisson.
+
+```python
+from sklearn.linear_model import PoissonRegressor
+
+poisson_model = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            PoissonRegressor(
+                alpha=1.0,
+                max_iter=1000
+            )
+        )
+    ]
+)
+```
+
+## Forecasting de eventos
+
+Para eventos futuros se plantea clasificación.
+
+Ejemplo:
+
+```text
+Deterioro en 24 horas
+→ sí o no
+```
+
+Deben evaluarse:
+
+- AUROC.
+- AUPRC.
+- Calibración.
+- Sensibilidad.
+- Lead time.
+- Alertas por paciente-día.
+
+## Lead time
+
+```text
+Evento a las 18:00
+Alerta a las 12:00
+→ 6 horas de anticipación
+```
+
+## Drift temporal
+
+Debe monitorizarse:
+
+- MAE o RMSE por periodo.
+- Sesgo medio.
+- Distribución de lags.
+- Proporción de missing.
+- Cobertura de intervalos.
+- Frecuencia de alertas.
+
+## Reentrenamiento
+
+Opciones:
+
+- Periódico.
+- Basado en drift.
+- Ventana móvil.
+- Historial completo.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Machine learning resulta útil cuando existen relaciones no lineales, múltiples variables y muchas series relacionadas.
+:::
+
+Debe revisarse:
+
+- Horizonte.
+- Latencia.
+- Lead time.
+- Pacientes nuevos.
+- Variables externas.
+- Incertidumbre.
+- Drift.
+- Utilidad clínica.
+
+## Errores frecuentes
+
+- No comparar con naive.
+- Usar split aleatorio.
+- Hacer tuning con test.
+- No evaluar por horizonte.
+- Usar exógenas futuras desconocidas.
+- No revisar residuos.
+- No cuantificar incertidumbre.
+- Ignorar pacientes repetidos.
+- No analizar picos.
+- No monitorizar drift.
+- Confundir nowcasting con forecasting.
+- Usar modelos complejos sin baseline.
+
+## Flujo recomendado
+
+1. Definir horizonte.
+2. Construir baseline.
+3. Crear features causales.
+4. Separar temporalmente.
+5. Entrenar modelos lineales.
+6. Probar árboles y boosting.
+7. Aplicar backtesting.
+8. Hacer tuning temporal.
+9. Evaluar por horizonte.
+10. Revisar residuos.
+11. Cuantificar incertidumbre.
+12. Monitorizar drift.
+
+## Checklist para proyectos
+
+- [ ] He definido el horizonte.
+- [ ] He creado un baseline naive.
+- [ ] He construido features causales.
+- [ ] He realizado split temporal.
+- [ ] He utilizado CV temporal.
+- [ ] He reservado test final.
+- [ ] He probado modelos lineales.
+- [ ] He probado árboles o boosting.
+- [ ] He evaluado por horizonte.
+- [ ] He revisado residuos.
+- [ ] He cuantificado incertidumbre.
+- [ ] He evaluado pacientes nuevos.
+- [ ] He revisado variables externas.
+- [ ] He documentado las features.
+- [ ] He planificado monitorización.
+
+## Recursos
+
+### Documentación
+
+- `TimeSeriesSplit`.
+- `LinearRegression`.
+- `Ridge`.
+- `RandomForestRegressor`.
+- `HistGradientBoostingRegressor`.
+- `GridSearchCV`.
+- Quantile regression.
+- Conformal prediction.
+- Métricas de forecasting.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus modelos, features, backtesting, intervalos y decisiones de producción.

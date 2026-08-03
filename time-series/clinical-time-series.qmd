@@ -1,0 +1,1439 @@
+---
+title: "Series temporales clínicas"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Las series temporales clínicas presentan retos específicos:
+
+- Mediciones irregulares.
+- Múltiples pacientes.
+- Frecuencia de muestreo dependiente del estado clínico.
+- Missingness informativa.
+- Intervenciones que modifican la evolución.
+- Censura y seguimientos incompletos.
+- Necesidad de anticipación clínica útil.
+
+No basta con aplicar técnicas estándar de forecasting sin adaptar el diseño al contexto clínico.
+:::
+
+## ¿Qué es una serie temporal clínica?
+
+Es una secuencia de observaciones relacionadas con la evolución de un paciente.
+
+Ejemplos:
+
+- Signos vitales.
+- Resultados analíticos.
+- Ecocardiografías.
+- Medicación.
+- Eventos clínicos.
+- Ingresos.
+- Intervenciones.
+- Estados de enfermedad.
+
+```text
+Paciente
+   ↓
+Tiempo
+   ↓
+Mediciones
+Tratamientos
+Eventos
+Outcomes
+```
+
+::: {.callout-note}
+## Idea clave
+
+En datos clínicos, el proceso de medición también contiene información.
+:::
+
+## Particularidades de los datos clínicos
+
+## Irregularidad
+
+Las observaciones no suelen estar igualmente espaciadas.
+
+```text
+Día 0
+Día 4
+Día 17
+Día 63
+```
+
+## Múltiples variables
+
+Cada paciente puede tener:
+
+- Frecuencia cardiaca.
+- Presión arterial.
+- Troponina.
+- NT-proBNP.
+- FEVI.
+- GLS.
+- Tratamientos.
+- Diagnósticos.
+- Eventos.
+
+## Múltiples escalas temporales
+
+```text
+Minutos
+→ monitorización
+
+Horas
+→ deterioro agudo
+
+Días
+→ ingreso
+
+Meses
+→ seguimiento
+
+Años
+→ supervivencia
+```
+
+## Missingness informativa
+
+Una prueba puede faltar porque:
+
+- No se consideró necesaria.
+- El paciente estaba estable.
+- No estaba disponible.
+- Hubo pérdida de seguimiento.
+- Se produjo un evento previo.
+- El protocolo cambió.
+
+## Intervenciones
+
+Los tratamientos alteran la evolución.
+
+```text
+Estado previo
+→ intervención
+→ respuesta
+```
+
+Por tanto, la serie no es puramente observacional.
+
+## Censura
+
+El seguimiento puede terminar antes de observar el evento.
+
+Ejemplos:
+
+- Fin del estudio.
+- Alta.
+- Traslado.
+- Pérdida de seguimiento.
+- Fallecimiento por otra causa.
+
+## Múltiples pacientes
+
+```text
+Paciente 1
+→ serie 1
+
+Paciente 2
+→ serie 2
+
+Paciente 3
+→ serie 3
+```
+
+Cada serie puede tener:
+
+- Longitud distinta.
+- Frecuencia distinta.
+- Variables distintas.
+- Número de eventos distinto.
+
+## Unidad de análisis
+
+Debe definirse con precisión.
+
+Puede ser:
+
+- Paciente.
+- Episodio.
+- Visita.
+- Hora.
+- Día.
+- Ventana.
+- Medición.
+- Evento.
+
+## Ejemplo de tabla longitudinal
+
+```python
+import pandas as pd
+
+df = pd.DataFrame(
+    {
+        "patient_id": [
+            1,
+            1,
+            1,
+            2,
+            2
+        ],
+        "datetime": [
+            "2026-01-01 08:00",
+            "2026-01-01 14:00",
+            "2026-01-02 08:00",
+            "2026-01-01 10:00",
+            "2026-01-02 10:00"
+        ],
+        "heart_rate": [
+            90,
+            96,
+            102,
+            82,
+            84
+        ],
+        "troponin": [
+            0.01,
+            None,
+            0.03,
+            None,
+            0.01
+        ]
+    }
+)
+```
+
+## Convertir fechas
+
+```python
+df["datetime"] = pd.to_datetime(
+    df["datetime"]
+)
+```
+
+## Ordenar
+
+```python
+df = df.sort_values(
+    [
+        "patient_id",
+        "datetime"
+    ]
+)
+```
+
+## Tiempo desde inicio
+
+```python
+df[
+    "hours_from_start"
+] = (
+    df["datetime"]
+    -
+    df
+    .groupby("patient_id")[
+        "datetime"
+    ]
+    .transform("min")
+).dt.total_seconds() / 3600
+```
+
+## Tiempo desde medición anterior
+
+```python
+df[
+    "hours_since_previous"
+] = (
+    df
+    .groupby("patient_id")[
+        "datetime"
+    ]
+    .diff()
+    .dt
+    .total_seconds()
+    /
+    3600
+)
+```
+
+## Tiempo desde ingreso
+
+```python
+df[
+    "hours_since_admission"
+] = (
+    df["datetime"]
+    -
+    df["admission_datetime"]
+).dt.total_seconds() / 3600
+```
+
+## Tiempo desde tratamiento
+
+```python
+df[
+    "days_since_treatment_start"
+] = (
+    df["datetime"]
+    -
+    df["treatment_start_datetime"]
+).dt.total_seconds() / 86400
+```
+
+## Alinear eventos clínicos
+
+```python
+df[
+    "hours_from_surgery"
+] = (
+    df["datetime"]
+    -
+    df["surgery_datetime"]
+).dt.total_seconds() / 3600
+```
+
+## Ventanas clínicas
+
+Ejemplos:
+
+```text
+Últimas 6 horas
+Últimas 12 horas
+Últimas 24 horas
+Últimas 48 horas
+```
+
+## Media previa de 6 horas
+
+```python
+df_time = (
+    df
+    .set_index("datetime")
+    .sort_index()
+)
+```
+
+```python
+heart_rate_mean_6h = (
+    df_time
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .rolling(
+        "6h",
+        closed="left"
+    )
+    .mean()
+)
+```
+
+## Máximo previo de 24 horas
+
+```python
+heart_rate_max_24h = (
+    df_time
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .rolling(
+        "24h",
+        closed="left"
+    )
+    .max()
+)
+```
+
+## Número de mediciones
+
+```python
+measurement_count_24h = (
+    df_time
+    .groupby("patient_id")[
+        "heart_rate"
+    ]
+    .rolling(
+        "24h",
+        closed="left"
+    )
+    .count()
+)
+```
+
+La frecuencia de medición puede ser informativa.
+
+## Ventana de observación
+
+Debe definirse cuánto pasado utiliza el modelo.
+
+```text
+Ventana de observación
+──────────────────────
+
+Momento de predicción
+                      │
+
+Horizonte
+                      └────────→
+```
+
+Ejemplo:
+
+```text
+Usar últimas 24 horas
+→ predecir deterioro en próximas 6 horas
+```
+
+## Ventana de predicción
+
+Es el periodo futuro en el que se evalúa el outcome.
+
+```text
+t
+│
+├── observación pasada
+│
+└── evento entre t y t + 6 h
+```
+
+## Gap clínico
+
+Puede añadirse un intervalo entre observación y outcome.
+
+```text
+Observación
+────────────
+
+Gap
+            ──
+
+Outcome
+              ─────
+```
+
+Esto evita que señales demasiado próximas al evento produzcan una predicción clínicamente inútil.
+
+## Ejemplo de target
+
+```python
+df[
+    "deterioration_next_6h"
+] = (
+    (
+        df[
+            "deterioration_datetime"
+        ]
+        >
+        df["datetime"]
+    )
+    &
+    (
+        df[
+            "deterioration_datetime"
+        ]
+        <=
+        df["datetime"]
+        +
+        pd.Timedelta(
+            hours=6
+        )
+    )
+).astype(int)
+```
+
+## Target con gap
+
+```python
+gap = pd.Timedelta(
+    hours=1
+)
+
+horizon = pd.Timedelta(
+    hours=6
+)
+```
+
+```python
+df[
+    "deterioration_after_gap"
+] = (
+    (
+        df[
+            "deterioration_datetime"
+        ]
+        >
+        df["datetime"]
+        +
+        gap
+    )
+    &
+    (
+        df[
+            "deterioration_datetime"
+        ]
+        <=
+        df["datetime"]
+        +
+        gap
+        +
+        horizon
+    )
+).astype(int)
+```
+
+## Predicción dinámica
+
+El modelo puede actualizarse repetidamente.
+
+```text
+08:00
+→ predicción
+
+09:00
+→ nueva predicción
+
+10:00
+→ nueva predicción
+```
+
+Esto genera múltiples predicciones por paciente.
+
+## Dependencia entre observaciones
+
+Las filas del mismo paciente no son independientes.
+
+Esto afecta a:
+
+- Split.
+- Métricas.
+- Intervalos de confianza.
+- Interpretación.
+- Calibración.
+
+## Split por paciente
+
+Adecuado para evaluar pacientes nuevos.
+
+```python
+train_patients = set(
+    patient_split[
+        "train"
+    ]
+)
+
+test_patients = set(
+    patient_split[
+        "test"
+    ]
+)
+```
+
+```python
+train = df.loc[
+    df["patient_id"]
+    .isin(
+        train_patients
+    )
+]
+
+test = df.loc[
+    df["patient_id"]
+    .isin(
+        test_patients
+    )
+]
+```
+
+## Split temporal dentro de paciente
+
+Adecuado para evaluar el futuro de pacientes ya conocidos.
+
+```text
+Pasado del paciente
+→ train
+
+Futuro del mismo paciente
+→ test
+```
+
+## Split combinado
+
+Puede evaluarse:
+
+- Futuro de pacientes conocidos.
+- Pacientes nuevos.
+- Centro nuevo.
+- Periodo futuro.
+- Centro y periodo nuevos.
+
+## Missingness informativa
+
+## Indicador de disponibilidad
+
+```python
+df[
+    "troponin_available"
+] = (
+    df["troponin"]
+    .notna()
+    .astype(int)
+)
+```
+
+## Tiempo desde última medición
+
+```python
+df[
+    "last_troponin_datetime"
+] = (
+    df["datetime"]
+    .where(
+        df["troponin"]
+        .notna()
+    )
+)
+```
+
+```python
+df[
+    "last_troponin_datetime"
+] = (
+    df
+    .groupby("patient_id")[
+        "last_troponin_datetime"
+    ]
+    .ffill()
+)
+```
+
+```python
+df[
+    "hours_since_last_troponin"
+] = (
+    df["datetime"]
+    -
+    df[
+        "last_troponin_datetime"
+    ]
+).dt.total_seconds() / 3600
+```
+
+## Forward fill causal
+
+```python
+df[
+    "troponin_ffill"
+] = (
+    df
+    .groupby("patient_id")[
+        "troponin"
+    ]
+    .ffill()
+)
+```
+
+## Limitar validez
+
+```python
+df[
+    "troponin_recent"
+] = (
+    df[
+        "hours_since_last_troponin"
+    ]
+    <=
+    24
+).astype(int)
+```
+
+## Imputación clínica
+
+Una medición antigua puede dejar de ser válida.
+
+Debe definirse:
+
+- Tiempo máximo de arrastre.
+- Variable.
+- Contexto clínico.
+- Cambio de estado.
+- Intervenciones intermedias.
+
+## Intervenciones como variables
+
+```python
+df[
+    "treatment_active"
+] = (
+    (
+        df["datetime"]
+        >=
+        df[
+            "treatment_start"
+        ]
+    )
+    &
+    (
+        df["datetime"]
+        <=
+        df[
+            "treatment_end"
+        ]
+    )
+).astype(int)
+```
+
+## Dosis acumulada previa
+
+```python
+df[
+    "previous_cumulative_dose"
+] = (
+    df
+    .groupby("patient_id")[
+        "dose"
+    ]
+    .cumsum()
+    -
+    df["dose"]
+)
+```
+
+## Confounding by indication
+
+Los pacientes más graves reciben más tratamientos.
+
+Por tanto:
+
+```text
+Tratamiento
+↔ gravedad
+↔ outcome
+```
+
+Una asociación predictiva no implica efecto causal.
+
+::: {.callout-warning}
+## Importante
+
+Un modelo predictivo no estima automáticamente el efecto de un tratamiento.
+:::
+
+## Baseline clínico
+
+Puede definirse como:
+
+- Primera valoración pretratamiento.
+- Valor más cercano al inicio.
+- Media de varias mediciones.
+- Estado adjudicado por expertos.
+
+## Cambio desde baseline
+
+```python
+df[
+    "lvef_change_from_baseline"
+] = (
+    df["lvef"]
+    -
+    df[
+        "lvef_baseline"
+    ]
+)
+```
+
+## Cambio relativo
+
+```python
+df[
+    "gls_relative_change"
+] = (
+    df["gls"]
+    -
+    df[
+        "gls_baseline"
+    ]
+) / (
+    df[
+        "gls_baseline"
+    ].abs()
+)
+```
+
+## Estados clínicos
+
+Una trayectoria puede representarse mediante estados.
+
+```text
+S0
+→ normal
+
+S1
+→ alteración leve
+
+S2
+→ alteración moderada
+
+S3
+→ alteración grave
+```
+
+## Transiciones
+
+```text
+S0 → S1
+S1 → S2
+S2 → S1
+S2 → S3
+```
+
+## Modelos multiestado
+
+Permiten estudiar:
+
+- Probabilidad de transición.
+- Tiempo hasta transición.
+- Estados reversibles.
+- Estados absorbentes.
+- Competencia entre eventos.
+
+## Forecasting frente a multiestado
+
+```text
+Forecasting
+→ valor futuro
+
+Clasificación
+→ estado futuro
+
+Multiestado
+→ transición y tiempo
+```
+
+## Survival analysis
+
+Es adecuada cuando interesa:
+
+```text
+¿Cuándo ocurrirá el evento?
+```
+
+y existe censura.
+
+## Joint models
+
+Combinan:
+
+- Trayectoria longitudinal.
+- Tiempo hasta evento.
+
+Ejemplo:
+
+```text
+Evolución de biomarcador
++
+riesgo de evento
+```
+
+## Eventos recurrentes
+
+Un paciente puede experimentar varios eventos.
+
+Ejemplos:
+
+- Reingresos.
+- Infecciones.
+- Crisis.
+- Episodios de arritmia.
+
+Debe definirse:
+
+- Reinicio del riesgo.
+- Dependencia entre eventos.
+- Tiempo desde evento anterior.
+- Evento terminal.
+
+## Datos de alta frecuencia
+
+Signos vitales pueden medirse cada segundo o minuto.
+
+Problemas:
+
+- Gran volumen.
+- Artefactos.
+- Señales repetidas.
+- Alarmas.
+- Dependencia fuerte.
+
+## Agregación de alta frecuencia
+
+```python
+hourly_summary = (
+    signal
+    .resample("h")
+    .agg(
+        [
+            "mean",
+            "median",
+            "min",
+            "max",
+            "std"
+        ]
+    )
+)
+```
+
+## Features de variabilidad
+
+- Desviación estándar.
+- Rango.
+- Coeficiente de variación.
+- Entropía.
+- Número de cambios.
+- Pendiente.
+- Tiempo fuera de rango.
+
+## Tiempo fuera de rango
+
+```python
+df[
+    "heart_rate_above_threshold"
+] = (
+    df["heart_rate"]
+    >
+    120
+).astype(int)
+```
+
+```python
+proportion_above = (
+    df_time
+    .groupby("patient_id")[
+        "heart_rate_above_threshold"
+    ]
+    .rolling(
+        "6h",
+        closed="left"
+    )
+    .mean()
+)
+```
+
+## Artefactos
+
+Pueden aparecer por:
+
+- Sensor desconectado.
+- Movimiento.
+- Error de transmisión.
+- Unidad incorrecta.
+- Duplicados.
+- Valores imposibles.
+
+## Reglas de calidad
+
+```python
+df[
+    "heart_rate_valid"
+] = (
+    df["heart_rate"]
+    .between(
+        20,
+        250
+    )
+)
+```
+
+Las reglas deben justificarse clínicamente.
+
+## Variables estáticas y dinámicas
+
+### Estáticas
+
+- Sexo.
+- Diagnóstico.
+- Genética.
+- Centro.
+- Edad basal.
+
+### Dinámicas
+
+- Signos vitales.
+- Biomarcadores.
+- Tratamiento.
+- Estado.
+- Soporte respiratorio.
+
+## Modelo global
+
+Un modelo global aprende de múltiples pacientes.
+
+Ventajas:
+
+- Más datos.
+- Patrones compartidos.
+- Aplicación a pacientes nuevos.
+
+Limitaciones:
+
+- Heterogeneidad.
+- Diferencias entre centros.
+- Riesgo de sesgo.
+- Dependencia entre observaciones.
+
+## Embeddings de paciente
+
+Pueden representar características latentes individuales.
+
+Pero pueden memorizar pacientes y reducir generalización.
+
+## Series de longitud variable
+
+Opciones:
+
+- Padding.
+- Masking.
+- Ventanas fijas.
+- Modelos recurrentes.
+- Transformers.
+- Agregaciones tabulares.
+
+## Padding
+
+```text
+Paciente A
+[10, 12, 14, 15]
+
+Paciente B
+[8, 9, PAD, PAD]
+```
+
+## Masking
+
+Indica qué posiciones son reales y cuáles son padding.
+
+## Sequence-to-one
+
+```text
+Secuencia
+→ un outcome
+```
+
+Ejemplo:
+
+- Últimas 24 horas.
+- Predicción de deterioro.
+
+## Sequence-to-sequence
+
+```text
+Secuencia pasada
+→ secuencia futura
+```
+
+Ejemplo:
+
+- Forecast de signos vitales.
+
+## Clasificación temporal
+
+Puede utilizarse:
+
+- Logistic regression con ventanas.
+- Gradient boosting.
+- RNN.
+- LSTM.
+- GRU.
+- Temporal CNN.
+- Transformers.
+
+## Métricas clínicas
+
+Además de AUROC:
+
+- AUPRC.
+- Sensibilidad.
+- Especificidad.
+- PPV.
+- NPV.
+- Calibración.
+- Lead time.
+- Alertas por paciente-día.
+- Eventos detectados.
+- Tiempo bajo alerta.
+
+## Lead time
+
+```python
+prediction_df[
+    "lead_time_hours"
+] = (
+    prediction_df[
+        "event_datetime"
+    ]
+    -
+    prediction_df[
+        "first_alert_datetime"
+    ]
+).dt.total_seconds() / 3600
+```
+
+## Primer aviso por evento
+
+```python
+first_alert = (
+    prediction_df
+    .loc[
+        prediction_df["alert"] == 1
+    ]
+    .groupby(
+        [
+            "patient_id",
+            "event_id"
+        ]
+    )[
+        "datetime"
+    ]
+    .min()
+)
+```
+
+## Ventana de silencio
+
+Evita contar alertas consecutivas como alertas independientes.
+
+```text
+Alerta
+→ silencio de 6 horas
+→ próxima alerta posible
+```
+
+## Fatiga de alertas
+
+Debe evaluarse:
+
+- Alertas por turno.
+- Alertas por paciente.
+- Alertas sin evento.
+- Duración de alertas.
+- Casos revisables.
+
+## Calibración
+
+Una probabilidad del 20 % debería corresponder aproximadamente a un 20 % de eventos en casos similares.
+
+Debe evaluarse:
+
+- Globalmente.
+- Por centro.
+- Por periodo.
+- Por subgrupo.
+- Por horizonte.
+
+## Evaluación por paciente
+
+```python
+patient_metrics = (
+    prediction_df
+    .groupby("patient_id")
+    .apply(
+        evaluate_patient
+    )
+)
+```
+
+## Macro average
+
+Cada paciente pesa igual.
+
+## Micro average
+
+Cada predicción pesa igual.
+
+Ambas pueden producir resultados diferentes.
+
+## Evaluación por centro
+
+```python
+center_metrics = (
+    prediction_df
+    .groupby("center")
+    .apply(
+        evaluate_predictions
+    )
+)
+```
+
+## Validación temporal externa
+
+```text
+Entrenar
+→ periodo histórico
+
+Validar
+→ periodo posterior
+```
+
+## Validación geográfica
+
+```text
+Entrenar
+→ hospitales A y B
+
+Validar
+→ hospital C
+```
+
+## Validación prospectiva
+
+El modelo se ejecuta sobre nuevos pacientes sin modificar decisiones inicialmente.
+
+Puede realizarse en modo:
+
+- Silencioso.
+- Shadow mode.
+- Observacional.
+- Prospectivo intervencionista.
+
+## Shadow mode
+
+El modelo genera predicciones, pero los profesionales no las ven.
+
+Permite evaluar:
+
+- Rendimiento real.
+- Latencia.
+- Integración.
+- Drift.
+- Volumen de alertas.
+
+## Data leakage clínico
+
+Ejemplos:
+
+- Diagnóstico documentado después del evento.
+- Tratamiento iniciado como respuesta al deterioro.
+- Resultado validado retrospectivamente.
+- Fecha de alta.
+- Duración total del episodio.
+- Código final de facturación.
+- Información del futuro en imputación.
+
+## Leakage por documentación
+
+La hora registrada puede no coincidir con la hora real de disponibilidad.
+
+Debe distinguirse:
+
+- Hora del evento.
+- Hora de solicitud.
+- Hora de toma.
+- Hora de validación.
+- Hora de disponibilidad en sistema.
+
+## Latencia
+
+```text
+Muestra tomada
+→ 10:00
+
+Resultado validado
+→ 11:00
+
+Disponible para modelo
+→ 11:05
+```
+
+El modelo no puede usarlo a las 10:30.
+
+## Tabla de disponibilidad
+
+| Variable | Hora clínica | Hora disponible | Uso permitido |
+|---|---|---|---|
+| Signo vital | 10:00 | 10:01 | Sí |
+| Analítica | 10:00 | 11:00 | Desde 11:00 |
+| Diagnóstico final | Día 5 | Día 5 | No al ingreso |
+| Fecha de alta | Día 7 | Día 7 | No antes |
+
+## Drift clínico
+
+Puede aparecer por:
+
+- Nuevo protocolo.
+- Cambio de laboratorio.
+- Nueva población.
+- Cambio de sensor.
+- Cambio de codificación.
+- Nueva indicación terapéutica.
+
+## Monitorización
+
+Debe incluir:
+
+- Disponibilidad de variables.
+- Distribución.
+- Frecuencia de medición.
+- Error.
+- Calibración.
+- Volumen de alertas.
+- Rendimiento por centro.
+
+## Sesgo
+
+Debe evaluarse por:
+
+- Edad.
+- Sexo.
+- Diagnóstico.
+- Centro.
+- Gravedad.
+- Grupo socioeconómico.
+- Disponibilidad de seguimiento.
+
+## Fairness temporal
+
+Los subgrupos pueden tener:
+
+- Distinta frecuencia de medición.
+- Distinta duración de seguimiento.
+- Diferente acceso a pruebas.
+- Diferente prevalencia.
+
+## Interpretabilidad clínica
+
+Debe explicar:
+
+- Qué variables influyen.
+- Qué periodo temporal importa.
+- Qué cambio activó la alerta.
+- Qué incertidumbre existe.
+- Qué acción se espera.
+
+## Explicaciones temporales
+
+Ejemplo:
+
+```text
+Riesgo elevado por:
+- aumento de frecuencia cardiaca en 6 h
+- troponina reciente elevada
+- descenso de FEVI desde baseline
+```
+
+## Riesgo de causalidad aparente
+
+Una feature predictiva puede reflejar una respuesta clínica previa.
+
+Ejemplo:
+
+```text
+Mayor monitorización
+→ mayor riesgo predicho
+```
+
+Puede indicar que los profesionales ya detectaron deterioro.
+
+## Consideraciones éticas
+
+- Transparencia.
+- Supervisión humana.
+- Gestión de falsos negativos.
+- Gestión de falsas alertas.
+- Privacidad.
+- Validación local.
+- Impacto en workflow.
+
+## Flujo recomendado
+
+1. Definir población.
+2. Definir unidad temporal.
+3. Definir momento de predicción.
+4. Definir ventana de observación.
+5. Definir gap.
+6. Definir horizonte.
+7. Revisar disponibilidad.
+8. Construir features causales.
+9. Separar pacientes y tiempo.
+10. Evaluar alertas y lead time.
+11. Validar externamente.
+12. Monitorizar prospectivamente.
+
+## Errores frecuentes
+
+- Tratar visitas como intervalos regulares.
+- Ignorar missingness informativa.
+- Mezclar pacientes en train y test.
+- Usar información documentada después.
+- No definir gap.
+- Evaluar solo AUROC.
+- No medir lead time.
+- Contar alertas repetidas.
+- Ignorar intervenciones.
+- Interpretar predicción como causalidad.
+- No validar por centro.
+- No simular latencia real.
+- No monitorizar drift.
+- No revisar sesgo.
+
+## Checklist para proyectos
+
+- [ ] He definido la población.
+- [ ] He definido la unidad de análisis.
+- [ ] He definido momento de predicción.
+- [ ] He definido ventana de observación.
+- [ ] He definido gap.
+- [ ] He definido horizonte.
+- [ ] He revisado irregularidad.
+- [ ] He modelado recencia.
+- [ ] He añadido indicadores de missing.
+- [ ] He revisado intervenciones.
+- [ ] He separado pacientes correctamente.
+- [ ] He separado temporalmente.
+- [ ] He revisado latencia.
+- [ ] He evitado leakage documental.
+- [ ] He evaluado lead time.
+- [ ] He evaluado alertas por paciente-día.
+- [ ] He evaluado calibración.
+- [ ] He validado por centro.
+- [ ] He considerado shadow mode.
+- [ ] He planificado monitorización.
+
+## Cierre de la sección
+
+Las series temporales clínicas requieren combinar:
+
+- Ingeniería de datos.
+- Metodología temporal.
+- Conocimiento clínico.
+- Validación rigurosa.
+- Integración operativa.
+- Supervisión continua.
+
+Un modelo técnicamente bueno puede fracasar si no respeta la disponibilidad real de los datos o no proporciona suficiente anticipación clínica.
+
+## Recursos
+
+### Documentación
+
+- Datos longitudinales.
+- Survival analysis.
+- Multi-state models.
+- Joint models.
+- Dynamic prediction.
+- Time-varying covariates.
+- Clinical early warning systems.
+- Temporal validation.
+- Calibration and lead time.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus ventanas clínicas, gaps, horizontes, reglas de disponibilidad, alertas y decisiones de validación.

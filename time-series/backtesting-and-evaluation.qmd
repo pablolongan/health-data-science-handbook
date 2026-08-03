@@ -1,0 +1,1423 @@
+---
+title: "Backtesting y evaluación temporal"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+El backtesting simula cómo habría funcionado un modelo en distintos momentos del pasado.
+
+Una evaluación temporal correcta debe:
+
+- Respetar el orden cronológico.
+- Comparar con baselines.
+- Evaluar varios horizontes.
+- Revisar estabilidad entre periodos.
+- Analizar intervalos de predicción.
+- Evitar leakage.
+- Reflejar el uso real del modelo.
+:::
+
+## ¿Qué es backtesting?
+
+Backtesting consiste en entrenar el modelo con información pasada y evaluar su rendimiento en periodos posteriores.
+
+```text
+Train
+────────────
+            Test
+
+Train
+────────────────
+                Test
+
+Train
+────────────────────
+                    Test
+```
+
+::: {.callout-note}
+## Idea clave
+
+El backtesting reproduce repetidamente el escenario real de predecir el futuro.
+:::
+
+## Por qué no usar split aleatorio
+
+Un split aleatorio mezcla pasado y futuro.
+
+```text
+Train
+2019, 2023, 2025
+
+Test
+2020, 2022, 2024
+```
+
+Esto puede introducir:
+
+- Información futura.
+- Distribuciones irreales.
+- Leakage.
+- Rendimiento artificialmente alto.
+
+## Split temporal simple
+
+```python
+train = df.loc[
+    df["datetime"]
+    <
+    "2025-01-01"
+]
+
+validation = df.loc[
+    (
+        df["datetime"]
+        >=
+        "2025-01-01"
+    )
+    &
+    (
+        df["datetime"]
+        <
+        "2025-07-01"
+    )
+]
+
+test = df.loc[
+    df["datetime"]
+    >=
+    "2025-07-01"
+]
+```
+
+## Ventana expansiva
+
+Cada fold incorpora todo el historial anterior.
+
+```text
+Fold 1
+Train: [1 2 3]
+Test:          [4]
+
+Fold 2
+Train: [1 2 3 4]
+Test:            [5]
+
+Fold 3
+Train: [1 2 3 4 5]
+Test:              [6]
+```
+
+Ventajas:
+
+- Usa toda la información disponible.
+- Adecuada cuando datos antiguos siguen siendo relevantes.
+
+Limitaciones:
+
+- El train crece continuamente.
+- Puede incluir patrones obsoletos.
+- Mayor coste computacional.
+
+## Ventana deslizante
+
+El train mantiene un tamaño fijo.
+
+```text
+Fold 1
+Train: [1 2 3]
+Test:          [4]
+
+Fold 2
+Train:   [2 3 4]
+Test:            [5]
+
+Fold 3
+Train:     [3 4 5]
+Test:              [6]
+```
+
+Ventajas:
+
+- Da más peso a datos recientes.
+- Puede adaptarse mejor a drift.
+
+Limitaciones:
+
+- Elimina información histórica.
+- Puede reducir tamaño de muestra.
+
+## Gap temporal
+
+Un gap separa el final de train del inicio de validation.
+
+```text
+Train
+────────────
+
+Gap
+            ──
+
+Validation
+              ──────
+```
+
+Puede ser útil cuando:
+
+- Hay dependencia temporal fuerte.
+- Las ventanas se solapan.
+- El target utiliza información futura.
+- Existen retrasos de disponibilidad.
+- Se quiere evitar contaminación cercana.
+
+## TimeSeriesSplit
+
+```python
+from sklearn.model_selection import TimeSeriesSplit
+
+cv = TimeSeriesSplit(
+    n_splits=5
+)
+```
+
+## Con gap
+
+```python
+cv = TimeSeriesSplit(
+    n_splits=5,
+    gap=7
+)
+```
+
+## Con ventana máxima
+
+```python
+cv = TimeSeriesSplit(
+    n_splits=5,
+    max_train_size=365
+)
+```
+
+## Visualizar folds
+
+```python
+for fold, (
+    train_index,
+    validation_index
+) in enumerate(
+    cv.split(X),
+    start=1
+):
+
+    print(
+        "Fold:",
+        fold
+    )
+
+    print(
+        "Train:",
+        train_index[
+            0
+        ],
+        "to",
+        train_index[
+            -1
+        ]
+    )
+
+    print(
+        "Validation:",
+        validation_index[
+            0
+        ],
+        "to",
+        validation_index[
+            -1
+        ]
+    )
+```
+
+## Walk-forward validation
+
+Walk-forward validation actualiza el modelo tras cada nuevo periodo.
+
+```text
+Entrenar hasta enero
+→ predecir febrero
+
+Entrenar hasta febrero
+→ predecir marzo
+
+Entrenar hasta marzo
+→ predecir abril
+```
+
+## Ejemplo manual
+
+```python
+from sklearn.metrics import mean_absolute_error
+
+forecast_horizon = 7
+
+rows = []
+
+for cutoff in range(
+    100,
+    len(series)
+    -
+    forecast_horizon,
+    forecast_horizon
+):
+
+    train_fold = series.iloc[
+        :cutoff
+    ]
+
+    test_fold = series.iloc[
+        cutoff:
+        cutoff
+        +
+        forecast_horizon
+    ]
+
+    fitted_model = fit_model(
+        train_fold
+    )
+
+    forecast = fitted_model.forecast(
+        forecast_horizon
+    )
+
+    rows.append(
+        {
+            "cutoff": train_fold.index[
+                -1
+            ],
+            "mae": mean_absolute_error(
+                test_fold,
+                forecast
+            )
+        }
+    )
+```
+
+## Guardar predicciones de cada fold
+
+```python
+prediction_rows = []
+
+for cutoff in cutoffs:
+
+    train_fold = df.loc[
+        df["datetime"]
+        <=
+        cutoff
+    ]
+
+    test_fold = df.loc[
+        (
+            df["datetime"]
+            >
+            cutoff
+        )
+        &
+        (
+            df["datetime"]
+            <=
+            cutoff
+            +
+            pd.Timedelta(
+                days=7
+            )
+        )
+    ]
+
+    model.fit(
+        train_fold[features],
+        train_fold[target]
+    )
+
+    prediction = model.predict(
+        test_fold[features]
+    )
+
+    fold_result = test_fold[
+        [
+            "datetime",
+            target
+        ]
+    ].copy()
+
+    fold_result[
+        "prediction"
+    ] = prediction
+
+    fold_result[
+        "cutoff"
+    ] = cutoff
+
+    prediction_rows.append(
+        fold_result
+    )
+```
+
+```python
+backtest_predictions = pd.concat(
+    prediction_rows,
+    ignore_index=True
+)
+```
+
+## Baselines
+
+Todo modelo debe compararse con uno o varios baselines.
+
+## Naive
+
+```text
+Predicción
+=
+último valor observado
+```
+
+```python
+df[
+    "naive_prediction"
+] = (
+    df["target"]
+    .shift(1)
+)
+```
+
+## Seasonal naive
+
+```text
+Predicción de hoy
+=
+valor del mismo periodo anterior
+```
+
+```python
+df[
+    "seasonal_naive_7"
+] = (
+    df["target"]
+    .shift(7)
+)
+```
+
+## Media histórica
+
+```python
+df[
+    "historical_mean"
+] = (
+    df["target"]
+    .shift(1)
+    .expanding()
+    .mean()
+)
+```
+
+## Media móvil
+
+```python
+df[
+    "rolling_mean_7"
+] = (
+    df["target"]
+    .shift(1)
+    .rolling(
+        window=7
+    )
+    .mean()
+)
+```
+
+## Métricas principales
+
+Las métricas más habituales son:
+
+- MAE.
+- RMSE.
+- MAPE.
+- sMAPE.
+- WAPE.
+- MASE.
+- Bias.
+- Pinball loss.
+- Cobertura de intervalos.
+
+## MAE
+
+$$
+MAE
+=
+\frac{1}{n}
+\sum_{t=1}^{n}
+\left|
+y_t-\hat{y}_t
+\right|
+$$
+
+```python
+from sklearn.metrics import mean_absolute_error
+
+mae = mean_absolute_error(
+    y_true,
+    y_pred
+)
+```
+
+Ventajas:
+
+- Fácil de interpretar.
+- Misma unidad que el target.
+- Menos sensible a outliers que RMSE.
+
+## RMSE
+
+$$
+RMSE
+=
+\sqrt{
+\frac{1}{n}
+\sum_{t=1}^{n}
+\left(
+y_t-\hat{y}_t
+\right)^2
+}
+$$
+
+```python
+from sklearn.metrics import root_mean_squared_error
+
+rmse = root_mean_squared_error(
+    y_true,
+    y_pred
+)
+```
+
+Ventajas:
+
+- Penaliza más los errores grandes.
+
+Limitaciones:
+
+- Más sensible a outliers.
+- Puede estar dominado por picos.
+
+## MAPE
+
+$$
+MAPE
+=
+\frac{100}{n}
+\sum_{t=1}^{n}
+\left|
+\frac{
+y_t-\hat{y}_t
+}{
+y_t
+}
+\right|
+$$
+
+```python
+import numpy as np
+
+mape = np.mean(
+    np.abs(
+        (
+            y_true
+            -
+            y_pred
+        )
+        /
+        y_true
+    )
+) * 100
+```
+
+## Problemas de MAPE
+
+- No funciona bien con ceros.
+- Es inestable con valores pequeños.
+- Penaliza de forma asimétrica.
+- Puede generar valores enormes.
+
+## sMAPE
+
+Una formulación habitual es:
+
+$$
+sMAPE
+=
+\frac{100}{n}
+\sum
+\frac{
+2|y_t-\hat{y}_t|
+}{
+|y_t|+|\hat{y}_t|
+}
+$$
+
+```python
+smape = (
+    100
+    *
+    np.mean(
+        2
+        *
+        np.abs(
+            y_true
+            -
+            y_pred
+        )
+        /
+        (
+            np.abs(
+                y_true
+            )
+            +
+            np.abs(
+                y_pred
+            )
+            +
+            1e-8
+        )
+    )
+)
+```
+
+## WAPE
+
+$$
+WAPE
+=
+\frac{
+\sum |y_t-\hat{y}_t|
+}{
+\sum |y_t|
+}
+$$
+
+```python
+wape = (
+    np.abs(
+        y_true
+        -
+        y_pred
+    ).sum()
+    /
+    np.abs(
+        y_true
+    ).sum()
+)
+```
+
+## MASE
+
+MASE compara el error del modelo con un baseline naive.
+
+$$
+MASE
+=
+\frac{
+MAE_{modelo}
+}{
+MAE_{naive}
+}
+$$
+
+```python
+mase = (
+    model_mae
+    /
+    naive_mae
+)
+```
+
+Interpretación:
+
+```text
+MASE < 1
+→ mejor que naive
+
+MASE = 1
+→ igual que naive
+
+MASE > 1
+→ peor que naive
+```
+
+## Bias
+
+El bias medio mide si el modelo sobrepredice o infrapredice.
+
+$$
+Bias
+=
+\frac{1}{n}
+\sum
+(\hat{y}_t-y_t)
+$$
+
+```python
+bias = np.mean(
+    y_pred
+    -
+    y_true
+)
+```
+
+```text
+Bias positivo
+→ sobrepredicción
+
+Bias negativo
+→ infrapredicción
+```
+
+## Error porcentual agregado
+
+```python
+aggregate_error = (
+    y_pred.sum()
+    -
+    y_true.sum()
+)
+```
+
+Puede ser importante en planificación de recursos.
+
+## Métricas por horizonte
+
+No debe reportarse solo una métrica global.
+
+```python
+horizon_metrics = (
+    prediction_df
+    .groupby("horizon")
+    .apply(
+        lambda group:
+        pd.Series(
+            {
+                "mae": mean_absolute_error(
+                    group["y_true"],
+                    group["y_pred"]
+                ),
+                "rmse": root_mean_squared_error(
+                    group["y_true"],
+                    group["y_pred"]
+                )
+            }
+        )
+    )
+)
+```
+
+## Por qué evaluar por horizonte
+
+El rendimiento suele deteriorarse al aumentar el horizonte.
+
+```text
+t + 1
+→ error bajo
+
+t + 7
+→ error mayor
+
+t + 30
+→ error aún mayor
+```
+
+## Métricas por periodo
+
+```python
+monthly_metrics = (
+    prediction_df
+    .set_index("datetime")
+    .resample("ME")
+    .apply(
+        lambda group:
+        pd.Series(
+            {
+                "mae": mean_absolute_error(
+                    group["y_true"],
+                    group["y_pred"]
+                ),
+                "bias": np.mean(
+                    group["y_pred"]
+                    -
+                    group["y_true"]
+                )
+            }
+        )
+    )
+)
+```
+
+## Evaluación por subgrupo
+
+Puede ser útil analizar:
+
+- Centro.
+- Servicio.
+- Tipo de paciente.
+- Día de la semana.
+- Festivos.
+- Turno.
+- Estación.
+- Gravedad.
+
+## Error en picos
+
+```python
+high_demand = (
+    prediction_df[
+        "y_true"
+    ]
+    >=
+    prediction_df[
+        "y_true"
+    ]
+    .quantile(
+        0.90
+    )
+)
+```
+
+```python
+peak_mae = mean_absolute_error(
+    prediction_df.loc[
+        high_demand,
+        "y_true"
+    ],
+    prediction_df.loc[
+        high_demand,
+        "y_pred"
+    ]
+)
+```
+
+## Infrapredicción crítica
+
+```python
+critical_underprediction = (
+    prediction_df[
+        "y_true"
+    ]
+    -
+    prediction_df[
+        "y_pred"
+    ]
+    >
+    critical_margin
+)
+```
+
+```python
+critical_underprediction_rate = (
+    critical_underprediction.mean()
+)
+```
+
+## Función de coste asimétrica
+
+En algunos problemas, infrapredecir es más costoso que sobrepredecir.
+
+```python
+def asymmetric_error(
+    y_true,
+    y_pred,
+    underprediction_weight=3.0
+):
+
+    error = (
+        y_pred
+        -
+        y_true
+    )
+
+    return np.mean(
+        np.where(
+            error < 0,
+            underprediction_weight
+            *
+            np.abs(
+                error
+            ),
+            np.abs(
+                error
+            )
+        )
+    )
+```
+
+## Intervalos de predicción
+
+Una predicción puntual no expresa incertidumbre.
+
+```text
+Predicción
+→ 100 camas
+
+Intervalo
+→ 90 a 115 camas
+```
+
+## Cobertura
+
+```python
+coverage = (
+    (
+        y_true
+        >=
+        lower
+    )
+    &
+    (
+        y_true
+        <=
+        upper
+    )
+).mean()
+```
+
+## Anchura media
+
+```python
+mean_interval_width = (
+    upper
+    -
+    lower
+).mean()
+```
+
+## Cobertura por horizonte
+
+```python
+coverage_by_horizon = (
+    prediction_df
+    .groupby("horizon")
+    .apply(
+        lambda group:
+        (
+            (
+                group["y_true"]
+                >=
+                group["lower"]
+            )
+            &
+            (
+                group["y_true"]
+                <=
+                group["upper"]
+            )
+        ).mean()
+    )
+)
+```
+
+## Intervalos demasiado amplios
+
+Un intervalo puede tener buena cobertura simplemente por ser muy ancho.
+
+Por tanto, hay que equilibrar:
+
+- Cobertura.
+- Anchura.
+- Utilidad.
+
+## Pinball loss
+
+Se utiliza para evaluar predicciones cuantílicas.
+
+```python
+from sklearn.metrics import mean_pinball_loss
+
+pinball = mean_pinball_loss(
+    y_true,
+    quantile_prediction,
+    alpha=0.90
+)
+```
+
+## Winkler score
+
+Evalúa intervalos considerando:
+
+- Anchura.
+- Penalización por observaciones fuera del intervalo.
+
+## Calibración temporal
+
+Puede revisarse si:
+
+```text
+Intervalo 90 %
+→ contiene aproximadamente 90 % de los valores
+```
+
+También debe evaluarse por:
+
+- Horizonte.
+- Periodo.
+- Subgrupo.
+- Nivel de demanda.
+
+## Comparación estadística de modelos
+
+Dos modelos con MAE similar pueden comportarse de forma distinta por periodo.
+
+Puede compararse:
+
+- Distribución de errores.
+- Errores por fold.
+- Diferencia pareada.
+- Test de Diebold-Mariano.
+- Bootstrap por bloques.
+
+## Diferencia por fold
+
+```python
+fold_comparison = (
+    fold_metrics
+    .pivot(
+        index="fold",
+        columns="model",
+        values="mae"
+    )
+)
+```
+
+```python
+fold_comparison[
+    "difference"
+] = (
+    fold_comparison[
+        "model_a"
+    ]
+    -
+    fold_comparison[
+        "model_b"
+    ]
+)
+```
+
+## Bootstrap por bloques
+
+En series temporales no conviene re-muestrear observaciones individuales de forma independiente.
+
+Puede utilizarse:
+
+- Moving block bootstrap.
+- Circular block bootstrap.
+- Stationary bootstrap.
+
+## Evaluación de clasificación temporal
+
+Cuando el target es un evento futuro:
+
+- AUROC.
+- AUPRC.
+- Sensibilidad.
+- Especificidad.
+- PPV.
+- NPV.
+- Calibración.
+- Lead time.
+- Alarmas por paciente-día.
+
+## Lead time
+
+```python
+prediction_df[
+    "lead_time_hours"
+] = (
+    prediction_df[
+        "event_datetime"
+    ]
+    -
+    prediction_df[
+        "alert_datetime"
+    ]
+).dt.total_seconds() / 3600
+```
+
+## Alarmas por unidad temporal
+
+```python
+alerts_per_patient_day = (
+    prediction_df[
+        "alert"
+    ].sum()
+    /
+    prediction_df[
+        [
+            "patient_id",
+            "date"
+        ]
+    ]
+    .drop_duplicates()
+    .shape[
+        0
+    ]
+)
+```
+
+## Primer aviso
+
+Puede ser más relevante evaluar el primer aviso antes del evento que todas las predicciones positivas.
+
+## Eventos repetidos
+
+Debe definirse:
+
+- Cuándo empieza un episodio.
+- Cuándo termina.
+- Ventana de silencio.
+- Cuántas alertas cuentan.
+- Cómo agrupar alertas consecutivas.
+
+## Evaluación con pacientes repetidos
+
+Las observaciones del mismo paciente no son independientes.
+
+Puede ser necesario:
+
+- Agrupar métricas por paciente.
+- Separar pacientes.
+- Usar bootstrap por paciente.
+- Reportar variabilidad entre pacientes.
+
+## MAE por paciente
+
+```python
+patient_mae = (
+    prediction_df
+    .groupby("patient_id")
+    .apply(
+        lambda group:
+        mean_absolute_error(
+            group["y_true"],
+            group["y_pred"]
+        )
+    )
+)
+```
+
+## Macro y micro average
+
+```text
+Micro
+→ todas las observaciones pesan igual
+
+Macro
+→ cada paciente pesa igual
+```
+
+## Evaluación multicentro
+
+Debe analizarse:
+
+- Rendimiento global.
+- Rendimiento por centro.
+- Bias por centro.
+- Cobertura por centro.
+- Drift entre centros.
+
+## Leakage en backtesting
+
+Ejemplos:
+
+- Ajustar scaler con todo el dataset.
+- Imputar usando periodos futuros.
+- Seleccionar hiperparámetros con test.
+- Crear lags después de mezclar folds.
+- Calcular rolling features con valores posteriores.
+- Usar una serie revisada retrospectivamente.
+
+## Pipeline dentro de cada fold
+
+El preprocesamiento debe ajustarse dentro de cada fold.
+
+```python
+from sklearn.pipeline import Pipeline
+
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            Ridge()
+        )
+    ]
+)
+```
+
+## Cross-validation correcta
+
+```python
+scores = cross_validate(
+    estimator=pipeline,
+    X=X,
+    y=y,
+    cv=cv,
+    scoring="neg_mean_absolute_error"
+)
+```
+
+## Selección y test final
+
+Una estrategia recomendable:
+
+```text
+Train + CV temporal
+→ elegir modelo
+
+Validation
+→ fijar threshold y decisiones
+
+Test final
+→ estimación final
+```
+
+## Reentrenar antes de test
+
+Tras seleccionar hiperparámetros, puede reentrenarse con train y validation.
+
+Después se evalúa una sola vez en test.
+
+## Producción simulada
+
+El backtesting debe reproducir:
+
+- Frecuencia de actualización.
+- Latencia de datos.
+- Frecuencia de reentrenamiento.
+- Variables disponibles.
+- Horizonte.
+- Reglas de alerta.
+- Capacidad operativa.
+
+## Retraining en cada fold
+
+Puede simularse:
+
+```text
+Reentrenamiento diario
+Reentrenamiento semanal
+Reentrenamiento mensual
+Modelo fijo
+```
+
+## Modelo fijo vs actualizado
+
+| Estrategia | Ventaja | Limitación |
+|---|---|---|
+| Modelo fijo | Simple | Puede degradarse |
+| Reentrenamiento periódico | Se adapta | Coste y complejidad |
+| Ventana móvil | Responde a drift | Pierde historia |
+| Online learning | Actualización continua | Mayor control requerido |
+
+## Drift
+
+El error puede cambiar con el tiempo.
+
+```python
+prediction_df[
+    "absolute_error"
+] = (
+    prediction_df[
+        "y_true"
+    ]
+    -
+    prediction_df[
+        "y_pred"
+    ]
+).abs()
+```
+
+```python
+rolling_mae = (
+    prediction_df
+    .set_index("datetime")[
+        "absolute_error"
+    ]
+    .rolling(
+        "30D"
+    )
+    .mean()
+)
+```
+
+## Visualizar drift del error
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(
+    figsize=(12, 5)
+)
+
+plt.plot(
+    rolling_mae.index,
+    rolling_mae.values
+)
+
+plt.xlabel(
+    "Fecha"
+)
+
+plt.ylabel(
+    "MAE móvil"
+)
+
+plt.title(
+    "Evolución temporal del error"
+)
+
+plt.show()
+```
+
+## Tabla de evaluación final
+
+| Modelo | MAE | RMSE | MASE | Bias | Cobertura 90 % |
+|---|---:|---:|---:|---:|---:|
+| Naive | 12.4 | 18.2 | 1.00 | -1.2 | — |
+| Seasonal naive | 10.8 | 16.1 | 0.87 | 0.8 | — |
+| ARIMA | 9.7 | 14.9 | 0.78 | -0.5 | 88 % |
+| Gradient boosting | 8.9 | 14.1 | 0.72 | -1.0 | 91 % |
+
+## Elegir modelo final
+
+No debe seleccionarse solo por una métrica.
+
+Debe equilibrarse:
+
+- Error medio.
+- Error en picos.
+- Bias.
+- Estabilidad.
+- Intervalos.
+- Coste.
+- Latencia.
+- Interpretabilidad.
+- Utilidad clínica.
+
+::: {.callout-important}
+## Regla práctica
+
+El mejor modelo es el que funciona de forma consistente en el escenario real de uso.
+:::
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+La evaluación debe medir no solo precisión, sino también anticipación, seguridad y carga operativa.
+:::
+
+Debe revisarse:
+
+- Lead time.
+- Falsas alertas.
+- Error en periodos críticos.
+- Error por paciente.
+- Error por centro.
+- Cobertura de intervalos.
+- Impacto operativo.
+
+## Errores frecuentes
+
+- Usar split aleatorio.
+- No comparar con naive.
+- Reportar una sola métrica.
+- No evaluar por horizonte.
+- No evaluar por periodo.
+- Ignorar bias.
+- No revisar picos.
+- Ajustar preprocesamiento fuera del fold.
+- Usar test para tuning.
+- No reproducir latencia real.
+- Ignorar pacientes repetidos.
+- No evaluar intervalos.
+- No monitorizar drift.
+
+## Flujo recomendado
+
+1. Definir escenario real.
+2. Elegir ventana expansiva o deslizante.
+3. Definir gap.
+4. Crear baselines.
+5. Ejecutar walk-forward validation.
+6. Calcular varias métricas.
+7. Evaluar por horizonte.
+8. Evaluar por periodo y subgrupo.
+9. Analizar intervalos.
+10. Revisar bias y picos.
+11. Reservar test final.
+12. Simular producción.
+
+## Checklist para proyectos
+
+- [ ] He definido el escenario de uso.
+- [ ] He respetado el orden temporal.
+- [ ] He elegido ventana de entrenamiento.
+- [ ] He definido gap.
+- [ ] He creado naive baseline.
+- [ ] He creado seasonal naive.
+- [ ] He aplicado backtesting.
+- [ ] He calculado MAE.
+- [ ] He calculado RMSE.
+- [ ] He calculado MASE.
+- [ ] He revisado bias.
+- [ ] He evaluado por horizonte.
+- [ ] He evaluado por periodo.
+- [ ] He revisado picos.
+- [ ] He evaluado intervalos.
+- [ ] He reservado test final.
+- [ ] He evitado leakage.
+- [ ] He considerado pacientes repetidos.
+- [ ] He simulado producción.
+- [ ] He planificado monitorización.
+
+## Recursos
+
+### Documentación
+
+- `TimeSeriesSplit`.
+- `cross_validate`.
+- `mean_absolute_error`.
+- `root_mean_squared_error`.
+- `mean_pinball_loss`.
+- Walk-forward validation.
+- Block bootstrap.
+- Conformal prediction.
+- Evaluación temporal de alertas.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus folds, horizontes, baselines, métricas, intervalos y decisiones de evaluación.
