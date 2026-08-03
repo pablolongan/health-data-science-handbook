@@ -3828,963 +3828,1611 @@
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html",
-    "href": "time-series/decomposition-stationarity.html",
-    "title": "Descomposición y estacionariedad",
+    "objectID": "time-series/exponential-smoothing.html",
+    "href": "time-series/exponential-smoothing.html",
+    "title": "Exponential smoothing",
     "section": "",
-    "text": "TipResumen en 30 segundos\n\n\n\nUna serie temporal puede contener:\n\nTendencia.\nEstacionalidad.\nCiclos.\nRuido.\nCambios estructurales.\n\nLa descomposición separa estos componentes.\nLa estacionariedad describe una serie cuyas propiedades estadísticas permanecen aproximadamente estables en el tiempo.\nMuchos modelos clásicos funcionan mejor cuando la serie es estacionaria.",
+    "text": "TipResumen en 30 segundos\n\n\n\nLos métodos de exponential smoothing generan predicciones dando más peso a las observaciones recientes.\nIncluyen:\n\nSimple Exponential Smoothing.\nMétodo de Holt.\nHolt-Winters.\nTendencia amortiguada.\n\nSon modelos muy útiles como baseline y funcionan especialmente bien cuando la serie presenta nivel, tendencia y estacionalidad relativamente estables.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#componentes-de-una-serie-temporal",
-    "href": "time-series/decomposition-stationarity.html#componentes-de-una-serie-temporal",
-    "title": "Descomposición y estacionariedad",
-    "section": "Componentes de una serie temporal",
-    "text": "Componentes de una serie temporal\nUna serie puede representarse de forma simplificada como:\n\\[\ny_t\n=\nT_t\n+\nS_t\n+\nR_t\n\\]\ndonde:\n\n(T_t) es la tendencia.\n(S_t) es la estacionalidad.\n(R_t) es el residuo.\n\nEsta es una descomposición aditiva.",
+    "objectID": "time-series/exponential-smoothing.html#qué-es-exponential-smoothing",
+    "href": "time-series/exponential-smoothing.html#qué-es-exponential-smoothing",
+    "title": "Exponential smoothing",
+    "section": "¿Qué es exponential smoothing?",
+    "text": "¿Qué es exponential smoothing?\nExponential smoothing es una familia de modelos de forecasting.\nLa idea central es sencilla:\nObservaciones recientes\n→ mayor peso\n\nObservaciones antiguas\n→ menor peso\nLos pesos disminuyen exponencialmente con el tiempo.\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nEl modelo resume la historia mediante componentes actualizados de nivel, tendencia y estacionalidad.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#tendencia",
-    "href": "time-series/decomposition-stationarity.html#tendencia",
-    "title": "Descomposición y estacionariedad",
-    "section": "Tendencia",
-    "text": "Tendencia\nLa tendencia es un cambio sostenido a largo plazo.\nValor\n  │\n  │             /\n  │          /\n  │       /\n  │    /\n  └──────────────── Tiempo\nPuede ser:\n\nCreciente.\nDecreciente.\nLineal.\nCurva.\nCambiante.",
+    "objectID": "time-series/exponential-smoothing.html#tipos-principales",
+    "href": "time-series/exponential-smoothing.html#tipos-principales",
+    "title": "Exponential smoothing",
+    "section": "Tipos principales",
+    "text": "Tipos principales",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#estacionalidad",
-    "href": "time-series/decomposition-stationarity.html#estacionalidad",
-    "title": "Descomposición y estacionariedad",
-    "section": "Estacionalidad",
-    "text": "Estacionalidad\nLa estacionalidad es un patrón que se repite con una frecuencia relativamente fija.\nEjemplos:\n\nVariación horaria.\nCiclo día-noche.\nPatrón semanal.\nPatrón mensual.\nPatrón anual.",
+    "objectID": "time-series/exponential-smoothing.html#simple-exponential-smoothing",
+    "href": "time-series/exponential-smoothing.html#simple-exponential-smoothing",
+    "title": "Exponential smoothing",
+    "section": "Simple Exponential Smoothing",
+    "text": "Simple Exponential Smoothing\nAdecuado cuando la serie tiene:\n\nNivel.\nSin tendencia clara.\nSin estacionalidad clara.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#ciclos",
-    "href": "time-series/decomposition-stationarity.html#ciclos",
-    "title": "Descomposición y estacionariedad",
-    "section": "Ciclos",
-    "text": "Ciclos\nLos ciclos son oscilaciones que no tienen necesariamente una frecuencia fija.\nEjemplos:\n\nCambios económicos.\nOleadas epidémicas.\nCambios asistenciales.\nPeriodos de tratamiento.",
+    "objectID": "time-series/exponential-smoothing.html#holt",
+    "href": "time-series/exponential-smoothing.html#holt",
+    "title": "Exponential smoothing",
+    "section": "Holt",
+    "text": "Holt\nAdecuado cuando existe:\n\nNivel.\nTendencia.\nSin estacionalidad.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#residuo",
-    "href": "time-series/decomposition-stationarity.html#residuo",
-    "title": "Descomposición y estacionariedad",
-    "section": "Residuo",
-    "text": "Residuo\nEl residuo contiene la variación que no explican la tendencia ni la estacionalidad.\nSerie observada\n-\ntendencia\n-\nestacionalidad\n=\nresiduo\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nUn residuo aparentemente aleatorio sugiere que la descomposición ha capturado buena parte de la estructura.",
+    "objectID": "time-series/exponential-smoothing.html#holt-winters",
+    "href": "time-series/exponential-smoothing.html#holt-winters",
+    "title": "Exponential smoothing",
+    "section": "Holt-Winters",
+    "text": "Holt-Winters\nAdecuado cuando existe:\n\nNivel.\nTendencia.\nEstacionalidad.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#preparar-una-serie",
-    "href": "time-series/decomposition-stationarity.html#preparar-una-serie",
-    "title": "Descomposición y estacionariedad",
-    "section": "Preparar una serie",
-    "text": "Preparar una serie\nimport pandas as pd\n\nseries = (\n    df\n    .set_index(\"datetime\")[\n        \"value\"\n    ]\n    .sort_index()\n)",
+    "objectID": "time-series/exponential-smoothing.html#tendencia-amortiguada",
+    "href": "time-series/exponential-smoothing.html#tendencia-amortiguada",
+    "title": "Exponential smoothing",
+    "section": "Tendencia amortiguada",
+    "text": "Tendencia amortiguada\nAdecuada cuando la tendencia existe, pero no se espera que continúe indefinidamente con la misma intensidad.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#revisar-frecuencia",
-    "href": "time-series/decomposition-stationarity.html#revisar-frecuencia",
-    "title": "Descomposición y estacionariedad",
-    "section": "Revisar frecuencia",
-    "text": "Revisar frecuencia\nprint(\n    pd.infer_freq(\n        series.index\n    )\n)\nPara muchos métodos de descomposición conviene trabajar con frecuencia regular.",
+    "objectID": "time-series/exponential-smoothing.html#preparar-la-serie",
+    "href": "time-series/exponential-smoothing.html#preparar-la-serie",
+    "title": "Exponential smoothing",
+    "section": "Preparar la serie",
+    "text": "Preparar la serie\nimport pandas as pd\n\nseries = (\n    df\n    .set_index(\"datetime\")[\n        \"value\"\n    ]\n    .sort_index()\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#resampling",
-    "href": "time-series/decomposition-stationarity.html#resampling",
-    "title": "Descomposición y estacionariedad",
-    "section": "Resampling",
-    "text": "Resampling\ndaily_series = (\n    series\n    .resample(\"D\")\n    .mean()\n)",
+    "objectID": "time-series/exponential-smoothing.html#regularizar-frecuencia",
+    "href": "time-series/exponential-smoothing.html#regularizar-frecuencia",
+    "title": "Exponential smoothing",
+    "section": "Regularizar frecuencia",
+    "text": "Regularizar frecuencia\ndaily_series = (\n    series\n    .resample(\"D\")\n    .mean()\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#revisar-valores-ausentes",
-    "href": "time-series/decomposition-stationarity.html#revisar-valores-ausentes",
-    "title": "Descomposición y estacionariedad",
+    "objectID": "time-series/exponential-smoothing.html#revisar-valores-ausentes",
+    "href": "time-series/exponential-smoothing.html#revisar-valores-ausentes",
+    "title": "Exponential smoothing",
     "section": "Revisar valores ausentes",
     "text": "Revisar valores ausentes\nprint(\n    daily_series\n    .isna()\n    .sum()\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#imputación-simple",
-    "href": "time-series/decomposition-stationarity.html#imputación-simple",
-    "title": "Descomposición y estacionariedad",
-    "section": "Imputación simple",
-    "text": "Imputación simple\ndaily_series = (\n    daily_series\n    .interpolate(\n        method=\"time\"\n    )\n)\n\n\n\n\n\n\nWarningImportante\n\n\n\nLa imputación debe estar justificada y no debe introducir información futura en un workflow predictivo.",
+    "objectID": "time-series/exponential-smoothing.html#imputación-temporal",
+    "href": "time-series/exponential-smoothing.html#imputación-temporal",
+    "title": "Exponential smoothing",
+    "section": "Imputación temporal",
+    "text": "Imputación temporal\ndaily_series = (\n    daily_series\n    .interpolate(\n        method=\"time\"\n    )\n)\n\n\n\n\n\n\nWarningImportante\n\n\n\nEn producción, la imputación debe utilizar solo información disponible en el momento de predicción.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#visualizar-la-serie",
-    "href": "time-series/decomposition-stationarity.html#visualizar-la-serie",
-    "title": "Descomposición y estacionariedad",
-    "section": "Visualizar la serie",
-    "text": "Visualizar la serie\nimport matplotlib.pyplot as plt\n\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    daily_series.index,\n    daily_series.values\n)\n\nplt.xlabel(\n    \"Fecha\"\n)\n\nplt.ylabel(\n    \"Valor\"\n)\n\nplt.title(\n    \"Serie temporal\"\n)\n\nplt.show()",
+    "objectID": "time-series/exponential-smoothing.html#separar-train-y-test",
+    "href": "time-series/exponential-smoothing.html#separar-train-y-test",
+    "title": "Exponential smoothing",
+    "section": "Separar train y test",
+    "text": "Separar train y test\ntrain = daily_series.loc[\n    daily_series.index\n    &lt;\n    \"2025-07-01\"\n]\n\ntest = daily_series.loc[\n    daily_series.index\n    &gt;=\n    \"2025-07-01\"\n]",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#descomposición-aditiva",
-    "href": "time-series/decomposition-stationarity.html#descomposición-aditiva",
-    "title": "Descomposición y estacionariedad",
-    "section": "Descomposición aditiva",
-    "text": "Descomposición aditiva\nLa descomposición aditiva es adecuada cuando la amplitud estacional se mantiene aproximadamente constante.\n\\[\ny_t\n=\nT_t\n+\nS_t\n+\nR_t\n\\]\nEjemplo conceptual:\nNivel bajo\n→ oscilación de ±5\n\nNivel alto\n→ oscilación de ±5",
+    "objectID": "time-series/exponential-smoothing.html#baseline-naive",
+    "href": "time-series/exponential-smoothing.html#baseline-naive",
+    "title": "Exponential smoothing",
+    "section": "Baseline naive",
+    "text": "Baseline naive\nnaive_forecast = pd.Series(\n    train.iloc[-1],\n    index=test.index\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#seasonal_decompose",
-    "href": "time-series/decomposition-stationarity.html#seasonal_decompose",
-    "title": "Descomposición y estacionariedad",
-    "section": "seasonal_decompose",
-    "text": "seasonal_decompose\nfrom statsmodels.tsa.seasonal import seasonal_decompose\n\ndecomposition = seasonal_decompose(\n    daily_series,\n    model=\"additive\",\n    period=7\n)",
+    "objectID": "time-series/exponential-smoothing.html#evaluar-baseline",
+    "href": "time-series/exponential-smoothing.html#evaluar-baseline",
+    "title": "Exponential smoothing",
+    "section": "Evaluar baseline",
+    "text": "Evaluar baseline\nfrom sklearn.metrics import mean_absolute_error\nfrom sklearn.metrics import root_mean_squared_error\n\nnaive_mae = mean_absolute_error(\n    test,\n    naive_forecast\n)\n\nnaive_rmse = root_mean_squared_error(\n    test,\n    naive_forecast\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#visualizar-componentes",
-    "href": "time-series/decomposition-stationarity.html#visualizar-componentes",
-    "title": "Descomposición y estacionariedad",
-    "section": "Visualizar componentes",
-    "text": "Visualizar componentes\ndecomposition.plot()\n\nplt.show()",
+    "objectID": "time-series/exponential-smoothing.html#simple-exponential-smoothing-1",
+    "href": "time-series/exponential-smoothing.html#simple-exponential-smoothing-1",
+    "title": "Exponential smoothing",
+    "section": "Simple Exponential Smoothing",
+    "text": "Simple Exponential Smoothing\nLa actualización del nivel es:\n\\[\n\\ell_t\n=\n\\alpha y_t\n+\n(1-\\alpha)\\ell_{t-1}\n\\]\ndonde:\n\n(y_t) es el valor observado.\n(_t) es el nivel estimado.\n() es el parámetro de suavizado.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#acceder-a-los-componentes",
-    "href": "time-series/decomposition-stationarity.html#acceder-a-los-componentes",
-    "title": "Descomposición y estacionariedad",
-    "section": "Acceder a los componentes",
-    "text": "Acceder a los componentes\ntrend = decomposition.trend\n\nseasonal = decomposition.seasonal\n\nresidual = decomposition.resid",
+    "objectID": "time-series/exponential-smoothing.html#interpretar-alpha",
+    "href": "time-series/exponential-smoothing.html#interpretar-alpha",
+    "title": "Exponential smoothing",
+    "section": "Interpretar alpha",
+    "text": "Interpretar alpha\nalpha cercano a 1\n→ gran peso a observaciones recientes\n→ modelo más reactivo\n\nalpha cercano a 0\n→ mayor suavizado\n→ modelo más estable",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#descomposición-multiplicativa",
-    "href": "time-series/decomposition-stationarity.html#descomposición-multiplicativa",
-    "title": "Descomposición y estacionariedad",
-    "section": "Descomposición multiplicativa",
-    "text": "Descomposición multiplicativa\nEs adecuada cuando la amplitud estacional aumenta con el nivel.\n\\[\ny_t\n=\nT_t\n\\times\nS_t\n\\times\nR_t\n\\]\nEjemplo conceptual:\nNivel bajo\n→ oscilación pequeña\n\nNivel alto\n→ oscilación grande",
+    "objectID": "time-series/exponential-smoothing.html#entrenar-ses",
+    "href": "time-series/exponential-smoothing.html#entrenar-ses",
+    "title": "Exponential smoothing",
+    "section": "Entrenar SES",
+    "text": "Entrenar SES\nfrom statsmodels.tsa.holtwinters import SimpleExpSmoothing\n\nmodel = SimpleExpSmoothing(\n    train,\n    initialization_method=\"estimated\"\n)\n\nfitted_model = model.fit(\n    optimized=True\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#aplicar-modelo-multiplicativo",
-    "href": "time-series/decomposition-stationarity.html#aplicar-modelo-multiplicativo",
-    "title": "Descomposición y estacionariedad",
-    "section": "Aplicar modelo multiplicativo",
-    "text": "Aplicar modelo multiplicativo\ndecomposition = seasonal_decompose(\n    daily_series,\n    model=\"multiplicative\",\n    period=7\n)",
+    "objectID": "time-series/exponential-smoothing.html#forecast",
+    "href": "time-series/exponential-smoothing.html#forecast",
+    "title": "Exponential smoothing",
+    "section": "Forecast",
+    "text": "Forecast\nforecast = fitted_model.forecast(\n    len(test)\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#requisito-práctico",
-    "href": "time-series/decomposition-stationarity.html#requisito-práctico",
-    "title": "Descomposición y estacionariedad",
-    "section": "Requisito práctico",
-    "text": "Requisito práctico\nUna descomposición multiplicativa necesita valores positivos.\nSi existen ceros o valores negativos, debe utilizarse otra estrategia.",
+    "objectID": "time-series/exponential-smoothing.html#evaluar-ses",
+    "href": "time-series/exponential-smoothing.html#evaluar-ses",
+    "title": "Exponential smoothing",
+    "section": "Evaluar SES",
+    "text": "Evaluar SES\nses_mae = mean_absolute_error(\n    test,\n    forecast\n)\n\nses_rmse = root_mean_squared_error(\n    test,\n    forecast\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#aditiva-frente-a-multiplicativa",
-    "href": "time-series/decomposition-stationarity.html#aditiva-frente-a-multiplicativa",
-    "title": "Descomposición y estacionariedad",
-    "section": "Aditiva frente a multiplicativa",
-    "text": "Aditiva frente a multiplicativa\n\n\n\nAspecto\nAditiva\nMultiplicativa\n\n\n\n\nAmplitud estacional\nConstante\nProporcional al nivel\n\n\nValores cero\nPosibles\nProblemáticos\n\n\nFórmula\nSuma\nProducto\n\n\nInterpretación\nDiferencias absolutas\nCambios relativos",
+    "objectID": "time-series/exponential-smoothing.html#fijar-alpha-manualmente",
+    "href": "time-series/exponential-smoothing.html#fijar-alpha-manualmente",
+    "title": "Exponential smoothing",
+    "section": "Fijar alpha manualmente",
+    "text": "Fijar alpha manualmente\nfitted_model = model.fit(\n    smoothing_level=0.30,\n    optimized=False\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#transformación-logarítmica",
-    "href": "time-series/decomposition-stationarity.html#transformación-logarítmica",
-    "title": "Descomposición y estacionariedad",
-    "section": "Transformación logarítmica",
-    "text": "Transformación logarítmica\nUna serie multiplicativa puede transformarse en aditiva mediante logaritmo.\n\\[\n\\log(y_t)\n=\n\\log(T_t)\n+\n\\log(S_t)\n+\n\\log(R_t)\n\\]\nimport numpy as np\n\nlog_series = np.log(\n    daily_series\n)",
+    "objectID": "time-series/exponential-smoothing.html#inspeccionar-parámetros",
+    "href": "time-series/exponential-smoothing.html#inspeccionar-parámetros",
+    "title": "Exponential smoothing",
+    "section": "Inspeccionar parámetros",
+    "text": "Inspeccionar parámetros\nprint(\n    fitted_model.params\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#stl",
-    "href": "time-series/decomposition-stationarity.html#stl",
-    "title": "Descomposición y estacionariedad",
-    "section": "STL",
-    "text": "STL\nSTL significa Seasonal-Trend decomposition using LOESS.\nEs un método flexible para separar:\n\nTendencia.\nEstacionalidad.\nResiduo.\n\nfrom statsmodels.tsa.seasonal import STL\n\nstl = STL(\n    daily_series,\n    period=7\n)\n\nstl_result = stl.fit()",
+    "objectID": "time-series/exponential-smoothing.html#visualizar",
+    "href": "time-series/exponential-smoothing.html#visualizar",
+    "title": "Exponential smoothing",
+    "section": "Visualizar",
+    "text": "Visualizar\nimport matplotlib.pyplot as plt\n\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    train.index,\n    train.values,\n    label=\"Train\"\n)\n\nplt.plot(\n    test.index,\n    test.values,\n    label=\"Test\"\n)\n\nplt.plot(\n    forecast.index,\n    forecast.values,\n    label=\"Forecast\"\n)\n\nplt.xlabel(\n    \"Fecha\"\n)\n\nplt.ylabel(\n    \"Valor\"\n)\n\nplt.title(\n    \"Simple Exponential Smoothing\"\n)\n\nplt.legend()\n\nplt.show()",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#visualizar-stl",
-    "href": "time-series/decomposition-stationarity.html#visualizar-stl",
-    "title": "Descomposición y estacionariedad",
-    "section": "Visualizar STL",
-    "text": "Visualizar STL\nstl_result.plot()\n\nplt.show()",
+    "objectID": "time-series/exponential-smoothing.html#método-de-holt",
+    "href": "time-series/exponential-smoothing.html#método-de-holt",
+    "title": "Exponential smoothing",
+    "section": "Método de Holt",
+    "text": "Método de Holt\nHolt añade una componente de tendencia.\nEl modelo actualiza:\n\nNivel.\nTendencia.\n\nUna formulación habitual es:\n\\[\n\\ell_t\n=\n\\alpha y_t\n+\n(1-\\alpha)\n(\\ell_{t-1}+b_{t-1})\n\\]\n\\[\nb_t\n=\n\\beta\n(\\ell_t-\\ell_{t-1})\n+\n(1-\\beta)b_{t-1}\n\\]",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#acceder-a-componentes-stl",
-    "href": "time-series/decomposition-stationarity.html#acceder-a-componentes-stl",
-    "title": "Descomposición y estacionariedad",
-    "section": "Acceder a componentes STL",
-    "text": "Acceder a componentes STL\ntrend = stl_result.trend\n\nseasonal = stl_result.seasonal\n\nresidual = stl_result.resid",
+    "objectID": "time-series/exponential-smoothing.html#entrenar-holt",
+    "href": "time-series/exponential-smoothing.html#entrenar-holt",
+    "title": "Exponential smoothing",
+    "section": "Entrenar Holt",
+    "text": "Entrenar Holt\nfrom statsmodels.tsa.holtwinters import Holt\n\nmodel = Holt(\n    train,\n    initialization_method=\"estimated\"\n)\n\nfitted_model = model.fit(\n    optimized=True\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#stl-robusto",
-    "href": "time-series/decomposition-stationarity.html#stl-robusto",
-    "title": "Descomposición y estacionariedad",
-    "section": "STL robusto",
-    "text": "STL robusto\nstl = STL(\n    daily_series,\n    period=7,\n    robust=True\n)\n\nstl_result = stl.fit()\nLa opción robusta reduce la influencia de valores extremos sobre la tendencia y la estacionalidad.",
+    "objectID": "time-series/exponential-smoothing.html#forecast-con-holt",
+    "href": "time-series/exponential-smoothing.html#forecast-con-holt",
+    "title": "Exponential smoothing",
+    "section": "Forecast con Holt",
+    "text": "Forecast con Holt\nforecast = fitted_model.forecast(\n    len(test)\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#ventajas-de-stl",
-    "href": "time-series/decomposition-stationarity.html#ventajas-de-stl",
-    "title": "Descomposición y estacionariedad",
-    "section": "Ventajas de STL",
-    "text": "Ventajas de STL\n\nFlexible.\nPermite tendencia no lineal.\nPuede ser robusto a outliers.\nÚtil con estacionalidad estable.\nFácil de interpretar.",
+    "objectID": "time-series/exponential-smoothing.html#tendencia-exponencial",
+    "href": "time-series/exponential-smoothing.html#tendencia-exponencial",
+    "title": "Exponential smoothing",
+    "section": "Tendencia exponencial",
+    "text": "Tendencia exponencial\nmodel = Holt(\n    train,\n    exponential=True,\n    initialization_method=\"estimated\"\n)\nLa tendencia exponencial puede ser útil cuando el crecimiento es proporcional.\nRequiere valores positivos.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#limitaciones-de-stl",
-    "href": "time-series/decomposition-stationarity.html#limitaciones-de-stl",
-    "title": "Descomposición y estacionariedad",
-    "section": "Limitaciones de STL",
-    "text": "Limitaciones de STL\n\nRequiere elegir un periodo.\nNo resuelve automáticamente cambios estructurales.\nNecesita frecuencia suficientemente regular.\nNo sustituye la validación predictiva.",
+    "objectID": "time-series/exponential-smoothing.html#tendencia-amortiguada-1",
+    "href": "time-series/exponential-smoothing.html#tendencia-amortiguada-1",
+    "title": "Exponential smoothing",
+    "section": "Tendencia amortiguada",
+    "text": "Tendencia amortiguada\nmodel = Holt(\n    train,\n    damped_trend=True,\n    initialization_method=\"estimated\"\n)\n\nfitted_model = model.fit(\n    optimized=True\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#elegir-el-periodo",
-    "href": "time-series/decomposition-stationarity.html#elegir-el-periodo",
-    "title": "Descomposición y estacionariedad",
-    "section": "Elegir el periodo",
-    "text": "Elegir el periodo\nEjemplos:\nDatos horarios con ciclo diario\n→ period = 24\n\nDatos diarios con ciclo semanal\n→ period = 7\n\nDatos mensuales con ciclo anual\n→ period = 12\n\n\n\n\n\n\nWarningError frecuente\n\n\n\nConfundir número de observaciones con unidad temporal.",
+    "objectID": "time-series/exponential-smoothing.html#por-qué-amortiguar",
+    "href": "time-series/exponential-smoothing.html#por-qué-amortiguar",
+    "title": "Exponential smoothing",
+    "section": "¿Por qué amortiguar?",
+    "text": "¿Por qué amortiguar?\nUna tendencia lineal indefinida puede producir forecasts poco realistas.\nTendencia no amortiguada\n→ crecimiento continuo\n\nTendencia amortiguada\n→ crecimiento que se estabiliza\n\n\n\n\n\n\nNoteRegla práctica\n\n\n\nLa tendencia amortiguada suele ser una alternativa razonable para horizontes largos.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#varias-estacionalidades",
-    "href": "time-series/decomposition-stationarity.html#varias-estacionalidades",
-    "title": "Descomposición y estacionariedad",
+    "objectID": "time-series/exponential-smoothing.html#holt-winters-1",
+    "href": "time-series/exponential-smoothing.html#holt-winters-1",
+    "title": "Exponential smoothing",
+    "section": "Holt-Winters",
+    "text": "Holt-Winters\nHolt-Winters añade una componente estacional.\nPuede ser:\n\nAditiva.\nMultiplicativa.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#estacionalidad-aditiva",
+    "href": "time-series/exponential-smoothing.html#estacionalidad-aditiva",
+    "title": "Exponential smoothing",
+    "section": "Estacionalidad aditiva",
+    "text": "Estacionalidad aditiva\nAdecuada cuando la amplitud estacional es aproximadamente constante.\nfrom statsmodels.tsa.holtwinters import ExponentialSmoothing\n\nmodel = ExponentialSmoothing(\n    train,\n    trend=\"add\",\n    seasonal=\"add\",\n    seasonal_periods=7,\n    initialization_method=\"estimated\"\n)\n\nfitted_model = model.fit(\n    optimized=True\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#forecast-aditivo",
+    "href": "time-series/exponential-smoothing.html#forecast-aditivo",
+    "title": "Exponential smoothing",
+    "section": "Forecast aditivo",
+    "text": "Forecast aditivo\nforecast = fitted_model.forecast(\n    len(test)\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#estacionalidad-multiplicativa",
+    "href": "time-series/exponential-smoothing.html#estacionalidad-multiplicativa",
+    "title": "Exponential smoothing",
+    "section": "Estacionalidad multiplicativa",
+    "text": "Estacionalidad multiplicativa\nAdecuada cuando la amplitud estacional aumenta con el nivel.\nmodel = ExponentialSmoothing(\n    train,\n    trend=\"add\",\n    seasonal=\"mul\",\n    seasonal_periods=7,\n    initialization_method=\"estimated\"\n)\n\nfitted_model = model.fit(\n    optimized=True\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#requisito-multiplicativo",
+    "href": "time-series/exponential-smoothing.html#requisito-multiplicativo",
+    "title": "Exponential smoothing",
+    "section": "Requisito multiplicativo",
+    "text": "Requisito multiplicativo\nLa estacionalidad multiplicativa requiere valores positivos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#tendencia-y-estacionalidad-multiplicativas",
+    "href": "time-series/exponential-smoothing.html#tendencia-y-estacionalidad-multiplicativas",
+    "title": "Exponential smoothing",
+    "section": "Tendencia y estacionalidad multiplicativas",
+    "text": "Tendencia y estacionalidad multiplicativas\nmodel = ExponentialSmoothing(\n    train,\n    trend=\"mul\",\n    seasonal=\"mul\",\n    seasonal_periods=7,\n    initialization_method=\"estimated\"\n)\nDebe utilizarse con cautela porque puede producir crecimiento muy rápido.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#holt-winters-amortiguado",
+    "href": "time-series/exponential-smoothing.html#holt-winters-amortiguado",
+    "title": "Exponential smoothing",
+    "section": "Holt-Winters amortiguado",
+    "text": "Holt-Winters amortiguado\nmodel = ExponentialSmoothing(\n    train,\n    trend=\"add\",\n    damped_trend=True,\n    seasonal=\"add\",\n    seasonal_periods=7,\n    initialization_method=\"estimated\"\n)\n\nfitted_model = model.fit(\n    optimized=True\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#parámetros-de-suavizado",
+    "href": "time-series/exponential-smoothing.html#parámetros-de-suavizado",
+    "title": "Exponential smoothing",
+    "section": "Parámetros de suavizado",
+    "text": "Parámetros de suavizado\nLos principales parámetros son:\n\n(): nivel.\n(): tendencia.\n(): estacionalidad.\n(): amortiguación.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#interpretación",
+    "href": "time-series/exponential-smoothing.html#interpretación",
+    "title": "Exponential smoothing",
+    "section": "Interpretación",
+    "text": "Interpretación\nalpha alto\n→ nivel muy reactivo\n\nbeta alto\n→ tendencia muy reactiva\n\ngamma alto\n→ estacionalidad muy reactiva\n\nphi bajo\n→ tendencia más amortiguada",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#inspeccionar-componentes",
+    "href": "time-series/exponential-smoothing.html#inspeccionar-componentes",
+    "title": "Exponential smoothing",
+    "section": "Inspeccionar componentes",
+    "text": "Inspeccionar componentes\nlevel = fitted_model.level\n\ntrend = fitted_model.trend\n\nseasonal = fitted_model.season",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#visualizar-componentes-estimados",
+    "href": "time-series/exponential-smoothing.html#visualizar-componentes-estimados",
+    "title": "Exponential smoothing",
+    "section": "Visualizar componentes estimados",
+    "text": "Visualizar componentes estimados\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    fitted_model.level,\n    label=\"Nivel\"\n)\n\nplt.plot(\n    fitted_model.trend,\n    label=\"Tendencia\"\n)\n\nplt.legend()\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#seleccionar-periodo-estacional",
+    "href": "time-series/exponential-smoothing.html#seleccionar-periodo-estacional",
+    "title": "Exponential smoothing",
+    "section": "Seleccionar periodo estacional",
+    "text": "Seleccionar periodo estacional\nEjemplos:\nDatos horarios con ciclo diario\n→ 24\n\nDatos diarios con ciclo semanal\n→ 7\n\nDatos mensuales con ciclo anual\n→ 12",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#varias-estacionalidades",
+    "href": "time-series/exponential-smoothing.html#varias-estacionalidades",
+    "title": "Exponential smoothing",
     "section": "Varias estacionalidades",
-    "text": "Varias estacionalidades\nUna serie horaria puede contener:\n\nCiclo diario.\nCiclo semanal.\nCiclo anual.\n\nUna única descomposición STL clásica modela una estacionalidad principal.\nPara varias estacionalidades pueden considerarse:\n\nMSTL.\nModelos de Fourier.\nTBATS.\nProphet.\nModelos de machine learning con variables de calendario.",
+    "text": "Varias estacionalidades\nHolt-Winters clásico modela una sola estacionalidad.\nPara varias estacionalidades pueden considerarse:\n\nMSTL.\nTBATS.\nProphet.\nVariables de Fourier.\nMachine learning.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#suavizado-de-tendencia",
-    "href": "time-series/decomposition-stationarity.html#suavizado-de-tendencia",
-    "title": "Descomposición y estacionariedad",
-    "section": "Suavizado de tendencia",
-    "text": "Suavizado de tendencia\nUna media móvil puede utilizarse como aproximación de tendencia.\ntrend_7 = (\n    daily_series\n    .rolling(\n        window=7,\n        center=True\n    )\n    .mean()\n)",
+    "objectID": "time-series/exponential-smoothing.html#comparar-modelos",
+    "href": "time-series/exponential-smoothing.html#comparar-modelos",
+    "title": "Exponential smoothing",
+    "section": "Comparar modelos",
+    "text": "Comparar modelos\ncandidate_models = {\n    \"ses\": SimpleExpSmoothing(\n        train,\n        initialization_method=\"estimated\"\n    ),\n    \"holt\": Holt(\n        train,\n        initialization_method=\"estimated\"\n    ),\n    \"holt_damped\": Holt(\n        train,\n        damped_trend=True,\n        initialization_method=\"estimated\"\n    ),\n    \"holt_winters\": ExponentialSmoothing(\n        train,\n        trend=\"add\",\n        seasonal=\"add\",\n        seasonal_periods=7,\n        initialization_method=\"estimated\"\n    )\n}",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#media-móvil-centrada",
-    "href": "time-series/decomposition-stationarity.html#media-móvil-centrada",
-    "title": "Descomposición y estacionariedad",
-    "section": "Media móvil centrada",
-    "text": "Media móvil centrada\nEl uso de center=True incluye valores futuros.\nEs adecuado para análisis descriptivo retrospectivo.\nNo es adecuado como feature predictiva en tiempo real.\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nUna tendencia centrada puede generar leakage si se utiliza para predecir.",
+    "objectID": "time-series/exponential-smoothing.html#evaluación-de-candidatos",
+    "href": "time-series/exponential-smoothing.html#evaluación-de-candidatos",
+    "title": "Exponential smoothing",
+    "section": "Evaluación de candidatos",
+    "text": "Evaluación de candidatos\nimport pandas as pd\n\nrows = []\n\nfor name, model in candidate_models.items():\n\n    fitted = model.fit(\n        optimized=True\n    )\n\n    forecast = fitted.forecast(\n        len(test)\n    )\n\n    rows.append(\n        {\n            \"model\": name,\n            \"mae\": mean_absolute_error(\n                test,\n                forecast\n            ),\n            \"rmse\": root_mean_squared_error(\n                test,\n                forecast\n            ),\n            \"aic\": fitted.aic,\n            \"bic\": fitted.bic\n        }\n    )\n\ncomparison_table = pd.DataFrame(\n    rows\n).sort_values(\n    \"mae\"\n)\n\ndisplay(\n    comparison_table\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#eliminar-tendencia",
-    "href": "time-series/decomposition-stationarity.html#eliminar-tendencia",
-    "title": "Descomposición y estacionariedad",
-    "section": "Eliminar tendencia",
-    "text": "Eliminar tendencia\nUna forma sencilla es restar la tendencia.\ndetrended = (\n    daily_series\n    -\n    trend_7\n)",
+    "objectID": "time-series/exponential-smoothing.html#aic-y-bic",
+    "href": "time-series/exponential-smoothing.html#aic-y-bic",
+    "title": "Exponential smoothing",
+    "section": "AIC y BIC",
+    "text": "AIC y BIC\nAIC y BIC ayudan a comparar ajuste y complejidad.\nValores menores suelen ser preferibles.\nNo sustituyen la validación temporal.\n\n\n\n\n\n\nWarningImportante\n\n\n\nEl modelo con menor AIC no es necesariamente el que mejor predice datos futuros.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#eliminar-estacionalidad",
-    "href": "time-series/decomposition-stationarity.html#eliminar-estacionalidad",
-    "title": "Descomposición y estacionariedad",
-    "section": "Eliminar estacionalidad",
-    "text": "Eliminar estacionalidad\nseasonally_adjusted = (\n    daily_series\n    -\n    stl_result.seasonal\n)",
+    "objectID": "time-series/exponential-smoothing.html#evaluación-temporal",
+    "href": "time-series/exponential-smoothing.html#evaluación-temporal",
+    "title": "Exponential smoothing",
+    "section": "Evaluación temporal",
+    "text": "Evaluación temporal\nNo debe usarse un split aleatorio.\nPuede aplicarse backtesting.\nTrain 1\n→ Test 1\n\nTrain 2 más largo\n→ Test 2\n\nTrain 3 más largo\n→ Test 3",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#serie-desestacionalizada",
-    "href": "time-series/decomposition-stationarity.html#serie-desestacionalizada",
-    "title": "Descomposición y estacionariedad",
-    "section": "Serie desestacionalizada",
-    "text": "Serie desestacionalizada\nLa serie ajustada permite estudiar:\n\nTendencia.\nCambios estructurales.\nComparaciones entre periodos.\nModelos posteriores.",
+    "objectID": "time-series/exponential-smoothing.html#backtesting-manual",
+    "href": "time-series/exponential-smoothing.html#backtesting-manual",
+    "title": "Exponential smoothing",
+    "section": "Backtesting manual",
+    "text": "Backtesting manual\nfrom sklearn.metrics import mean_absolute_error\n\nforecast_horizon = 7\n\npredictions = []\nobservations = []\n\nfor cutoff in range(\n    60,\n    len(daily_series)\n    -\n    forecast_horizon\n):\n\n    train_fold = daily_series.iloc[\n        :cutoff\n    ]\n\n    test_fold = daily_series.iloc[\n        cutoff:\n        cutoff\n        +\n        forecast_horizon\n    ]\n\n    model = ExponentialSmoothing(\n        train_fold,\n        trend=\"add\",\n        seasonal=\"add\",\n        seasonal_periods=7,\n        initialization_method=\"estimated\"\n    )\n\n    fitted = model.fit(\n        optimized=True\n    )\n\n    forecast = fitted.forecast(\n        forecast_horizon\n    )\n\n    predictions.extend(\n        forecast.values\n    )\n\n    observations.extend(\n        test_fold.values\n    )\nbacktest_mae = mean_absolute_error(\n    observations,\n    predictions\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#qué-es-estacionariedad",
-    "href": "time-series/decomposition-stationarity.html#qué-es-estacionariedad",
-    "title": "Descomposición y estacionariedad",
-    "section": "¿Qué es estacionariedad?",
-    "text": "¿Qué es estacionariedad?\nUna serie es débilmente estacionaria cuando mantiene aproximadamente:\n\nMedia constante.\nVarianza constante.\nAutocovarianza dependiente del lag, no del tiempo concreto.\n\nMedia estable\nVarianza estable\nDependencia temporal estable",
+    "objectID": "time-series/exponential-smoothing.html#ventana-expansiva",
+    "href": "time-series/exponential-smoothing.html#ventana-expansiva",
+    "title": "Exponential smoothing",
+    "section": "Ventana expansiva",
+    "text": "Ventana expansiva\nCada fold añade nuevas observaciones al train.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#serie-no-estacionaria",
-    "href": "time-series/decomposition-stationarity.html#serie-no-estacionaria",
-    "title": "Descomposición y estacionariedad",
-    "section": "Serie no estacionaria",
-    "text": "Serie no estacionaria\nPuede presentar:\n\nTendencia.\nEstacionalidad.\nVarianza cambiante.\nCambios de nivel.\nRupturas estructurales.",
+    "objectID": "time-series/exponential-smoothing.html#ventana-deslizante",
+    "href": "time-series/exponential-smoothing.html#ventana-deslizante",
+    "title": "Exponential smoothing",
+    "section": "Ventana deslizante",
+    "text": "Ventana deslizante\nPuede limitarse el historial.\nwindow_size = 180\n\ntrain_fold = daily_series.iloc[\n    cutoff\n    -\n    window_size:\n    cutoff\n]\nEsto puede ser útil cuando los datos antiguos pierden relevancia.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#por-qué-importa",
-    "href": "time-series/decomposition-stationarity.html#por-qué-importa",
-    "title": "Descomposición y estacionariedad",
-    "section": "¿Por qué importa?",
-    "text": "¿Por qué importa?\nMuchos modelos clásicos como ARMA y ciertas formulaciones ARIMA se apoyan en una serie estacionaria después de las transformaciones necesarias.",
+    "objectID": "time-series/exponential-smoothing.html#evaluación-por-horizonte",
+    "href": "time-series/exponential-smoothing.html#evaluación-por-horizonte",
+    "title": "Exponential smoothing",
+    "section": "Evaluación por horizonte",
+    "text": "Evaluación por horizonte\nhorizon_errors = {\n    1: [],\n    2: [],\n    3: [],\n    7: []\n}\nDebe analizarse si el error crece con el horizonte.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#inspección-visual",
-    "href": "time-series/decomposition-stationarity.html#inspección-visual",
-    "title": "Descomposición y estacionariedad",
-    "section": "Inspección visual",
-    "text": "Inspección visual\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    daily_series\n)\n\nplt.title(\n    \"Inspección visual de estacionariedad\"\n)\n\nplt.show()\nBusca:\n\nTendencia.\nCambios de varianza.\nCambios de nivel.\nEstacionalidad.\nRupturas.",
+    "objectID": "time-series/exponential-smoothing.html#residuos",
+    "href": "time-series/exponential-smoothing.html#residuos",
+    "title": "Exponential smoothing",
+    "section": "Residuos",
+    "text": "Residuos\nresiduals = (\n    fitted_model.resid\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#media-y-varianza-móviles",
-    "href": "time-series/decomposition-stationarity.html#media-y-varianza-móviles",
-    "title": "Descomposición y estacionariedad",
-    "section": "Media y varianza móviles",
-    "text": "Media y varianza móviles\nrolling_mean = (\n    daily_series\n    .rolling(\n        window=30\n    )\n    .mean()\n)\n\nrolling_std = (\n    daily_series\n    .rolling(\n        window=30\n    )\n    .std()\n)\nplt.figure(\n    figsize=(12, 6)\n)\n\nplt.plot(\n    daily_series,\n    label=\"Serie\"\n)\n\nplt.plot(\n    rolling_mean,\n    label=\"Media móvil\"\n)\n\nplt.plot(\n    rolling_std,\n    label=\"Desviación móvil\"\n)\n\nplt.legend()\n\nplt.show()",
+    "objectID": "time-series/exponential-smoothing.html#visualizar-residuos",
+    "href": "time-series/exponential-smoothing.html#visualizar-residuos",
+    "title": "Exponential smoothing",
+    "section": "Visualizar residuos",
+    "text": "Visualizar residuos\nplt.figure(\n    figsize=(12, 4)\n)\n\nplt.plot(\n    residuals\n)\n\nplt.axhline(\n    0,\n    linestyle=\"--\"\n)\n\nplt.title(\n    \"Residuos\"\n)\n\nplt.show()",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#augmented-dickey-fuller",
-    "href": "time-series/decomposition-stationarity.html#augmented-dickey-fuller",
-    "title": "Descomposición y estacionariedad",
-    "section": "Augmented Dickey-Fuller",
-    "text": "Augmented Dickey-Fuller\nEl test ADF evalúa la presencia de raíz unitaria.\nHipótesis:\nH₀\n→ existe raíz unitaria\n→ serie no estacionaria\n\nH₁\n→ serie estacionaria",
+    "objectID": "time-series/exponential-smoothing.html#acf-de-residuos",
+    "href": "time-series/exponential-smoothing.html#acf-de-residuos",
+    "title": "Exponential smoothing",
+    "section": "ACF de residuos",
+    "text": "ACF de residuos\nfrom statsmodels.graphics.tsaplots import plot_acf\n\nplot_acf(\n    residuals.dropna(),\n    lags=30\n)\n\nplt.show()",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#aplicar-adf",
-    "href": "time-series/decomposition-stationarity.html#aplicar-adf",
-    "title": "Descomposición y estacionariedad",
-    "section": "Aplicar ADF",
-    "text": "Aplicar ADF\nfrom statsmodels.tsa.stattools import adfuller\n\nadf_result = adfuller(\n    daily_series.dropna(),\n    autolag=\"AIC\"\n)",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#interpretar-adf",
-    "href": "time-series/decomposition-stationarity.html#interpretar-adf",
-    "title": "Descomposición y estacionariedad",
-    "section": "Interpretar ADF",
-    "text": "Interpretar ADF\nadf_statistic = adf_result[0]\n\np_value = adf_result[1]\n\nused_lags = adf_result[2]\n\nn_observations = adf_result[3]\n\ncritical_values = adf_result[4]\nprint(\n    \"ADF statistic:\",\n    adf_statistic\n)\n\nprint(\n    \"p-value:\",\n    p_value\n)\n\nprint(\n    \"Critical values:\",\n    critical_values\n)\nInterpretación habitual:\np &lt; 0.05\n→ rechazar H₀\n→ evidencia compatible con estacionariedad",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#kpss",
-    "href": "time-series/decomposition-stationarity.html#kpss",
-    "title": "Descomposición y estacionariedad",
-    "section": "KPSS",
-    "text": "KPSS\nEl test KPSS utiliza hipótesis opuestas.\nH₀\n→ serie estacionaria\n\nH₁\n→ serie no estacionaria",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#aplicar-kpss",
-    "href": "time-series/decomposition-stationarity.html#aplicar-kpss",
-    "title": "Descomposición y estacionariedad",
-    "section": "Aplicar KPSS",
-    "text": "Aplicar KPSS\nfrom statsmodels.tsa.stattools import kpss\n\nkpss_result = kpss(\n    daily_series.dropna(),\n    regression=\"c\",\n    nlags=\"auto\"\n)",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#interpretar-kpss",
-    "href": "time-series/decomposition-stationarity.html#interpretar-kpss",
-    "title": "Descomposición y estacionariedad",
-    "section": "Interpretar KPSS",
-    "text": "Interpretar KPSS\nkpss_statistic = kpss_result[0]\n\np_value = kpss_result[1]\n\nused_lags = kpss_result[2]\n\ncritical_values = kpss_result[3]\nprint(\n    \"KPSS statistic:\",\n    kpss_statistic\n)\n\nprint(\n    \"p-value:\",\n    p_value\n)\nInterpretación habitual:\np &lt; 0.05\n→ rechazar H₀\n→ evidencia de no estacionariedad",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#combinar-adf-y-kpss",
-    "href": "time-series/decomposition-stationarity.html#combinar-adf-y-kpss",
-    "title": "Descomposición y estacionariedad",
-    "section": "Combinar ADF y KPSS",
-    "text": "Combinar ADF y KPSS\n\n\n\n\n\n\n\n\nADF\nKPSS\nInterpretación orientativa\n\n\n\n\nRechaza H₀\nNo rechaza H₀\nCompatible con estacionariedad\n\n\nNo rechaza H₀\nRechaza H₀\nCompatible con no estacionariedad\n\n\nNo rechaza H₀\nNo rechaza H₀\nResultado inconcluso\n\n\nRechaza H₀\nRechaza H₀\nPosible cambio estructural o problema de especificación\n\n\n\n\n\n\n\n\n\nNoteBuena práctica\n\n\n\nCombina inspección visual, ADF, KPSS y conocimiento del dominio.",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#diferenciación",
-    "href": "time-series/decomposition-stationarity.html#diferenciación",
-    "title": "Descomposición y estacionariedad",
-    "section": "Diferenciación",
-    "text": "Diferenciación\nLa primera diferencia es:\n\\[\n\\Delta y_t\n=\ny_t-y_{t-1}\n\\]\nfirst_difference = (\n    daily_series\n    .diff()\n    .dropna()\n)",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#visualizar-la-primera-diferencia",
-    "href": "time-series/decomposition-stationarity.html#visualizar-la-primera-diferencia",
-    "title": "Descomposición y estacionariedad",
-    "section": "Visualizar la primera diferencia",
-    "text": "Visualizar la primera diferencia\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    first_difference\n)\n\nplt.title(\n    \"Primera diferencia\"\n)\n\nplt.show()",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#segunda-diferencia",
-    "href": "time-series/decomposition-stationarity.html#segunda-diferencia",
-    "title": "Descomposición y estacionariedad",
-    "section": "Segunda diferencia",
-    "text": "Segunda diferencia\nsecond_difference = (\n    daily_series\n    .diff()\n    .diff()\n    .dropna()\n)",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#riesgo-de-sobrediferenciación",
-    "href": "time-series/decomposition-stationarity.html#riesgo-de-sobrediferenciación",
-    "title": "Descomposición y estacionariedad",
-    "section": "Riesgo de sobrediferenciación",
-    "text": "Riesgo de sobrediferenciación\nAplicar demasiadas diferencias puede:\n\nAumentar ruido.\nEliminar señal.\nCrear autocorrelación negativa.\nEmpeorar forecasts.\n\n\n\n\n\n\n\nWarningRegla práctica\n\n\n\nUtiliza el mínimo número de diferencias necesario.",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#diferencia-estacional",
-    "href": "time-series/decomposition-stationarity.html#diferencia-estacional",
-    "title": "Descomposición y estacionariedad",
-    "section": "Diferencia estacional",
-    "text": "Diferencia estacional\nPara datos diarios con ciclo semanal:\n\\[\n\\Delta_7 y_t\n=\ny_t-y_{t-7}\n\\]\nseasonal_difference = (\n    daily_series\n    .diff(\n        7\n    )\n    .dropna()\n)",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#diferenciación-regular-y-estacional",
-    "href": "time-series/decomposition-stationarity.html#diferenciación-regular-y-estacional",
-    "title": "Descomposición y estacionariedad",
-    "section": "Diferenciación regular y estacional",
-    "text": "Diferenciación regular y estacional\ntransformed_series = (\n    daily_series\n    .diff()\n    .diff(\n        7\n    )\n    .dropna()\n)",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#transformación-logarítmica-y-diferencia",
-    "href": "time-series/decomposition-stationarity.html#transformación-logarítmica-y-diferencia",
-    "title": "Descomposición y estacionariedad",
-    "section": "Transformación logarítmica y diferencia",
-    "text": "Transformación logarítmica y diferencia\nlog_difference = (\n    np.log(\n        daily_series\n    )\n    .diff()\n    .dropna()\n)\nEsto aproxima una tasa de crecimiento.",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#box-cox",
-    "href": "time-series/decomposition-stationarity.html#box-cox",
-    "title": "Descomposición y estacionariedad",
-    "section": "Box-Cox",
-    "text": "Box-Cox\nBox-Cox puede estabilizar la varianza.\nfrom scipy.stats import boxcox\n\ntransformed_values, lambda_value = boxcox(\n    daily_series.dropna()\n)\nRequiere valores positivos.",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#autocorrelación",
-    "href": "time-series/decomposition-stationarity.html#autocorrelación",
-    "title": "Descomposición y estacionariedad",
-    "section": "Autocorrelación",
-    "text": "Autocorrelación\nLa autocorrelación mide la relación entre la serie y sus valores pasados.\n\\[\nCorr\n\\left(\ny_t,\ny_{t-k}\n\\right)\n\\]",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#acf",
-    "href": "time-series/decomposition-stationarity.html#acf",
-    "title": "Descomposición y estacionariedad",
-    "section": "ACF",
-    "text": "ACF\nfrom statsmodels.graphics.tsaplots import plot_acf\n\nplot_acf(\n    daily_series.dropna(),\n    lags=40\n)\n\nplt.show()",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#interpretar-acf",
-    "href": "time-series/decomposition-stationarity.html#interpretar-acf",
-    "title": "Descomposición y estacionariedad",
-    "section": "Interpretar ACF",
-    "text": "Interpretar ACF\nPuede mostrar:\n\nPersistencia.\nEstacionalidad.\nDecaimiento lento.\nEstructura MA.\nNo estacionariedad.",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#pacf",
-    "href": "time-series/decomposition-stationarity.html#pacf",
-    "title": "Descomposición y estacionariedad",
-    "section": "PACF",
-    "text": "PACF\nLa autocorrelación parcial mide la relación con un lag controlando los lags intermedios.\nfrom statsmodels.graphics.tsaplots import plot_pacf\n\nplot_pacf(\n    daily_series.dropna(),\n    lags=40,\n    method=\"ywm\"\n)\n\nplt.show()",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#acf-y-pacf",
-    "href": "time-series/decomposition-stationarity.html#acf-y-pacf",
-    "title": "Descomposición y estacionariedad",
-    "section": "ACF y PACF",
-    "text": "ACF y PACF\nSe utilizan como guía para identificar:\n\nOrden autoregresivo.\nOrden de media móvil.\nEstacionalidad.\nNecesidad de diferenciación.\n\nNo deben interpretarse como reglas automáticas.",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#patrón-de-tendencia-en-acf",
-    "href": "time-series/decomposition-stationarity.html#patrón-de-tendencia-en-acf",
-    "title": "Descomposición y estacionariedad",
-    "section": "Patrón de tendencia en ACF",
-    "text": "Patrón de tendencia en ACF\nUna ACF que disminuye lentamente puede sugerir:\n\nTendencia.\nRaíz unitaria.\nNo estacionariedad.",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#patrón-estacional-en-acf",
-    "href": "time-series/decomposition-stationarity.html#patrón-estacional-en-acf",
-    "title": "Descomposición y estacionariedad",
-    "section": "Patrón estacional en ACF",
-    "text": "Patrón estacional en ACF\nPicos en:\nlag 7\nlag 14\nlag 21\npueden sugerir estacionalidad semanal en datos diarios.",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#residuos-de-descomposición",
-    "href": "time-series/decomposition-stationarity.html#residuos-de-descomposición",
-    "title": "Descomposición y estacionariedad",
-    "section": "Residuos de descomposición",
-    "text": "Residuos de descomposición\nresidual = (\n    stl_result\n    .resid\n    .dropna()\n)",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#revisar-residuos",
-    "href": "time-series/decomposition-stationarity.html#revisar-residuos",
-    "title": "Descomposición y estacionariedad",
-    "section": "Revisar residuos",
-    "text": "Revisar residuos\nplot_acf(\n    residual,\n    lags=40\n)\n\nplt.show()\nSi persiste autocorrelación, queda estructura temporal sin explicar.",
-    "crumbs": [
-      "Sobre el proyecto",
-      "Series temporales",
-      "Descomposición y estacionariedad"
-    ]
-  },
-  {
-    "objectID": "time-series/decomposition-stationarity.html#ljung-box",
-    "href": "time-series/decomposition-stationarity.html#ljung-box",
-    "title": "Descomposición y estacionariedad",
+    "objectID": "time-series/exponential-smoothing.html#ljung-box",
+    "href": "time-series/exponential-smoothing.html#ljung-box",
+    "title": "Exponential smoothing",
     "section": "Ljung-Box",
-    "text": "Ljung-Box\nEvalúa autocorrelación conjunta en varios lags.\nfrom statsmodels.stats.diagnostic import acorr_ljungbox\n\nljung_box = acorr_ljungbox(\n    residual,\n    lags=[\n        7,\n        14,\n        21\n    ],\n    return_df=True\n)\n\ndisplay(\n    ljung_box\n)\nHipótesis:\nH₀\n→ no existe autocorrelación conjunta\nUn p-value pequeño sugiere dependencia residual.",
+    "text": "Ljung-Box\nfrom statsmodels.stats.diagnostic import acorr_ljungbox\n\nljung_box = acorr_ljungbox(\n    residuals.dropna(),\n    lags=[\n        7,\n        14,\n        21\n    ],\n    return_df=True\n)\n\ndisplay(\n    ljung_box\n)\nUn p-value pequeño sugiere autocorrelación residual.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#ruido-blanco",
-    "href": "time-series/decomposition-stationarity.html#ruido-blanco",
-    "title": "Descomposición y estacionariedad",
-    "section": "Ruido blanco",
-    "text": "Ruido blanco\nUn residuo parecido a ruido blanco tiene:\n\nMedia aproximadamente 0.\nVarianza estable.\nPoca autocorrelación.\nDistribución sin patrones temporales claros.",
+    "objectID": "time-series/exponential-smoothing.html#residuos-y-modelo-incompleto",
+    "href": "time-series/exponential-smoothing.html#residuos-y-modelo-incompleto",
+    "title": "Exponential smoothing",
+    "section": "Residuos y modelo incompleto",
+    "text": "Residuos y modelo incompleto\nSi queda autocorrelación puede faltar:\n\nTendencia.\nEstacionalidad.\nCambio estructural.\nVariables externas.\nOtra dinámica temporal.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#cambio-estructural",
-    "href": "time-series/decomposition-stationarity.html#cambio-estructural",
-    "title": "Descomposición y estacionariedad",
-    "section": "Cambio estructural",
-    "text": "Cambio estructural\nUna serie puede cambiar de comportamiento por:\n\nNuevo protocolo.\nNueva máquina.\nCambio poblacional.\nPandemia.\nCambio de codificación.\nIntervención clínica.",
+    "objectID": "time-series/exponential-smoothing.html#intervalos-de-predicción",
+    "href": "time-series/exponential-smoothing.html#intervalos-de-predicción",
+    "title": "Exponential smoothing",
+    "section": "Intervalos de predicción",
+    "text": "Intervalos de predicción\nLas clases Holt-Winters tradicionales no siempre ofrecen intervalos completos de forma directa en todos los workflows.\nUna aproximación simple puede basarse en la desviación de los residuos.\nimport numpy as np\n\nresidual_std = residuals.std()\n\nlower = (\n    forecast\n    -\n    1.96\n    *\n    residual_std\n)\n\nupper = (\n    forecast\n    +\n    1.96\n    *\n    residual_std\n)\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nEsta aproximación asume error aproximadamente constante y normal.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#visualizar-cambios",
-    "href": "time-series/decomposition-stationarity.html#visualizar-cambios",
-    "title": "Descomposición y estacionariedad",
-    "section": "Visualizar cambios",
-    "text": "Visualizar cambios\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    daily_series\n)\n\nplt.axvline(\n    pd.Timestamp(\n        \"2025-01-01\"\n    ),\n    linestyle=\"--\"\n)\n\nplt.show()",
+    "objectID": "time-series/exponential-smoothing.html#bootstrap-de-residuos",
+    "href": "time-series/exponential-smoothing.html#bootstrap-de-residuos",
+    "title": "Exponential smoothing",
+    "section": "Bootstrap de residuos",
+    "text": "Bootstrap de residuos\nUna alternativa es simular trayectorias añadiendo residuos re-muestreados.\nrng = np.random.default_rng(\n    42\n)\n\nsimulations = []\n\nfor _ in range(\n    1000\n):\n\n    sampled_residuals = rng.choice(\n        residuals.dropna(),\n        size=len(forecast),\n        replace=True\n    )\n\n    simulations.append(\n        forecast.values\n        +\n        sampled_residuals\n    )",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#cambio-de-nivel",
-    "href": "time-series/decomposition-stationarity.html#cambio-de-nivel",
-    "title": "Descomposición y estacionariedad",
-    "section": "Cambio de nivel",
-    "text": "Cambio de nivel\nAntes\n→ media 50\n\nDespués\n→ media 70",
+    "objectID": "time-series/exponential-smoothing.html#intervalos-simulados",
+    "href": "time-series/exponential-smoothing.html#intervalos-simulados",
+    "title": "Exponential smoothing",
+    "section": "Intervalos simulados",
+    "text": "Intervalos simulados\nsimulation_array = np.array(\n    simulations\n)\n\nlower = np.percentile(\n    simulation_array,\n    2.5,\n    axis=0\n)\n\nupper = np.percentile(\n    simulation_array,\n    97.5,\n    axis=0\n)",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#cambio-de-pendiente",
-    "href": "time-series/decomposition-stationarity.html#cambio-de-pendiente",
-    "title": "Descomposición y estacionariedad",
-    "section": "Cambio de pendiente",
-    "text": "Cambio de pendiente\nAntes\n→ estable\n\nDespués\n→ tendencia creciente",
+    "objectID": "time-series/exponential-smoothing.html#variables-externas",
+    "href": "time-series/exponential-smoothing.html#variables-externas",
+    "title": "Exponential smoothing",
+    "section": "Variables externas",
+    "text": "Variables externas\nExponential smoothing clásico utiliza únicamente la serie objetivo.\nNo incorpora directamente:\n\nFestivos.\nTratamientos.\nTemperatura.\nCentro.\nCambios de protocolo.\n\nPara variables externas pueden utilizarse:\n\nRegresión dinámica.\nSARIMAX.\nProphet.\nMachine learning.\nModelos híbridos.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#cambio-de-varianza",
-    "href": "time-series/decomposition-stationarity.html#cambio-de-varianza",
-    "title": "Descomposición y estacionariedad",
-    "section": "Cambio de varianza",
-    "text": "Cambio de varianza\nAntes\n→ poca dispersión\n\nDespués\n→ alta variabilidad",
+    "objectID": "time-series/exponential-smoothing.html#cambios-estructurales",
+    "href": "time-series/exponential-smoothing.html#cambios-estructurales",
+    "title": "Exponential smoothing",
+    "section": "Cambios estructurales",
+    "text": "Cambios estructurales\nEstos modelos pueden adaptarse lentamente tras:\n\nCambios de protocolo.\nPandemias.\nNueva tecnología.\nCambios organizativos.\n\nPuede ser necesario:\n\nReentrenar.\nUsar ventana móvil.\nAñadir intervención.\nCambiar modelo.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#estacionariedad-local",
-    "href": "time-series/decomposition-stationarity.html#estacionariedad-local",
-    "title": "Descomposición y estacionariedad",
-    "section": "Estacionariedad local",
-    "text": "Estacionariedad local\nUna serie puede no ser estacionaria globalmente, pero sí dentro de ventanas o periodos concretos.\nEsto puede justificar:\n\nModelos con ventana móvil.\nRetraining periódico.\nSegmentación temporal.\nModelos de cambio de régimen.",
+    "objectID": "time-series/exponential-smoothing.html#ventajas",
+    "href": "time-series/exponential-smoothing.html#ventajas",
+    "title": "Exponential smoothing",
+    "section": "Ventajas",
+    "text": "Ventajas\n\nSimples.\nInterpretables.\nRápidos.\nBuenos baselines.\nFuncionan bien con nivel, tendencia y estacionalidad.\nRequieren pocos datos.\nFáciles de actualizar.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#estacionariedad-y-machine-learning",
-    "href": "time-series/decomposition-stationarity.html#estacionariedad-y-machine-learning",
-    "title": "Descomposición y estacionariedad",
-    "section": "Estacionariedad y machine learning",
-    "text": "Estacionariedad y machine learning\nLos modelos de árboles no exigen estacionariedad de la misma forma que ARIMA.\nPero siguen siendo sensibles a:\n\nDrift.\nCambios de distribución.\nTendencias no representadas.\nExtrapolación.\nLeakage temporal.",
+    "objectID": "time-series/exponential-smoothing.html#limitaciones",
+    "href": "time-series/exponential-smoothing.html#limitaciones",
+    "title": "Exponential smoothing",
+    "section": "Limitaciones",
+    "text": "Limitaciones\n\nUna sola estacionalidad principal.\nSin variables externas en la formulación básica.\nSensibles a cambios estructurales.\nPueden extrapolar tendencias de forma poco realista.\nRequieren frecuencia regular.\nMenos flexibles ante relaciones complejas.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#descomposición-como-feature-engineering",
-    "href": "time-series/decomposition-stationarity.html#descomposición-como-feature-engineering",
-    "title": "Descomposición y estacionariedad",
-    "section": "Descomposición como feature engineering",
-    "text": "Descomposición como feature engineering\nPueden utilizarse:\n\nTendencia estimada.\nComponente estacional.\nResiduo.\nÍndice estacional.\nDistancia a tendencia.\n\nPero solo si pueden calcularse con información disponible en tiempo real.",
+    "objectID": "time-series/exponential-smoothing.html#comparación-con-naive",
+    "href": "time-series/exponential-smoothing.html#comparación-con-naive",
+    "title": "Exponential smoothing",
+    "section": "Comparación con naive",
+    "text": "Comparación con naive\nUn modelo complejo debe superar claramente:\n\nÚltimo valor.\nMedia.\nSeasonal naive.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#descomposición-retrospectiva-vs-predictiva",
-    "href": "time-series/decomposition-stationarity.html#descomposición-retrospectiva-vs-predictiva",
-    "title": "Descomposición y estacionariedad",
-    "section": "Descomposición retrospectiva vs predictiva",
-    "text": "Descomposición retrospectiva vs predictiva\nDescomposición centrada\n→ usa pasado y futuro\n→ adecuada para análisis descriptivo\n\nDescomposición causal\n→ usa solo pasado\n→ necesaria para predicción en tiempo real",
+    "objectID": "time-series/exponential-smoothing.html#seasonal-naive",
+    "href": "time-series/exponential-smoothing.html#seasonal-naive",
+    "title": "Exponential smoothing",
+    "section": "Seasonal naive",
+    "text": "Seasonal naive\nPara estacionalidad semanal:\nseasonal_naive = (\n    test\n    .copy()\n)\n\nseasonal_naive[:] = daily_series.shift(\n    7\n).loc[\n    test.index\n]",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#consideraciones-clínicas",
-    "href": "time-series/decomposition-stationarity.html#consideraciones-clínicas",
-    "title": "Descomposición y estacionariedad",
+    "objectID": "time-series/exponential-smoothing.html#comparar-métricas",
+    "href": "time-series/exponential-smoothing.html#comparar-métricas",
+    "title": "Exponential smoothing",
+    "section": "Comparar métricas",
+    "text": "Comparar métricas\nresults = pd.DataFrame(\n    {\n        \"model\": [\n            \"naive\",\n            \"seasonal_naive\",\n            \"holt_winters\"\n        ],\n        \"mae\": [\n            naive_mae,\n            mean_absolute_error(\n                test,\n                seasonal_naive\n            ),\n            mean_absolute_error(\n                test,\n                forecast\n            )\n        ]\n    }\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/exponential-smoothing.html#consideraciones-clínicas",
+    "href": "time-series/exponential-smoothing.html#consideraciones-clínicas",
+    "title": "Exponential smoothing",
     "section": "Consideraciones clínicas",
-    "text": "Consideraciones clínicas\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nUna tendencia o estacionalidad puede reflejar tanto biología como organización asistencial.\n\n\nEjemplos:\n\nCambios por ciclos de tratamiento.\nMás pruebas en pacientes inestables.\nPatrones semanales de actividad.\nCambios por protocolos.\nDiferencias entre centros.",
+    "text": "Consideraciones clínicas\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nExponential smoothing es especialmente útil para previsiones agregadas y operativas, como demanda, ocupación o actividad asistencial.\n\n\nEjemplos:\n\nOcupación de camas.\nNúmero de urgencias.\nDemanda de personal.\nUso de recursos.\nVolumen de pruebas.\nConsumo de medicación.\n\nDebe revisarse:\n\nHorizonte.\nFrecuencia.\nEstacionalidad.\nCambios de protocolo.\nCobertura de intervalos.\nError en periodos críticos.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#errores-frecuentes",
-    "href": "time-series/decomposition-stationarity.html#errores-frecuentes",
-    "title": "Descomposición y estacionariedad",
+    "objectID": "time-series/exponential-smoothing.html#errores-frecuentes",
+    "href": "time-series/exponential-smoothing.html#errores-frecuentes",
+    "title": "Exponential smoothing",
     "section": "Errores frecuentes",
-    "text": "Errores frecuentes\n\nNo definir el periodo.\nAplicar descomposición a una serie irregular sin revisar.\nConfundir ciclo con estacionalidad.\nUsar una media centrada como feature predictiva.\nInterpretar un test aislado.\nDiferenciar demasiadas veces.\nIgnorar cambios estructurales.\nNo revisar ACF de residuos.\nUsar modelo multiplicativo con ceros.\nNo estabilizar varianza.\nIgnorar múltiples estacionalidades.\nConfundir estacionariedad con ausencia total de estructura.",
+    "text": "Errores frecuentes\n\nNo comparar con naive.\nElegir periodo incorrecto.\nUsar multiplicativo con ceros.\nIgnorar varias estacionalidades.\nUsar split aleatorio.\nNo revisar residuos.\nExtrapolar tendencia indefinidamente.\nNo evaluar por horizonte.\nNo revisar cambios estructurales.\nSeleccionar modelo solo por AIC.\nNo cuantificar incertidumbre.\nUsar imputación con información futura.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#flujo-recomendado",
-    "href": "time-series/decomposition-stationarity.html#flujo-recomendado",
-    "title": "Descomposición y estacionariedad",
+    "objectID": "time-series/exponential-smoothing.html#flujo-recomendado",
+    "href": "time-series/exponential-smoothing.html#flujo-recomendado",
+    "title": "Exponential smoothing",
     "section": "Flujo recomendado",
-    "text": "Flujo recomendado\n\nVisualizar la serie.\nConfirmar frecuencia.\nRevisar valores ausentes.\nIdentificar tendencia.\nIdentificar estacionalidad.\nAplicar STL.\nRevisar residuos.\nEvaluar ADF y KPSS.\nProbar transformaciones.\nAplicar diferenciación mínima.\nRevisar ACF y PACF.\nDocumentar cambios estructurales.",
+    "text": "Flujo recomendado\n\nVisualizar la serie.\nDefinir frecuencia.\nIdentificar tendencia.\nIdentificar estacionalidad.\nCrear naive baseline.\nProbar SES.\nProbar Holt.\nProbar tendencia amortiguada.\nProbar Holt-Winters.\nAplicar backtesting.\nRevisar residuos.\nEvaluar intervalos.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#checklist-para-proyectos",
-    "href": "time-series/decomposition-stationarity.html#checklist-para-proyectos",
-    "title": "Descomposición y estacionariedad",
+    "objectID": "time-series/exponential-smoothing.html#checklist-para-proyectos",
+    "href": "time-series/exponential-smoothing.html#checklist-para-proyectos",
+    "title": "Exponential smoothing",
     "section": "Checklist para proyectos",
-    "text": "Checklist para proyectos\n\nHe definido la frecuencia.\nHe justificado el periodo.\nHe visualizado la serie.\nHe evaluado tendencia.\nHe evaluado estacionalidad.\nHe aplicado descomposición.\nHe revisado residuos.\nHe ejecutado ADF.\nHe ejecutado KPSS.\nHe revisado ACF.\nHe revisado PACF.\nHe aplicado el mínimo de diferencias.\nHe considerado transformación logarítmica.\nHe revisado cambios estructurales.\nHe evitado usar información futura.",
+    "text": "Checklist para proyectos\n\nHe definido la frecuencia.\nHe definido el periodo estacional.\nHe creado un baseline naive.\nHe probado SES.\nHe probado Holt.\nHe probado tendencia amortiguada.\nHe probado Holt-Winters.\nHe comparado modelos en validation.\nHe aplicado backtesting.\nHe revisado residuos.\nHe revisado ACF residual.\nHe evaluado por horizonte.\nHe calculado intervalos.\nHe revisado cambios estructurales.\nHe comparado con seasonal naive.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#recursos",
-    "href": "time-series/decomposition-stationarity.html#recursos",
-    "title": "Descomposición y estacionariedad",
+    "objectID": "time-series/exponential-smoothing.html#recursos",
+    "href": "time-series/exponential-smoothing.html#recursos",
+    "title": "Exponential smoothing",
     "section": "Recursos",
-    "text": "Recursos\n\nDocumentación\n\nseasonal_decompose.\nSTL.\nadfuller.\nkpss.\nplot_acf.\nplot_pacf.\nacorr_ljungbox.\nSeries.diff.\nSeries.rolling.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "text": "Recursos\n\nDocumentación\n\nSimpleExpSmoothing.\nHolt.\nExponentialSmoothing.\nseasonal_decompose.\nacorr_ljungbox.\nMétricas de forecasting.\nBacktesting temporal.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
     ]
   },
   {
-    "objectID": "time-series/decomposition-stationarity.html#notas-personales",
-    "href": "time-series/decomposition-stationarity.html#notas-personales",
-    "title": "Descomposición y estacionariedad",
+    "objectID": "time-series/exponential-smoothing.html#notas-personales",
+    "href": "time-series/exponential-smoothing.html#notas-personales",
+    "title": "Exponential smoothing",
     "section": "Notas personales",
-    "text": "Notas personales\nAñade aquí tus periodos, descomposiciones, tests, transformaciones y decisiones metodológicas.",
+    "text": "Notas personales\nAñade aquí tus modelos SES, Holt, Holt-Winters, periodos, métricas y decisiones.",
     "crumbs": [
       "Sobre el proyecto",
       "Series temporales",
-      "Descomposición y estacionariedad"
+      "Exponential smoothing"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html",
+    "href": "time-series/arima-sarima.html",
+    "title": "ARIMA y SARIMA",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nARIMA modela una serie temporal mediante tres componentes:\n\nAR: dependencia de valores pasados.\nI: diferenciación para lograr estacionariedad.\nMA: dependencia de errores pasados.\n\nSARIMA añade estacionalidad.\nSARIMAX permite además incorporar variables externas.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#qué-significa-arima",
+    "href": "time-series/arima-sarima.html#qué-significa-arima",
+    "title": "ARIMA y SARIMA",
+    "section": "¿Qué significa ARIMA?",
+    "text": "¿Qué significa ARIMA?\nARIMA significa:\nAutoRegressive\nIntegrated\nMoving Average\nSe representa como:\n\\[\nARIMA(p,d,q)\n\\]\ndonde:\n\n(p): orden autoregresivo.\n(d): número de diferencias.\n(q): orden de media móvil.\n\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nARIMA combina memoria de la propia serie, diferenciación y errores pasados.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#componente-ar",
+    "href": "time-series/arima-sarima.html#componente-ar",
+    "title": "ARIMA y SARIMA",
+    "section": "Componente AR",
+    "text": "Componente AR\nEl componente autoregresivo utiliza valores pasados.\nUn AR(1) puede escribirse como:\n\\[\ny_t\n=\nc\n+\n\\phi_1 y_{t-1}\n+\n\\varepsilon_t\n\\]\nInterpretación:\nValor actual\n≈\nconstante\n+\nvalor anterior\n+\nerror",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#arp",
+    "href": "time-series/arima-sarima.html#arp",
+    "title": "ARIMA y SARIMA",
+    "section": "AR(p)",
+    "text": "AR(p)\n\\[\ny_t\n=\nc\n+\n\\phi_1 y_{t-1}\n+\n\\phi_2 y_{t-2}\n+\n\\cdots\n+\n\\phi_p y_{t-p}\n+\n\\varepsilon_t\n\\]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#componente-i",
+    "href": "time-series/arima-sarima.html#componente-i",
+    "title": "ARIMA y SARIMA",
+    "section": "Componente I",
+    "text": "Componente I\nLa parte integrada aplica diferencias.\nPrimera diferencia:\n\\[\n\\Delta y_t\n=\ny_t-y_{t-1}\n\\]\ndifferenced = (\n    series\n    .diff()\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#componente-ma",
+    "href": "time-series/arima-sarima.html#componente-ma",
+    "title": "ARIMA y SARIMA",
+    "section": "Componente MA",
+    "text": "Componente MA\nEl componente de media móvil utiliza errores pasados.\nUn MA(1) puede escribirse como:\n\\[\ny_t\n=\n\\mu\n+\n\\varepsilon_t\n+\n\\theta_1 \\varepsilon_{t-1}\n\\]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#arima-completo",
+    "href": "time-series/arima-sarima.html#arima-completo",
+    "title": "ARIMA y SARIMA",
+    "section": "ARIMA completo",
+    "text": "ARIMA completo\nUn ARIMA combina:\n\nLags de la serie.\nDiferenciación.\nLags de los errores.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#preparar-la-serie",
+    "href": "time-series/arima-sarima.html#preparar-la-serie",
+    "title": "ARIMA y SARIMA",
+    "section": "Preparar la serie",
+    "text": "Preparar la serie\nimport pandas as pd\n\nseries = (\n    df\n    .set_index(\"datetime\")[\n        \"value\"\n    ]\n    .sort_index()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#regularizar-frecuencia",
+    "href": "time-series/arima-sarima.html#regularizar-frecuencia",
+    "title": "ARIMA y SARIMA",
+    "section": "Regularizar frecuencia",
+    "text": "Regularizar frecuencia\ndaily_series = (\n    series\n    .resample(\"D\")\n    .mean()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#tratar-ausentes",
+    "href": "time-series/arima-sarima.html#tratar-ausentes",
+    "title": "ARIMA y SARIMA",
+    "section": "Tratar ausentes",
+    "text": "Tratar ausentes\ndaily_series = (\n    daily_series\n    .interpolate(\n        method=\"time\"\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#split-temporal",
+    "href": "time-series/arima-sarima.html#split-temporal",
+    "title": "ARIMA y SARIMA",
+    "section": "Split temporal",
+    "text": "Split temporal\ntrain = daily_series.loc[\n    daily_series.index\n    &lt;\n    \"2025-07-01\"\n]\n\ntest = daily_series.loc[\n    daily_series.index\n    &gt;=\n    \"2025-07-01\"\n]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#revisar-estacionariedad",
+    "href": "time-series/arima-sarima.html#revisar-estacionariedad",
+    "title": "ARIMA y SARIMA",
+    "section": "Revisar estacionariedad",
+    "text": "Revisar estacionariedad\nfrom statsmodels.tsa.stattools import adfuller\n\nadf_result = adfuller(\n    train.dropna(),\n    autolag=\"AIC\"\n)\n\nprint(\n    adf_result[1]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#diferenciación",
+    "href": "time-series/arima-sarima.html#diferenciación",
+    "title": "ARIMA y SARIMA",
+    "section": "Diferenciación",
+    "text": "Diferenciación\ntrain_diff = (\n    train\n    .diff()\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#elegir-d",
+    "href": "time-series/arima-sarima.html#elegir-d",
+    "title": "ARIMA y SARIMA",
+    "section": "Elegir d",
+    "text": "Elegir d\nUna guía práctica:\nSerie estacionaria\n→ d = 0\n\nUna diferencia suficiente\n→ d = 1\n\nDos diferencias necesarias\n→ d = 2\n\n\n\n\n\n\nWarningPrecaución\n\n\n\nValores altos de d pueden sobrediferenciar la serie.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#acf-y-pacf",
+    "href": "time-series/arima-sarima.html#acf-y-pacf",
+    "title": "ARIMA y SARIMA",
+    "section": "ACF y PACF",
+    "text": "ACF y PACF\nACF y PACF ayudan a orientar la elección de (p) y (q).",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#acf",
+    "href": "time-series/arima-sarima.html#acf",
+    "title": "ARIMA y SARIMA",
+    "section": "ACF",
+    "text": "ACF\nfrom statsmodels.graphics.tsaplots import plot_acf\nimport matplotlib.pyplot as plt\n\nplot_acf(\n    train_diff,\n    lags=40\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#pacf",
+    "href": "time-series/arima-sarima.html#pacf",
+    "title": "ARIMA y SARIMA",
+    "section": "PACF",
+    "text": "PACF\nfrom statsmodels.graphics.tsaplots import plot_pacf\n\nplot_pacf(\n    train_diff,\n    lags=40,\n    method=\"ywm\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#interpretación-orientativa",
+    "href": "time-series/arima-sarima.html#interpretación-orientativa",
+    "title": "ARIMA y SARIMA",
+    "section": "Interpretación orientativa",
+    "text": "Interpretación orientativa\nPACF corta tras lag p\n→ posible AR(p)\n\nACF corta tras lag q\n→ posible MA(q)\n\nAmbas decaen\n→ posible ARMA\nNo son reglas absolutas.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#entrenar-arima",
+    "href": "time-series/arima-sarima.html#entrenar-arima",
+    "title": "ARIMA y SARIMA",
+    "section": "Entrenar ARIMA",
+    "text": "Entrenar ARIMA\nfrom statsmodels.tsa.arima.model import ARIMA\n\nmodel = ARIMA(\n    train,\n    order=(\n        1,\n        1,\n        1\n    )\n)\n\nfitted_model = model.fit()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#resumen-del-modelo",
+    "href": "time-series/arima-sarima.html#resumen-del-modelo",
+    "title": "ARIMA y SARIMA",
+    "section": "Resumen del modelo",
+    "text": "Resumen del modelo\nprint(\n    fitted_model.summary()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#forecast",
+    "href": "time-series/arima-sarima.html#forecast",
+    "title": "ARIMA y SARIMA",
+    "section": "Forecast",
+    "text": "Forecast\nforecast_result = fitted_model.get_forecast(\n    steps=len(test)\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#predicción-media",
+    "href": "time-series/arima-sarima.html#predicción-media",
+    "title": "ARIMA y SARIMA",
+    "section": "Predicción media",
+    "text": "Predicción media\nforecast_mean = (\n    forecast_result\n    .predicted_mean\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#intervalo-de-confianza",
+    "href": "time-series/arima-sarima.html#intervalo-de-confianza",
+    "title": "ARIMA y SARIMA",
+    "section": "Intervalo de confianza",
+    "text": "Intervalo de confianza\nforecast_interval = (\n    forecast_result\n    .conf_int(\n        alpha=0.05\n    )\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#visualizar-forecast",
+    "href": "time-series/arima-sarima.html#visualizar-forecast",
+    "title": "ARIMA y SARIMA",
+    "section": "Visualizar forecast",
+    "text": "Visualizar forecast\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    train.index,\n    train.values,\n    label=\"Train\"\n)\n\nplt.plot(\n    test.index,\n    test.values,\n    label=\"Test\"\n)\n\nplt.plot(\n    forecast_mean.index,\n    forecast_mean.values,\n    label=\"Forecast\"\n)\n\nplt.fill_between(\n    forecast_interval.index,\n    forecast_interval.iloc[\n        :,\n        0\n    ],\n    forecast_interval.iloc[\n        :,\n        1\n    ],\n    alpha=0.2\n)\n\nplt.legend()\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#evaluar",
+    "href": "time-series/arima-sarima.html#evaluar",
+    "title": "ARIMA y SARIMA",
+    "section": "Evaluar",
+    "text": "Evaluar\nfrom sklearn.metrics import mean_absolute_error\nfrom sklearn.metrics import root_mean_squared_error\n\nmae = mean_absolute_error(\n    test,\n    forecast_mean\n)\n\nrmse = root_mean_squared_error(\n    test,\n    forecast_mean\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#comparar-con-baseline",
+    "href": "time-series/arima-sarima.html#comparar-con-baseline",
+    "title": "ARIMA y SARIMA",
+    "section": "Comparar con baseline",
+    "text": "Comparar con baseline\nnaive_forecast = pd.Series(\n    train.iloc[-1],\n    index=test.index\n)\n\nnaive_mae = mean_absolute_error(\n    test,\n    naive_forecast\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#selección-de-órdenes",
+    "href": "time-series/arima-sarima.html#selección-de-órdenes",
+    "title": "ARIMA y SARIMA",
+    "section": "Selección de órdenes",
+    "text": "Selección de órdenes\nPuede probarse una cuadrícula de valores.\nimport itertools\nimport pandas as pd\n\np_values = range(\n    0,\n    4\n)\n\nd_values = range(\n    0,\n    3\n)\n\nq_values = range(\n    0,\n    4\n)\n\nrows = []\n\nfor p, d, q in itertools.product(\n    p_values,\n    d_values,\n    q_values\n):\n\n    try:\n\n        model = ARIMA(\n            train,\n            order=(\n                p,\n                d,\n                q\n            )\n        )\n\n        fitted = model.fit()\n\n        rows.append(\n            {\n                \"p\": p,\n                \"d\": d,\n                \"q\": q,\n                \"aic\": fitted.aic,\n                \"bic\": fitted.bic\n            }\n        )\n\n    except Exception:\n\n        continue\n\norder_table = pd.DataFrame(\n    rows\n).sort_values(\n    \"aic\"\n)\n\ndisplay(\n    order_table.head(10)\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#aic-y-bic",
+    "href": "time-series/arima-sarima.html#aic-y-bic",
+    "title": "ARIMA y SARIMA",
+    "section": "AIC y BIC",
+    "text": "AIC y BIC\nValores menores suelen ser preferibles.\nPero la selección final debe basarse también en:\n\nBacktesting.\nEstabilidad.\nResiduos.\nInterpretabilidad.\nError por horizonte.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#diagnóstico-de-residuos",
+    "href": "time-series/arima-sarima.html#diagnóstico-de-residuos",
+    "title": "ARIMA y SARIMA",
+    "section": "Diagnóstico de residuos",
+    "text": "Diagnóstico de residuos\nresiduals = (\n    fitted_model\n    .resid\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#visualizar-residuos",
+    "href": "time-series/arima-sarima.html#visualizar-residuos",
+    "title": "ARIMA y SARIMA",
+    "section": "Visualizar residuos",
+    "text": "Visualizar residuos\nplt.figure(\n    figsize=(12, 4)\n)\n\nplt.plot(\n    residuals\n)\n\nplt.axhline(\n    0,\n    linestyle=\"--\"\n)\n\nplt.title(\n    \"Residuos del modelo\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#acf-residual",
+    "href": "time-series/arima-sarima.html#acf-residual",
+    "title": "ARIMA y SARIMA",
+    "section": "ACF residual",
+    "text": "ACF residual\nplot_acf(\n    residuals,\n    lags=30\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#ljung-box",
+    "href": "time-series/arima-sarima.html#ljung-box",
+    "title": "ARIMA y SARIMA",
+    "section": "Ljung-Box",
+    "text": "Ljung-Box\nfrom statsmodels.stats.diagnostic import acorr_ljungbox\n\nljung_box = acorr_ljungbox(\n    residuals,\n    lags=[\n        7,\n        14,\n        21\n    ],\n    return_df=True\n)\n\ndisplay(\n    ljung_box\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#residuos-ideales",
+    "href": "time-series/arima-sarima.html#residuos-ideales",
+    "title": "ARIMA y SARIMA",
+    "section": "Residuos ideales",
+    "text": "Residuos ideales\nDeberían mostrar:\n\nMedia cercana a 0.\nVarianza estable.\nPoca autocorrelación.\nAusencia de estructura clara.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#sarima",
+    "href": "time-series/arima-sarima.html#sarima",
+    "title": "ARIMA y SARIMA",
+    "section": "SARIMA",
+    "text": "SARIMA\nSARIMA añade una componente estacional.\nSe representa como:\n\\[\nSARIMA(p,d,q)(P,D,Q)_s\n\\]\ndonde:\n\n(P): orden AR estacional.\n(D): diferenciación estacional.\n(Q): orden MA estacional.\n(s): periodo estacional.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#ejemplo-semanal",
+    "href": "time-series/arima-sarima.html#ejemplo-semanal",
+    "title": "ARIMA y SARIMA",
+    "section": "Ejemplo semanal",
+    "text": "Ejemplo semanal\nCon datos diarios y ciclo semanal:\ns = 7",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#sarimax",
+    "href": "time-series/arima-sarima.html#sarimax",
+    "title": "ARIMA y SARIMA",
+    "section": "SARIMAX",
+    "text": "SARIMAX\nEn statsmodels, SARIMA se implementa mediante SARIMAX.\nfrom statsmodels.tsa.statespace.sarimax import SARIMAX\n\nmodel = SARIMAX(\n    train,\n    order=(\n        1,\n        1,\n        1\n    ),\n    seasonal_order=(\n        1,\n        1,\n        1,\n        7\n    ),\n    enforce_stationarity=False,\n    enforce_invertibility=False\n)\n\nfitted_model = model.fit(\n    disp=False\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#forecast-sarima",
+    "href": "time-series/arima-sarima.html#forecast-sarima",
+    "title": "ARIMA y SARIMA",
+    "section": "Forecast SARIMA",
+    "text": "Forecast SARIMA\nforecast_result = fitted_model.get_forecast(\n    steps=len(test)\n)\n\nforecast_mean = (\n    forecast_result\n    .predicted_mean\n)\n\nforecast_interval = (\n    forecast_result\n    .conf_int()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#diferenciación-estacional",
+    "href": "time-series/arima-sarima.html#diferenciación-estacional",
+    "title": "ARIMA y SARIMA",
+    "section": "Diferenciación estacional",
+    "text": "Diferenciación estacional\n\\[\n\\Delta_s y_t\n=\ny_t-y_{t-s}\n\\]\nseasonal_difference = (\n    train\n    .diff(\n        7\n    )\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#elegir-d-1",
+    "href": "time-series/arima-sarima.html#elegir-d-1",
+    "title": "ARIMA y SARIMA",
+    "section": "Elegir D",
+    "text": "Elegir D\nSin estacionalidad no estacionaria\n→ D = 0\n\nUna diferencia estacional suficiente\n→ D = 1",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#acf-estacional",
+    "href": "time-series/arima-sarima.html#acf-estacional",
+    "title": "ARIMA y SARIMA",
+    "section": "ACF estacional",
+    "text": "ACF estacional\nPicos en:\nlag 7\nlag 14\nlag 21\npueden sugerir estructura semanal.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#comparar-arima-y-sarima",
+    "href": "time-series/arima-sarima.html#comparar-arima-y-sarima",
+    "title": "ARIMA y SARIMA",
+    "section": "Comparar ARIMA y SARIMA",
+    "text": "Comparar ARIMA y SARIMA\nresults = pd.DataFrame(\n    [\n        {\n            \"model\": \"ARIMA\",\n            \"mae\": arima_mae,\n            \"aic\": arima_model.aic\n        },\n        {\n            \"model\": \"SARIMA\",\n            \"mae\": sarima_mae,\n            \"aic\": sarima_model.aic\n        }\n    ]\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#sarimax-con-variables-externas",
+    "href": "time-series/arima-sarima.html#sarimax-con-variables-externas",
+    "title": "ARIMA y SARIMA",
+    "section": "SARIMAX con variables externas",
+    "text": "SARIMAX con variables externas\nSARIMAX puede incorporar variables exógenas.\nEjemplos:\n\nFestivos.\nTemperatura.\nIntervenciones.\nDía de la semana.\nCambios de protocolo.\nTratamientos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#preparar-exógenas",
+    "href": "time-series/arima-sarima.html#preparar-exógenas",
+    "title": "ARIMA y SARIMA",
+    "section": "Preparar exógenas",
+    "text": "Preparar exógenas\nexogenous_features = [\n    \"is_weekend\",\n    \"holiday\",\n    \"temperature\"\n]\n\nX_train = train_df[\n    exogenous_features\n]\n\nX_test = test_df[\n    exogenous_features\n]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#entrenar-sarimax",
+    "href": "time-series/arima-sarima.html#entrenar-sarimax",
+    "title": "ARIMA y SARIMA",
+    "section": "Entrenar SARIMAX",
+    "text": "Entrenar SARIMAX\nmodel = SARIMAX(\n    train_df[\"target\"],\n    exog=X_train,\n    order=(\n        1,\n        1,\n        1\n    ),\n    seasonal_order=(\n        1,\n        1,\n        1,\n        7\n    ),\n    enforce_stationarity=False,\n    enforce_invertibility=False\n)\n\nfitted_model = model.fit(\n    disp=False\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#forecast-con-exógenas",
+    "href": "time-series/arima-sarima.html#forecast-con-exógenas",
+    "title": "ARIMA y SARIMA",
+    "section": "Forecast con exógenas",
+    "text": "Forecast con exógenas\nforecast_result = fitted_model.get_forecast(\n    steps=len(test_df),\n    exog=X_test\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#requisito-clave",
+    "href": "time-series/arima-sarima.html#requisito-clave",
+    "title": "ARIMA y SARIMA",
+    "section": "Requisito clave",
+    "text": "Requisito clave\nPara predecir el futuro deben conocerse también los valores futuros de las variables externas.\nFestivo futuro\n→ conocido\n\nTemperatura futura\n→ requiere forecast o escenario\n\nTratamiento futuro\n→ puede no conocerse\n\n\n\n\n\n\nWarningImportante\n\n\n\nNo incluyas variables exógenas futuras que no estarán disponibles en producción.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#variables-de-intervención",
+    "href": "time-series/arima-sarima.html#variables-de-intervención",
+    "title": "ARIMA y SARIMA",
+    "section": "Variables de intervención",
+    "text": "Variables de intervención\nPuede modelarse un cambio de protocolo.\ndf[\n    \"post_protocol_change\"\n] = (\n    df.index\n    &gt;=\n    pd.Timestamp(\n        \"2025-01-01\"\n    )\n).astype(int)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#variable-pulso",
+    "href": "time-series/arima-sarima.html#variable-pulso",
+    "title": "ARIMA y SARIMA",
+    "section": "Variable pulso",
+    "text": "Variable pulso\ndf[\n    \"special_event\"\n] = (\n    df.index\n    ==\n    pd.Timestamp(\n        \"2025-03-15\"\n    )\n).astype(int)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#regresión-con-errores-arima",
+    "href": "time-series/arima-sarima.html#regresión-con-errores-arima",
+    "title": "ARIMA y SARIMA",
+    "section": "Regresión con errores ARIMA",
+    "text": "Regresión con errores ARIMA\nSARIMAX puede interpretarse como:\nRegresión con variables externas\n+\nestructura temporal en los errores",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#backtesting",
+    "href": "time-series/arima-sarima.html#backtesting",
+    "title": "ARIMA y SARIMA",
+    "section": "Backtesting",
+    "text": "Backtesting\nLa selección debe evaluarse en varios cortes temporales.\nforecast_horizon = 7\n\nrows = []\n\nfor cutoff in range(\n    100,\n    len(daily_series)\n    -\n    forecast_horizon,\n    7\n):\n\n    train_fold = daily_series.iloc[\n        :cutoff\n    ]\n\n    test_fold = daily_series.iloc[\n        cutoff:\n        cutoff\n        +\n        forecast_horizon\n    ]\n\n    model = SARIMAX(\n        train_fold,\n        order=(\n            1,\n            1,\n            1\n        ),\n        seasonal_order=(\n            1,\n            1,\n            1,\n            7\n        ),\n        enforce_stationarity=False,\n        enforce_invertibility=False\n    )\n\n    fitted = model.fit(\n        disp=False\n    )\n\n    forecast = fitted.forecast(\n        steps=forecast_horizon\n    )\n\n    rows.append(\n        {\n            \"cutoff\": train_fold.index[-1],\n            \"mae\": mean_absolute_error(\n                test_fold,\n                forecast\n            )\n        }\n    )",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#error-por-horizonte",
+    "href": "time-series/arima-sarima.html#error-por-horizonte",
+    "title": "ARIMA y SARIMA",
+    "section": "Error por horizonte",
+    "text": "Error por horizonte\nhorizon_errors = {\n    horizon: []\n    for horizon in range(\n        1,\n        8\n    )\n}\nDebe analizarse si el modelo funciona bien:\n\nA corto plazo.\nA medio plazo.\nEn todos los periodos.\nSolo durante periodos estables.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#actualización-del-modelo",
+    "href": "time-series/arima-sarima.html#actualización-del-modelo",
+    "title": "ARIMA y SARIMA",
+    "section": "Actualización del modelo",
+    "text": "Actualización del modelo\nARIMA puede actualizarse al recibir nuevos datos.\nOpciones:\n\nReentrenar completamente.\nActualizar estado.\nUsar ventana móvil.\nReestimar periódicamente.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#cambio-estructural",
+    "href": "time-series/arima-sarima.html#cambio-estructural",
+    "title": "ARIMA y SARIMA",
+    "section": "Cambio estructural",
+    "text": "Cambio estructural\nARIMA y SARIMA pueden fallar ante:\n\nCambio de protocolo.\nPandemia.\nNueva tecnología.\nCambio de población.\nRuptura de tendencia.\n\nPuede ser necesario añadir:\n\nVariables de intervención.\nVentanas móviles.\nRetraining.\nModelos de régimen.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#supuesto-de-linealidad",
+    "href": "time-series/arima-sarima.html#supuesto-de-linealidad",
+    "title": "ARIMA y SARIMA",
+    "section": "Supuesto de linealidad",
+    "text": "Supuesto de linealidad\nARIMA modela relaciones lineales con el pasado.\nPuede no capturar:\n\nUmbrales.\nInteracciones complejas.\nCambios abruptos.\nRelaciones no lineales.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#ventajas",
+    "href": "time-series/arima-sarima.html#ventajas",
+    "title": "ARIMA y SARIMA",
+    "section": "Ventajas",
+    "text": "Ventajas\n\nInterpretables.\nBien establecidos.\nÚtiles con autocorrelación.\nPermiten intervalos.\nSARIMA maneja estacionalidad.\nSARIMAX incorpora variables externas.\nBuenos baselines clásicos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#limitaciones",
+    "href": "time-series/arima-sarima.html#limitaciones",
+    "title": "ARIMA y SARIMA",
+    "section": "Limitaciones",
+    "text": "Limitaciones\n\nRequieren frecuencia regular.\nSensibles a especificación.\nPueden ser costosos al buscar órdenes.\nNo manejan fácilmente múltiples series.\nAsumen estructura lineal.\nDificultad con varias estacionalidades.\nSensibles a cambios estructurales.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#comparación-con-exponential-smoothing",
+    "href": "time-series/arima-sarima.html#comparación-con-exponential-smoothing",
+    "title": "ARIMA y SARIMA",
+    "section": "Comparación con exponential smoothing",
+    "text": "Comparación con exponential smoothing\n\n\n\nAspecto\nExponential smoothing\nARIMA\n\n\n\n\nNivel y tendencia\nDirecto\nMediante dinámica\n\n\nEstacionalidad\nHolt-Winters\nSARIMA\n\n\nAutocorrelación\nImplícita\nExplícita\n\n\nExógenas\nLimitado\nSARIMAX\n\n\nInterpretación\nComponentes\nCoeficientes y lags\n\n\nSelección\nSuavizado\nÓrdenes p,d,q",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#comparación-con-machine-learning",
+    "href": "time-series/arima-sarima.html#comparación-con-machine-learning",
+    "title": "ARIMA y SARIMA",
+    "section": "Comparación con machine learning",
+    "text": "Comparación con machine learning\n\n\n\nAspecto\nARIMA/SARIMA\nMachine learning\n\n\n\n\nRelación temporal\nExplícita\nMediante features\n\n\nNo linealidad\nLimitada\nAlta\n\n\nExógenas\nSí\nSí\n\n\nDatos pequeños\nBueno\nVariable\n\n\nInterpretabilidad\nModerada\nVariable\n\n\nMúltiples series\nMenos natural\nMás flexible",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#consideraciones-clínicas",
+    "href": "time-series/arima-sarima.html#consideraciones-clínicas",
+    "title": "ARIMA y SARIMA",
+    "section": "Consideraciones clínicas",
+    "text": "Consideraciones clínicas\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nARIMA y SARIMA suelen ser más adecuados para series agregadas o señales regulares que para seguimientos clínicos muy irregulares.\n\n\nEjemplos:\n\nDemanda asistencial diaria.\nOcupación de camas.\nVolumen de urgencias.\nConsumo de recursos.\nSeñales fisiológicas regulares.\nBiomarcadores agregados por periodo.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#errores-frecuentes",
+    "href": "time-series/arima-sarima.html#errores-frecuentes",
+    "title": "ARIMA y SARIMA",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nNo revisar estacionariedad.\nElegir órdenes solo por ACF/PACF.\nElegir modelo solo por AIC.\nNo comparar con naive.\nNo revisar residuos.\nIgnorar estacionalidad.\nUsar exógenas futuras desconocidas.\nNo hacer backtesting.\nSobrediferenciar.\nUsar demasiados parámetros.\nIgnorar cambios estructurales.\nNo evaluar intervalos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#flujo-recomendado",
+    "href": "time-series/arima-sarima.html#flujo-recomendado",
+    "title": "ARIMA y SARIMA",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nVisualizar la serie.\nRevisar estacionariedad.\nDefinir d.\nRevisar ACF y PACF.\nProbar órdenes pequeños.\nComparar AIC y BIC.\nAplicar backtesting.\nRevisar residuos.\nAñadir estacionalidad si procede.\nConsiderar exógenas.\nEvaluar intervalos.\nComparar con naive.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#checklist-para-proyectos",
+    "href": "time-series/arima-sarima.html#checklist-para-proyectos",
+    "title": "ARIMA y SARIMA",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe definido la frecuencia.\nHe separado train y test temporalmente.\nHe revisado estacionariedad.\nHe justificado d.\nHe revisado ACF.\nHe revisado PACF.\nHe probado órdenes pequeños.\nHe comparado AIC y BIC.\nHe revisado residuos.\nHe aplicado Ljung-Box.\nHe comparado con naive.\nHe probado SARIMA si hay estacionalidad.\nHe validado exógenas disponibles.\nHe aplicado backtesting.\nHe evaluado intervalos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#recursos",
+    "href": "time-series/arima-sarima.html#recursos",
+    "title": "ARIMA y SARIMA",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\nARIMA.\nSARIMAX.\nadfuller.\nplot_acf.\nplot_pacf.\nacorr_ljungbox.\nget_forecast.\nconf_int.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
+    ]
+  },
+  {
+    "objectID": "time-series/arima-sarima.html#notas-personales",
+    "href": "time-series/arima-sarima.html#notas-personales",
+    "title": "ARIMA y SARIMA",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus órdenes ARIMA, términos estacionales, exógenas, diagnósticos y métricas.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "ARIMA y SARIMA"
     ]
   },
   {
@@ -18890,6 +19538,966 @@
     "title": "Nombre de la técnica",
     "section": "Notas personales",
     "text": "Notas personales\nAñade aquí tus propias notas, dudas, ejemplos o recordatorios."
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html",
+    "href": "time-series/decomposition-stationarity.html",
+    "title": "Descomposición y estacionariedad",
+    "section": "",
+    "text": "TipResumen en 30 segundos\n\n\n\nUna serie temporal puede contener:\n\nTendencia.\nEstacionalidad.\nCiclos.\nRuido.\nCambios estructurales.\n\nLa descomposición separa estos componentes.\nLa estacionariedad describe una serie cuyas propiedades estadísticas permanecen aproximadamente estables en el tiempo.\nMuchos modelos clásicos funcionan mejor cuando la serie es estacionaria.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#componentes-de-una-serie-temporal",
+    "href": "time-series/decomposition-stationarity.html#componentes-de-una-serie-temporal",
+    "title": "Descomposición y estacionariedad",
+    "section": "Componentes de una serie temporal",
+    "text": "Componentes de una serie temporal\nUna serie puede representarse de forma simplificada como:\n\\[\ny_t\n=\nT_t\n+\nS_t\n+\nR_t\n\\]\ndonde:\n\n(T_t) es la tendencia.\n(S_t) es la estacionalidad.\n(R_t) es el residuo.\n\nEsta es una descomposición aditiva.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#tendencia",
+    "href": "time-series/decomposition-stationarity.html#tendencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Tendencia",
+    "text": "Tendencia\nLa tendencia es un cambio sostenido a largo plazo.\nValor\n  │\n  │             /\n  │          /\n  │       /\n  │    /\n  └──────────────── Tiempo\nPuede ser:\n\nCreciente.\nDecreciente.\nLineal.\nCurva.\nCambiante.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#estacionalidad",
+    "href": "time-series/decomposition-stationarity.html#estacionalidad",
+    "title": "Descomposición y estacionariedad",
+    "section": "Estacionalidad",
+    "text": "Estacionalidad\nLa estacionalidad es un patrón que se repite con una frecuencia relativamente fija.\nEjemplos:\n\nVariación horaria.\nCiclo día-noche.\nPatrón semanal.\nPatrón mensual.\nPatrón anual.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#ciclos",
+    "href": "time-series/decomposition-stationarity.html#ciclos",
+    "title": "Descomposición y estacionariedad",
+    "section": "Ciclos",
+    "text": "Ciclos\nLos ciclos son oscilaciones que no tienen necesariamente una frecuencia fija.\nEjemplos:\n\nCambios económicos.\nOleadas epidémicas.\nCambios asistenciales.\nPeriodos de tratamiento.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#residuo",
+    "href": "time-series/decomposition-stationarity.html#residuo",
+    "title": "Descomposición y estacionariedad",
+    "section": "Residuo",
+    "text": "Residuo\nEl residuo contiene la variación que no explican la tendencia ni la estacionalidad.\nSerie observada\n-\ntendencia\n-\nestacionalidad\n=\nresiduo\n\n\n\n\n\n\nNoteIdea clave\n\n\n\nUn residuo aparentemente aleatorio sugiere que la descomposición ha capturado buena parte de la estructura.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#preparar-una-serie",
+    "href": "time-series/decomposition-stationarity.html#preparar-una-serie",
+    "title": "Descomposición y estacionariedad",
+    "section": "Preparar una serie",
+    "text": "Preparar una serie\nimport pandas as pd\n\nseries = (\n    df\n    .set_index(\"datetime\")[\n        \"value\"\n    ]\n    .sort_index()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#revisar-frecuencia",
+    "href": "time-series/decomposition-stationarity.html#revisar-frecuencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Revisar frecuencia",
+    "text": "Revisar frecuencia\nprint(\n    pd.infer_freq(\n        series.index\n    )\n)\nPara muchos métodos de descomposición conviene trabajar con frecuencia regular.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#resampling",
+    "href": "time-series/decomposition-stationarity.html#resampling",
+    "title": "Descomposición y estacionariedad",
+    "section": "Resampling",
+    "text": "Resampling\ndaily_series = (\n    series\n    .resample(\"D\")\n    .mean()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#revisar-valores-ausentes",
+    "href": "time-series/decomposition-stationarity.html#revisar-valores-ausentes",
+    "title": "Descomposición y estacionariedad",
+    "section": "Revisar valores ausentes",
+    "text": "Revisar valores ausentes\nprint(\n    daily_series\n    .isna()\n    .sum()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#imputación-simple",
+    "href": "time-series/decomposition-stationarity.html#imputación-simple",
+    "title": "Descomposición y estacionariedad",
+    "section": "Imputación simple",
+    "text": "Imputación simple\ndaily_series = (\n    daily_series\n    .interpolate(\n        method=\"time\"\n    )\n)\n\n\n\n\n\n\nWarningImportante\n\n\n\nLa imputación debe estar justificada y no debe introducir información futura en un workflow predictivo.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#visualizar-la-serie",
+    "href": "time-series/decomposition-stationarity.html#visualizar-la-serie",
+    "title": "Descomposición y estacionariedad",
+    "section": "Visualizar la serie",
+    "text": "Visualizar la serie\nimport matplotlib.pyplot as plt\n\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    daily_series.index,\n    daily_series.values\n)\n\nplt.xlabel(\n    \"Fecha\"\n)\n\nplt.ylabel(\n    \"Valor\"\n)\n\nplt.title(\n    \"Serie temporal\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#descomposición-aditiva",
+    "href": "time-series/decomposition-stationarity.html#descomposición-aditiva",
+    "title": "Descomposición y estacionariedad",
+    "section": "Descomposición aditiva",
+    "text": "Descomposición aditiva\nLa descomposición aditiva es adecuada cuando la amplitud estacional se mantiene aproximadamente constante.\n\\[\ny_t\n=\nT_t\n+\nS_t\n+\nR_t\n\\]\nEjemplo conceptual:\nNivel bajo\n→ oscilación de ±5\n\nNivel alto\n→ oscilación de ±5",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#seasonal_decompose",
+    "href": "time-series/decomposition-stationarity.html#seasonal_decompose",
+    "title": "Descomposición y estacionariedad",
+    "section": "seasonal_decompose",
+    "text": "seasonal_decompose\nfrom statsmodels.tsa.seasonal import seasonal_decompose\n\ndecomposition = seasonal_decompose(\n    daily_series,\n    model=\"additive\",\n    period=7\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#visualizar-componentes",
+    "href": "time-series/decomposition-stationarity.html#visualizar-componentes",
+    "title": "Descomposición y estacionariedad",
+    "section": "Visualizar componentes",
+    "text": "Visualizar componentes\ndecomposition.plot()\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#acceder-a-los-componentes",
+    "href": "time-series/decomposition-stationarity.html#acceder-a-los-componentes",
+    "title": "Descomposición y estacionariedad",
+    "section": "Acceder a los componentes",
+    "text": "Acceder a los componentes\ntrend = decomposition.trend\n\nseasonal = decomposition.seasonal\n\nresidual = decomposition.resid",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#descomposición-multiplicativa",
+    "href": "time-series/decomposition-stationarity.html#descomposición-multiplicativa",
+    "title": "Descomposición y estacionariedad",
+    "section": "Descomposición multiplicativa",
+    "text": "Descomposición multiplicativa\nEs adecuada cuando la amplitud estacional aumenta con el nivel.\n\\[\ny_t\n=\nT_t\n\\times\nS_t\n\\times\nR_t\n\\]\nEjemplo conceptual:\nNivel bajo\n→ oscilación pequeña\n\nNivel alto\n→ oscilación grande",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#aplicar-modelo-multiplicativo",
+    "href": "time-series/decomposition-stationarity.html#aplicar-modelo-multiplicativo",
+    "title": "Descomposición y estacionariedad",
+    "section": "Aplicar modelo multiplicativo",
+    "text": "Aplicar modelo multiplicativo\ndecomposition = seasonal_decompose(\n    daily_series,\n    model=\"multiplicative\",\n    period=7\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#requisito-práctico",
+    "href": "time-series/decomposition-stationarity.html#requisito-práctico",
+    "title": "Descomposición y estacionariedad",
+    "section": "Requisito práctico",
+    "text": "Requisito práctico\nUna descomposición multiplicativa necesita valores positivos.\nSi existen ceros o valores negativos, debe utilizarse otra estrategia.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#aditiva-frente-a-multiplicativa",
+    "href": "time-series/decomposition-stationarity.html#aditiva-frente-a-multiplicativa",
+    "title": "Descomposición y estacionariedad",
+    "section": "Aditiva frente a multiplicativa",
+    "text": "Aditiva frente a multiplicativa\n\n\n\nAspecto\nAditiva\nMultiplicativa\n\n\n\n\nAmplitud estacional\nConstante\nProporcional al nivel\n\n\nValores cero\nPosibles\nProblemáticos\n\n\nFórmula\nSuma\nProducto\n\n\nInterpretación\nDiferencias absolutas\nCambios relativos",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#transformación-logarítmica",
+    "href": "time-series/decomposition-stationarity.html#transformación-logarítmica",
+    "title": "Descomposición y estacionariedad",
+    "section": "Transformación logarítmica",
+    "text": "Transformación logarítmica\nUna serie multiplicativa puede transformarse en aditiva mediante logaritmo.\n\\[\n\\log(y_t)\n=\n\\log(T_t)\n+\n\\log(S_t)\n+\n\\log(R_t)\n\\]\nimport numpy as np\n\nlog_series = np.log(\n    daily_series\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#stl",
+    "href": "time-series/decomposition-stationarity.html#stl",
+    "title": "Descomposición y estacionariedad",
+    "section": "STL",
+    "text": "STL\nSTL significa Seasonal-Trend decomposition using LOESS.\nEs un método flexible para separar:\n\nTendencia.\nEstacionalidad.\nResiduo.\n\nfrom statsmodels.tsa.seasonal import STL\n\nstl = STL(\n    daily_series,\n    period=7\n)\n\nstl_result = stl.fit()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#visualizar-stl",
+    "href": "time-series/decomposition-stationarity.html#visualizar-stl",
+    "title": "Descomposición y estacionariedad",
+    "section": "Visualizar STL",
+    "text": "Visualizar STL\nstl_result.plot()\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#acceder-a-componentes-stl",
+    "href": "time-series/decomposition-stationarity.html#acceder-a-componentes-stl",
+    "title": "Descomposición y estacionariedad",
+    "section": "Acceder a componentes STL",
+    "text": "Acceder a componentes STL\ntrend = stl_result.trend\n\nseasonal = stl_result.seasonal\n\nresidual = stl_result.resid",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#stl-robusto",
+    "href": "time-series/decomposition-stationarity.html#stl-robusto",
+    "title": "Descomposición y estacionariedad",
+    "section": "STL robusto",
+    "text": "STL robusto\nstl = STL(\n    daily_series,\n    period=7,\n    robust=True\n)\n\nstl_result = stl.fit()\nLa opción robusta reduce la influencia de valores extremos sobre la tendencia y la estacionalidad.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#ventajas-de-stl",
+    "href": "time-series/decomposition-stationarity.html#ventajas-de-stl",
+    "title": "Descomposición y estacionariedad",
+    "section": "Ventajas de STL",
+    "text": "Ventajas de STL\n\nFlexible.\nPermite tendencia no lineal.\nPuede ser robusto a outliers.\nÚtil con estacionalidad estable.\nFácil de interpretar.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#limitaciones-de-stl",
+    "href": "time-series/decomposition-stationarity.html#limitaciones-de-stl",
+    "title": "Descomposición y estacionariedad",
+    "section": "Limitaciones de STL",
+    "text": "Limitaciones de STL\n\nRequiere elegir un periodo.\nNo resuelve automáticamente cambios estructurales.\nNecesita frecuencia suficientemente regular.\nNo sustituye la validación predictiva.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#elegir-el-periodo",
+    "href": "time-series/decomposition-stationarity.html#elegir-el-periodo",
+    "title": "Descomposición y estacionariedad",
+    "section": "Elegir el periodo",
+    "text": "Elegir el periodo\nEjemplos:\nDatos horarios con ciclo diario\n→ period = 24\n\nDatos diarios con ciclo semanal\n→ period = 7\n\nDatos mensuales con ciclo anual\n→ period = 12\n\n\n\n\n\n\nWarningError frecuente\n\n\n\nConfundir número de observaciones con unidad temporal.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#varias-estacionalidades",
+    "href": "time-series/decomposition-stationarity.html#varias-estacionalidades",
+    "title": "Descomposición y estacionariedad",
+    "section": "Varias estacionalidades",
+    "text": "Varias estacionalidades\nUna serie horaria puede contener:\n\nCiclo diario.\nCiclo semanal.\nCiclo anual.\n\nUna única descomposición STL clásica modela una estacionalidad principal.\nPara varias estacionalidades pueden considerarse:\n\nMSTL.\nModelos de Fourier.\nTBATS.\nProphet.\nModelos de machine learning con variables de calendario.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#suavizado-de-tendencia",
+    "href": "time-series/decomposition-stationarity.html#suavizado-de-tendencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Suavizado de tendencia",
+    "text": "Suavizado de tendencia\nUna media móvil puede utilizarse como aproximación de tendencia.\ntrend_7 = (\n    daily_series\n    .rolling(\n        window=7,\n        center=True\n    )\n    .mean()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#media-móvil-centrada",
+    "href": "time-series/decomposition-stationarity.html#media-móvil-centrada",
+    "title": "Descomposición y estacionariedad",
+    "section": "Media móvil centrada",
+    "text": "Media móvil centrada\nEl uso de center=True incluye valores futuros.\nEs adecuado para análisis descriptivo retrospectivo.\nNo es adecuado como feature predictiva en tiempo real.\n\n\n\n\n\n\nCautionPrecaución\n\n\n\nUna tendencia centrada puede generar leakage si se utiliza para predecir.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#eliminar-tendencia",
+    "href": "time-series/decomposition-stationarity.html#eliminar-tendencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Eliminar tendencia",
+    "text": "Eliminar tendencia\nUna forma sencilla es restar la tendencia.\ndetrended = (\n    daily_series\n    -\n    trend_7\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#eliminar-estacionalidad",
+    "href": "time-series/decomposition-stationarity.html#eliminar-estacionalidad",
+    "title": "Descomposición y estacionariedad",
+    "section": "Eliminar estacionalidad",
+    "text": "Eliminar estacionalidad\nseasonally_adjusted = (\n    daily_series\n    -\n    stl_result.seasonal\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#serie-desestacionalizada",
+    "href": "time-series/decomposition-stationarity.html#serie-desestacionalizada",
+    "title": "Descomposición y estacionariedad",
+    "section": "Serie desestacionalizada",
+    "text": "Serie desestacionalizada\nLa serie ajustada permite estudiar:\n\nTendencia.\nCambios estructurales.\nComparaciones entre periodos.\nModelos posteriores.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#qué-es-estacionariedad",
+    "href": "time-series/decomposition-stationarity.html#qué-es-estacionariedad",
+    "title": "Descomposición y estacionariedad",
+    "section": "¿Qué es estacionariedad?",
+    "text": "¿Qué es estacionariedad?\nUna serie es débilmente estacionaria cuando mantiene aproximadamente:\n\nMedia constante.\nVarianza constante.\nAutocovarianza dependiente del lag, no del tiempo concreto.\n\nMedia estable\nVarianza estable\nDependencia temporal estable",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#serie-no-estacionaria",
+    "href": "time-series/decomposition-stationarity.html#serie-no-estacionaria",
+    "title": "Descomposición y estacionariedad",
+    "section": "Serie no estacionaria",
+    "text": "Serie no estacionaria\nPuede presentar:\n\nTendencia.\nEstacionalidad.\nVarianza cambiante.\nCambios de nivel.\nRupturas estructurales.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#por-qué-importa",
+    "href": "time-series/decomposition-stationarity.html#por-qué-importa",
+    "title": "Descomposición y estacionariedad",
+    "section": "¿Por qué importa?",
+    "text": "¿Por qué importa?\nMuchos modelos clásicos como ARMA y ciertas formulaciones ARIMA se apoyan en una serie estacionaria después de las transformaciones necesarias.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#inspección-visual",
+    "href": "time-series/decomposition-stationarity.html#inspección-visual",
+    "title": "Descomposición y estacionariedad",
+    "section": "Inspección visual",
+    "text": "Inspección visual\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    daily_series\n)\n\nplt.title(\n    \"Inspección visual de estacionariedad\"\n)\n\nplt.show()\nBusca:\n\nTendencia.\nCambios de varianza.\nCambios de nivel.\nEstacionalidad.\nRupturas.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#media-y-varianza-móviles",
+    "href": "time-series/decomposition-stationarity.html#media-y-varianza-móviles",
+    "title": "Descomposición y estacionariedad",
+    "section": "Media y varianza móviles",
+    "text": "Media y varianza móviles\nrolling_mean = (\n    daily_series\n    .rolling(\n        window=30\n    )\n    .mean()\n)\n\nrolling_std = (\n    daily_series\n    .rolling(\n        window=30\n    )\n    .std()\n)\nplt.figure(\n    figsize=(12, 6)\n)\n\nplt.plot(\n    daily_series,\n    label=\"Serie\"\n)\n\nplt.plot(\n    rolling_mean,\n    label=\"Media móvil\"\n)\n\nplt.plot(\n    rolling_std,\n    label=\"Desviación móvil\"\n)\n\nplt.legend()\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#augmented-dickey-fuller",
+    "href": "time-series/decomposition-stationarity.html#augmented-dickey-fuller",
+    "title": "Descomposición y estacionariedad",
+    "section": "Augmented Dickey-Fuller",
+    "text": "Augmented Dickey-Fuller\nEl test ADF evalúa la presencia de raíz unitaria.\nHipótesis:\nH₀\n→ existe raíz unitaria\n→ serie no estacionaria\n\nH₁\n→ serie estacionaria",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#aplicar-adf",
+    "href": "time-series/decomposition-stationarity.html#aplicar-adf",
+    "title": "Descomposición y estacionariedad",
+    "section": "Aplicar ADF",
+    "text": "Aplicar ADF\nfrom statsmodels.tsa.stattools import adfuller\n\nadf_result = adfuller(\n    daily_series.dropna(),\n    autolag=\"AIC\"\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#interpretar-adf",
+    "href": "time-series/decomposition-stationarity.html#interpretar-adf",
+    "title": "Descomposición y estacionariedad",
+    "section": "Interpretar ADF",
+    "text": "Interpretar ADF\nadf_statistic = adf_result[0]\n\np_value = adf_result[1]\n\nused_lags = adf_result[2]\n\nn_observations = adf_result[3]\n\ncritical_values = adf_result[4]\nprint(\n    \"ADF statistic:\",\n    adf_statistic\n)\n\nprint(\n    \"p-value:\",\n    p_value\n)\n\nprint(\n    \"Critical values:\",\n    critical_values\n)\nInterpretación habitual:\np &lt; 0.05\n→ rechazar H₀\n→ evidencia compatible con estacionariedad",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#kpss",
+    "href": "time-series/decomposition-stationarity.html#kpss",
+    "title": "Descomposición y estacionariedad",
+    "section": "KPSS",
+    "text": "KPSS\nEl test KPSS utiliza hipótesis opuestas.\nH₀\n→ serie estacionaria\n\nH₁\n→ serie no estacionaria",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#aplicar-kpss",
+    "href": "time-series/decomposition-stationarity.html#aplicar-kpss",
+    "title": "Descomposición y estacionariedad",
+    "section": "Aplicar KPSS",
+    "text": "Aplicar KPSS\nfrom statsmodels.tsa.stattools import kpss\n\nkpss_result = kpss(\n    daily_series.dropna(),\n    regression=\"c\",\n    nlags=\"auto\"\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#interpretar-kpss",
+    "href": "time-series/decomposition-stationarity.html#interpretar-kpss",
+    "title": "Descomposición y estacionariedad",
+    "section": "Interpretar KPSS",
+    "text": "Interpretar KPSS\nkpss_statistic = kpss_result[0]\n\np_value = kpss_result[1]\n\nused_lags = kpss_result[2]\n\ncritical_values = kpss_result[3]\nprint(\n    \"KPSS statistic:\",\n    kpss_statistic\n)\n\nprint(\n    \"p-value:\",\n    p_value\n)\nInterpretación habitual:\np &lt; 0.05\n→ rechazar H₀\n→ evidencia de no estacionariedad",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#combinar-adf-y-kpss",
+    "href": "time-series/decomposition-stationarity.html#combinar-adf-y-kpss",
+    "title": "Descomposición y estacionariedad",
+    "section": "Combinar ADF y KPSS",
+    "text": "Combinar ADF y KPSS\n\n\n\n\n\n\n\n\nADF\nKPSS\nInterpretación orientativa\n\n\n\n\nRechaza H₀\nNo rechaza H₀\nCompatible con estacionariedad\n\n\nNo rechaza H₀\nRechaza H₀\nCompatible con no estacionariedad\n\n\nNo rechaza H₀\nNo rechaza H₀\nResultado inconcluso\n\n\nRechaza H₀\nRechaza H₀\nPosible cambio estructural o problema de especificación\n\n\n\n\n\n\n\n\n\nNoteBuena práctica\n\n\n\nCombina inspección visual, ADF, KPSS y conocimiento del dominio.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#diferenciación",
+    "href": "time-series/decomposition-stationarity.html#diferenciación",
+    "title": "Descomposición y estacionariedad",
+    "section": "Diferenciación",
+    "text": "Diferenciación\nLa primera diferencia es:\n\\[\n\\Delta y_t\n=\ny_t-y_{t-1}\n\\]\nfirst_difference = (\n    daily_series\n    .diff()\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#visualizar-la-primera-diferencia",
+    "href": "time-series/decomposition-stationarity.html#visualizar-la-primera-diferencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Visualizar la primera diferencia",
+    "text": "Visualizar la primera diferencia\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    first_difference\n)\n\nplt.title(\n    \"Primera diferencia\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#segunda-diferencia",
+    "href": "time-series/decomposition-stationarity.html#segunda-diferencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Segunda diferencia",
+    "text": "Segunda diferencia\nsecond_difference = (\n    daily_series\n    .diff()\n    .diff()\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#riesgo-de-sobrediferenciación",
+    "href": "time-series/decomposition-stationarity.html#riesgo-de-sobrediferenciación",
+    "title": "Descomposición y estacionariedad",
+    "section": "Riesgo de sobrediferenciación",
+    "text": "Riesgo de sobrediferenciación\nAplicar demasiadas diferencias puede:\n\nAumentar ruido.\nEliminar señal.\nCrear autocorrelación negativa.\nEmpeorar forecasts.\n\n\n\n\n\n\n\nWarningRegla práctica\n\n\n\nUtiliza el mínimo número de diferencias necesario.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#diferencia-estacional",
+    "href": "time-series/decomposition-stationarity.html#diferencia-estacional",
+    "title": "Descomposición y estacionariedad",
+    "section": "Diferencia estacional",
+    "text": "Diferencia estacional\nPara datos diarios con ciclo semanal:\n\\[\n\\Delta_7 y_t\n=\ny_t-y_{t-7}\n\\]\nseasonal_difference = (\n    daily_series\n    .diff(\n        7\n    )\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#diferenciación-regular-y-estacional",
+    "href": "time-series/decomposition-stationarity.html#diferenciación-regular-y-estacional",
+    "title": "Descomposición y estacionariedad",
+    "section": "Diferenciación regular y estacional",
+    "text": "Diferenciación regular y estacional\ntransformed_series = (\n    daily_series\n    .diff()\n    .diff(\n        7\n    )\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#transformación-logarítmica-y-diferencia",
+    "href": "time-series/decomposition-stationarity.html#transformación-logarítmica-y-diferencia",
+    "title": "Descomposición y estacionariedad",
+    "section": "Transformación logarítmica y diferencia",
+    "text": "Transformación logarítmica y diferencia\nlog_difference = (\n    np.log(\n        daily_series\n    )\n    .diff()\n    .dropna()\n)\nEsto aproxima una tasa de crecimiento.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#box-cox",
+    "href": "time-series/decomposition-stationarity.html#box-cox",
+    "title": "Descomposición y estacionariedad",
+    "section": "Box-Cox",
+    "text": "Box-Cox\nBox-Cox puede estabilizar la varianza.\nfrom scipy.stats import boxcox\n\ntransformed_values, lambda_value = boxcox(\n    daily_series.dropna()\n)\nRequiere valores positivos.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#autocorrelación",
+    "href": "time-series/decomposition-stationarity.html#autocorrelación",
+    "title": "Descomposición y estacionariedad",
+    "section": "Autocorrelación",
+    "text": "Autocorrelación\nLa autocorrelación mide la relación entre la serie y sus valores pasados.\n\\[\nCorr\n\\left(\ny_t,\ny_{t-k}\n\\right)\n\\]",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#acf",
+    "href": "time-series/decomposition-stationarity.html#acf",
+    "title": "Descomposición y estacionariedad",
+    "section": "ACF",
+    "text": "ACF\nfrom statsmodels.graphics.tsaplots import plot_acf\n\nplot_acf(\n    daily_series.dropna(),\n    lags=40\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#interpretar-acf",
+    "href": "time-series/decomposition-stationarity.html#interpretar-acf",
+    "title": "Descomposición y estacionariedad",
+    "section": "Interpretar ACF",
+    "text": "Interpretar ACF\nPuede mostrar:\n\nPersistencia.\nEstacionalidad.\nDecaimiento lento.\nEstructura MA.\nNo estacionariedad.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#pacf",
+    "href": "time-series/decomposition-stationarity.html#pacf",
+    "title": "Descomposición y estacionariedad",
+    "section": "PACF",
+    "text": "PACF\nLa autocorrelación parcial mide la relación con un lag controlando los lags intermedios.\nfrom statsmodels.graphics.tsaplots import plot_pacf\n\nplot_pacf(\n    daily_series.dropna(),\n    lags=40,\n    method=\"ywm\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#acf-y-pacf",
+    "href": "time-series/decomposition-stationarity.html#acf-y-pacf",
+    "title": "Descomposición y estacionariedad",
+    "section": "ACF y PACF",
+    "text": "ACF y PACF\nSe utilizan como guía para identificar:\n\nOrden autoregresivo.\nOrden de media móvil.\nEstacionalidad.\nNecesidad de diferenciación.\n\nNo deben interpretarse como reglas automáticas.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#patrón-de-tendencia-en-acf",
+    "href": "time-series/decomposition-stationarity.html#patrón-de-tendencia-en-acf",
+    "title": "Descomposición y estacionariedad",
+    "section": "Patrón de tendencia en ACF",
+    "text": "Patrón de tendencia en ACF\nUna ACF que disminuye lentamente puede sugerir:\n\nTendencia.\nRaíz unitaria.\nNo estacionariedad.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#patrón-estacional-en-acf",
+    "href": "time-series/decomposition-stationarity.html#patrón-estacional-en-acf",
+    "title": "Descomposición y estacionariedad",
+    "section": "Patrón estacional en ACF",
+    "text": "Patrón estacional en ACF\nPicos en:\nlag 7\nlag 14\nlag 21\npueden sugerir estacionalidad semanal en datos diarios.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#residuos-de-descomposición",
+    "href": "time-series/decomposition-stationarity.html#residuos-de-descomposición",
+    "title": "Descomposición y estacionariedad",
+    "section": "Residuos de descomposición",
+    "text": "Residuos de descomposición\nresidual = (\n    stl_result\n    .resid\n    .dropna()\n)",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#revisar-residuos",
+    "href": "time-series/decomposition-stationarity.html#revisar-residuos",
+    "title": "Descomposición y estacionariedad",
+    "section": "Revisar residuos",
+    "text": "Revisar residuos\nplot_acf(\n    residual,\n    lags=40\n)\n\nplt.show()\nSi persiste autocorrelación, queda estructura temporal sin explicar.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#ljung-box",
+    "href": "time-series/decomposition-stationarity.html#ljung-box",
+    "title": "Descomposición y estacionariedad",
+    "section": "Ljung-Box",
+    "text": "Ljung-Box\nEvalúa autocorrelación conjunta en varios lags.\nfrom statsmodels.stats.diagnostic import acorr_ljungbox\n\nljung_box = acorr_ljungbox(\n    residual,\n    lags=[\n        7,\n        14,\n        21\n    ],\n    return_df=True\n)\n\ndisplay(\n    ljung_box\n)\nHipótesis:\nH₀\n→ no existe autocorrelación conjunta\nUn p-value pequeño sugiere dependencia residual.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#ruido-blanco",
+    "href": "time-series/decomposition-stationarity.html#ruido-blanco",
+    "title": "Descomposición y estacionariedad",
+    "section": "Ruido blanco",
+    "text": "Ruido blanco\nUn residuo parecido a ruido blanco tiene:\n\nMedia aproximadamente 0.\nVarianza estable.\nPoca autocorrelación.\nDistribución sin patrones temporales claros.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#cambio-estructural",
+    "href": "time-series/decomposition-stationarity.html#cambio-estructural",
+    "title": "Descomposición y estacionariedad",
+    "section": "Cambio estructural",
+    "text": "Cambio estructural\nUna serie puede cambiar de comportamiento por:\n\nNuevo protocolo.\nNueva máquina.\nCambio poblacional.\nPandemia.\nCambio de codificación.\nIntervención clínica.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#visualizar-cambios",
+    "href": "time-series/decomposition-stationarity.html#visualizar-cambios",
+    "title": "Descomposición y estacionariedad",
+    "section": "Visualizar cambios",
+    "text": "Visualizar cambios\nplt.figure(\n    figsize=(12, 5)\n)\n\nplt.plot(\n    daily_series\n)\n\nplt.axvline(\n    pd.Timestamp(\n        \"2025-01-01\"\n    ),\n    linestyle=\"--\"\n)\n\nplt.show()",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#cambio-de-nivel",
+    "href": "time-series/decomposition-stationarity.html#cambio-de-nivel",
+    "title": "Descomposición y estacionariedad",
+    "section": "Cambio de nivel",
+    "text": "Cambio de nivel\nAntes\n→ media 50\n\nDespués\n→ media 70",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#cambio-de-pendiente",
+    "href": "time-series/decomposition-stationarity.html#cambio-de-pendiente",
+    "title": "Descomposición y estacionariedad",
+    "section": "Cambio de pendiente",
+    "text": "Cambio de pendiente\nAntes\n→ estable\n\nDespués\n→ tendencia creciente",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#cambio-de-varianza",
+    "href": "time-series/decomposition-stationarity.html#cambio-de-varianza",
+    "title": "Descomposición y estacionariedad",
+    "section": "Cambio de varianza",
+    "text": "Cambio de varianza\nAntes\n→ poca dispersión\n\nDespués\n→ alta variabilidad",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#estacionariedad-local",
+    "href": "time-series/decomposition-stationarity.html#estacionariedad-local",
+    "title": "Descomposición y estacionariedad",
+    "section": "Estacionariedad local",
+    "text": "Estacionariedad local\nUna serie puede no ser estacionaria globalmente, pero sí dentro de ventanas o periodos concretos.\nEsto puede justificar:\n\nModelos con ventana móvil.\nRetraining periódico.\nSegmentación temporal.\nModelos de cambio de régimen.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#estacionariedad-y-machine-learning",
+    "href": "time-series/decomposition-stationarity.html#estacionariedad-y-machine-learning",
+    "title": "Descomposición y estacionariedad",
+    "section": "Estacionariedad y machine learning",
+    "text": "Estacionariedad y machine learning\nLos modelos de árboles no exigen estacionariedad de la misma forma que ARIMA.\nPero siguen siendo sensibles a:\n\nDrift.\nCambios de distribución.\nTendencias no representadas.\nExtrapolación.\nLeakage temporal.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#descomposición-como-feature-engineering",
+    "href": "time-series/decomposition-stationarity.html#descomposición-como-feature-engineering",
+    "title": "Descomposición y estacionariedad",
+    "section": "Descomposición como feature engineering",
+    "text": "Descomposición como feature engineering\nPueden utilizarse:\n\nTendencia estimada.\nComponente estacional.\nResiduo.\nÍndice estacional.\nDistancia a tendencia.\n\nPero solo si pueden calcularse con información disponible en tiempo real.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#descomposición-retrospectiva-vs-predictiva",
+    "href": "time-series/decomposition-stationarity.html#descomposición-retrospectiva-vs-predictiva",
+    "title": "Descomposición y estacionariedad",
+    "section": "Descomposición retrospectiva vs predictiva",
+    "text": "Descomposición retrospectiva vs predictiva\nDescomposición centrada\n→ usa pasado y futuro\n→ adecuada para análisis descriptivo\n\nDescomposición causal\n→ usa solo pasado\n→ necesaria para predicción en tiempo real",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#consideraciones-clínicas",
+    "href": "time-series/decomposition-stationarity.html#consideraciones-clínicas",
+    "title": "Descomposición y estacionariedad",
+    "section": "Consideraciones clínicas",
+    "text": "Consideraciones clínicas\n\n\n\n\n\n\nNoteAplicación clínica\n\n\n\nUna tendencia o estacionalidad puede reflejar tanto biología como organización asistencial.\n\n\nEjemplos:\n\nCambios por ciclos de tratamiento.\nMás pruebas en pacientes inestables.\nPatrones semanales de actividad.\nCambios por protocolos.\nDiferencias entre centros.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#errores-frecuentes",
+    "href": "time-series/decomposition-stationarity.html#errores-frecuentes",
+    "title": "Descomposición y estacionariedad",
+    "section": "Errores frecuentes",
+    "text": "Errores frecuentes\n\nNo definir el periodo.\nAplicar descomposición a una serie irregular sin revisar.\nConfundir ciclo con estacionalidad.\nUsar una media centrada como feature predictiva.\nInterpretar un test aislado.\nDiferenciar demasiadas veces.\nIgnorar cambios estructurales.\nNo revisar ACF de residuos.\nUsar modelo multiplicativo con ceros.\nNo estabilizar varianza.\nIgnorar múltiples estacionalidades.\nConfundir estacionariedad con ausencia total de estructura.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#flujo-recomendado",
+    "href": "time-series/decomposition-stationarity.html#flujo-recomendado",
+    "title": "Descomposición y estacionariedad",
+    "section": "Flujo recomendado",
+    "text": "Flujo recomendado\n\nVisualizar la serie.\nConfirmar frecuencia.\nRevisar valores ausentes.\nIdentificar tendencia.\nIdentificar estacionalidad.\nAplicar STL.\nRevisar residuos.\nEvaluar ADF y KPSS.\nProbar transformaciones.\nAplicar diferenciación mínima.\nRevisar ACF y PACF.\nDocumentar cambios estructurales.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#checklist-para-proyectos",
+    "href": "time-series/decomposition-stationarity.html#checklist-para-proyectos",
+    "title": "Descomposición y estacionariedad",
+    "section": "Checklist para proyectos",
+    "text": "Checklist para proyectos\n\nHe definido la frecuencia.\nHe justificado el periodo.\nHe visualizado la serie.\nHe evaluado tendencia.\nHe evaluado estacionalidad.\nHe aplicado descomposición.\nHe revisado residuos.\nHe ejecutado ADF.\nHe ejecutado KPSS.\nHe revisado ACF.\nHe revisado PACF.\nHe aplicado el mínimo de diferencias.\nHe considerado transformación logarítmica.\nHe revisado cambios estructurales.\nHe evitado usar información futura.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#recursos",
+    "href": "time-series/decomposition-stationarity.html#recursos",
+    "title": "Descomposición y estacionariedad",
+    "section": "Recursos",
+    "text": "Recursos\n\nDocumentación\n\nseasonal_decompose.\nSTL.\nadfuller.\nkpss.\nplot_acf.\nplot_pacf.\nacorr_ljungbox.\nSeries.diff.\nSeries.rolling.\n\n\n\nMaterial del máster\nAñadir aquí:\n\nPresentación correspondiente.\nDiapositivas relevantes.\nEjercicios realizados.\nApuntes de Notion.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
+  },
+  {
+    "objectID": "time-series/decomposition-stationarity.html#notas-personales",
+    "href": "time-series/decomposition-stationarity.html#notas-personales",
+    "title": "Descomposición y estacionariedad",
+    "section": "Notas personales",
+    "text": "Notas personales\nAñade aquí tus periodos, descomposiciones, tests, transformaciones y decisiones metodológicas.",
+    "crumbs": [
+      "Sobre el proyecto",
+      "Series temporales",
+      "Descomposición y estacionariedad"
+    ]
   },
   {
     "objectID": "time-series/index.html",
