@@ -1,0 +1,1081 @@
+---
+title: "Kaplan-Meier y log-rank"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Kaplan-Meier estima la probabilidad de permanecer libre de un evento a lo largo del tiempo.
+
+Permite:
+
+- Incorporar censura.
+- Estimar supervivencia.
+- Calcular medianas.
+- Visualizar curvas.
+- Comparar grupos.
+
+El test log-rank evalúa si las curvas difieren globalmente.
+:::
+
+## ¿Qué estima Kaplan-Meier?
+
+El estimador de Kaplan-Meier calcula la función de supervivencia:
+
+$$
+S(t)
+=
+P(T>t)
+$$
+
+Es decir, la probabilidad de permanecer libre del evento más allá del tiempo \(t\).
+
+::: {.callout-note}
+## Idea clave
+
+La curva cambia únicamente cuando ocurren eventos.
+:::
+
+## Fórmula
+
+$$
+\hat{S}(t)
+=
+\prod_{t_i \leq t}
+\left(
+1-
+\frac{d_i}{n_i}
+\right)
+$$
+
+donde:
+
+- \(t_i\): tiempo del evento.
+- \(d_i\): número de eventos en \(t_i\).
+- \(n_i\): número de personas en riesgo justo antes de \(t_i\).
+
+## Ejemplo manual
+
+Supongamos:
+
+```text
+Tiempo | En riesgo | Eventos
+----------------------------
+2      | 5         | 1
+4      | 4         | 1
+7      | 2         | 1
+```
+
+En tiempo 2:
+
+$$
+\hat{S}(2)
+=
+1
+\times
+\left(
+1-
+\frac{1}{5}
+\right)
+=
+0.80
+$$
+
+En tiempo 4:
+
+$$
+\hat{S}(4)
+=
+0.80
+\times
+\left(
+1-
+\frac{1}{4}
+\right)
+=
+0.60
+$$
+
+En tiempo 7:
+
+$$
+\hat{S}(7)
+=
+0.60
+\times
+\left(
+1-
+\frac{1}{2}
+\right)
+=
+0.30
+$$
+
+## Interpretación
+
+```text
+S(4) = 0.60
+```
+
+significa que la probabilidad estimada de permanecer libre del evento más allá del tiempo 4 es del 60 %.
+
+## Curva escalonada
+
+```text
+Supervivencia
+1.0 ─────────────┐
+                 └──────┐
+                        └─────┐
+                              └──
+0.0 ───────────────────────────── Tiempo
+```
+
+La curva:
+
+- Comienza en 1.
+- Desciende con cada evento.
+- Permanece horizontal entre eventos.
+- No desciende en las censuras.
+
+## Censura en la curva
+
+Las observaciones censuradas suelen marcarse con pequeños símbolos.
+
+```text
+─────|──────
+     censura
+```
+
+La censura:
+
+- No produce descenso.
+- Reduce el número de personas en riesgo después de ese tiempo.
+- Aporta información hasta el momento de censura.
+
+## Preparar datos
+
+```python
+survival_df = df[
+    [
+        "patient_id",
+        "follow_up_days",
+        "event",
+        "group"
+    ]
+].copy()
+```
+
+## Validar columnas
+
+```python
+survival_df[
+    [
+        "follow_up_days",
+        "event"
+    ]
+].isna().sum()
+```
+
+## Revisar eventos
+
+```python
+survival_df[
+    "event"
+].value_counts()
+```
+
+## Ajustar Kaplan-Meier
+
+```python
+from lifelines import KaplanMeierFitter
+
+kmf = KaplanMeierFitter()
+```
+
+```python
+kmf.fit(
+    durations=survival_df[
+        "follow_up_days"
+    ],
+    event_observed=survival_df[
+        "event"
+    ],
+    label="Cohorte"
+)
+```
+
+## Visualizar curva
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(
+    figsize=(9, 6)
+)
+
+kmf.plot_survival_function()
+
+plt.xlabel(
+    "Tiempo de seguimiento"
+)
+
+plt.ylabel(
+    "Probabilidad de supervivencia"
+)
+
+plt.title(
+    "Curva de Kaplan-Meier"
+)
+
+plt.show()
+```
+
+## Intervalos de confianza
+
+Kaplan-Meier suele acompañarse de intervalos de confianza.
+
+```python
+kmf.confidence_interval_
+```
+
+Los intervalos se ensanchan cuando:
+
+- Quedan pocos pacientes en riesgo.
+- El seguimiento es largo.
+- Hay muchos censurados.
+- Hay pocos eventos.
+
+## Mediana de supervivencia
+
+```python
+median_survival = (
+    kmf
+    .median_survival_time_
+)
+```
+
+La mediana es el tiempo donde:
+
+$$
+S(t)
+=
+0.5
+$$
+
+## Mediana no alcanzada
+
+Si la curva no baja de 0.5:
+
+```text
+Mediana de supervivencia
+→ no alcanzada
+```
+
+No debe inventarse un valor.
+
+## Supervivencia en tiempos concretos
+
+```python
+survival_at_times = (
+    kmf
+    .survival_function_at_times(
+        [
+            30,
+            180,
+            365
+        ]
+    )
+)
+```
+
+Ejemplo:
+
+```text
+Supervivencia a 30 días
+Supervivencia a 6 meses
+Supervivencia a 1 año
+```
+
+## Número en riesgo
+
+La tabla de riesgo muestra cuántas personas siguen bajo observación y libres del evento en cada tiempo.
+
+```python
+from lifelines.plotting import add_at_risk_counts
+```
+
+```python
+ax = kmf.plot_survival_function()
+
+add_at_risk_counts(
+    kmf,
+    ax=ax
+)
+
+plt.show()
+```
+
+::: {.callout-important}
+## Regla práctica
+
+No interpretes la cola de una curva sin revisar cuántos pacientes permanecen en riesgo.
+:::
+
+## Curvas por grupos
+
+```python
+groups = (
+    survival_df[
+        "group"
+    ]
+    .dropna()
+    .unique()
+)
+```
+
+```python
+plt.figure(
+    figsize=(9, 6)
+)
+
+fitters = []
+
+for group in groups:
+
+    mask = (
+        survival_df[
+            "group"
+        ]
+        ==
+        group
+    )
+
+    fitter = KaplanMeierFitter()
+
+    fitter.fit(
+        durations=survival_df.loc[
+            mask,
+            "follow_up_days"
+        ],
+        event_observed=survival_df.loc[
+            mask,
+            "event"
+        ],
+        label=str(
+            group
+        )
+    )
+
+    fitter.plot_survival_function()
+
+    fitters.append(
+        fitter
+    )
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Supervivencia"
+)
+
+plt.title(
+    "Kaplan-Meier por grupos"
+)
+
+plt.show()
+```
+
+## Interpretar curvas por grupos
+
+Puede evaluarse:
+
+- Separación temprana.
+- Separación tardía.
+- Cruce de curvas.
+- Diferencias absolutas.
+- Medianas.
+- Incertidumbre.
+- Número en riesgo.
+
+## Diferencia de supervivencia
+
+Ejemplo:
+
+```text
+S_A(365) = 0.85
+S_B(365) = 0.70
+```
+
+La diferencia absoluta a un año es:
+
+$$
+0.85-0.70
+=
+0.15
+$$
+
+Es decir, 15 puntos porcentuales.
+
+## Comparar medianas
+
+```python
+median_a = fitter_a.median_survival_time_
+
+median_b = fitter_b.median_survival_time_
+```
+
+La comparación de medianas no resume necesariamente toda la curva.
+
+## Log-rank test
+
+El test log-rank compara globalmente dos curvas.
+
+Hipótesis:
+
+```text
+H₀
+→ no hay diferencia en la experiencia de supervivencia
+
+H₁
+→ las curvas difieren
+```
+
+## Aplicar log-rank
+
+```python
+from lifelines.statistics import logrank_test
+```
+
+```python
+group_a = survival_df.loc[
+    survival_df[
+        "group"
+    ]
+    ==
+    "A"
+]
+
+group_b = survival_df.loc[
+    survival_df[
+        "group"
+    ]
+    ==
+    "B"
+]
+```
+
+```python
+result = logrank_test(
+    group_a[
+        "follow_up_days"
+    ],
+    group_b[
+        "follow_up_days"
+    ],
+    event_observed_A=group_a[
+        "event"
+    ],
+    event_observed_B=group_b[
+        "event"
+    ]
+)
+```
+
+## Resultado
+
+```python
+print(
+    result.test_statistic
+)
+
+print(
+    result.p_value
+)
+```
+
+Interpretación habitual:
+
+```text
+p < 0.05
+→ evidencia de diferencia entre curvas
+```
+
+## Qué no dice log-rank
+
+El test no indica:
+
+- Magnitud clínica.
+- Dirección completa.
+- Diferencia en un tiempo concreto.
+- Ajuste por confusores.
+- Causalidad.
+- Validez del supuesto de riesgos proporcionales.
+
+## Más de dos grupos
+
+```python
+from lifelines.statistics import multivariate_logrank_test
+
+result = multivariate_logrank_test(
+    event_durations=survival_df[
+        "follow_up_days"
+    ],
+    groups=survival_df[
+        "group"
+    ],
+    event_observed=survival_df[
+        "event"
+    ]
+)
+```
+
+## Comparaciones múltiples
+
+Si se comparan muchos grupos por pares, debe considerarse ajuste por multiplicidad.
+
+Ejemplos:
+
+- Bonferroni.
+- Holm.
+- FDR.
+
+## Log-rank y riesgos proporcionales
+
+El log-rank tiene mayor potencia cuando la razón de hazards es aproximadamente constante.
+
+Puede funcionar peor cuando:
+
+- Las curvas se cruzan.
+- La diferencia aparece solo temprano.
+- La diferencia aparece solo tarde.
+- Existen efectos temporales complejos.
+
+## Curvas cruzadas
+
+```text
+Grupo A mejor al inicio
+Grupo B mejor después
+```
+
+En este caso, un único p-value puede ocultar la dinámica.
+
+## Weighted log-rank
+
+Existen versiones ponderadas que dan más peso a determinados periodos.
+
+Ejemplos:
+
+- Eventos tempranos.
+- Eventos tardíos.
+- Fleming-Harrington.
+
+Deben definirse a priori cuando sea posible.
+
+## Peto-Peto
+
+Da más peso relativo a periodos tempranos y puede ser útil en ciertos patrones de censura.
+
+## Wilcoxon-Breslow
+
+Pondera por el número en riesgo y suele dar más peso a diferencias tempranas.
+
+## Comparación visual no basta
+
+Dos curvas visualmente distintas pueden no diferir estadísticamente.
+
+Dos curvas estadísticamente distintas pueden tener una diferencia clínicamente pequeña.
+
+## Intervalos de confianza por grupo
+
+```python
+fitter_a.confidence_interval_
+
+fitter_b.confidence_interval_
+```
+
+Debe revisarse:
+
+- Anchura.
+- Solapamiento.
+- Cola.
+- Número de eventos.
+
+## Tablas descriptivas
+
+```python
+group_summary = (
+    survival_df
+    .groupby(
+        "group"
+    )
+    .agg(
+        n=(
+            "patient_id",
+            "count"
+        ),
+        events=(
+            "event",
+            "sum"
+        ),
+        median_follow_up=(
+            "follow_up_days",
+            "median"
+        )
+    )
+)
+```
+
+## Eventos por grupo
+
+```python
+group_summary[
+    "event_proportion"
+] = (
+    group_summary[
+        "events"
+    ]
+    /
+    group_summary[
+        "n"
+    ]
+)
+```
+
+La proporción bruta de eventos no sustituye el análisis de supervivencia.
+
+## Seguimiento desigual
+
+Ejemplo:
+
+```text
+Grupo A
+→ seguimiento medio 2 años
+
+Grupo B
+→ seguimiento medio 6 meses
+```
+
+Comparar porcentajes brutos puede ser engañoso.
+
+## Reverse Kaplan-Meier
+
+Se utiliza para describir la distribución del seguimiento.
+
+Conceptualmente:
+
+- Se invierte el indicador.
+- Las censuras pasan a considerarse eventos del seguimiento.
+- Los eventos originales se tratan como censura.
+
+## Estimación manual del seguimiento inverso
+
+```python
+reverse_kmf = KaplanMeierFitter()
+
+reverse_kmf.fit(
+    durations=survival_df[
+        "follow_up_days"
+    ],
+    event_observed=(
+        1
+        -
+        survival_df[
+            "event"
+        ]
+    )
+)
+```
+
+```python
+median_follow_up = (
+    reverse_kmf
+    .median_survival_time_
+)
+```
+
+Debe interpretarse como mediana de seguimiento potencial, no como supervivencia clínica.
+
+## Supervivencia restringida media
+
+La Restricted Mean Survival Time es el área bajo la curva hasta un tiempo \(\tau\).
+
+$$
+RMST(\tau)
+=
+\int_0^\tau S(t)\,dt
+$$
+
+Interpretación:
+
+```text
+Tiempo medio libre del evento
+hasta un horizonte definido
+```
+
+## Ventajas de RMST
+
+- Interpretación absoluta.
+- No exige riesgos proporcionales.
+- Útil cuando las curvas se cruzan.
+- Permite comparar grupos en un horizonte clínico.
+
+## Elegir tau
+
+Debe elegirse según:
+
+- Horizonte clínico.
+- Soporte de seguimiento.
+- Número en riesgo.
+- Plan de análisis.
+
+## Estimar RMST
+
+```python
+from lifelines.utils import restricted_mean_survival_time
+```
+
+```python
+rmst = restricted_mean_survival_time(
+    kmf,
+    t=365
+)
+```
+
+## Comparar RMST
+
+```text
+RMST_A(365)
+-
+RMST_B(365)
+```
+
+puede interpretarse como diferencia media en tiempo libre del evento durante el primer año.
+
+## Kaplan-Meier con competing risks
+
+Kaplan-Meier no es adecuado para estimar incidencia acumulada de un evento específico cuando existen eventos competidores relevantes.
+
+Si se censuran los competidores:
+
+```text
+Kaplan-Meier
+→ puede sobreestimar la incidencia
+```
+
+Debe utilizarse función de incidencia acumulada.
+
+## Endpoint compuesto
+
+Una opción es combinar eventos, pero cambia la pregunta clínica.
+
+Ejemplo:
+
+```text
+Cardiotoxicidad o muerte
+```
+
+No equivale a estimar cardiotoxicidad en presencia de muerte competitiva.
+
+## Truncamiento izquierdo
+
+Kaplan-Meier estándar puede adaptarse a entrada tardía si se especifica el tiempo de entrada.
+
+```python
+kmf.fit(
+    durations=survival_df[
+        "exit_time"
+    ],
+    event_observed=survival_df[
+        "event"
+    ],
+    entry=survival_df[
+        "entry_time"
+    ]
+)
+```
+
+## Curvas ajustadas
+
+Kaplan-Meier es no ajustado.
+
+No controla por:
+
+- Edad.
+- Diagnóstico.
+- Tratamiento.
+- Centro.
+- Riesgo basal.
+
+Para ajuste se utilizan:
+
+- Cox.
+- Modelos paramétricos.
+- Curvas estandarizadas.
+- Ponderación.
+- Métodos causales.
+
+## Curvas descriptivas
+
+Kaplan-Meier debe interpretarse principalmente como descripción de la cohorte observada.
+
+## Datos pequeños
+
+Con pocos eventos:
+
+- Curvas inestables.
+- Intervalos amplios.
+- Medianas no alcanzadas.
+- P-values poco informativos.
+- Cola poco fiable.
+
+## Regla de cola
+
+Puede truncarse la visualización cuando el número en riesgo sea demasiado pequeño.
+
+Debe declararse claramente.
+
+## Eventos simultáneos
+
+Kaplan-Meier puede manejar tiempos empatados.
+
+En datos con resolución diaria es frecuente que varios eventos ocurran el mismo día.
+
+## Calidad de la escala temporal
+
+Ejemplo:
+
+```text
+Fecha de evento registrada por día
+```
+
+No debe interpretarse como tiempo exacto dentro del día.
+
+## Visualización recomendada
+
+Una buena figura debería incluir:
+
+- Curvas.
+- Intervalos de confianza.
+- Marcas de censura.
+- Número en riesgo.
+- Eje temporal con unidad.
+- Etiquetas claras.
+- Horizonte clínico.
+
+## Ejemplo completo
+
+```python
+from lifelines import KaplanMeierFitter
+from lifelines.plotting import add_at_risk_counts
+import matplotlib.pyplot as plt
+
+kmf_a = KaplanMeierFitter()
+kmf_b = KaplanMeierFitter()
+
+mask_a = (
+    survival_df[
+        "group"
+    ]
+    ==
+    "A"
+)
+
+mask_b = (
+    survival_df[
+        "group"
+    ]
+    ==
+    "B"
+)
+
+kmf_a.fit(
+    survival_df.loc[
+        mask_a,
+        "follow_up_days"
+    ],
+    survival_df.loc[
+        mask_a,
+        "event"
+    ],
+    label="Grupo A"
+)
+
+kmf_b.fit(
+    survival_df.loc[
+        mask_b,
+        "follow_up_days"
+    ],
+    survival_df.loc[
+        mask_b,
+        "event"
+    ],
+    label="Grupo B"
+)
+
+ax = kmf_a.plot_survival_function(
+    figsize=(
+        9,
+        6
+    )
+)
+
+kmf_b.plot_survival_function(
+    ax=ax
+)
+
+add_at_risk_counts(
+    kmf_a,
+    kmf_b,
+    ax=ax
+)
+
+ax.set_xlabel(
+    "Días desde el inicio"
+)
+
+ax.set_ylabel(
+    "Probabilidad de permanecer libre del evento"
+)
+
+ax.set_title(
+    "Kaplan-Meier por grupo"
+)
+
+plt.show()
+```
+
+## Reportar resultados
+
+Ejemplo de estructura:
+
+```text
+Grupo A:
+n = ...
+eventos = ...
+supervivencia a 1 año = ...
+IC 95 % = ...
+
+Grupo B:
+n = ...
+eventos = ...
+supervivencia a 1 año = ...
+IC 95 % = ...
+
+Log-rank:
+estadístico = ...
+p = ...
+```
+
+## No reportar solo p-value
+
+Debe incluirse:
+
+- Número de pacientes.
+- Número de eventos.
+- Seguimiento.
+- Supervivencia en tiempos clínicos.
+- Intervalos.
+- Número en riesgo.
+- Diferencias absolutas.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Kaplan-Meier es ideal para describir la evolución libre de evento, pero no ajusta por diferencias basales entre grupos.
+:::
+
+Debe revisarse:
+
+- Relevancia del evento.
+- Horizonte.
+- Seguimiento.
+- Censura.
+- Competing risks.
+- Diferencias absolutas.
+- Soporte en la cola.
+
+## Errores frecuentes
+
+- Interpretar censuras como eventos.
+- Comparar porcentajes brutos.
+- No mostrar tabla de riesgo.
+- Interpretar la cola con pocos pacientes.
+- Reportar solo mediana.
+- Reportar solo p-value.
+- Usar Kaplan-Meier con competing risks.
+- Ignorar curvas cruzadas.
+- Asumir causalidad.
+- No indicar unidad temporal.
+- No mostrar intervalos.
+- Comparar muchos grupos sin ajuste.
+
+## Flujo recomendado
+
+1. Revisar tiempos y eventos.
+2. Ajustar Kaplan-Meier global.
+3. Mostrar intervalos.
+4. Añadir tabla de riesgo.
+5. Estimar supervivencia en tiempos clínicos.
+6. Calcular mediana si se alcanza.
+7. Comparar grupos.
+8. Aplicar log-rank.
+9. Revisar curvas cruzadas.
+10. Considerar RMST.
+11. Revisar competing risks.
+12. Reportar magnitud e incertidumbre.
+
+## Checklist para proyectos
+
+- [ ] He validado tiempos.
+- [ ] He validado eventos.
+- [ ] He estimado Kaplan-Meier global.
+- [ ] He mostrado intervalos.
+- [ ] He mostrado censuras.
+- [ ] He añadido número en riesgo.
+- [ ] He calculado supervivencia en tiempos relevantes.
+- [ ] He revisado si la mediana se alcanza.
+- [ ] He comparado grupos.
+- [ ] He aplicado log-rank.
+- [ ] He revisado curvas cruzadas.
+- [ ] He considerado RMST.
+- [ ] He revisado competing risks.
+- [ ] He reportado diferencias absolutas.
+- [ ] He evitado interpretar causalidad.
+
+## Recursos
+
+### Conceptos
+
+- Kaplan-Meier estimator.
+- Survival function.
+- Median survival.
+- Number at risk.
+- Log-rank test.
+- Weighted log-rank.
+- Restricted Mean Survival Time.
+- Reverse Kaplan-Meier.
+
+### Librerías de Python
+
+- `lifelines.KaplanMeierFitter`.
+- `lifelines.statistics.logrank_test`.
+- `multivariate_logrank_test`.
+- `add_at_risk_counts`.
+- `restricted_mean_survival_time`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus curvas, horizontes, medianas, resultados log-rank y decisiones de interpretación.

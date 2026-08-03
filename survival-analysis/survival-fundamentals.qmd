@@ -1,0 +1,1166 @@
+---
+title: "Fundamentos de Survival Analysis"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Survival analysis estudia el tiempo hasta que ocurre un evento.
+
+Para construir correctamente el análisis hay que definir:
+
+- Población en riesgo.
+- Tiempo cero.
+- Evento.
+- Tiempo de seguimiento.
+- Censura.
+- Truncamiento.
+- Eventos competidores.
+- Covariables basales y dependientes del tiempo.
+
+Un error en estas definiciones puede invalidar todo el análisis.
+:::
+
+## Elementos mínimos
+
+Cada observación necesita al menos:
+
+```text
+Tiempo de seguimiento
++
+Indicador de evento
+```
+
+Ejemplo:
+
+```text
+patient_id | follow_up_days | event
+-----------------------------------
+1          | 120            | 1
+2          | 300            | 0
+3          | 45             | 1
+4          | 210            | 0
+```
+
+donde:
+
+```text
+event = 1
+→ evento observado
+
+event = 0
+→ observación censurada
+```
+
+## Pregunta de investigación
+
+Antes de preparar los datos, formula la pregunta.
+
+Ejemplo:
+
+```text
+¿Cuál es el tiempo desde el inicio del tratamiento
+hasta la primera cardiotoxicidad moderada o grave?
+```
+
+Esta pregunta determina:
+
+- Tiempo cero.
+- Evento.
+- Censura.
+- Población.
+- Covariables.
+- Horizonte.
+
+::: {.callout-note}
+## Idea clave
+
+En survival analysis, el diseño temporal forma parte del modelo.
+:::
+
+## Población en riesgo
+
+Solo deben incluirse personas que pueden experimentar el evento.
+
+Ejemplo:
+
+```text
+Evento
+→ primera cardiotoxicidad
+
+Población
+→ pacientes sin cardiotoxicidad al inicio
+```
+
+Un paciente que ya presenta el evento en tiempo cero no está libre de riesgo para una primera ocurrencia.
+
+## Criterios de inclusión
+
+Pueden incluir:
+
+- Diagnóstico confirmado.
+- Inicio de tratamiento registrado.
+- Seguimiento disponible.
+- Ausencia del evento basal.
+- Edad o periodo definidos.
+- Variables mínimas disponibles.
+
+## Criterios de exclusión
+
+Ejemplos:
+
+- Evento previo.
+- Fecha de inicio desconocida.
+- Tiempo negativo.
+- Duplicados.
+- Seguimiento imposible.
+- Inconsistencia temporal grave.
+
+## Tiempo cero
+
+El tiempo cero es el inicio del seguimiento.
+
+Puede ser:
+
+- Fecha de diagnóstico.
+- Inicio de tratamiento.
+- Alta hospitalaria.
+- Inclusión en el estudio.
+- Primera exposición.
+- Entrada en un estado.
+- Primera valoración válida.
+
+## Elegir tiempo cero
+
+Debe cumplir:
+
+- Ser clínicamente significativo.
+- Ser observable.
+- Ser reproducible.
+- Ser igual conceptualmente para todos.
+- Ocurrir antes del evento.
+- Coincidir con disponibilidad de covariables basales.
+
+## Ejemplo
+
+```python
+df[
+    "time_zero"
+] = pd.to_datetime(
+    df[
+        "treatment_start_date"
+    ]
+)
+```
+
+## Fecha del evento
+
+```python
+df[
+    "event_date"
+] = pd.to_datetime(
+    df[
+        "cardiotoxicity_date"
+    ]
+)
+```
+
+## Fecha de última observación
+
+```python
+df[
+    "last_follow_up_date"
+] = pd.to_datetime(
+    df[
+        "last_follow_up_date"
+    ]
+)
+```
+
+## Indicador de evento
+
+```python
+df[
+    "event"
+] = (
+    df[
+        "event_date"
+    ]
+    .notna()
+    .astype(int)
+)
+```
+
+## Fecha final observada
+
+```python
+df[
+    "end_date"
+] = df[
+    [
+        "event_date",
+        "last_follow_up_date"
+    ]
+].min(
+    axis=1
+)
+```
+
+## Tiempo de seguimiento
+
+```python
+df[
+    "follow_up_days"
+] = (
+    df[
+        "end_date"
+    ]
+    -
+    df[
+        "time_zero"
+    ]
+).dt.days
+```
+
+## Validar tiempos negativos
+
+```python
+invalid_time = df.loc[
+    df[
+        "follow_up_days"
+    ]
+    <
+    0
+]
+```
+
+## Evento antes de tiempo cero
+
+```python
+event_before_start = df.loc[
+    (
+        df[
+            "event"
+        ]
+        ==
+        1
+    )
+    &
+    (
+        df[
+            "event_date"
+        ]
+        <
+        df[
+            "time_zero"
+        ]
+    )
+]
+```
+
+## Evento en tiempo cero
+
+Debe decidirse cómo tratar:
+
+```text
+follow_up_days = 0
+event = 1
+```
+
+Puede representar:
+
+- Evento basal.
+- Error de fecha.
+- Evento detectado el mismo día.
+- Falta de resolución temporal.
+
+Debe definirse antes del análisis.
+
+## Evento
+
+El evento debe tener una definición operacional precisa.
+
+Ejemplo:
+
+```text
+Primera cardiotoxicidad moderada o grave
+definida por transición a S2 o S3
+```
+
+Debe especificarse:
+
+- Criterio clínico.
+- Fuente.
+- Fecha utilizada.
+- Regla ante varias fechas.
+- Primera ocurrencia o recurrencia.
+- Adjudicación.
+
+## Primera ocurrencia
+
+```python
+first_event = (
+    events
+    .sort_values(
+        [
+            "patient_id",
+            "event_date"
+        ]
+    )
+    .groupby(
+        "patient_id"
+    )
+    .first()
+    .reset_index()
+)
+```
+
+## Varios eventos el mismo día
+
+Debe definirse:
+
+- Prioridad clínica.
+- Mayor severidad.
+- Primer registro.
+- Adjudicación manual.
+- Evento compuesto.
+
+## Evento compuesto
+
+Ejemplo:
+
+```text
+Muerte
+o
+ingreso
+o
+cardiotoxicidad grave
+```
+
+Ventajas:
+
+- Más eventos.
+- Mayor potencia.
+
+Limitaciones:
+
+- Componentes heterogéneos.
+- Interpretación más difícil.
+- Un componente frecuente puede dominar.
+
+## Censura
+
+La censura más habitual es por la derecha.
+
+Sabemos que el evento no ocurrió hasta el último tiempo observado.
+
+```text
+Inicio
+───────────────|
+               última observación
+
+Evento no observado
+```
+
+## Censura administrativa
+
+Ocurre al finalizar el estudio.
+
+```python
+study_end = pd.Timestamp(
+    "2026-12-31"
+)
+```
+
+```python
+df[
+    "administrative_end"
+] = study_end
+```
+
+## Última fecha válida
+
+```python
+df[
+    "last_observed_date"
+] = df[
+    [
+        "last_visit_date",
+        "study_end_date"
+    ]
+].min(
+    axis=1
+)
+```
+
+## Pérdida de seguimiento
+
+La fecha de censura debe ser la última fecha en la que sabemos que el paciente permanecía libre del evento.
+
+No debe utilizarse una fecha administrativa posterior si el estado era desconocido.
+
+## Censura no informativa
+
+Muchos modelos suponen que, condicionando por las covariables, la censura no está relacionada con el riesgo futuro.
+
+Ejemplo problemático:
+
+```text
+Pacientes con mayor riesgo
+→ abandonan seguimiento antes
+```
+
+Esto puede sesgar el análisis.
+
+## Revisar motivos de censura
+
+```python
+censoring_reasons = (
+    df.loc[
+        df[
+            "event"
+        ]
+        ==
+        0,
+        "censoring_reason"
+    ]
+    .value_counts(
+        dropna=False
+    )
+)
+```
+
+## Comparar censurados y no censurados
+
+```python
+comparison = (
+    df
+    .groupby(
+        "event"
+    )[
+        [
+            "age",
+            "baseline_lvef",
+            "follow_up_days"
+        ]
+    ]
+    .mean()
+)
+```
+
+## Censura por intervalo
+
+A veces no se conoce la fecha exacta del evento.
+
+Ejemplo:
+
+```text
+Visita 1
+→ sin evento
+
+Visita 2
+→ evento presente
+```
+
+Sabemos que ocurrió entre ambas visitas.
+
+Esto es censura por intervalo.
+
+## Censura por la izquierda
+
+El evento ya ocurrió antes de la primera observación, pero no se conoce cuándo.
+
+Ejemplo:
+
+```text
+Primera visita
+→ enfermedad ya presente
+```
+
+## Truncamiento izquierdo
+
+El paciente entra en el estudio después de comenzar su periodo de riesgo.
+
+```text
+Inicio del riesgo
+────────
+
+Entrada en estudio
+        ───────────
+```
+
+Solo observamos pacientes que sobrevivieron hasta entrar.
+
+## Delayed entry
+
+En software, el truncamiento izquierdo suele representarse mediante:
+
+```text
+entry time
++
+exit time
+```
+
+Ejemplo:
+
+```text
+patient_id | entry | exit | event
+---------------------------------
+1          | 30    | 120  | 1
+2          | 10    | 200  | 0
+```
+
+## Riesgo de sesgo por supervivencia
+
+Ignorar delayed entry puede sobreestimar supervivencia.
+
+## Tiempo cronológico y tiempo de análisis
+
+Puede modelarse:
+
+- Tiempo desde diagnóstico.
+- Tiempo desde tratamiento.
+- Edad.
+- Tiempo calendario.
+- Tiempo desde entrada en estado.
+
+La escala temporal debe justificarse.
+
+## Edad como escala temporal
+
+En algunos estudios epidemiológicos puede utilizarse edad como tiempo.
+
+```text
+Entrada
+→ edad al incluirse
+
+Salida
+→ edad al evento o censura
+```
+
+## Covariables basales
+
+Se miden en o antes del tiempo cero.
+
+Ejemplos:
+
+- Edad.
+- Sexo.
+- Diagnóstico.
+- FEVI basal.
+- Biomarcadores basales.
+- Centro.
+- Tratamiento planificado.
+
+## Riesgo de covariable futura
+
+Incorrecto:
+
+```text
+Dosis acumulada al final del seguimiento
+→ usada como basal
+```
+
+Correcto:
+
+```text
+Dosis acumulada hasta tiempo cero
+```
+
+## Variables dependientes del tiempo
+
+Cambian durante el seguimiento.
+
+Ejemplos:
+
+- Tratamiento activo.
+- Troponina.
+- FEVI.
+- Estado clínico.
+- Exposición acumulada.
+- Hospitalización.
+
+## Formato start-stop
+
+```text
+patient_id | start | stop | event | treatment
+------------------------------------------------
+1          | 0     | 30   | 0     | 0
+1          | 30    | 90   | 0     | 1
+1          | 90    | 120  | 1     | 1
+```
+
+## Construir intervalos
+
+```python
+interval_df = pd.DataFrame(
+    {
+        "patient_id": [
+            1,
+            1,
+            1
+        ],
+        "start": [
+            0,
+            30,
+            90
+        ],
+        "stop": [
+            30,
+            90,
+            120
+        ],
+        "event": [
+            0,
+            0,
+            1
+        ],
+        "treatment": [
+            0,
+            1,
+            1
+        ]
+    }
+)
+```
+
+## Regla del evento
+
+El indicador debe valer 1 solo en el intervalo en que ocurre el evento.
+
+## Intervalos sin solapamiento
+
+```python
+overlap_check = (
+    interval_df
+    .sort_values(
+        [
+            "patient_id",
+            "start"
+        ]
+    )
+    .groupby(
+        "patient_id"
+    )
+    .apply(
+        lambda group:
+        (
+            group[
+                "start"
+            ]
+            <
+            group[
+                "stop"
+            ]
+            .shift()
+        )
+        .any()
+    )
+)
+```
+
+## Huecos temporales
+
+Debe decidirse si los huecos representan:
+
+- Ausencia de riesgo.
+- Falta de observación.
+- Error.
+- Periodo no registrado.
+- Tiempo fuera del sistema.
+
+## Competing risks
+
+Un evento competidor impide observar el evento principal.
+
+Ejemplo:
+
+```text
+Evento principal
+→ cardiotoxicidad
+
+Evento competidor
+→ fallecimiento sin cardiotoxicidad
+```
+
+## Codificar tipos de evento
+
+```text
+event_type = 0
+→ censura
+
+event_type = 1
+→ cardiotoxicidad
+
+event_type = 2
+→ fallecimiento sin cardiotoxicidad
+```
+
+## No censurar automáticamente competidores
+
+Tratarlos como censura independiente puede sobreestimar la incidencia acumulada del evento principal.
+
+## Evento recurrente
+
+Si el evento puede repetirse, debe definirse si se analiza:
+
+- Primera ocurrencia.
+- Todas las ocurrencias.
+- Tiempo entre eventos.
+- Número de eventos.
+- Evento terminal.
+
+## Primera ocurrencia
+
+Es más simple, pero pierde información posterior.
+
+## Dataset de eventos recurrentes
+
+```text
+patient_id | start | stop | event_number | event
+-------------------------------------------------
+1          | 0     | 30   | 1            | 1
+1          | 30    | 80   | 2            | 1
+1          | 80    | 120  | 3            | 0
+```
+
+## Inmortal time bias
+
+Aparece cuando la clasificación de exposición requiere sobrevivir un periodo.
+
+Ejemplo:
+
+```text
+Grupo tratado
+→ definido por recibir tratamiento en día 30
+```
+
+Los primeros 30 días no pueden atribuirse retrospectivamente al tratamiento.
+
+## Solución conceptual
+
+Tratar exposición como variable dependiente del tiempo.
+
+## Landmark analysis
+
+Se elige un tiempo landmark.
+
+```text
+Tiempo cero
+──────
+
+Landmark
+       │
+       └──── seguimiento posterior
+```
+
+Solo se incluyen pacientes libres del evento en el landmark.
+
+## Ejemplo
+
+```text
+Landmark
+→ 6 meses tras tratamiento
+
+Predicción
+→ cardiotoxicidad entre 6 y 24 meses
+```
+
+## Left censoring vs left truncation
+
+| Concepto | Significado |
+|---|---|
+| Censura izquierda | El evento ocurrió antes de observarlo |
+| Truncamiento izquierdo | El paciente solo entra si sobrevivió hasta cierto tiempo |
+
+No son equivalentes.
+
+## Estructura de una fila por paciente
+
+```python
+survival_df = df[
+    [
+        "patient_id",
+        "follow_up_days",
+        "event",
+        "age",
+        "sex",
+        "baseline_lvef"
+    ]
+].copy()
+```
+
+## Comprobar duplicados
+
+```python
+duplicated_patients = (
+    survival_df
+    .duplicated(
+        subset=[
+            "patient_id"
+        ]
+    )
+    .sum()
+)
+```
+
+## Comprobar missing del outcome
+
+```python
+outcome_missing = (
+    survival_df[
+        [
+            "follow_up_days",
+            "event"
+        ]
+    ]
+    .isna()
+    .sum()
+)
+```
+
+## Comprobar eventos inválidos
+
+```python
+invalid_event = survival_df.loc[
+    ~survival_df[
+        "event"
+    ]
+    .isin(
+        [
+            0,
+            1
+        ]
+    )
+]
+```
+
+## Revisar seguimiento
+
+```python
+survival_df[
+    "follow_up_days"
+].describe()
+```
+
+## Proporción de eventos
+
+```python
+event_rate = (
+    survival_df[
+        "event"
+    ]
+    .mean()
+)
+```
+
+## Seguimiento por estado
+
+```python
+follow_up_by_event = (
+    survival_df
+    .groupby(
+        "event"
+    )[
+        "follow_up_days"
+    ]
+    .describe()
+)
+```
+
+## Reverse Kaplan-Meier
+
+Puede utilizarse para describir la distribución del seguimiento potencial.
+
+Es preferible a resumir únicamente la mediana observada de seguimiento.
+
+## Cronología por paciente
+
+```text
+Paciente 1
+Inicio ├──────── Evento
+
+Paciente 2
+Inicio ├──────────────── Censura
+
+Paciente 3
+       Entrada ├──── Evento
+```
+
+## Visualizar trayectorias
+
+```python
+import matplotlib.pyplot as plt
+
+plot_df = (
+    survival_df
+    .sort_values(
+        "follow_up_days"
+    )
+    .reset_index(
+        drop=True
+    )
+)
+```
+
+```python
+plt.figure(
+    figsize=(10, 8)
+)
+
+for index, row in plot_df.iterrows():
+
+    plt.hlines(
+        y=index,
+        xmin=0,
+        xmax=row[
+            "follow_up_days"
+        ]
+    )
+
+    marker = (
+        "o"
+        if row[
+            "event"
+        ]
+        ==
+        1
+        else
+        "|"
+    )
+
+    plt.plot(
+        row[
+            "follow_up_days"
+        ],
+        index,
+        marker=marker
+    )
+
+plt.xlabel(
+    "Tiempo de seguimiento"
+)
+
+plt.ylabel(
+    "Paciente"
+)
+
+plt.title(
+    "Seguimiento individual"
+)
+
+plt.show()
+```
+
+## Horizonte clínico
+
+Puede interesar el riesgo a:
+
+```text
+30 días
+6 meses
+1 año
+2 años
+5 años
+```
+
+El horizonte debe estar respaldado por suficiente seguimiento.
+
+## Número en riesgo
+
+A tiempos tardíos puede quedar poca población en riesgo.
+
+Las estimaciones se vuelven inestables.
+
+## Soporte temporal
+
+No debe extrapolarse más allá de donde existen datos suficientes sin un modelo y supuestos claramente justificados.
+
+## Pérdida de seguimiento diferencial
+
+Debe evaluarse por:
+
+- Centro.
+- Edad.
+- Sexo.
+- Diagnóstico.
+- Tratamiento.
+- Riesgo basal.
+
+## Calidad de fechas
+
+Problemas frecuentes:
+
+- Fecha del evento anterior al inicio.
+- Fechas duplicadas.
+- Cambio de unidades.
+- Fecha administrativa usada como clínica.
+- Hora de registro diferente de hora real.
+- Seguimiento posterior a fallecimiento.
+
+## Reglas temporales
+
+```python
+quality_checks = {
+    "negative_follow_up": (
+        df[
+            "follow_up_days"
+        ]
+        <
+        0
+    ),
+    "event_after_last_follow_up": (
+        df[
+            "event_date"
+        ]
+        >
+        df[
+            "last_follow_up_date"
+        ]
+    ),
+    "event_before_start": (
+        df[
+            "event_date"
+        ]
+        <
+        df[
+            "time_zero"
+        ]
+    )
+}
+```
+
+## Documentación del outcome
+
+Debe mantenerse un diccionario con:
+
+- Nombre del outcome.
+- Definición.
+- Fuente.
+- Tiempo cero.
+- Fecha del evento.
+- Fecha de censura.
+- Competing risks.
+- Reglas de adjudicación.
+- Versión.
+
+## Ejemplo de especificación
+
+```text
+Outcome:
+Primera transición a S2 o S3
+
+Tiempo cero:
+Inicio del tratamiento oncológico
+
+Evento:
+Primera fecha de valoración cardiovascular
+clasificada como S2 o S3
+
+Censura:
+Última valoración libre de S2/S3,
+fin del estudio o pérdida de seguimiento
+
+Evento competidor:
+Fallecimiento sin transición previa
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+La definición del evento debe ser clínicamente válida y temporalmente reproducible.
+:::
+
+Debe consensuarse:
+
+- Qué cuenta como evento.
+- Qué fecha se utiliza.
+- Cómo tratar evaluaciones discordantes.
+- Qué hacer con estados basales.
+- Cómo manejar eventos competidores.
+- Qué seguimiento mínimo se necesita.
+
+## Errores frecuentes
+
+- Tratar censurados como negativos.
+- No definir población en riesgo.
+- Elegir mal el tiempo cero.
+- Usar fechas administrativas.
+- Ignorar truncamiento.
+- Usar covariables futuras.
+- No identificar competing risks.
+- Mezclar primera ocurrencia y recurrencias.
+- No revisar immortal time bias.
+- Ignorar pérdidas diferenciales.
+- No documentar reglas.
+- Extrapolar con pocos pacientes en riesgo.
+
+## Flujo recomendado
+
+1. Formular la pregunta.
+2. Definir población en riesgo.
+3. Definir tiempo cero.
+4. Definir evento.
+5. Definir censura.
+6. Identificar competing risks.
+7. Revisar truncamiento.
+8. Construir tiempos.
+9. Validar fechas.
+10. Revisar pérdidas.
+11. Crear dataset final.
+12. Documentar decisiones.
+
+## Checklist para proyectos
+
+- [ ] He formulado la pregunta temporal.
+- [ ] He definido la población en riesgo.
+- [ ] He definido tiempo cero.
+- [ ] He definido el evento.
+- [ ] He definido fecha del evento.
+- [ ] He definido censura.
+- [ ] He identificado competing risks.
+- [ ] He revisado truncamiento.
+- [ ] He comprobado tiempos negativos.
+- [ ] He comprobado duplicados.
+- [ ] He revisado eventos en tiempo cero.
+- [ ] He separado covariables basales y temporales.
+- [ ] He revisado immortal time bias.
+- [ ] He analizado pérdidas de seguimiento.
+- [ ] He documentado todas las reglas.
+
+## Recursos
+
+### Conceptos
+
+- Time origin.
+- Risk set.
+- Right censoring.
+- Interval censoring.
+- Left truncation.
+- Delayed entry.
+- Immortal time bias.
+- Landmark analysis.
+- Competing risks.
+- Recurrent events.
+
+### Librerías de Python
+
+- `pandas`.
+- `lifelines`.
+- `scikit-survival`.
+- `statsmodels`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus definiciones de población, tiempo cero, evento, censura, competing risks y reglas temporales.

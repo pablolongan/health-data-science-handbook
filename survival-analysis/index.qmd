@@ -1,0 +1,913 @@
+---
+title: "Survival Analysis"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Survival analysis estudia el tiempo hasta que ocurre un evento.
+
+Permite trabajar correctamente cuando:
+
+- Algunos pacientes presentan el evento.
+- Otros terminan el seguimiento sin presentarlo.
+- Los tiempos de seguimiento son diferentes.
+- Existen eventos competidores.
+- Las variables cambian durante el seguimiento.
+
+Ejemplos:
+
+- Tiempo hasta fallecimiento.
+- Tiempo hasta reingreso.
+- Tiempo hasta recaída.
+- Tiempo hasta cardiotoxicidad.
+- Tiempo hasta progresión.
+:::
+
+## ¿Qué pregunta responde?
+
+En clasificación se pregunta:
+
+```text
+¿Ocurrirá el evento?
+```
+
+En survival analysis se pregunta:
+
+```text
+¿Cuándo ocurrirá el evento?
+```
+
+Se modelan conjuntamente:
+
+- La ocurrencia del evento.
+- El tiempo hasta el evento.
+- La información incompleta por censura.
+
+::: {.callout-note}
+## Idea clave
+
+Un paciente sin evento al finalizar el estudio no debe tratarse automáticamente como un caso negativo.
+:::
+
+## Ejemplo clínico
+
+Supongamos que estudiamos cardiotoxicidad.
+
+```text
+Paciente A
+→ cardiotoxicidad a los 14 meses
+
+Paciente B
+→ sin cardiotoxicidad tras 24 meses
+
+Paciente C
+→ seguimiento perdido a los 9 meses
+
+Paciente D
+→ cardiotoxicidad a los 6 meses
+```
+
+Los pacientes B y C aportan información aunque no se haya observado el evento.
+
+## Elementos básicos
+
+Cada observación necesita al menos:
+
+- Tiempo de seguimiento.
+- Indicador de evento.
+
+```python
+duration_column = "follow_up_days"
+
+event_column = "cardiotoxicity_event"
+```
+
+Ejemplo:
+
+```text
+follow_up_days | event
+----------------------
+120            | 1
+300            | 0
+90             | 0
+45             | 1
+```
+
+## Tiempo hasta evento
+
+Puede definirse como:
+
+$$
+T
+=
+\text{fecha del evento}
+-
+\text{fecha de inicio}
+$$
+
+## Fecha de inicio
+
+Debe definirse clínicamente.
+
+Ejemplos:
+
+- Fecha de diagnóstico.
+- Inicio del tratamiento.
+- Alta hospitalaria.
+- Primera valoración.
+- Inclusión en el estudio.
+- Entrada en un estado.
+
+## Evento
+
+Debe definirse con precisión.
+
+Ejemplos:
+
+- Fallecimiento.
+- Reingreso.
+- Recaída.
+- Cardiotoxicidad moderada.
+- Primera transición a disfunción.
+- Inicio de ventilación mecánica.
+
+## Censura
+
+Existe censura cuando no conocemos el tiempo exacto del evento.
+
+## Censura por la derecha
+
+Es la más habitual.
+
+```text
+Inicio
+───────────────|
+               fin del seguimiento
+
+No se observó el evento
+```
+
+Sabemos que:
+
+$$
+T
+>
+t_{\text{último seguimiento}}
+$$
+
+## Motivos de censura
+
+- Fin del estudio.
+- Pérdida de seguimiento.
+- Retirada.
+- Alta.
+- Traslado.
+- El evento no ocurrió todavía.
+
+## Censura no informativa
+
+Muchos modelos asumen que la censura es independiente del riesgo del evento, condicionada a las variables incluidas.
+
+Esta hipótesis puede fallar.
+
+Ejemplo:
+
+```text
+Pacientes más graves
+→ abandonan seguimiento con mayor frecuencia
+```
+
+## Truncamiento
+
+El truncamiento es diferente de la censura.
+
+### Truncamiento izquierdo
+
+Un paciente entra en observación después del inicio de su periodo de riesgo.
+
+```text
+Inicio del riesgo
+───────
+
+Entrada en estudio
+       ───────────
+```
+
+El paciente tuvo que sobrevivir hasta entrar.
+
+## Función de supervivencia
+
+La función de supervivencia es:
+
+$$
+S(t)
+=
+P(T>t)
+$$
+
+Representa la probabilidad de permanecer libre del evento más allá del tiempo \(t\).
+
+```text
+S(0) = 1
+
+S(t)
+↓
+disminuye cuando ocurren eventos
+```
+
+## Función de distribución
+
+$$
+F(t)
+=
+P(T\leq t)
+$$
+
+y:
+
+$$
+F(t)
+=
+1-S(t)
+$$
+
+## Hazard
+
+La función de riesgo instantáneo es:
+
+$$
+h(t)
+=
+\lim_{\Delta t \to 0}
+\frac{
+P(t\leq T<t+\Delta t\mid T\geq t)
+}{
+\Delta t
+}
+$$
+
+Representa la tasa instantánea del evento entre quienes siguen en riesgo.
+
+## Hazard no es probabilidad
+
+El hazard:
+
+- Puede superar 1.
+- No es una probabilidad directa.
+- Describe una tasa instantánea.
+- Depende del tiempo.
+
+## Riesgo acumulado
+
+$$
+H(t)
+=
+\int_0^t h(u)\,du
+$$
+
+La relación con supervivencia es:
+
+$$
+S(t)
+=
+e^{-H(t)}
+$$
+
+## Kaplan-Meier
+
+El estimador de Kaplan-Meier estima la función de supervivencia sin asumir una distribución paramétrica concreta.
+
+$$
+\hat{S}(t)
+=
+\prod_{t_i \leq t}
+\left(
+1-
+\frac{d_i}{n_i}
+\right)
+$$
+
+donde:
+
+- \(d_i\): eventos en \(t_i\).
+- \(n_i\): personas en riesgo justo antes de \(t_i\).
+
+## Curva Kaplan-Meier
+
+```text
+Supervivencia
+1.0 ──────────┐
+              └──────┐
+                     └─────┐
+                           └──
+0.0 ───────────────────────── Tiempo
+```
+
+La curva desciende cuando ocurren eventos.
+
+## Mediana de supervivencia
+
+Es el tiempo en el que:
+
+$$
+S(t)
+=
+0.5
+$$
+
+Puede no alcanzarse si más del 50 % permanece libre del evento.
+
+## Comparar grupos
+
+Ejemplos:
+
+- Tratamiento A frente a B.
+- Hombres frente a mujeres.
+- Centro A frente a B.
+- Riesgo bajo frente a alto.
+
+Puede utilizarse:
+
+- Curvas Kaplan-Meier.
+- Log-rank test.
+- Modelos de Cox.
+- Diferencias absolutas de supervivencia.
+
+## Log-rank test
+
+Compara las curvas de supervivencia bajo la hipótesis nula de igualdad entre grupos.
+
+```text
+H₀
+→ las curvas son iguales
+```
+
+## Modelo de Cox
+
+El modelo de riesgos proporcionales de Cox relaciona covariables y hazard.
+
+$$
+h(t\mid X)
+=
+h_0(t)
+\exp(
+\beta_1X_1
++
+\cdots
++
+\beta_pX_p
+)
+$$
+
+donde:
+
+- \(h_0(t)\): hazard basal.
+- \(X\): covariables.
+- \(\beta\): coeficientes.
+
+## Hazard ratio
+
+Para una variable \(X_j\):
+
+$$
+HR
+=
+e^{\beta_j}
+$$
+
+Interpretación:
+
+```text
+HR > 1
+→ mayor hazard
+
+HR < 1
+→ menor hazard
+
+HR = 1
+→ sin asociación
+```
+
+## Ejemplo
+
+```text
+HR = 1.50
+```
+
+Se interpreta como un hazard instantáneo aproximadamente un 50 % mayor, bajo los supuestos del modelo.
+
+::: {.callout-warning}
+## Importante
+
+Hazard ratio no equivale directamente a un 50 % más de probabilidad acumulada.
+:::
+
+## Riesgos proporcionales
+
+Cox asume que la razón de hazards entre dos individuos es aproximadamente constante en el tiempo.
+
+```text
+HR temprano
+≈
+HR tardío
+```
+
+Este supuesto debe comprobarse.
+
+## Variables dependientes del tiempo
+
+Algunas variables cambian durante el seguimiento.
+
+Ejemplos:
+
+- Troponina.
+- FEVI.
+- Tratamiento acumulado.
+- Estado clínico.
+- Exposición farmacológica.
+- Biomarcadores.
+
+Estas variables requieren una estructura longitudinal adecuada.
+
+## Competing risks
+
+Existen riesgos competitivos cuando otro evento impide o modifica la posibilidad del evento principal.
+
+Ejemplo:
+
+```text
+Evento principal
+→ recaída
+
+Evento competidor
+→ fallecimiento sin recaída
+```
+
+No debe censurarse automáticamente el evento competidor como si fuera censura independiente.
+
+## Función de incidencia acumulada
+
+En competing risks se utiliza:
+
+$$
+CIF_k(t)
+=
+P(T\leq t, J=k)
+$$
+
+Representa la probabilidad acumulada de presentar el evento de tipo \(k\).
+
+## Modelos principales de competing risks
+
+- Cause-specific Cox.
+- Fine-Gray.
+- Modelos multiestado.
+
+## Eventos recurrentes
+
+Un paciente puede experimentar varias veces el mismo evento.
+
+Ejemplos:
+
+- Reingresos.
+- Infecciones.
+- Crisis.
+- Arritmias.
+- Hospitalizaciones.
+
+La primera ocurrencia no siempre resume adecuadamente la trayectoria.
+
+## Modelos recurrentes
+
+- Andersen-Gill.
+- Prentice-Williams-Peterson.
+- Modelos de frailty.
+- Modelos multiestado.
+- Joint frailty models.
+
+## Modelos paramétricos
+
+Asumen una forma para la distribución del tiempo.
+
+Ejemplos:
+
+- Exponencial.
+- Weibull.
+- Gompertz.
+- Log-normal.
+- Log-logistic.
+
+## Ventajas paramétricas
+
+- Predicciones más suaves.
+- Extrapolación temporal.
+- Estimación directa de supervivencia.
+- Posible interpretación del tiempo.
+
+## Limitaciones paramétricas
+
+- Riesgo de especificar mal la distribución.
+- Extrapolaciones poco realistas.
+- Mayor dependencia de supuestos.
+
+## Accelerated Failure Time
+
+Los modelos AFT modelan directamente el tiempo hasta evento.
+
+$$
+\log(T)
+=
+\beta_0
++
+\beta X
++
+\varepsilon
+$$
+
+## Time ratio
+
+En un modelo AFT puede interpretarse:
+
+```text
+Time ratio > 1
+→ tiempo hasta evento más largo
+
+Time ratio < 1
+→ tiempo hasta evento más corto
+```
+
+## Machine learning de supervivencia
+
+También existen modelos no lineales:
+
+- Random Survival Forest.
+- Gradient Boosting Survival.
+- Survival SVM.
+- DeepSurv.
+- Redes neuronales de supervivencia.
+
+## Random Survival Forest
+
+Ventajas:
+
+- No linealidad.
+- Interacciones.
+- Menos supuestos paramétricos.
+- Importancia de variables.
+
+Limitaciones:
+
+- Menor interpretabilidad.
+- Requiere tuning.
+- Puede necesitar muestras grandes.
+
+## Métricas de supervivencia
+
+No deben utilizarse directamente métricas estándar ignorando censura.
+
+Métricas habituales:
+
+- Concordance index.
+- Time-dependent AUC.
+- Brier score.
+- Integrated Brier Score.
+- Calibración temporal.
+- Error de predicción de supervivencia.
+
+## Concordance index
+
+Evalúa si pacientes con mayor riesgo presentan antes el evento.
+
+```text
+C-index = 0.5
+→ discriminación similar al azar
+
+C-index = 1
+→ orden perfecto
+```
+
+## Limitación del C-index
+
+- No mide calibración.
+- Puede ocultar diferencias por tiempo.
+- Depende de pares comparables.
+- No indica utilidad clínica.
+
+## Brier score temporal
+
+Evalúa la precisión de probabilidades de supervivencia en un tiempo específico.
+
+Combina:
+
+- Discriminación.
+- Calibración.
+
+## Calibración temporal
+
+Ejemplo:
+
+```text
+Pacientes con supervivencia predicha del 80 % a 2 años
+→ aproximadamente 80 % deberían estar libres del evento
+```
+
+Debe evaluarse en varios tiempos.
+
+## Predicción de riesgo
+
+Un modelo puede producir:
+
+- Risk score.
+- Hazard.
+- Supervivencia individual.
+- Riesgo acumulado.
+- Incidencia acumulada.
+
+No todos son equivalentes.
+
+## Preparación mínima de datos
+
+```python
+survival_df = df[
+    [
+        "patient_id",
+        "follow_up_days",
+        "event",
+        "age",
+        "sex",
+        "treatment"
+    ]
+].copy()
+```
+
+## Revisar tiempos
+
+```python
+survival_df[
+    "follow_up_days"
+].describe()
+```
+
+## Revisar eventos
+
+```python
+survival_df[
+    "event"
+].value_counts(
+    dropna=False
+)
+```
+
+## Validaciones básicas
+
+```python
+invalid_times = survival_df.loc[
+    survival_df[
+        "follow_up_days"
+    ]
+    <
+    0
+]
+```
+
+```python
+duplicated_patients = (
+    survival_df
+    .duplicated(
+        subset=[
+            "patient_id"
+        ]
+    )
+    .sum()
+)
+```
+
+## Una fila por paciente
+
+En un modelo basal clásico suele utilizarse:
+
+```text
+Una fila
+→ un paciente
+```
+
+con:
+
+- Tiempo.
+- Evento.
+- Covariables basales.
+
+## Formato start-stop
+
+Para variables dependientes del tiempo:
+
+```text
+patient_id | start | stop | event | covariate
+```
+
+Ejemplo:
+
+```text
+1 | 0   | 30  | 0 | 0
+1 | 30  | 60  | 0 | 1
+1 | 60  | 90  | 1 | 1
+```
+
+## Time zero
+
+La elección del tiempo cero es crítica.
+
+Puede ser:
+
+- Diagnóstico.
+- Inicio de tratamiento.
+- Alta.
+- Primera exposición.
+- Entrada en estado.
+
+## Immortal time bias
+
+Aparece cuando una persona debe sobrevivir un periodo para ser clasificada como expuesta.
+
+Ejemplo:
+
+```text
+Expuesto
+→ definido por recibir tratamiento en día 30
+
+Días 0 a 30
+→ tiempo inmortal si se atribuye a exposición
+```
+
+## Landmark analysis
+
+Selecciona pacientes libres de evento en un tiempo definido y predice desde ese punto.
+
+```text
+Inicio
+──────
+
+Landmark
+       │
+       └──── predicción futura
+```
+
+## Dynamic prediction
+
+Actualiza el riesgo utilizando información longitudinal nueva.
+
+Ejemplos:
+
+- Biomarcadores recientes.
+- Nueva ecocardiografía.
+- Cambio de tratamiento.
+- Transición de estado.
+
+## Validación temporal
+
+```text
+Cohorte histórica
+→ entrenamiento
+
+Cohorte posterior
+→ validación
+```
+
+## Validación externa
+
+```text
+Hospital A
+→ desarrollo
+
+Hospital B
+→ validación
+```
+
+## Split por paciente
+
+Cada paciente debe pertenecer a un único conjunto.
+
+## Leakage clínico
+
+Ejemplos:
+
+- Variables medidas después del inicio del seguimiento.
+- Diagnóstico final.
+- Tratamiento iniciado como respuesta al evento.
+- Duración total.
+- Fecha de alta.
+- Eventos futuros usados como covariables basales.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Survival analysis resulta especialmente útil cuando el momento del evento y la censura son clínicamente relevantes.
+:::
+
+Debe definirse:
+
+- Evento.
+- Tiempo cero.
+- Censura.
+- Eventos competidores.
+- Horizonte clínico.
+- Variables disponibles.
+- Población en riesgo.
+
+## Errores frecuentes
+
+- Tratar censurados como negativos.
+- Ignorar tiempos diferentes.
+- Elegir mal el tiempo cero.
+- No comprobar riesgos proporcionales.
+- Interpretar HR como riesgo absoluto.
+- Censurar eventos competidores.
+- Ignorar truncamiento.
+- Usar variables futuras.
+- No evaluar calibración.
+- Reportar solo C-index.
+- No documentar pérdidas.
+- No validar externamente.
+
+## Flujo recomendado
+
+1. Definir población.
+2. Definir tiempo cero.
+3. Definir evento.
+4. Definir censura.
+5. Revisar competing risks.
+6. Explorar seguimiento.
+7. Estimar Kaplan-Meier.
+8. Comparar grupos.
+9. Ajustar modelo de Cox.
+10. Revisar supuestos.
+11. Evaluar discriminación y calibración.
+12. Validar externamente.
+
+## Itinerario de la sección
+
+Esta sección se desarrollará con:
+
+1. Fundamentos, tiempos y censura.
+2. Kaplan-Meier y log-rank.
+3. Modelo de Cox.
+4. Supuesto de riesgos proporcionales.
+5. Modelos paramétricos y AFT.
+6. Variables dependientes del tiempo.
+7. Competing risks.
+8. Machine learning de supervivencia.
+9. Evaluación y calibración.
+10. Aplicaciones clínicas.
+
+## Checklist inicial
+
+- [ ] He definido el tiempo cero.
+- [ ] He definido el evento.
+- [ ] He definido la censura.
+- [ ] He identificado competing risks.
+- [ ] He revisado truncamiento.
+- [ ] He comprobado tiempos negativos.
+- [ ] He revisado duplicados.
+- [ ] He definido covariables basales.
+- [ ] He separado variables temporales.
+- [ ] He evitado leakage.
+- [ ] He definido horizontes.
+- [ ] He planificado validación externa.
+
+## Recursos
+
+### Conceptos
+
+- Survival function.
+- Hazard.
+- Cumulative hazard.
+- Censoring.
+- Truncation.
+- Kaplan-Meier.
+- Cox proportional hazards.
+- Competing risks.
+- Time-varying covariates.
+- Dynamic prediction.
+
+### Librerías de Python
+
+- `lifelines`.
+- `scikit-survival`.
+- `statsmodels`.
+- `pycox`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus definiciones de tiempo cero, evento, censura, horizontes y decisiones clínicas.
