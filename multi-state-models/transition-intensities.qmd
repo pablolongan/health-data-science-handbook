@@ -1,0 +1,1437 @@
+---
+title: "Intensidades y matriz de transición"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Las intensidades de transición describen la tasa instantánea de pasar de un estado a otro.
+
+Para una transición \(r \rightarrow s\):
+
+$$
+q_{rs}(t)
+$$
+
+representa la intensidad instantánea de cambio, condicionado a encontrarse en el estado \(r\).
+
+Las intensidades se organizan en una matriz generadora y permiten obtener probabilidades de transición y ocupación.
+:::
+
+## ¿Qué es una intensidad de transición?
+
+Para dos estados \(r\) y \(s\):
+
+$$
+q_{rs}(t)
+=
+\lim_{\Delta t \to 0}
+\frac{
+P[
+X(t+\Delta t)=s
+\mid
+X(t)=r
+]
+}{
+\Delta t
+}
+$$
+
+Describe la tasa instantánea de pasar de \(r\) a \(s\).
+
+::: {.callout-note}
+## Idea clave
+
+La intensidad no es una probabilidad, aunque permite construir probabilidades de transición.
+:::
+
+## Ejemplo
+
+```text
+q₀₁(t)
+```
+
+representa la intensidad de transición:
+
+```text
+S0 → S1
+```
+
+## Interpretación clínica
+
+Una intensidad alta significa que, entre los pacientes actualmente en el estado de origen, la transición ocurre con mayor rapidez.
+
+## Intensidad frente a probabilidad
+
+```text
+Intensidad
+→ tasa instantánea
+
+Probabilidad
+→ posibilidad acumulada durante un intervalo
+```
+
+## Ejemplo conceptual
+
+```text
+q₀₁ = 0.02 por mes
+```
+
+No significa exactamente una probabilidad mensual del 2 %, aunque para intervalos muy pequeños puede aproximarse.
+
+## Matriz generadora
+
+Las intensidades se organizan en una matriz \(Q(t)\).
+
+$$
+Q(t)
+=
+\begin{pmatrix}
+q_{00}(t) & q_{01}(t) & q_{02}(t) \\
+q_{10}(t) & q_{11}(t) & q_{12}(t) \\
+q_{20}(t) & q_{21}(t) & q_{22}(t)
+\end{pmatrix}
+$$
+
+## Elementos fuera de la diagonal
+
+```text
+q_rs
+→ intensidad de r a s
+```
+
+## Elementos diagonales
+
+$$
+q_{rr}(t)
+=
+-
+\sum_{s \neq r}
+q_{rs}(t)
+$$
+
+## Por qué son negativos
+
+La diagonal representa la tasa total de salida del estado.
+
+## Ejemplo con cuatro estados
+
+```text
+S0 ↔ S1 ↔ S2 → S3
+```
+
+Una posible matriz:
+
+$$
+Q
+=
+\begin{pmatrix}
+-(q_{01}+q_{02}) & q_{01} & q_{02} & 0 \\
+q_{10} & -(q_{10}+q_{12}) & q_{12} & 0 \\
+0 & q_{21} & -(q_{21}+q_{23}) & q_{23} \\
+0 & 0 & 0 & 0
+\end{pmatrix}
+$$
+
+## Estado absorbente
+
+Para un estado absorbente:
+
+```text
+S3
+```
+
+todas las intensidades de salida son 0.
+
+```text
+Fila de S3
+→ todos los valores 0
+```
+
+## Matriz en Python
+
+```python
+import numpy as np
+
+q01 = 0.05
+q02 = 0.01
+q10 = 0.03
+q12 = 0.04
+q21 = 0.02
+q23 = 0.01
+```
+
+```python
+Q = np.array(
+    [
+        [
+            -(q01 + q02),
+            q01,
+            q02,
+            0.0
+        ],
+        [
+            q10,
+            -(q10 + q12),
+            q12,
+            0.0
+        ],
+        [
+            0.0,
+            q21,
+            -(q21 + q23),
+            q23
+        ],
+        [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+        ]
+    ]
+)
+```
+
+## Validar filas
+
+Cada fila debe sumar aproximadamente 0.
+
+```python
+Q.sum(
+    axis=1
+)
+```
+
+## Intensidad total de salida
+
+Desde un estado \(r\):
+
+$$
+q_r(t)
+=
+\sum_{s \neq r}
+q_{rs}(t)
+$$
+
+## Ejemplo desde S1
+
+```text
+S1 → S0
+S1 → S2
+```
+
+Entonces:
+
+$$
+q_1(t)
+=
+q_{10}(t)
++
+q_{12}(t)
+$$
+
+## Tiempo de permanencia
+
+En un modelo Markov homogéneo, el tiempo de permanencia en un estado sigue una distribución exponencial con tasa igual a la intensidad total de salida.
+
+$$
+T_r
+\sim
+Exponential(
+q_r
+)
+$$
+
+## Esperanza del tiempo en estado
+
+$$
+E(T_r)
+=
+\frac{1}{q_r}
+$$
+
+## Ejemplo
+
+```python
+q1 = (
+    q10
+    +
+    q12
+)
+
+expected_time_s1 = (
+    1
+    /
+    q1
+)
+```
+
+## Probabilidad del siguiente destino
+
+Condicionado a abandonar el estado \(r\):
+
+$$
+P(
+r \rightarrow s
+\mid
+\text{salida de }r
+)
+=
+\frac{
+q_{rs}
+}{
+\sum_{k \neq r}
+q_{rk}
+}
+$$
+
+## Ejemplo desde S1
+
+```python
+prob_next_s0 = (
+    q10
+    /
+    (
+        q10
+        +
+        q12
+    )
+)
+
+prob_next_s2 = (
+    q12
+    /
+    (
+        q10
+        +
+        q12
+    )
+)
+```
+
+## Diferencia importante
+
+La intensidad total determina cuánto se tarda en salir.
+
+Las proporciones relativas determinan hacia qué estado se sale.
+
+## Estimación no paramétrica simple
+
+En un modelo homogéneo sin covariables, una estimación intuitiva es:
+
+$$
+\hat{q}_{rs}
+=
+\frac{
+N_{rs}
+}{
+Y_r
+}
+$$
+
+donde:
+
+- \(N_{rs}\): número de transiciones \(r \rightarrow s\).
+- \(Y_r\): tiempo total en riesgo en \(r\).
+
+## Calcular tiempo en riesgo
+
+```python
+interval_data[
+    "duration"
+] = (
+    interval_data[
+        "stop"
+    ]
+    -
+    interval_data[
+        "start"
+    ]
+)
+```
+
+```python
+time_at_risk = (
+    interval_data
+    .groupby(
+        "from_state"
+    )[
+        "duration"
+    ]
+    .sum()
+)
+```
+
+## Contar transiciones
+
+```python
+transition_counts = (
+    interval_data
+    .loc[
+        interval_data[
+            "status"
+        ]
+        ==
+        1
+    ]
+    .groupby(
+        [
+            "from_state",
+            "to_state"
+        ]
+    )
+    .size()
+)
+```
+
+## Estimar intensidad bruta
+
+```python
+rows = []
+
+for (
+    origin,
+    destination
+), count in transition_counts.items():
+
+    rate = (
+        count
+        /
+        time_at_risk[
+            origin
+        ]
+    )
+
+    rows.append(
+        {
+            "from_state": origin,
+            "to_state": destination,
+            "transitions": count,
+            "time_at_risk": time_at_risk[
+                origin
+            ],
+            "intensity": rate
+        }
+    )
+```
+
+```python
+intensity_table = pd.DataFrame(
+    rows
+)
+```
+
+## Unidades
+
+Si el tiempo está en días:
+
+```text
+intensidad
+→ transiciones por día
+```
+
+Puede expresarse por 1000 días:
+
+```python
+intensity_table[
+    "intensity_per_1000_days"
+] = (
+    intensity_table[
+        "intensity"
+    ]
+    *
+    1000
+)
+```
+
+## Intervalos de confianza aproximados
+
+Para tasas basadas en recuentos Poisson puede utilizarse una aproximación.
+
+```python
+intensity_table[
+    "se"
+] = (
+    np.sqrt(
+        intensity_table[
+            "transitions"
+        ]
+    )
+    /
+    intensity_table[
+        "time_at_risk"
+    ]
+)
+```
+
+## Precaución
+
+Con pocos eventos, las aproximaciones normales pueden ser pobres.
+
+## Intensidades dependientes del tiempo
+
+En muchos procesos:
+
+```text
+q_rs(t)
+```
+
+cambia con el tiempo.
+
+Ejemplos:
+
+- Mayor progresión al inicio.
+- Recuperación tardía.
+- Efecto acumulativo de tratamiento.
+- Cambios de protocolo.
+
+## Modelo por tramos
+
+```text
+0–180 días
+→ intensidad 1
+
+>180 días
+→ intensidad 2
+```
+
+## Crear periodos
+
+```python
+interval_data[
+    "period"
+] = pd.cut(
+    interval_data[
+        "start"
+    ],
+    bins=[
+        0,
+        180,
+        float(
+            "inf"
+        )
+    ],
+    labels=[
+        "early",
+        "late"
+    ],
+    right=False
+)
+```
+
+## Dividir intervalos
+
+Si un intervalo cruza un punto de corte, debe dividirse.
+
+```text
+start = 120
+stop = 240
+```
+
+debe transformarse en:
+
+```text
+120–180
+180–240
+```
+
+## Función auxiliar conceptual
+
+```python
+def split_interval_at_cut(
+    start,
+    stop,
+    cut
+):
+
+    if (
+        start
+        <
+        cut
+        <
+        stop
+    ):
+        return [
+            (
+                start,
+                cut
+            ),
+            (
+                cut,
+                stop
+            )
+        ]
+
+    return [
+        (
+            start,
+            stop
+        )
+    ]
+```
+
+## Cox específico por transición
+
+Para una transición \(r \rightarrow s\):
+
+$$
+q_{rs}(t \mid X)
+=
+q_{rs,0}(t)
+\exp(
+\beta_{rs}^{\top}X
+)
+$$
+
+## Interpretación
+
+```text
+exp(beta_rs)
+→ hazard ratio específico de esa transición
+```
+
+## Dataset específico
+
+```python
+transition_12 = expanded_data.loc[
+    expanded_data[
+        "transition_id"
+    ]
+    ==
+    4
+].copy()
+```
+
+## Ajustar Cox
+
+```python
+from lifelines import CoxPHFitter
+
+cph_12 = CoxPHFitter()
+
+cph_12.fit(
+    transition_12[
+        [
+            "start",
+            "stop",
+            "event",
+            "age",
+            "baseline_lvef",
+            "cumulative_dose"
+        ]
+    ],
+    duration_col="stop",
+    event_col="event",
+    entry_col="start"
+)
+```
+
+## Interpretación clínica
+
+Un HR de 1.30 para dosis acumulada en S1 → S2 indica un hazard específico de progresión aproximadamente 30 % mayor por unidad definida de dosis.
+
+## Modelo separado por transición
+
+```text
+Modelo 1
+→ S0 → S1
+
+Modelo 2
+→ S0 → S2
+
+Modelo 3
+→ S1 → S0
+
+Modelo 4
+→ S1 → S2
+```
+
+## Ventaja
+
+Cada arco puede tener:
+
+- Covariables distintas.
+- Baseline hazard distinto.
+- Efectos distintos.
+- Supuestos distintos.
+
+## Limitación
+
+Se necesitan suficientes transiciones por arco.
+
+## Modelo conjunto estratificado
+
+Otra opción es apilar todas las transiciones y estratificar por identificador de transición.
+
+```python
+stacked_model = CoxPHFitter()
+```
+
+```python
+stacked_model.fit(
+    expanded_data[
+        [
+            "start",
+            "stop",
+            "event",
+            "transition_id",
+            "age",
+            "baseline_lvef"
+        ]
+    ],
+    duration_col="stop",
+    event_col="event",
+    entry_col="start",
+    strata=[
+        "transition_id"
+    ]
+)
+```
+
+## Efecto común
+
+Con esta formulación, el efecto de una covariable puede asumirse común entre transiciones.
+
+```text
+Edad
+→ mismo beta en todos los arcos
+```
+
+## Efectos específicos
+
+Pueden añadirse interacciones:
+
+```python
+expanded_data[
+    "age_t1"
+] = (
+    expanded_data[
+        "age"
+    ]
+    *
+    (
+        expanded_data[
+            "transition_id"
+        ]
+        ==
+        1
+    )
+)
+```
+
+## Una interacción por transición
+
+```python
+for transition_id in sorted(
+    expanded_data[
+        "transition_id"
+    ]
+    .unique()
+):
+
+    expanded_data[
+        f"age_t{transition_id}"
+    ] = (
+        expanded_data[
+            "age"
+        ]
+        *
+        (
+            expanded_data[
+                "transition_id"
+            ]
+            ==
+            transition_id
+        )
+    )
+```
+
+## Modelo híbrido
+
+Puede imponerse:
+
+- Efecto común para algunas transiciones.
+- Efecto específico para otras.
+- Estratificación por baseline hazard.
+
+## Compartir información
+
+Con transiciones raras puede ser útil:
+
+- Imponer efectos comunes.
+- Penalizar coeficientes.
+- Usar modelos jerárquicos.
+- Combinar estados.
+- Simplificar estructura.
+
+## Intensidades con covariables temporales
+
+Ejemplo:
+
+```text
+Dosis acumulada al inicio del intervalo
+```
+
+```python
+transition_12[
+    "dose_scaled"
+] = (
+    transition_12[
+        "cumulative_dose"
+    ]
+    /
+    100
+)
+```
+
+Así el HR puede interpretarse por 100 mg/m², si esa es la unidad clínica definida.
+
+## No usar exposición futura
+
+Incorrecto:
+
+```text
+Dosis acumulada al final del seguimiento
+```
+
+Correcto:
+
+```text
+Dosis acumulada al inicio del intervalo
+```
+
+## Probabilidades de transición
+
+A partir de \(Q\), en un modelo homogéneo:
+
+$$
+P(t)
+=
+\exp(
+Qt
+)
+$$
+
+donde \(\exp\) es la exponencial matricial.
+
+## Calcular en Python
+
+```python
+from scipy.linalg import expm
+
+P_12_months = expm(
+    Q
+    *
+    12
+)
+```
+
+## Interpretación
+
+```python
+P_12_months[
+    0,
+    2
+]
+```
+
+es la probabilidad de estar en S2 a los 12 meses, comenzando en S0.
+
+## Validar matriz P
+
+Cada fila debe sumar aproximadamente 1.
+
+```python
+P_12_months.sum(
+    axis=1
+)
+```
+
+## Matriz de probabilidades
+
+```python
+probability_matrix = pd.DataFrame(
+    P_12_months,
+    index=[
+        "S0",
+        "S1",
+        "S2",
+        "S3"
+    ],
+    columns=[
+        "S0",
+        "S1",
+        "S2",
+        "S3"
+    ]
+)
+```
+
+## Horizonte variable
+
+```python
+times = [
+    1,
+    3,
+    6,
+    12,
+    24
+]
+
+transition_probabilities = {
+    time:
+    expm(
+        Q
+        *
+        time
+    )
+    for time
+    in times
+}
+```
+
+## Ocupación desde un estado inicial
+
+Si el paciente empieza en S0:
+
+```python
+initial_distribution = np.array(
+    [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+    ]
+)
+```
+
+```python
+state_occupancy_12 = (
+    initial_distribution
+    @
+    P_12_months
+)
+```
+
+## Distribución inicial mixta
+
+```python
+initial_distribution = np.array(
+    [
+        0.80,
+        0.15,
+        0.05,
+        0.00
+    ]
+)
+```
+
+## Trayectorias de ocupación
+
+```python
+timeline = np.linspace(
+    0,
+    24,
+    100
+)
+```
+
+```python
+occupancy = np.asarray(
+    [
+        initial_distribution
+        @
+        expm(
+            Q
+            *
+            time
+        )
+        for time
+        in timeline
+    ]
+)
+```
+
+## Visualizar ocupación
+
+```python
+import matplotlib.pyplot as plt
+
+for index, state in enumerate(
+    [
+        "S0",
+        "S1",
+        "S2",
+        "S3"
+    ]
+):
+
+    plt.plot(
+        timeline,
+        occupancy[
+            :,
+            index
+        ],
+        label=state
+    )
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Probabilidad de ocupación"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## Modelo no homogéneo
+
+Si \(Q\) cambia con el tiempo:
+
+```text
+P(u,t)
+```
+
+no se obtiene simplemente con:
+
+```text
+exp(Q × tiempo)
+```
+
+Puede requerirse:
+
+- Product integral.
+- Aalen-Johansen.
+- Integración numérica.
+- Piecewise constant intensities.
+
+## Matrices por periodos
+
+```python
+Q_early = Q.copy()
+
+Q_late = Q.copy()
+```
+
+```python
+P_0_6 = expm(
+    Q_early
+    *
+    6
+)
+
+P_6_12 = expm(
+    Q_late
+    *
+    6
+)
+
+P_0_12 = (
+    P_0_6
+    @
+    P_6_12
+)
+```
+
+## Product integral
+
+Para intensidades variables:
+
+$$
+P(u,t)
+=
+\prod_{(u,t]}
+[
+I+dA(v)
+]
+$$
+
+Aalen-Johansen es el estimador no paramétrico habitual de esta cantidad.
+
+## Intensidad acumulada
+
+$$
+A_{rs}(t)
+=
+\int_0^t q_{rs}(u)\,du
+$$
+
+## Nelson-Aalen por transición
+
+Puede estimarse una intensidad acumulada específica por transición.
+
+## Estimación conceptual
+
+```python
+from lifelines import NelsonAalenFitter
+
+naf = NelsonAalenFitter()
+```
+
+Para cada estado de origen, las otras salidas deben considerarse competing transitions.
+
+## Censura de salidas competidoras
+
+Al modelar S1 → S2:
+
+```text
+S1 → S0
+```
+
+se trata como salida competidora en el análisis cause-specific.
+
+## Riesgo específico
+
+Solo contribuyen al risk set quienes están actualmente en el estado de origen.
+
+## Error frecuente
+
+Incluir a todos los pacientes desde tiempo cero en cada transición, aunque todavía no hayan entrado en el estado de origen.
+
+## Entrada al risk set
+
+Para S1 → S2:
+
+```text
+Entrada
+→ momento en que el paciente llega a S1
+```
+
+## Salida del risk set
+
+- Transición a S2.
+- Transición a otro estado.
+- Censura.
+- Estado terminal.
+
+## Clock-forward y clock-reset
+
+## Clock-forward
+
+```text
+start y stop
+→ tiempo desde origen global
+```
+
+## Clock-reset
+
+```text
+start = 0
+stop = tiempo en estado
+```
+
+## Implicaciones
+
+Clock-forward modela el efecto del tiempo global.
+
+Clock-reset modela el efecto del tiempo desde entrada al estado.
+
+## Markov frente a semi-Markov
+
+### Markov
+
+La intensidad depende del estado actual y del tiempo global.
+
+### Semi-Markov
+
+Puede depender de cuánto tiempo lleva el paciente en el estado.
+
+## Efecto del sojourn time
+
+```python
+expanded_data[
+    "sojourn_time"
+] = (
+    expanded_data[
+        "stop"
+    ]
+    -
+    expanded_data[
+        "state_entry_time"
+    ]
+)
+```
+
+Debe definirse cuidadosamente para evitar usar información futura.
+
+## Intensidades y número de transiciones
+
+Antes de ajustar modelos:
+
+```python
+transition_event_counts = (
+    expanded_data
+    .groupby(
+        "transition_id"
+    )[
+        "event"
+    ]
+    .sum()
+)
+```
+
+## Transiciones escasas
+
+```python
+rare_transitions = (
+    transition_event_counts
+    .loc[
+        transition_event_counts
+        <
+        10
+    ]
+)
+```
+
+El umbral no es una regla universal, pero sirve como alerta.
+
+## Separación
+
+Puede ocurrir si una categoría no presenta ninguna transición.
+
+Ejemplo:
+
+```text
+Ningún paciente tratado
+presenta S2 → S3
+```
+
+Puede generar coeficientes extremos.
+
+## Soluciones
+
+- Penalización.
+- Fusionar categorías.
+- Efectos compartidos.
+- Modelo bayesiano.
+- Más datos.
+- Simplificar transición.
+
+## Intensidad específica por centro
+
+Puede incluirse:
+
+- Centro como covariable.
+- Estratificación.
+- Frailty.
+- Efectos aleatorios.
+
+## Heterogeneidad no observada
+
+Dos pacientes en el mismo estado pueden tener distinta propensión a progresar.
+
+Los modelos de frailty pueden capturar parte de esa heterogeneidad.
+
+## Predicción individual
+
+Para un perfil \(X\):
+
+```text
+Q(X)
+```
+
+contiene intensidades ajustadas.
+
+A partir de ella pueden calcularse:
+
+- Probabilidades de transición.
+- Ocupación.
+- Tiempo esperado.
+- Riesgo de estado absorbente.
+
+## Matriz individual
+
+Conceptualmente:
+
+```python
+Q_patient = Q_baseline.copy()
+```
+
+```python
+Q_patient[
+    0,
+    1
+] = (
+    q01_baseline
+    *
+    np.exp(
+        beta_01_age
+        *
+        patient_age
+    )
+)
+```
+
+La diagonal debe recalcularse después.
+
+## Recalcular diagonal
+
+```python
+for row_index in range(
+    Q_patient.shape[
+        0
+    ]
+):
+
+    off_diagonal_sum = (
+        Q_patient[
+            row_index,
+            :
+        ].sum()
+        -
+        Q_patient[
+            row_index,
+            row_index
+        ]
+    )
+
+    Q_patient[
+        row_index,
+        row_index
+    ] = (
+        -
+        off_diagonal_sum
+    )
+```
+
+## Intervalos de confianza
+
+Las probabilidades derivadas también tienen incertidumbre.
+
+Puede estimarse mediante:
+
+- Delta method.
+- Bootstrap.
+- Simulación de coeficientes.
+- Métodos bayesianos.
+
+## Bootstrap por paciente
+
+Debe re-muestrearse la trayectoria completa de cada paciente.
+
+## Reporting
+
+Debe incluir:
+
+- Diagrama de estados.
+- Matriz de transiciones.
+- Tiempo total en riesgo.
+- Recuentos por arco.
+- Intensidades estimadas.
+- HR por transición.
+- Probabilidades de transición.
+- Incertidumbre.
+- Escala temporal.
+
+## Ejemplo de tabla
+
+| Transición | Eventos | Tiempo en riesgo | Intensidad |
+|---|---:|---:|---:|
+| S0 → S1 | 45 | 8000 días | 5.6/1000 días |
+| S0 → S2 | 8 | 8000 días | 1.0/1000 días |
+| S1 → S0 | 20 | 2500 días | 8.0/1000 días |
+| S1 → S2 | 18 | 2500 días | 7.2/1000 días |
+
+## Interpretación clínica
+
+::: {.callout-note}
+## Aplicación clínica
+
+Las intensidades permiten distinguir entre:
+
+- Salir rápidamente de un estado.
+- Permanecer mucho tiempo.
+- Progresar.
+- Recuperarse.
+:::
+
+## Errores frecuentes
+
+- Interpretar intensidad como probabilidad.
+- No recalcular la diagonal.
+- Incluir pacientes fuera del estado de origen.
+- Ignorar transiciones competidoras.
+- Usar covariables futuras.
+- Ajustar demasiados modelos con pocos eventos.
+- Mezclar clock-forward y clock-reset.
+- No declarar unidades.
+- No comprobar filas de \(Q\).
+- Extrapolar con intensidades constantes sin justificar.
+- No estimar incertidumbre.
+- Confundir probabilidad de siguiente destino con probabilidad a tiempo fijo.
+
+## Flujo recomendado
+
+1. Definir arcos.
+2. Calcular tiempo en riesgo.
+3. Contar transiciones.
+4. Estimar intensidades brutas.
+5. Construir matriz \(Q\).
+6. Ajustar modelos por transición.
+7. Incorporar covariables.
+8. Revisar transiciones escasas.
+9. Calcular probabilidades.
+10. Calcular ocupación.
+11. Estimar incertidumbre.
+12. Comunicar resultados.
+
+## Checklist
+
+- [ ] He definido las intensidades por arco.
+- [ ] He calculado tiempo en riesgo.
+- [ ] He contado transiciones.
+- [ ] He declarado unidades.
+- [ ] He construido la matriz \(Q\).
+- [ ] Las filas de \(Q\) suman 0.
+- [ ] He identificado estados absorbentes.
+- [ ] He ajustado modelos por transición.
+- [ ] He tratado salidas competidoras.
+- [ ] He usado covariables disponibles.
+- [ ] He revisado eventos por arco.
+- [ ] He calculado probabilidades de transición.
+- [ ] Las filas de \(P\) suman 1.
+- [ ] He estimado ocupación.
+- [ ] He cuantificado incertidumbre.
+
+## Recursos
+
+### Conceptos
+
+- Transition intensity.
+- Generator matrix.
+- Cause-specific hazard.
+- Cumulative intensity.
+- Matrix exponential.
+- Transition probability.
+- State occupancy.
+- Product integral.
+- Clock-forward.
+- Clock-reset.
+
+### Herramientas
+
+- `numpy`.
+- `scipy.linalg.expm`.
+- `lifelines.CoxPHFitter`.
+- `lifelines.NelsonAalenFitter`.
+- `mstate` en R.
+- `msm` en R.
+
+### Material del proyecto
+
+Añadir aquí:
+
+- Matriz \(Q\).
+- Recuentos por transición.
+- Tiempo en riesgo.
+- Modelos por arco.
+- Intensidades ajustadas.
+- Probabilidades a 1 y 2 años.
+
+## Notas personales
+
+Añade aquí tus intensidades, coeficientes, matrices, probabilidades y decisiones de modelado.

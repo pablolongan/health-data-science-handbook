@@ -1,0 +1,1201 @@
+---
+title: "Multi-state Models"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Los modelos multiestado representan la evolución de una persona mediante transiciones entre estados.
+
+Ejemplo:
+
+```text
+S0
+→ estado normal
+
+S1
+→ alteración leve
+
+S2
+→ alteración moderada
+
+S3
+→ alteración grave
+```
+
+Permiten estudiar:
+
+- Qué transiciones ocurren.
+- Cuándo ocurren.
+- Qué factores se asocian con cada transición.
+- Cuánto tiempo se permanece en cada estado.
+- Qué probabilidad existe de ocupar cada estado en el futuro.
+:::
+
+## ¿Qué es un modelo multiestado?
+
+Un modelo multiestado describe un proceso que evoluciona entre distintos estados clínicos.
+
+```text
+Estado inicial
+      ↓
+Transición
+      ↓
+Nuevo estado
+      ↓
+Otra transición
+```
+
+Cada persona puede recorrer una trayectoria diferente.
+
+::: {.callout-note}
+## Idea clave
+
+No se modela un único evento, sino una secuencia de posibles transiciones.
+:::
+
+## Ejemplo clínico
+
+En cardiotoxicidad:
+
+```text
+S0
+→ función cardiovascular normal
+
+S1
+→ cardiotoxicidad leve
+
+S2
+→ cardiotoxicidad moderada
+
+S3
+→ cardiotoxicidad grave
+```
+
+Posibles trayectorias:
+
+```text
+S0 → S1 → S2
+
+S0 → S2
+
+S1 → S0
+
+S2 → S1
+
+S2 → S3
+```
+
+## Diferencia frente a clasificación
+
+Una clasificación convencional podría preguntar:
+
+```text
+¿El paciente tendrá cardiotoxicidad?
+```
+
+Un modelo multiestado pregunta:
+
+```text
+¿En qué estado está?
+
+¿A qué estado puede pasar?
+
+¿Cuándo ocurrirá la transición?
+
+¿Cuál es la probabilidad de cada trayectoria?
+```
+
+## Diferencia frente a Survival Analysis
+
+Survival analysis clásico suele modelar:
+
+```text
+Estado 0
+→ sin evento
+
+Estado 1
+→ evento
+```
+
+Un modelo multiestado generaliza esto:
+
+```text
+S0 → S1 → S2 → S3
+```
+
+## Competing risks como caso particular
+
+Un modelo de competing risks puede representarse como:
+
+```text
+Estado 0
+├──→ Evento 1
+└──→ Evento 2
+```
+
+Los estados de evento suelen ser absorbentes.
+
+## Illness-death model
+
+Modelo clásico:
+
+```text
+Sano
+├──→ Enfermo
+├──→ Fallecido
+└──── Enfermo → Fallecido
+```
+
+Puede incluir:
+
+- Transición directa a muerte.
+- Transición mediante enfermedad.
+- Estado terminal absorbente.
+
+## Estados
+
+Un estado representa una condición mutuamente identificable.
+
+Ejemplos:
+
+- Normal.
+- Leve.
+- Moderado.
+- Grave.
+- Reingresado.
+- Alta.
+- Fallecido.
+
+## Estados transitorios
+
+Se pueden abandonar.
+
+Ejemplos:
+
+```text
+S0
+S1
+S2
+```
+
+## Estados absorbentes
+
+Una vez alcanzados, no se abandonan.
+
+Ejemplos:
+
+- Fallecimiento.
+- Evento terminal.
+- Fin definitivo del seguimiento.
+
+## Estados reversibles
+
+Permiten recuperación.
+
+```text
+S0 ↔ S1
+S1 ↔ S2
+```
+
+## Estados irreversibles
+
+Solo permiten progresión.
+
+```text
+S0 → S1 → S2 → S3
+```
+
+## Elegir estructura
+
+La estructura debe basarse en:
+
+- Biología.
+- Definición clínica.
+- Frecuencia de observación.
+- Número de transiciones.
+- Objetivo del estudio.
+- Reversibilidad real.
+
+## Diagrama de estados
+
+Ejemplo progresivo:
+
+```text
+S0 → S1 → S2 → S3
+```
+
+Ejemplo reversible:
+
+```text
+S0 ↔ S1 ↔ S2 → S3
+```
+
+## Matriz de transiciones permitidas
+
+```text
+      To
+From  S0  S1  S2  S3
+S0    -   1   1   0
+S1    1   -   1   0
+S2    0   1   -   1
+S3    0   0   0   -
+```
+
+donde:
+
+```text
+1
+→ transición permitida
+
+0
+→ transición no permitida
+```
+
+## Crear matriz en Python
+
+```python
+import pandas as pd
+
+transition_matrix = pd.DataFrame(
+    {
+        "S0": [
+            None,
+            1,
+            None,
+            None
+        ],
+        "S1": [
+            1,
+            None,
+            4,
+            None
+        ],
+        "S2": [
+            2,
+            3,
+            None,
+            None
+        ],
+        "S3": [
+            None,
+            None,
+            5,
+            None
+        ]
+    },
+    index=[
+        "S0",
+        "S1",
+        "S2",
+        "S3"
+    ]
+)
+```
+
+## Transición
+
+Una transición es un cambio de estado.
+
+```text
+S1 → S2
+```
+
+Debe tener:
+
+- Estado de origen.
+- Estado de destino.
+- Tiempo.
+- Covariables.
+- Indicador de observación.
+
+## Tiempo en estado
+
+```text
+Entrada en S1
+→ día 30
+
+Salida de S1
+→ día 90
+
+Tiempo en S1
+→ 60 días
+```
+
+## Sojourn time
+
+El tiempo de permanencia en un estado se denomina:
+
+```text
+sojourn time
+```
+
+Puede influir en la siguiente transición.
+
+## Intensidad de transición
+
+La intensidad de transición de \(r\) a \(s\) se representa como:
+
+$$
+q_{rs}(t)
+$$
+
+Describe la tasa instantánea de pasar de \(r\) a \(s\), condicionado a estar en \(r\).
+
+## Interpretación
+
+```text
+q₁₂(t)
+```
+
+representa la intensidad instantánea de pasar de S1 a S2.
+
+## Matriz de intensidades
+
+$$
+Q(t)
+=
+\begin{pmatrix}
+q_{11}(t) & q_{12}(t) & \cdots \\
+q_{21}(t) & q_{22}(t) & \cdots \\
+\vdots & \vdots & \ddots
+\end{pmatrix}
+$$
+
+Los elementos diagonales cumplen:
+
+$$
+q_{rr}(t)
+=
+-
+\sum_{s\neq r}
+q_{rs}(t)
+$$
+
+## Probabilidad de transición
+
+$$
+P_{rs}(u,t)
+=
+P[
+X(t)=s
+\mid
+X(u)=r
+]
+$$
+
+Representa la probabilidad de estar en \(s\) en el tiempo \(t\), partiendo de \(r\) en \(u\).
+
+## Ejemplo
+
+```text
+P₀₂(0, 365)
+```
+
+es la probabilidad de estar en S2 al día 365, habiendo comenzado en S0.
+
+## Probabilidad de ocupación
+
+Es la probabilidad de que una persona ocupe un estado en un tiempo determinado.
+
+```text
+A 1 año:
+P(S0) = 0.60
+P(S1) = 0.20
+P(S2) = 0.15
+P(S3) = 0.05
+```
+
+## Trayectoria individual
+
+```text
+patient_id | time | state
+-------------------------
+1          | 0    | S0
+1          | 90   | S1
+1          | 180  | S2
+```
+
+## Formato por observaciones
+
+Adecuado cuando los estados se observan en visitas.
+
+```python
+state_observations = pd.DataFrame(
+    {
+        "patient_id": [
+            1,
+            1,
+            1,
+            2,
+            2
+        ],
+        "time": [
+            0,
+            90,
+            180,
+            0,
+            120
+        ],
+        "state": [
+            "S0",
+            "S1",
+            "S2",
+            "S0",
+            "S1"
+        ]
+    }
+)
+```
+
+## Formato de transiciones
+
+```text
+patient_id | from | to | start | stop | status
+------------------------------------------------
+1          | S0   | S1 | 0     | 90   | 1
+1          | S1   | S2 | 90    | 180  | 1
+1          | S2   | S3 | 180   | 300  | 0
+```
+
+## Significado de status
+
+```text
+status = 1
+→ transición observada
+
+status = 0
+→ censura en el estado
+```
+
+## Panel data
+
+En datos clínicos, el estado suele observarse solo en visitas.
+
+```text
+Visita 1
+→ S0
+
+Visita 2
+→ S2
+```
+
+No sabemos exactamente:
+
+- Cuándo ocurrió la transición.
+- Si pasó por S1.
+- Cuánto tiempo estuvo en S1.
+
+## Observación continua
+
+Se conoce aproximadamente el momento de transición.
+
+Ejemplos:
+
+- Fallecimiento.
+- Ingreso.
+- Alta.
+- Cirugía.
+- Inicio de ventilación.
+
+## Observación por panel
+
+El estado se conoce solo en momentos discretos.
+
+Ejemplos:
+
+- Ecocardiografías.
+- Evaluaciones funcionales.
+- Clasificación de enfermedad.
+- Seguimiento ambulatorio.
+
+## Censura por intervalo
+
+Si un paciente estaba en S0 y en la siguiente visita aparece en S1:
+
+```text
+Transición S0 → S1
+ocurrió entre ambas visitas
+```
+
+## Transiciones ocultas
+
+Puede existir:
+
+```text
+S0 → S1 → S2
+```
+
+entre dos visitas donde solo observamos:
+
+```text
+S0
+→ S2
+```
+
+Esto condiciona el tipo de modelo.
+
+## Modelos Markov
+
+Asumen que el futuro depende del estado actual.
+
+$$
+P[
+X(t+\Delta)=s
+\mid
+\text{historia}
+]
+=
+P[
+X(t+\Delta)=s
+\mid
+X(t)
+]
+$$
+
+## Interpretación
+
+```text
+Importa el estado actual
+
+No importa cómo se llegó a él
+```
+
+## Limitación Markov
+
+Puede ser poco realista si importa:
+
+- Tiempo en estado.
+- Número de recaídas.
+- Estado previo.
+- Dosis acumulada.
+- Trayectoria anterior.
+
+## Modelo semi-Markov
+
+Permite que la siguiente transición dependa del tiempo desde entrada en el estado actual.
+
+```text
+Riesgo de S2 → S3
+depende de cuánto tiempo lleva en S2
+```
+
+## Clock-forward
+
+El tiempo se mide desde el origen común.
+
+```text
+Inicio del estudio
+→ tiempo 0
+```
+
+## Clock-reset
+
+El tiempo se reinicia al entrar en cada estado.
+
+```text
+Entrada en S1
+→ tiempo de S1 = 0
+```
+
+## Diferencia
+
+```text
+Clock-forward
+→ tiempo global
+
+Clock-reset
+→ tiempo en estado
+```
+
+## Modelo homogéneo
+
+Las intensidades no dependen del tiempo calendario:
+
+$$
+q_{rs}(t)
+=
+q_{rs}
+$$
+
+## Modelo no homogéneo
+
+Las intensidades cambian con el tiempo:
+
+$$
+q_{rs}(t)
+$$
+
+Ejemplo:
+
+```text
+Mayor riesgo de progresión
+durante los primeros meses
+```
+
+## Covariables
+
+Cada transición puede tener su propio modelo.
+
+$$
+q_{rs}(t\mid Z)
+=
+q_{rs,0}(t)
+\exp(
+\beta_{rs}^{\top}Z
+)
+$$
+
+## Interpretación
+
+La edad puede asociarse de forma distinta con:
+
+```text
+S0 → S1
+
+S1 → S2
+
+S2 → S3
+```
+
+## Covariables compartidas
+
+Un mismo coeficiente puede imponerse a varias transiciones.
+
+## Covariables específicas
+
+Cada transición tiene su propio coeficiente.
+
+## Ventajas de efectos específicos
+
+- Mayor flexibilidad.
+- Interpretación clínica detallada.
+
+## Limitaciones
+
+- Más parámetros.
+- Más eventos necesarios.
+- Mayor riesgo de inestabilidad.
+
+## Datos escasos
+
+Algunas transiciones pueden ser raras.
+
+Ejemplo:
+
+```text
+S2 → S3
+→ 4 transiciones
+```
+
+Puede ser difícil estimar un modelo independiente.
+
+## Simplificar estados
+
+Opciones:
+
+- Combinar estados.
+- Eliminar transiciones improbables.
+- Imponer efectos compartidos.
+- Usar penalización.
+- Recoger más datos.
+
+## Estado mal clasificado
+
+Una evaluación puede contener error.
+
+Ejemplo:
+
+```text
+S1 real
+→ clasificado como S0
+```
+
+Los Hidden Markov Models permiten distinguir:
+
+- Estado observado.
+- Estado latente real.
+
+## Hidden Markov Model
+
+```text
+Estado real
+→ no observado directamente
+
+Medición
+→ observación imperfecta
+```
+
+Puede ser útil con:
+
+- Biomarcadores ruidosos.
+- Clasificación clínica imperfecta.
+- Visitas espaciadas.
+- Transiciones no observadas.
+
+## Multi-state y competing risks
+
+Desde un estado concreto, varias salidas pueden competir.
+
+Ejemplo:
+
+```text
+Desde S1:
+├──→ S0
+└──→ S2
+```
+
+Estas son competing transitions.
+
+## Multi-state y eventos recurrentes
+
+Puede representarse:
+
+```text
+Ingreso 1
+→ Alta
+→ Ingreso 2
+→ Alta
+```
+
+mediante estados repetidos o modelos específicos de recurrencia.
+
+## Multi-state y supervivencia
+
+La supervivencia global puede formar parte del modelo:
+
+```text
+S0 → S1 → Muerte
+S0 ───────→ Muerte
+```
+
+## Cantidades de interés
+
+- Intensidades.
+- Hazard ratios por transición.
+- Probabilidades de transición.
+- Probabilidades de ocupación.
+- Tiempo esperado en estado.
+- Probabilidad de alcanzar estado grave.
+- Probabilidad de recuperación.
+- Probabilidad de muerte.
+
+## Tiempo esperado en un estado
+
+```text
+Durante 2 años:
+tiempo esperado en S0
+tiempo esperado en S1
+tiempo esperado en S2
+```
+
+Puede ser más interpretable que un hazard ratio aislado.
+
+## Predicción individual
+
+Dado un paciente en S1:
+
+```text
+Probabilidad de estar en S0 a 6 meses
+Probabilidad de seguir en S1
+Probabilidad de pasar a S2
+Probabilidad de llegar a S3
+```
+
+## Dynamic prediction
+
+Las probabilidades pueden actualizarse cuando:
+
+- Cambia el estado.
+- Se obtiene un biomarcador.
+- Se acumula tratamiento.
+- Se produce una nueva evaluación.
+
+## Datos necesarios
+
+Como mínimo:
+
+- Identificador.
+- Tiempo.
+- Estado.
+- Orden temporal.
+- Censura.
+- Covariables.
+
+## Control de calidad
+
+Revisar:
+
+- Estados válidos.
+- Transiciones permitidas.
+- Tiempos negativos.
+- Duplicados.
+- Varias observaciones simultáneas.
+- Saltos imposibles.
+- Seguimiento posterior a estado absorbente.
+
+## Validar estados
+
+```python
+valid_states = {
+    "S0",
+    "S1",
+    "S2",
+    "S3"
+}
+
+invalid_states = state_observations.loc[
+    ~state_observations[
+        "state"
+    ]
+    .isin(
+        valid_states
+    )
+]
+```
+
+## Ordenar
+
+```python
+state_observations = (
+    state_observations
+    .sort_values(
+        [
+            "patient_id",
+            "time"
+        ]
+    )
+)
+```
+
+## Estado previo
+
+```python
+state_observations[
+    "previous_state"
+] = (
+    state_observations
+    .groupby("patient_id")[
+        "state"
+    ]
+    .shift()
+)
+```
+
+## Detectar transición
+
+```python
+state_observations[
+    "transition"
+] = (
+    state_observations[
+        "previous_state"
+    ]
+    .astype("string")
+    +
+    " → "
+    +
+    state_observations[
+        "state"
+    ]
+    .astype("string")
+)
+```
+
+## Eliminar permanencias
+
+```python
+transition_rows = (
+    state_observations
+    .loc[
+        state_observations[
+            "state"
+        ]
+        !=
+        state_observations[
+            "previous_state"
+        ]
+    ]
+)
+```
+
+## Contar transiciones
+
+```python
+transition_counts = (
+    transition_rows
+    .groupby(
+        [
+            "previous_state",
+            "state"
+        ]
+    )
+    .size()
+    .unstack(
+        fill_value=0
+    )
+)
+```
+
+## Matriz de recuentos
+
+| From / To | S0 | S1 | S2 | S3 |
+|---|---:|---:|---:|---:|
+| S0 | — | 45 | 8 | 0 |
+| S1 | 20 | — | 18 | 1 |
+| S2 | 0 | 6 | — | 5 |
+| S3 | 0 | 0 | 0 | — |
+
+## Transiciones imposibles
+
+Debe definirse una tabla de reglas.
+
+```python
+allowed_transitions = {
+    ("S0", "S1"),
+    ("S0", "S2"),
+    ("S1", "S0"),
+    ("S1", "S2"),
+    ("S2", "S1"),
+    ("S2", "S3")
+}
+```
+
+## Detectar imposibles
+
+```python
+transition_rows[
+    "allowed"
+] = transition_rows.apply(
+    lambda row:
+    (
+        row[
+            "previous_state"
+        ],
+        row[
+            "state"
+        ]
+    )
+    in
+    allowed_transitions,
+    axis=1
+)
+```
+
+## Saltos de estado
+
+```text
+S0 → S2
+```
+
+puede significar:
+
+- Transición directa real.
+- S1 no observado.
+- Seguimiento espaciado.
+- Error de clasificación.
+
+Debe decidirse clínicamente.
+
+## Misma fecha, varios estados
+
+Puede resolverse con:
+
+- Estado más grave.
+- Último registro.
+- Prioridad de fuente.
+- Adjudicación.
+- Mantener secuencia si existe hora.
+
+## Tiempo cero
+
+Puede definirse como:
+
+- Inicio de tratamiento.
+- Diagnóstico.
+- Primera valoración.
+- Entrada en S0.
+- Entrada en cualquier estado elegible.
+
+## Estado inicial
+
+No todos los pacientes tienen que iniciar en S0.
+
+Ejemplo:
+
+```text
+Paciente entra ya en S1
+```
+
+Debe decidirse si:
+
+- Se incluye con delayed entry.
+- Se excluye.
+- Se modela desde S1.
+- Se redefine la población.
+
+## Censura
+
+El paciente puede terminar seguimiento en cualquier estado transitorio.
+
+```text
+S1
+→ censura
+```
+
+## Truncamiento izquierdo
+
+Puede ocurrir si el proceso comenzó antes de observarse.
+
+Ejemplo:
+
+```text
+El paciente entra al estudio
+cuando ya lleva tiempo en S1
+```
+
+## Aplicaciones
+
+- Progresión de enfermedad.
+- Recuperación.
+- Reingresos.
+- Cardiotoxicidad.
+- Trasplante.
+- Discapacidad.
+- Estados de UCI.
+- Trayectorias funcionales.
+
+## Caso de cardiotoxicidad
+
+Una estructura inicial podría ser:
+
+```text
+S0 ↔ S1 ↔ S2 → S3
+```
+
+También podría permitirse:
+
+```text
+S0 → S2
+```
+
+si clínicamente se aceptan saltos observados.
+
+## Preguntas útiles
+
+- ¿Qué pacientes progresan de S0 a S1?
+- ¿Qué factores predicen S1 a S2?
+- ¿Cuánto tiempo se permanece en S1?
+- ¿Qué probabilidad existe de recuperación?
+- ¿Qué probabilidad hay de llegar a S3?
+- ¿Cómo afecta la dosis acumulada?
+
+## Riesgos del diseño
+
+- Demasiados estados.
+- Definiciones inestables.
+- Pocas transiciones.
+- Visitas irregulares.
+- Saltos no observados.
+- Error de clasificación.
+- Cambios de protocolo.
+
+## Elegir número de estados
+
+Más estados aportan detalle, pero requieren:
+
+- Más datos.
+- Más transiciones.
+- Más estabilidad.
+- Mejor calidad.
+- Mayor complejidad.
+
+## Flujo recomendado
+
+1. Definir pregunta.
+2. Definir estados.
+3. Definir transiciones permitidas.
+4. Definir tiempo cero.
+5. Preparar trayectorias.
+6. Validar transiciones.
+7. Contar eventos.
+8. Elegir Markov o semi-Markov.
+9. Ajustar intensidades.
+10. Estimar probabilidades.
+11. Evaluar predicción.
+12. Validar externamente.
+
+## Itinerario de la sección
+
+Esta sección se desarrollará con:
+
+1. Fundamentos y diseño de estados.
+2. Preparación de datos y transiciones.
+3. Intensidades y matriz de transición.
+4. Modelos Markov.
+5. Modelos semi-Markov.
+6. Covariables y modelos por transición.
+7. Aalen-Johansen y probabilidades de ocupación.
+8. Hidden Markov Models.
+9. Predicción y evaluación.
+10. Workflow clínico de cardiotoxicidad.
+
+## Checklist inicial
+
+- [ ] He definido los estados.
+- [ ] He identificado estados absorbentes.
+- [ ] He definido reversibilidad.
+- [ ] He definido transiciones permitidas.
+- [ ] He definido tiempo cero.
+- [ ] He definido escala temporal.
+- [ ] He identificado panel data.
+- [ ] He considerado censura por intervalo.
+- [ ] He contado transiciones.
+- [ ] He revisado estados raros.
+- [ ] He considerado Markov.
+- [ ] He considerado semi-Markov.
+- [ ] He documentado saltos.
+- [ ] He revisado errores de clasificación.
+- [ ] He planificado validación.
+
+## Recursos
+
+### Conceptos
+
+- Multi-state models.
+- Transition intensity.
+- Transition probability.
+- State occupation probability.
+- Markov assumption.
+- Semi-Markov models.
+- Clock-forward.
+- Clock-reset.
+- Panel data.
+- Hidden Markov Models.
+
+### Librerías
+
+En Python y R pueden utilizarse, según el tipo de modelo:
+
+- `lifelines`.
+- `statsmodels`.
+- `scikit-survival`.
+- `pydtmc`.
+- `msm` en R.
+- `mstate` en R.
+- `flexsurv` en R.
+
+### Material del proyecto
+
+Añadir aquí:
+
+- Definiciones S0–S3.
+- Matriz de transiciones.
+- Reglas clínicas.
+- Datos disponibles por centro.
+- Decisiones de modelado.
+- Diagramas de estados.
+
+## Notas personales
+
+Añade aquí tus estados, transiciones, supuestos, reglas clínicas y preguntas predictivas.

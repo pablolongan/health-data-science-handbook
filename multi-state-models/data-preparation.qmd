@@ -1,0 +1,1636 @@
+---
+title: "Preparación de datos para modelos multiestado"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Los modelos multiestado requieren convertir observaciones longitudinales en una estructura analítica consistente.
+
+El proceso habitual es:
+
+1. Ordenar visitas por paciente.
+2. Asignar un estado a cada visita.
+3. Detectar cambios de estado.
+4. Construir intervalos start-stop.
+5. Marcar transiciones observadas.
+6. Añadir censura.
+7. Incorporar covariables basales y temporales.
+8. Validar secuencias y transiciones permitidas.
+:::
+
+## Punto de partida
+
+Un dataset clínico suele venir en formato de visitas:
+
+```text
+patient_id | assessment_date | state | lvef | gls | troponin
+----------------------------------------------------------------
+1          | 2025-01-01      | S0    | 62   | -20 | 0.01
+1          | 2025-04-01      | S1    | 58   | -16 | 0.03
+1          | 2025-08-01      | S2    | 47   | -15 | 0.05
+```
+
+El modelo necesita una representación temporal explícita.
+
+::: {.callout-note}
+## Idea clave
+
+Cada fila analítica debe representar un periodo durante el cual el paciente permanece en un estado de origen y está en riesgo de una transición.
+:::
+
+## Formatos principales
+
+## Formato de observaciones
+
+```text
+patient_id | time | state
+```
+
+Una fila por visita.
+
+## Formato de intervalos
+
+```text
+patient_id | from | to | start | stop | status
+```
+
+Una fila por intervalo.
+
+## Formato específico por transición
+
+```text
+patient_id | transition | start | stop | event
+```
+
+Puede existir una fila por transición posible dentro de cada intervalo.
+
+## Dataset de ejemplo
+
+```python
+import pandas as pd
+
+visits = pd.DataFrame(
+    {
+        "patient_id": [
+            1,
+            1,
+            1,
+            2,
+            2
+        ],
+        "assessment_date": pd.to_datetime(
+            [
+                "2025-01-01",
+                "2025-04-01",
+                "2025-08-01",
+                "2025-02-15",
+                "2025-07-15"
+            ]
+        ),
+        "state": [
+            "S0",
+            "S1",
+            "S2",
+            "S0",
+            "S0"
+        ]
+    }
+)
+```
+
+## Paso 1. Ordenar observaciones
+
+```python
+visits = (
+    visits
+    .sort_values(
+        [
+            "patient_id",
+            "assessment_date"
+        ]
+    )
+    .reset_index(
+        drop=True
+    )
+)
+```
+
+## Paso 2. Definir tiempo cero
+
+Puede ser una fecha externa:
+
+```python
+baseline_dates = pd.DataFrame(
+    {
+        "patient_id": [
+            1,
+            2
+        ],
+        "time_zero": pd.to_datetime(
+            [
+                "2025-01-01",
+                "2025-02-15"
+            ]
+        )
+    }
+)
+```
+
+```python
+visits = visits.merge(
+    baseline_dates,
+    on="patient_id",
+    how="left"
+)
+```
+
+## Calcular tiempo desde origen
+
+```python
+visits[
+    "time"
+] = (
+    visits[
+        "assessment_date"
+    ]
+    -
+    visits[
+        "time_zero"
+    ]
+).dt.days
+```
+
+## Validar tiempos negativos
+
+```python
+negative_times = visits.loc[
+    visits[
+        "time"
+    ]
+    <
+    0
+]
+```
+
+## Paso 3. Revisar duplicados temporales
+
+```python
+duplicate_dates = visits.loc[
+    visits.duplicated(
+        subset=[
+            "patient_id",
+            "assessment_date"
+        ],
+        keep=False
+    )
+]
+```
+
+## Resolver duplicados
+
+Opciones:
+
+- Mantener el registro más completo.
+- Combinar variables.
+- Aplicar prioridad de fuente.
+- Elegir estado más grave.
+- Adjudicar manualmente.
+
+## Prioridad por severidad
+
+```python
+state_order = {
+    "S0": 0,
+    "S1": 1,
+    "S2": 2,
+    "S3": 3
+}
+
+visits[
+    "state_rank"
+] = visits[
+    "state"
+].map(
+    state_order
+)
+```
+
+```python
+visits = (
+    visits
+    .sort_values(
+        [
+            "patient_id",
+            "assessment_date",
+            "state_rank"
+        ]
+    )
+    .drop_duplicates(
+        subset=[
+            "patient_id",
+            "assessment_date"
+        ],
+        keep="last"
+    )
+)
+```
+
+## Paso 4. Validar estados
+
+```python
+valid_states = {
+    "S0",
+    "S1",
+    "S2",
+    "S3"
+}
+
+invalid_states = visits.loc[
+    ~visits[
+        "state"
+    ]
+    .isin(
+        valid_states
+    )
+]
+```
+
+## Paso 5. Detectar estado previo
+
+```python
+visits[
+    "previous_state"
+] = (
+    visits
+    .groupby("patient_id")[
+        "state"
+    ]
+    .shift()
+)
+```
+
+## Tiempo previo
+
+```python
+visits[
+    "previous_time"
+] = (
+    visits
+    .groupby("patient_id")[
+        "time"
+    ]
+    .shift()
+)
+```
+
+## Fecha previa
+
+```python
+visits[
+    "previous_date"
+] = (
+    visits
+    .groupby("patient_id")[
+        "assessment_date"
+    ]
+    .shift()
+)
+```
+
+## Paso 6. Identificar cambios
+
+```python
+visits[
+    "state_changed"
+] = (
+    visits[
+        "state"
+    ]
+    !=
+    visits[
+        "previous_state"
+    ]
+)
+```
+
+La primera observación de cada paciente debe tratarse aparte.
+
+```python
+visits.loc[
+    visits[
+        "previous_state"
+    ]
+    .isna(),
+    "state_changed"
+] = False
+```
+
+## Filas con transición
+
+```python
+observed_transitions = visits.loc[
+    visits[
+        "state_changed"
+    ]
+].copy()
+```
+
+## Etiqueta de transición
+
+```python
+observed_transitions[
+    "transition"
+] = (
+    observed_transitions[
+        "previous_state"
+    ]
+    +
+    " → "
+    +
+    observed_transitions[
+        "state"
+    ]
+)
+```
+
+## Paso 7. Definir transiciones permitidas
+
+```python
+allowed_transitions = {
+    ("S0", "S1"),
+    ("S0", "S2"),
+    ("S1", "S0"),
+    ("S1", "S2"),
+    ("S2", "S1"),
+    ("S2", "S3")
+}
+```
+
+## Validar cambios
+
+```python
+observed_transitions[
+    "allowed"
+] = observed_transitions.apply(
+    lambda row:
+    (
+        row[
+            "previous_state"
+        ],
+        row[
+            "state"
+        ]
+    )
+    in
+    allowed_transitions,
+    axis=1
+)
+```
+
+## Revisar imposibles
+
+```python
+invalid_transitions = (
+    observed_transitions
+    .loc[
+        ~observed_transitions[
+            "allowed"
+        ]
+    ]
+)
+```
+
+## Paso 8. Construir intervalos observados
+
+Cada observación posterior define el final del intervalo anterior.
+
+```python
+intervals = visits.loc[
+    visits[
+        "previous_state"
+    ]
+    .notna()
+].copy()
+```
+
+```python
+intervals = intervals.rename(
+    columns={
+        "previous_state":
+        "from_state",
+        "state":
+        "to_state",
+        "previous_time":
+        "start",
+        "time":
+        "stop"
+    }
+)
+```
+
+## Marcar transición
+
+```python
+intervals[
+    "status"
+] = (
+    intervals[
+        "from_state"
+    ]
+    !=
+    intervals[
+        "to_state"
+    ]
+).astype(int)
+```
+
+## Resultado
+
+```text
+patient_id | from_state | to_state | start | stop | status
+----------------------------------------------------------------
+1          | S0         | S1       | 0     | 90   | 1
+1          | S1         | S2       | 90    | 212  | 1
+2          | S0         | S0       | 0     | 150  | 0
+```
+
+## Permanencia sin transición
+
+```text
+S0 → S0
+```
+
+en el intervalo indica que el paciente seguía en S0 en la siguiente visita.
+
+Dependiendo del modelo:
+
+- Puede mantenerse como observación de panel.
+- Puede convertirse en tiempo en riesgo.
+- Puede no representarse como una transición real.
+
+## Paso 9. Añadir intervalo final de censura
+
+La última visita no genera por sí sola un intervalo posterior.
+
+Se necesita una fecha de fin de seguimiento.
+
+```python
+follow_up_end = pd.DataFrame(
+    {
+        "patient_id": [
+            1,
+            2
+        ],
+        "follow_up_end_date": pd.to_datetime(
+            [
+                "2025-12-31",
+                "2025-12-31"
+            ]
+        )
+    }
+)
+```
+
+## Última observación
+
+```python
+last_visits = (
+    visits
+    .sort_values(
+        [
+            "patient_id",
+            "time"
+        ]
+    )
+    .groupby(
+        "patient_id",
+        as_index=False
+    )
+    .tail(
+        1
+    )
+)
+```
+
+## Añadir fin
+
+```python
+last_visits = last_visits.merge(
+    follow_up_end,
+    on="patient_id",
+    how="left"
+)
+```
+
+## Tiempo final
+
+```python
+last_visits[
+    "follow_up_end_time"
+] = (
+    last_visits[
+        "follow_up_end_date"
+    ]
+    -
+    last_visits[
+        "time_zero"
+    ]
+).dt.days
+```
+
+## Intervalo censurado
+
+```python
+censored_intervals = pd.DataFrame(
+    {
+        "patient_id":
+        last_visits[
+            "patient_id"
+        ],
+        "from_state":
+        last_visits[
+            "state"
+        ],
+        "to_state":
+        last_visits[
+            "state"
+        ],
+        "start":
+        last_visits[
+            "time"
+        ],
+        "stop":
+        last_visits[
+            "follow_up_end_time"
+        ],
+        "status":
+        0
+    }
+)
+```
+
+## Combinar
+
+```python
+interval_data = pd.concat(
+    [
+        intervals[
+            [
+                "patient_id",
+                "from_state",
+                "to_state",
+                "start",
+                "stop",
+                "status"
+            ]
+        ],
+        censored_intervals
+    ],
+    ignore_index=True
+)
+```
+
+## Validar duración positiva
+
+```python
+invalid_durations = interval_data.loc[
+    interval_data[
+        "stop"
+    ]
+    <=
+    interval_data[
+        "start"
+    ]
+]
+```
+
+## Estado absorbente
+
+Si S3 es absorbente, no debe añadirse seguimiento posterior con salida de S3.
+
+```python
+absorbing_states = {
+    "S3"
+}
+```
+
+```python
+post_absorbing = (
+    interval_data
+    .loc[
+        interval_data[
+            "from_state"
+        ]
+        .isin(
+            absorbing_states
+        )
+        &
+        (
+            interval_data[
+                "to_state"
+            ]
+            !=
+            interval_data[
+                "from_state"
+            ]
+        )
+    ]
+)
+```
+
+## Delayed entry
+
+Si el paciente entra después del origen conceptual:
+
+```text
+Origen clínico
+→ día 0
+
+Entrada al estudio
+→ día 100
+```
+
+Debe registrarse:
+
+```python
+interval_data[
+    "entry_time"
+]
+```
+
+## Truncamiento izquierdo
+
+El paciente solo contribuye al risk set desde su entrada observada.
+
+```text
+No estuvo bajo observación
+entre día 0 y día 100
+```
+
+## Estado inicial observado
+
+```python
+initial_states = (
+    visits
+    .sort_values(
+        [
+            "patient_id",
+            "time"
+        ]
+    )
+    .groupby(
+        "patient_id",
+        as_index=False
+    )
+    .first()
+)
+```
+
+## Pacientes que no empiezan en S0
+
+```python
+non_s0_initial = initial_states.loc[
+    initial_states[
+        "state"
+    ]
+    !=
+    "S0"
+]
+```
+
+## Opciones
+
+- Incluir desde el estado observado.
+- Excluir del análisis S0-based.
+- Modelar entrada tardía.
+- Estratificar por estado inicial.
+
+## Construcción expandida por transición
+
+Para modelos cause-specific por transición, cada intervalo puede expandirse una vez por cada salida posible desde el estado de origen.
+
+## Mapa de salidas
+
+```python
+outgoing_transitions = {
+    "S0": [
+        "S1",
+        "S2"
+    ],
+    "S1": [
+        "S0",
+        "S2"
+    ],
+    "S2": [
+        "S1",
+        "S3"
+    ],
+    "S3": []
+}
+```
+
+## Expandir intervalos
+
+```python
+expanded_rows = []
+
+for _, row in interval_data.iterrows():
+
+    possible_destinations = (
+        outgoing_transitions[
+            row[
+                "from_state"
+            ]
+        ]
+    )
+
+    for destination in possible_destinations:
+
+        event = int(
+            row[
+                "status"
+            ]
+            ==
+            1
+            and
+            row[
+                "to_state"
+            ]
+            ==
+            destination
+        )
+
+        expanded_rows.append(
+            {
+                "patient_id":
+                row[
+                    "patient_id"
+                ],
+                "from_state":
+                row[
+                    "from_state"
+                ],
+                "destination":
+                destination,
+                "start":
+                row[
+                    "start"
+                ],
+                "stop":
+                row[
+                    "stop"
+                ],
+                "event":
+                event
+            }
+        )
+```
+
+```python
+expanded_data = pd.DataFrame(
+    expanded_rows
+)
+```
+
+## Ejemplo expandido
+
+```text
+Paciente en S1 durante 90–180 días:
+
+S1 → S0
+event = 0
+
+S1 → S2
+event = 1
+```
+
+## Riesgos en competencia
+
+Desde S1, las transiciones:
+
+```text
+S1 → S0
+S1 → S2
+```
+
+compiten entre sí.
+
+Cuando ocurre una, la otra deja de estar disponible en ese instante.
+
+## Identificador de transición
+
+```python
+transition_ids = {
+    ("S0", "S1"): 1,
+    ("S0", "S2"): 2,
+    ("S1", "S0"): 3,
+    ("S1", "S2"): 4,
+    ("S2", "S1"): 5,
+    ("S2", "S3"): 6
+}
+```
+
+```python
+expanded_data[
+    "transition_id"
+] = expanded_data.apply(
+    lambda row:
+    transition_ids[
+        (
+            row[
+                "from_state"
+            ],
+            row[
+                "destination"
+            ]
+        )
+    ],
+    axis=1
+)
+```
+
+## Covariables basales
+
+Ejemplos:
+
+- Sexo.
+- Diagnóstico.
+- Edad basal.
+- FEVI basal.
+- Centro.
+
+## Añadir covariables basales
+
+```python
+baseline_covariates = patient_df[
+    [
+        "patient_id",
+        "sex",
+        "diagnosis",
+        "baseline_age",
+        "baseline_lvef",
+        "center"
+    ]
+]
+```
+
+```python
+expanded_data = expanded_data.merge(
+    baseline_covariates,
+    on="patient_id",
+    how="left"
+)
+```
+
+## Covariables temporales
+
+Ejemplos:
+
+- Dosis acumulada.
+- Tratamiento activo.
+- Troponina.
+- FEVI reciente.
+- Estado previo.
+- Tiempo desde entrada en estado.
+
+## Valor al inicio del intervalo
+
+Para evitar leakage, una covariable temporal debe corresponder al valor disponible al inicio del intervalo.
+
+```text
+Intervalo 90–180
+→ usar información conocida en día 90
+```
+
+## Añadir mediante asof merge
+
+```python
+measurements = measurements.sort_values(
+    [
+        "patient_id",
+        "measurement_time"
+    ]
+)
+
+expanded_data = expanded_data.sort_values(
+    [
+        "patient_id",
+        "start"
+    ]
+)
+```
+
+```python
+expanded_data = pd.merge_asof(
+    expanded_data,
+    measurements,
+    left_on="start",
+    right_on="measurement_time",
+    by="patient_id",
+    direction="backward"
+)
+```
+
+## Fecha de disponibilidad
+
+Debe usarse la fecha en que el valor estaba disponible.
+
+```text
+Fecha de toma
+≠
+fecha de validación
+```
+
+## Recencia
+
+```python
+expanded_data[
+    "days_since_measurement"
+] = (
+    expanded_data[
+        "start"
+    ]
+    -
+    expanded_data[
+        "measurement_time"
+    ]
+)
+```
+
+## Ventana de validez
+
+```python
+expanded_data.loc[
+    expanded_data[
+        "days_since_measurement"
+    ]
+    >
+    60,
+    "troponin"
+] = pd.NA
+```
+
+## Dosis acumulada
+
+Debe calcularse solo hasta el inicio de cada intervalo.
+
+```python
+dose_data = dose_data.sort_values(
+    [
+        "patient_id",
+        "dose_time"
+    ]
+)
+```
+
+```python
+dose_data[
+    "cumulative_dose"
+] = (
+    dose_data
+    .groupby("patient_id")[
+        "dose"
+    ]
+    .cumsum()
+)
+```
+
+Luego puede integrarse con `merge_asof`.
+
+## Tiempo en estado
+
+```python
+expanded_data[
+    "time_in_state"
+] = (
+    expanded_data[
+        "stop"
+    ]
+    -
+    expanded_data[
+        "start"
+    ]
+)
+```
+
+Para modelos clock-reset, el reloj debe acumularse desde la entrada en el estado.
+
+## Identificar episodios de estado
+
+```python
+visits[
+    "new_state_episode"
+] = (
+    visits[
+        "state"
+    ]
+    !=
+    visits[
+        "previous_state"
+    ]
+).astype(int)
+```
+
+```python
+visits[
+    "state_episode_id"
+] = (
+    visits
+    .groupby("patient_id")[
+        "new_state_episode"
+    ]
+    .cumsum()
+)
+```
+
+## Entrada en estado
+
+```python
+state_entry_times = (
+    visits
+    .groupby(
+        [
+            "patient_id",
+            "state_episode_id"
+        ]
+    )[
+        "time"
+    ]
+    .min()
+    .rename(
+        "state_entry_time"
+    )
+    .reset_index()
+)
+```
+
+## Clock-reset
+
+```python
+expanded_data[
+    "clock_reset_start"
+] = (
+    expanded_data[
+        "start"
+    ]
+    -
+    expanded_data[
+        "state_entry_time"
+    ]
+)
+```
+
+## Eventos simultáneos
+
+Si varias transiciones aparecen en el mismo tiempo:
+
+- Revisar resolución temporal.
+- Usar hora si existe.
+- Aplicar prioridad.
+- Evitar intervalos de longitud cero.
+- Documentar adjudicación.
+
+## Censura administrativa
+
+```python
+administrative_end = pd.Timestamp(
+    "2026-12-31"
+)
+```
+
+```python
+visits[
+    "analysis_end_date"
+] = visits[
+    "last_follow_up_date"
+].clip(
+    upper=administrative_end
+)
+```
+
+## Evento competidor terminal
+
+Puede añadirse como estado:
+
+```text
+D
+→ fallecimiento
+```
+
+Transiciones:
+
+```text
+S0 → D
+S1 → D
+S2 → D
+S3 → D
+```
+
+## Estado absorbente de muerte
+
+```python
+states = [
+    "S0",
+    "S1",
+    "S2",
+    "S3",
+    "D"
+]
+```
+
+## Panel data y tiempo de transición incierto
+
+En observación por visitas, el tiempo real de cambio no suele conocerse.
+
+Opciones de preparación:
+
+- Fecha de primera detección.
+- Punto medio del intervalo.
+- Censura por intervalo.
+- Modelo Markov de panel.
+- Hidden Markov Model.
+
+## Fecha de primera detección
+
+```python
+intervals[
+    "transition_time_detected"
+] = intervals[
+    "stop"
+]
+```
+
+## Punto medio
+
+```python
+intervals[
+    "transition_time_midpoint"
+] = (
+    intervals[
+        "start"
+    ]
+    +
+    intervals[
+        "stop"
+    ]
+) / 2
+```
+
+## Sensibilidad
+
+Comparar resultados usando:
+
+- Primera detección.
+- Punto medio.
+- Modelos de panel.
+
+## Missing en estados
+
+No debe asumirse:
+
+```text
+Sin ecocardiografía
+→ S0
+```
+
+Opciones:
+
+- Estado desconocido.
+- Excluir visita.
+- Imputar componentes.
+- Mantener estado previo con límite.
+- Modelo oculto.
+
+## Gaps prolongados
+
+```python
+interval_data[
+    "interval_length"
+] = (
+    interval_data[
+        "stop"
+    ]
+    -
+    interval_data[
+        "start"
+    ]
+)
+```
+
+```python
+long_gaps = interval_data.loc[
+    interval_data[
+        "interval_length"
+    ]
+    >
+    180
+]
+```
+
+## Por qué importan
+
+En gaps largos:
+
+- Puede haber transiciones no observadas.
+- El orden real puede ser incierto.
+- La fecha asignada pierde precisión.
+- La asunción Markov puede ser difícil de evaluar.
+
+## Validaciones automáticas
+
+## Intervalos ordenados
+
+```python
+interval_data = interval_data.sort_values(
+    [
+        "patient_id",
+        "start",
+        "stop"
+    ]
+)
+```
+
+## Solapamientos
+
+```python
+interval_data[
+    "previous_stop"
+] = (
+    interval_data
+    .groupby("patient_id")[
+        "stop"
+    ]
+    .shift()
+)
+```
+
+```python
+overlaps = interval_data.loc[
+    interval_data[
+        "start"
+    ]
+    <
+    interval_data[
+        "previous_stop"
+    ]
+]
+```
+
+## Huecos
+
+```python
+gaps = interval_data.loc[
+    interval_data[
+        "start"
+    ]
+    >
+    interval_data[
+        "previous_stop"
+    ]
+]
+```
+
+Un hueco puede ser válido si existe delayed entry o ausencia de observación, pero debe documentarse.
+
+## Continuidad de estados
+
+El destino de un intervalo debe coincidir con el origen del siguiente.
+
+```python
+interval_data[
+    "next_from_state"
+] = (
+    interval_data
+    .groupby("patient_id")[
+        "from_state"
+    ]
+    .shift(
+        -1
+    )
+)
+```
+
+```python
+state_discontinuity = interval_data.loc[
+    interval_data[
+        "to_state"
+    ]
+    !=
+    interval_data[
+        "next_from_state"
+    ]
+]
+```
+
+La última fila de cada paciente debe excluirse de esta comprobación.
+
+## Seguimiento tras estado absorbente
+
+```python
+absorbing_reached = (
+    interval_data[
+        "to_state"
+    ]
+    ==
+    "S3"
+)
+```
+
+Debe comprobarse que no existan salidas posteriores si S3 es absorbente.
+
+## Resumen de calidad
+
+```python
+quality_summary = {
+    "n_patients":
+    interval_data[
+        "patient_id"
+    ].nunique(),
+
+    "n_intervals":
+    len(
+        interval_data
+    ),
+
+    "n_transitions":
+    int(
+        interval_data[
+            "status"
+        ].sum()
+    ),
+
+    "invalid_durations":
+    len(
+        invalid_durations
+    ),
+
+    "invalid_transitions":
+    len(
+        invalid_transitions
+    ),
+
+    "overlaps":
+    len(
+        overlaps
+    )
+}
+```
+
+## Tabla de transiciones
+
+```python
+transition_summary = (
+    interval_data
+    .loc[
+        interval_data[
+            "status"
+        ]
+        ==
+        1
+    ]
+    .groupby(
+        [
+            "from_state",
+            "to_state"
+        ]
+    )
+    .agg(
+        transitions=(
+            "patient_id",
+            "size"
+        ),
+        patients=(
+            "patient_id",
+            "nunique"
+        )
+    )
+    .reset_index()
+)
+```
+
+## Distribución de tiempo en riesgo
+
+```python
+risk_time_summary = (
+    interval_data
+    .assign(
+        duration=lambda data:
+        data[
+            "stop"
+        ]
+        -
+        data[
+            "start"
+        ]
+    )
+    .groupby(
+        "from_state"
+    )[
+        "duration"
+    ]
+    .agg(
+        [
+            "count",
+            "sum",
+            "median",
+            "mean"
+        ]
+    )
+)
+```
+
+## Guardar dataset analítico
+
+```python
+interval_data.to_parquet(
+    "multistate_intervals.parquet",
+    index=False
+)
+```
+
+```python
+expanded_data.to_parquet(
+    "multistate_transition_expanded.parquet",
+    index=False
+)
+```
+
+## Diccionario mínimo
+
+| Variable | Descripción |
+|---|---|
+| `patient_id` | Identificador |
+| `from_state` | Estado de origen |
+| `to_state` | Estado observado al final |
+| `destination` | Destino específico modelado |
+| `start` | Inicio del intervalo |
+| `stop` | Final del intervalo |
+| `status` | Cambio observado |
+| `event` | Evento para transición específica |
+| `transition_id` | Identificador de arco |
+| `entry_time` | Entrada tardía |
+| `time_in_state` | Tiempo de permanencia |
+
+## Trazabilidad
+
+Guardar además:
+
+- Versión de estados.
+- Fecha de extracción.
+- Código de preparación.
+- Reglas de adjudicación.
+- Fecha de disponibilidad.
+- Motivos de exclusión.
+- Log de errores.
+
+## Workflow reproducible
+
+```text
+raw visits
+    ↓
+normalización
+    ↓
+clasificación de estado
+    ↓
+resolución de duplicados
+    ↓
+validación de secuencias
+    ↓
+intervalos start-stop
+    ↓
+expansión por transición
+    ↓
+covariables
+    ↓
+dataset analítico
+```
+
+## Aplicación a cardiotoxicidad
+
+Dataset de observaciones:
+
+```text
+record_id
+fecha_estudio
+state
+lvef
+gls
+troponin
+ntprobnp
+cumulative_anthracycline
+```
+
+Dataset de intervalos:
+
+```text
+record_id
+from_state
+to_state
+start
+stop
+status
+baseline_age
+diagnosis
+cumulative_anthracycline_start
+troponin_start
+lvef_start
+gls_start
+```
+
+## Decisiones pendientes
+
+- Fecha exacta de transición.
+- Vigencia de biomarcadores.
+- Saltos S0 → S2.
+- Recuperaciones.
+- Estado desconocido.
+- Muerte como estado.
+- Clock-forward o clock-reset.
+- Entrada desde estados distintos.
+
+## Errores frecuentes
+
+- Usar una fila por paciente.
+- No añadir intervalo final censurado.
+- Crear intervalos solapados.
+- Usar covariables medidas al final del intervalo.
+- No considerar delayed entry.
+- Confundir permanencia y transición.
+- Contar visitas como transiciones.
+- Asumir normalidad cuando faltan pruebas.
+- Ignorar saltos.
+- No comprobar continuidad de estados.
+- Incluir datos posteriores a estado absorbente.
+- No versionar el dataset.
+
+## Flujo recomendado
+
+1. Normalizar fechas.
+2. Definir tiempo cero.
+3. Ordenar observaciones.
+4. Resolver duplicados.
+5. Validar estados.
+6. Detectar cambios.
+7. Construir intervalos.
+8. Añadir censura final.
+9. Expandir por transición.
+10. Añadir covariables.
+11. Ejecutar controles.
+12. Versionar salida.
+
+## Checklist
+
+- [ ] He definido tiempo cero.
+- [ ] He ordenado visitas.
+- [ ] He resuelto duplicados.
+- [ ] He validado estados.
+- [ ] He detectado transiciones.
+- [ ] He validado transiciones permitidas.
+- [ ] He construido intervalos start-stop.
+- [ ] He añadido censura final.
+- [ ] He comprobado duraciones positivas.
+- [ ] He comprobado solapamientos.
+- [ ] He comprobado continuidad de estados.
+- [ ] He añadido covariables basales.
+- [ ] He añadido covariables temporales sin leakage.
+- [ ] He considerado delayed entry.
+- [ ] He versionado el dataset.
+
+## Recursos
+
+### Conceptos
+
+- Longitudinal state data.
+- Start-stop format.
+- Transition-specific expansion.
+- Delayed entry.
+- Left truncation.
+- Panel data.
+- Interval censoring.
+- Time-varying covariates.
+- State continuity.
+
+### Herramientas
+
+- `pandas`.
+- `merge_asof`.
+- `groupby`.
+- `shift`.
+- `mstate` en R.
+- `msm` en R.
+
+### Material del proyecto
+
+Añadir aquí:
+
+- Esquema del dataset.
+- Reglas de fechas.
+- Ventanas de validez.
+- Diccionario de estados.
+- Logs de validación.
+- Dataset final versionado.
+
+## Notas personales
+
+Añade aquí tus decisiones de preparación, transformaciones, validaciones y estructura final.

@@ -1,0 +1,1192 @@
+---
+title: "Diseño de estados y transiciones"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+El diseño de estados es la decisión más importante de un modelo multiestado.
+
+Debe definir:
+
+- Qué representa cada estado.
+- Qué transiciones son posibles.
+- Qué estados son absorbentes.
+- Qué cambios son reversibles.
+- Cómo se tratan saltos y observaciones faltantes.
+- Qué tiempo cero y escala temporal se utilizan.
+
+Un mal diseño no se corrige con un modelo más complejo.
+:::
+
+## ¿Qué es un estado?
+
+Un estado es una condición clínica mutuamente identificable dentro del proceso.
+
+Ejemplos:
+
+```text
+S0
+→ normal
+
+S1
+→ alteración leve
+
+S2
+→ alteración moderada
+
+S3
+→ alteración grave
+```
+
+::: {.callout-note}
+## Idea clave
+
+Los estados deben ser clínicamente interpretables, reproducibles y suficientemente frecuentes.
+:::
+
+## Propiedades deseables
+
+Un buen conjunto de estados debe ser:
+
+- Exhaustivo.
+- Mutuamente excluyente.
+- Clínicamente relevante.
+- Temporalmente ordenable.
+- Observable o inferible.
+- Suficientemente estable.
+- Compatible con la pregunta.
+
+## Exhaustividad
+
+Cada observación debería poder asignarse a un estado.
+
+```text
+Paciente evaluado
+→ debe pertenecer a S0, S1, S2 o S3
+```
+
+Si existen observaciones no clasificables, debe definirse:
+
+- Estado desconocido.
+- Regla de adjudicación.
+- Exclusión justificada.
+- Modelo con estado latente.
+
+## Exclusividad
+
+Una observación no debería pertenecer simultáneamente a dos estados.
+
+Incorrecto:
+
+```text
+S1 y S2 al mismo tiempo
+```
+
+Correcto:
+
+```text
+Asignar prioridad de severidad
+o definir una regla clínica única
+```
+
+## Definir estados a partir de variables
+
+Ejemplo:
+
+```text
+S0
+→ FEVI normal
+→ GLS estable
+→ biomarcadores normales
+
+S1
+→ FEVI preservada
+→ GLS alterado o biomarcador elevado
+
+S2
+→ FEVI 40–49 % con criterios adicionales
+
+S3
+→ FEVI < 40 %
+```
+
+## Regla reproducible
+
+Debe existir una función o algoritmo que, con los mismos datos, produzca siempre el mismo estado.
+
+```python
+def classify_state(
+    lvef,
+    gls_relative_drop,
+    troponin_high,
+    ntprobnp_high
+):
+
+    biomarker_high = (
+        troponin_high
+        or
+        ntprobnp_high
+    )
+
+    if lvef < 40:
+        return "S3"
+
+    if 40 <= lvef < 50:
+        return "S2"
+
+    if (
+        lvef >= 50
+        and
+        (
+            gls_relative_drop >= 0.15
+            or
+            biomarker_high
+        )
+    ):
+        return "S1"
+
+    return "S0"
+```
+
+## Prioridad de variables
+
+Debe definirse qué ocurre cuando hay discordancia.
+
+Ejemplo:
+
+```text
+FEVI normal
+GLS alterado
+Troponina normal
+→ S1
+```
+
+## Prioridad de severidad
+
+Una regla habitual es asignar el estado más grave compatible.
+
+```text
+Cumple S1 y S2
+→ asignar S2
+```
+
+## Fuente prioritaria
+
+Si existen varias fuentes:
+
+```text
+Ecocardiografía validada
+→ prioridad 1
+
+Informe clínico
+→ prioridad 2
+
+Registro administrativo
+→ prioridad 3
+```
+
+## Estado observado y estado clínico real
+
+No siempre son equivalentes.
+
+```text
+Estado observado
+→ depende de pruebas disponibles
+
+Estado clínico real
+→ puede no observarse directamente
+```
+
+Esto es especialmente importante con visitas irregulares.
+
+## Estados absorbentes
+
+Un estado absorbente no permite salida.
+
+Ejemplos:
+
+- Fallecimiento.
+- Trasplante definitivo.
+- Evento terminal.
+
+```text
+S3
+→ podría ser absorbente
+solo si clínicamente no se modela recuperación
+```
+
+## Estados transitorios
+
+Permiten salida hacia otros estados.
+
+```text
+S0
+S1
+S2
+```
+
+## Reversibilidad
+
+### Modelo progresivo
+
+```text
+S0 → S1 → S2 → S3
+```
+
+### Modelo reversible
+
+```text
+S0 ↔ S1 ↔ S2 → S3
+```
+
+## Decidir reversibilidad
+
+Debe basarse en:
+
+- Recuperación clínica real.
+- Frecuencia observada.
+- Calidad de medición.
+- Objetivo.
+- Número de transiciones.
+
+## Falsa recuperación
+
+Una transición:
+
+```text
+S2 → S1
+```
+
+puede deberse a:
+
+- Mejora real.
+- Error de medición.
+- Diferencia entre técnicas.
+- Cambio de observador.
+- Regresión a la media.
+
+## Regla de confirmación
+
+Puede requerirse:
+
+```text
+Dos evaluaciones consecutivas
+en estado mejor
+```
+
+antes de declarar recuperación.
+
+## Ejemplo
+
+```python
+state_df[
+    "previous_state"
+] = (
+    state_df
+    .groupby("patient_id")[
+        "state"
+    ]
+    .shift()
+)
+```
+
+```python
+state_df[
+    "confirmed_recovery"
+] = (
+    (
+        state_df[
+            "state"
+        ]
+        ==
+        "S1"
+    )
+    &
+    (
+        state_df[
+            "previous_state"
+        ]
+        ==
+        "S2"
+    )
+)
+```
+
+La lógica real debería considerar más de una visita y ventanas temporales.
+
+## Transición
+
+Una transición es un cambio entre estados.
+
+```text
+S1 → S2
+```
+
+## Elementos mínimos
+
+- Estado de origen.
+- Estado de destino.
+- Tiempo de inicio.
+- Tiempo de final.
+- Indicador de transición.
+- Covariables.
+
+## Matriz de transiciones permitidas
+
+```python
+allowed_transitions = {
+    ("S0", "S1"),
+    ("S0", "S2"),
+    ("S1", "S0"),
+    ("S1", "S2"),
+    ("S2", "S1"),
+    ("S2", "S3")
+}
+```
+
+## Representación matricial
+
+```python
+import pandas as pd
+
+states = [
+    "S0",
+    "S1",
+    "S2",
+    "S3"
+]
+
+transition_matrix = pd.DataFrame(
+    0,
+    index=states,
+    columns=states
+)
+
+for origin, destination in allowed_transitions:
+
+    transition_matrix.loc[
+        origin,
+        destination
+    ] = 1
+```
+
+## Interpretación
+
+```text
+1
+→ transición permitida
+
+0
+→ transición no permitida
+```
+
+## Estados sin auto-transición
+
+La permanencia en el mismo estado no se considera una transición clínica.
+
+```text
+S1 → S1
+```
+
+significa permanencia, no cambio.
+
+## Saltos de estado
+
+Ejemplo:
+
+```text
+S0 → S2
+```
+
+Puede representar:
+
+- Cambio directo real.
+- S1 no observado.
+- Intervalo de visitas demasiado largo.
+- Error de clasificación.
+
+## Opciones ante saltos
+
+- Permitir transición directa.
+- Imputar estado intermedio.
+- Modelar estado oculto.
+- Excluir salto.
+- Analizar sensibilidad.
+
+## No imputar sin justificar
+
+Asignar automáticamente:
+
+```text
+S0 → S1 → S2
+```
+
+puede inventar una transición no observada.
+
+## Transiciones imposibles
+
+Ejemplo:
+
+```text
+S3 → S0
+```
+
+si S3 se ha definido como absorbente.
+
+## Detectarlas
+
+```python
+state_df[
+    "transition_tuple"
+] = list(
+    zip(
+        state_df[
+            "previous_state"
+        ],
+        state_df[
+            "state"
+        ]
+    )
+)
+```
+
+```python
+state_df[
+    "allowed"
+] = state_df[
+        "transition_tuple"
+    ].isin(
+        allowed_transitions
+    )
+```
+
+## Filtrar permanencias antes
+
+```python
+transition_rows = state_df.loc[
+    state_df[
+        "state"
+    ]
+    !=
+    state_df[
+        "previous_state"
+    ]
+].copy()
+```
+
+## Tiempo cero
+
+Debe representar el inicio conceptual del proceso.
+
+Ejemplos:
+
+- Inicio de tratamiento.
+- Diagnóstico.
+- Primera valoración cardiovascular.
+- Entrada en un estado.
+
+## Tiempo cero común
+
+Es preferible que todos los pacientes compartan una definición equivalente.
+
+## Entrada tardía
+
+Un paciente puede entrar cuando ya está en S1.
+
+Opciones:
+
+- Incluirlo desde S1.
+- Usar delayed entry.
+- Excluirlo si la pregunta exige S0 basal.
+- Redefinir población.
+
+## Escala temporal
+
+Puede ser:
+
+- Días desde tratamiento.
+- Meses desde diagnóstico.
+- Edad.
+- Tiempo desde entrada en estado.
+
+## Clock-forward
+
+```text
+Tiempo global desde origen
+```
+
+Ejemplo:
+
+```text
+Día 0
+→ inicio de tratamiento
+
+Día 300
+→ transición S1 → S2
+```
+
+## Clock-reset
+
+```text
+Tiempo desde entrada en estado actual
+```
+
+Ejemplo:
+
+```text
+Entrada en S1
+→ reloj = 0
+
+60 días después
+→ transición a S2
+```
+
+## Cuándo usar clock-forward
+
+Cuando importa:
+
+- Tiempo desde tratamiento.
+- Edad del proceso.
+- Fase clínica global.
+
+## Cuándo usar clock-reset
+
+Cuando importa:
+
+- Duración en estado.
+- Sojourn time.
+- Progresión dependiente de permanencia.
+
+## Observación continua
+
+El momento de transición se conoce con precisión razonable.
+
+Ejemplos:
+
+- Fallecimiento.
+- Alta.
+- Ingreso.
+- Inicio de tratamiento.
+
+## Panel data
+
+El estado se observa en visitas.
+
+```text
+Día 0
+→ S0
+
+Día 100
+→ S2
+```
+
+La transición ocurrió en algún punto del intervalo.
+
+## Censura por intervalo
+
+```text
+Transición S0 → S2
+ocurrió entre día 0 y día 100
+```
+
+## Fecha asignada por convención
+
+A veces se utiliza:
+
+- Fecha de visita.
+- Punto medio.
+- Fecha de primera detección.
+
+Cada opción introduce supuestos.
+
+## Primera detección
+
+```text
+Fecha de transición
+→ fecha en que se observa por primera vez el nuevo estado
+```
+
+Es simple, pero retrasa el tiempo real.
+
+## Punto medio
+
+```text
+Fecha estimada
+→ mitad entre última visita previa y primera visita nueva
+```
+
+Reduce sesgo medio bajo ciertos supuestos, pero sigue siendo una aproximación.
+
+## Interval-censored models
+
+Son preferibles si la incertidumbre temporal es importante.
+
+## Frecuencia de visitas
+
+Una mayor frecuencia puede aumentar la probabilidad de detectar transiciones tempranas.
+
+Esto puede introducir:
+
+- Detection bias.
+- Diferencias entre centros.
+- Diferencias por gravedad.
+
+## Ajustar por intensidad de observación
+
+Puede considerarse:
+
+- Centro.
+- Número de visitas.
+- Tiempo desde última evaluación.
+- Protocolo.
+- Ventanas de seguimiento.
+
+## Estado simultáneo
+
+Puede haber varias evaluaciones el mismo día.
+
+```text
+Eco
+→ S1
+
+Biomarcador
+→ S2
+```
+
+## Regla de desempate
+
+Opciones:
+
+- Estado más grave.
+- Prioridad de fuente.
+- Última hora.
+- Adjudicación clínica.
+- Combinar componentes.
+
+## Mismo estado repetido
+
+```text
+S1
+S1
+S1
+```
+
+No genera nuevas transiciones, pero sí aporta información de permanencia.
+
+## Cohorte inicial
+
+Debe decidirse si:
+
+- Todos empiezan en S0.
+- Se permiten varios estados iniciales.
+- Se condiciona el análisis al estado inicial.
+
+## Modelo de varias entradas
+
+```text
+Paciente A
+→ inicia en S0
+
+Paciente B
+→ inicia en S1
+```
+
+Esto es válido si se modela correctamente.
+
+## Estado desconocido
+
+Puede aparecer por:
+
+- Prueba no disponible.
+- Datos incompletos.
+- Calidad insuficiente.
+- Fecha incierta.
+
+## Opciones
+
+- Estado `UNK`.
+- Imputación.
+- Excluir observación.
+- Mantener estado previo.
+- Hidden Markov Model.
+
+## Last observation carried forward
+
+```text
+Mantener último estado
+hasta siguiente observación
+```
+
+Puede ser útil, pero presupone que el estado no cambió entre visitas.
+
+## Ventana de validez
+
+```text
+Estado observado
+→ válido durante 90 días
+```
+
+Después puede pasar a desconocido.
+
+## Implementación conceptual
+
+```python
+state_df[
+    "time_since_last_assessment"
+] = (
+    state_df[
+        "time"
+    ]
+    -
+    state_df[
+        "previous_time"
+    ]
+)
+```
+
+```python
+state_df[
+    "state_valid"
+] = (
+    state_df[
+        "time_since_last_assessment"
+    ]
+    <=
+    90
+)
+```
+
+## Estados derivados de varias fuentes
+
+Ejemplo:
+
+- FEVI.
+- GLS.
+- Troponina.
+- NT-proBNP.
+- ECG.
+
+Debe registrarse:
+
+- Qué variables estaban disponibles.
+- Qué regla produjo el estado.
+- Calidad.
+- Fecha.
+- Fuente.
+
+## Trazabilidad
+
+```python
+state_df[
+    [
+        "patient_id",
+        "assessment_date",
+        "state",
+        "state_rule",
+        "source",
+        "quality"
+    ]
+]
+```
+
+## Versionado de definición
+
+Si cambia la definición:
+
+```text
+state_definition_version
+```
+
+debe almacenarse.
+
+## Ejemplo
+
+```python
+state_df[
+    "state_definition_version"
+] = "v1.0"
+```
+
+## Contar transiciones
+
+```python
+transition_counts = (
+    transition_rows
+    .groupby(
+        [
+            "previous_state",
+            "state"
+        ]
+    )
+    .size()
+    .rename(
+        "n"
+    )
+    .reset_index()
+)
+```
+
+## Matriz de recuentos
+
+```python
+transition_count_matrix = (
+    transition_rows
+    .pivot_table(
+        index="previous_state",
+        columns="state",
+        values="patient_id",
+        aggfunc="count",
+        fill_value=0
+    )
+)
+```
+
+## Número de pacientes por transición
+
+No es igual que número de transiciones si un paciente puede repetir.
+
+```python
+unique_patients_per_transition = (
+    transition_rows
+    .groupby(
+        [
+            "previous_state",
+            "state"
+        ]
+    )[
+        "patient_id"
+    ]
+    .nunique()
+)
+```
+
+## Densidad de observación
+
+```python
+visits_per_patient = (
+    state_df
+    .groupby("patient_id")
+    .size()
+)
+```
+
+## Intervalos entre visitas
+
+```python
+state_df[
+    "previous_time"
+] = (
+    state_df
+    .groupby("patient_id")[
+        "time"
+    ]
+    .shift()
+)
+```
+
+```python
+state_df[
+    "gap"
+] = (
+    state_df[
+        "time"
+    ]
+    -
+    state_df[
+        "previous_time"
+    ]
+)
+```
+
+## Estadística por centro
+
+```python
+gap_by_center = (
+    state_df
+    .groupby("center")[
+        "gap"
+    ]
+    .describe()
+)
+```
+
+## Estados raros
+
+Un estado con pocos pacientes puede producir:
+
+- Intensidades inestables.
+- Coeficientes extremos.
+- Intervalos muy amplios.
+- Convergencia deficiente.
+
+## Combinar estados
+
+Ejemplo:
+
+```text
+S2 y S3
+→ disfunción clínicamente relevante
+```
+
+Debe justificarse clínicamente.
+
+## Evitar demasiados estados
+
+Más detalle no siempre significa mejor modelo.
+
+## Regla práctica
+
+Antes de modelar, revisar:
+
+```text
+Número de transiciones
+por cada arco del diagrama
+```
+
+## Visualizar trayectorias
+
+```python
+import matplotlib.pyplot as plt
+
+state_map = {
+    "S0": 0,
+    "S1": 1,
+    "S2": 2,
+    "S3": 3
+}
+```
+
+```python
+patient = state_df.loc[
+    state_df[
+        "patient_id"
+    ]
+    ==
+    1
+].copy()
+
+patient[
+    "state_numeric"
+] = patient[
+    "state"
+].map(
+    state_map
+)
+```
+
+```python
+plt.step(
+    patient[
+        "time"
+    ],
+    patient[
+        "state_numeric"
+    ],
+    where="post"
+)
+
+plt.yticks(
+    [
+        0,
+        1,
+        2,
+        3
+    ],
+    [
+        "S0",
+        "S1",
+        "S2",
+        "S3"
+    ]
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Estado"
+)
+
+plt.show()
+```
+
+## Visualización agregada
+
+Opciones:
+
+- Sankey.
+- Alluvial plot.
+- Transition matrix.
+- State occupancy plot.
+- Spaghetti plot de trayectorias.
+
+## Sankey
+
+Útil para mostrar volumen de transiciones, pero no representa bien el tiempo.
+
+## Alluvial
+
+Puede mostrar estados en tiempos discretos:
+
+```text
+Baseline
+6 meses
+12 meses
+24 meses
+```
+
+## Matriz de transición
+
+Útil para revisar estructura y frecuencia.
+
+## Diagrama clínico
+
+Debe ser validado por expertos.
+
+Ejemplo:
+
+```text
+S0 ↔ S1 ↔ S2 → S3
+```
+
+## Documentación mínima
+
+Para cada estado:
+
+| Campo | Descripción |
+|---|---|
+| Nombre | S1 |
+| Etiqueta | Cardiotoxicidad leve |
+| Criterios | FEVI preservada + GLS/biomarcador |
+| Prioridad | Inferior a S2 |
+| Reversible | Sí |
+| Fuentes | Eco y laboratorio |
+| Calidad mínima | Definida |
+
+## Para cada transición
+
+| Campo | Descripción |
+|---|---|
+| Origen | S1 |
+| Destino | S2 |
+| Permitida | Sí |
+| Reversible | Sí |
+| Tiempo | Primera detección |
+| Confirmación | Una evaluación |
+| Evento competidor | Muerte |
+
+## Aplicación a cardiotoxicidad
+
+Una estructura inicial:
+
+```text
+S0 ↔ S1 ↔ S2 → S3
+```
+
+Posible salto:
+
+```text
+S0 → S2
+```
+
+Pendientes clínicos:
+
+- ¿S3 es absorbente?
+- ¿Se permite S3 → S2?
+- ¿Cuántas evaluaciones confirman recuperación?
+- ¿Cómo tratar valores discordantes?
+- ¿Cómo tratar estados sin GLS?
+- ¿Qué fecha se asigna a la transición?
+
+## Sensitivity analyses
+
+Comparar:
+
+- Modelo progresivo.
+- Modelo reversible.
+- Saltos permitidos.
+- Saltos no permitidos.
+- Estado más grave.
+- Confirmación por dos visitas.
+- Fecha de detección.
+- Punto medio del intervalo.
+
+## Errores frecuentes
+
+- Definir estados solo por conveniencia estadística.
+- Solapar estados.
+- Permitir transiciones imposibles.
+- Ignorar saltos.
+- No documentar reversibilidad.
+- No revisar frecuencia.
+- Usar fecha de visita como tiempo exacto sin reconocerlo.
+- Arrastrar estados indefinidamente.
+- Confundir ausencia de prueba con normalidad.
+- Cambiar definiciones durante el análisis.
+- No versionar reglas.
+- No validar con clínicos.
+
+## Flujo recomendado
+
+1. Definir pregunta.
+2. Proponer estados.
+3. Especificar criterios.
+4. Definir prioridad.
+5. Definir transiciones.
+6. Definir reversibilidad.
+7. Definir tiempo cero.
+8. Definir escala temporal.
+9. Resolver panel data.
+10. Validar frecuencias.
+11. Revisar con clínicos.
+12. Congelar versión.
+
+## Checklist
+
+- [ ] Los estados son exhaustivos.
+- [ ] Los estados son excluyentes.
+- [ ] Cada estado tiene criterios.
+- [ ] Existe prioridad de severidad.
+- [ ] He definido estados absorbentes.
+- [ ] He definido reversibilidad.
+- [ ] He definido transiciones permitidas.
+- [ ] He documentado saltos.
+- [ ] He definido tiempo cero.
+- [ ] He elegido clock-forward o clock-reset.
+- [ ] He considerado panel data.
+- [ ] He definido regla temporal.
+- [ ] He revisado frecuencia.
+- [ ] He versionado la definición.
+- [ ] He validado con expertos clínicos.
+
+## Recursos
+
+### Conceptos
+
+- State space.
+- Transition graph.
+- Absorbing state.
+- Reversible state.
+- Panel observation.
+- Interval censoring.
+- Clock-forward.
+- Clock-reset.
+- Sojourn time.
+- Misclassification.
+
+### Material del proyecto
+
+Añadir aquí:
+
+- Definiciones S0–S3.
+- Reglas de prioridad.
+- Transiciones permitidas.
+- Decisiones sobre recuperación.
+- Reglas de fecha.
+- Versión de clasificación.
+
+## Notas personales
+
+Añade aquí las decisiones clínicas, estados, saltos, reglas temporales y análisis de sensibilidad.
