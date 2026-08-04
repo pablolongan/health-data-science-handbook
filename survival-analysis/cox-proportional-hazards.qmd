@@ -1,0 +1,1161 @@
+---
+title: "Modelo de riesgos proporcionales de Cox"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+El modelo de Cox estudia la asociación entre covariables y el tiempo hasta un evento.
+
+Su forma básica es:
+
+$$
+h(t\mid X)
+=
+h_0(t)
+\exp(
+\beta_1X_1+\cdots+\beta_pX_p
+)
+$$
+
+Permite:
+
+- Ajustar por varias variables.
+- Estimar hazard ratios.
+- Generar curvas de supervivencia ajustadas.
+- Predecir riesgo relativo.
+- Incorporar variables dependientes del tiempo.
+
+Su supuesto principal es la proporcionalidad de riesgos.
+:::
+
+## ¿Qué modela Cox?
+
+El modelo de Cox relaciona las covariables con el hazard.
+
+$$
+h(t\mid X)
+=
+h_0(t)
+\exp(
+\beta^\top X
+)
+$$
+
+donde:
+
+- \(h(t\mid X)\): hazard individual.
+- \(h_0(t)\): hazard basal.
+- \(X\): vector de covariables.
+- \(\beta\): coeficientes.
+
+::: {.callout-note}
+## Idea clave
+
+Cox no necesita especificar una forma paramétrica concreta para el hazard basal.
+:::
+
+## Modelo semiparamétrico
+
+Se considera semiparamétrico porque:
+
+- La parte de covariables es paramétrica.
+- El hazard basal queda sin especificar.
+
+## Interpretación del coeficiente
+
+Para una variable \(X_j\):
+
+$$
+HR_j
+=
+e^{\beta_j}
+$$
+
+## Hazard ratio
+
+```text
+HR > 1
+→ mayor hazard
+
+HR < 1
+→ menor hazard
+
+HR = 1
+→ ausencia de asociación
+```
+
+## Ejemplo
+
+```text
+HR = 1.40
+```
+
+Puede interpretarse como un hazard instantáneo aproximadamente un 40 % mayor por cada unidad de incremento, manteniendo constantes las demás variables.
+
+## Variable continua
+
+Ejemplo:
+
+```text
+Edad
+HR = 1.03 por año
+```
+
+Un incremento de 10 años se interpreta como:
+
+$$
+HR_{10}
+=
+1.03^{10}
+$$
+
+## Calcular HR para varias unidades
+
+```python
+hr_per_year = 1.03
+
+hr_per_10_years = (
+    hr_per_year
+    **
+    10
+)
+```
+
+## Variable binaria
+
+Ejemplo:
+
+```text
+Tratamiento
+0 = no
+1 = sí
+```
+
+Un HR de 0.75 compara tratados frente a no tratados, condicionado al resto de covariables.
+
+## Variable categórica
+
+Debe definirse una categoría de referencia.
+
+```text
+Diagnóstico A
+→ referencia
+
+Diagnóstico B
+→ HR respecto a A
+
+Diagnóstico C
+→ HR respecto a A
+```
+
+## Preparar datos
+
+```python
+cox_df = df[
+    [
+        "follow_up_days",
+        "event",
+        "age",
+        "sex",
+        "baseline_lvef",
+        "treatment"
+    ]
+].copy()
+```
+
+## Revisar missing
+
+```python
+cox_df.isna().mean()
+```
+
+## Codificar categóricas
+
+```python
+cox_df = pd.get_dummies(
+    cox_df,
+    columns=[
+        "sex",
+        "treatment"
+    ],
+    drop_first=True
+)
+```
+
+## Ajustar modelo con lifelines
+
+```python
+from lifelines import CoxPHFitter
+
+cph = CoxPHFitter()
+```
+
+```python
+cph.fit(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event"
+)
+```
+
+## Resumen
+
+```python
+cph.print_summary()
+```
+
+## Resultados principales
+
+El resumen incluye:
+
+- Coeficiente.
+- Hazard ratio.
+- Error estándar.
+- Intervalo de confianza.
+- Estadístico.
+- p-value.
+
+## Tabla de resultados
+
+```python
+results = (
+    cph.summary[
+        [
+            "coef",
+            "exp(coef)",
+            "se(coef)",
+            "p",
+            "exp(coef) lower 95%",
+            "exp(coef) upper 95%"
+        ]
+    ]
+)
+```
+
+## Interpretar intervalo de confianza
+
+Ejemplo:
+
+```text
+HR = 1.40
+IC 95 %: 1.10 a 1.78
+```
+
+El intervalo no incluye 1, por lo que existe evidencia estadística de asociación bajo el modelo.
+
+## No interpretar solo p-value
+
+Debe considerarse:
+
+- Magnitud.
+- Intervalo.
+- Plausibilidad.
+- Confusión.
+- Calidad de datos.
+- Supuestos.
+- Relevancia clínica.
+
+## Función de hazard basal
+
+```python
+baseline_hazard = (
+    cph.baseline_hazard_
+)
+```
+
+## Hazard acumulado basal
+
+```python
+baseline_cumulative_hazard = (
+    cph.baseline_cumulative_hazard_
+)
+```
+
+## Supervivencia basal
+
+```python
+baseline_survival = (
+    cph.baseline_survival_
+)
+```
+
+## Score de riesgo relativo
+
+```python
+partial_hazard = (
+    cph.predict_partial_hazard(
+        cox_df
+    )
+)
+```
+
+Valores mayores indican mayor riesgo relativo.
+
+## Predicción de supervivencia
+
+```python
+survival_function = (
+    cph.predict_survival_function(
+        cox_df.iloc[
+            [
+                0
+            ]
+        ]
+    )
+)
+```
+
+## Predicción para varios pacientes
+
+```python
+patient_profiles = cox_df.iloc[
+    [
+        0,
+        1,
+        2
+    ]
+]
+```
+
+```python
+predicted_survival = (
+    cph.predict_survival_function(
+        patient_profiles
+    )
+)
+```
+
+## Visualizar supervivencia individual
+
+```python
+import matplotlib.pyplot as plt
+
+predicted_survival.plot(
+    figsize=(
+        9,
+        6
+    )
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Supervivencia predicha"
+)
+
+plt.title(
+    "Curvas individuales ajustadas"
+)
+
+plt.show()
+```
+
+## Predicción en tiempos concretos
+
+```python
+survival_at_365 = (
+    cph
+    .predict_survival_function(
+        patient_profiles,
+        times=[
+            365
+        ]
+    )
+)
+```
+
+## Riesgo acumulado
+
+```python
+cumulative_hazard = (
+    cph.predict_cumulative_hazard(
+        patient_profiles
+    )
+)
+```
+
+## Selección de covariables
+
+La selección debe basarse en:
+
+- Pregunta clínica.
+- Confusores conocidos.
+- Evidencia previa.
+- Disponibilidad.
+- Número de eventos.
+- Riesgo de colinealidad.
+- Parsimonia.
+
+## No seleccionar solo por p-value univariable
+
+Una variable no significativa de forma univariable puede ser un confusor importante.
+
+## Modelo univariable
+
+```python
+univariable_df = cox_df[
+    [
+        "follow_up_days",
+        "event",
+        "age"
+    ]
+]
+```
+
+```python
+univariable_model = CoxPHFitter()
+
+univariable_model.fit(
+    univariable_df,
+    duration_col="follow_up_days",
+    event_col="event"
+)
+```
+
+## Modelo multivariable
+
+```python
+multivariable_model = CoxPHFitter()
+
+multivariable_model.fit(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event"
+)
+```
+
+## Confusión
+
+Una covariable es confusora cuando se relaciona con:
+
+- Exposición.
+- Outcome.
+- No es consecuencia de la exposición.
+
+## Ajuste excesivo
+
+Puede ocurrir al incluir:
+
+- Mediadores.
+- Variables posteriores.
+- Variables casi duplicadas.
+- Demasiadas covariables para pocos eventos.
+
+## Eventos por variable
+
+Reglas simples como 10 eventos por parámetro se usan como orientación, no como ley universal.
+
+Debe considerarse:
+
+- Complejidad.
+- Penalización.
+- Colinealidad.
+- Distribución.
+- Validación.
+
+## Colinealidad
+
+Ejemplos:
+
+- Edad y edad al diagnóstico.
+- FEVI Simpson y FEVI modo M.
+- Peso y superficie corporal.
+- Troponina y daño miocárdico derivado.
+
+## Revisar correlaciones
+
+```python
+correlation_matrix = (
+    cox_df
+    .drop(
+        columns=[
+            "follow_up_days",
+            "event"
+        ]
+    )
+    .corr()
+)
+```
+
+## VIF
+
+```python
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+
+X = cox_df.drop(
+    columns=[
+        "follow_up_days",
+        "event"
+    ]
+)
+```
+
+```python
+vif_table = pd.DataFrame(
+    {
+        "feature": X.columns,
+        "vif": [
+            variance_inflation_factor(
+                X.values,
+                index
+            )
+            for index in range(
+                X.shape[
+                    1
+                ]
+            )
+        ]
+    }
+)
+```
+
+## Escalado de variables
+
+No es obligatorio para Cox clásico, pero puede facilitar:
+
+- Comparabilidad.
+- Penalización.
+- Convergencia.
+- Interpretación por desviación estándar.
+
+## Estandarizar
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+cox_df[
+    [
+        "age",
+        "baseline_lvef"
+    ]
+] = scaler.fit_transform(
+    cox_df[
+        [
+            "age",
+            "baseline_lvef"
+        ]
+    ]
+)
+```
+
+## Interpretación tras estandarizar
+
+El HR corresponde a un incremento de una desviación estándar.
+
+## No linealidad
+
+Cox asume linealidad de las covariables continuas en el log-hazard.
+
+```text
+Edad
+→ efecto lineal sobre log-hazard
+```
+
+Esto puede ser incorrecto.
+
+## Categorizar continuas
+
+```python
+cox_df[
+    "age_group"
+] = pd.cut(
+    cox_df[
+        "age"
+    ],
+    bins=[
+        0,
+        40,
+        60,
+        80,
+        float(
+            "inf"
+        )
+    ]
+)
+```
+
+Categorizar pierde información y crea puntos de corte artificiales.
+
+## Splines
+
+Los splines permiten relaciones no lineales.
+
+```python
+cph = CoxPHFitter()
+```
+
+```python
+cph.fit(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event",
+    formula=(
+        "bs(age, df=4)"
+        " + baseline_lvef"
+        " + treatment"
+    )
+)
+```
+
+## Interacciones
+
+```python
+cox_df[
+    "age_x_treatment"
+] = (
+    cox_df[
+        "age"
+    ]
+    *
+    cox_df[
+        "treatment_yes"
+    ]
+)
+```
+
+## Interacción clínica
+
+Puede representar que el efecto de una variable cambia según otra.
+
+Ejemplo:
+
+```text
+Efecto del tratamiento
+→ diferente según edad
+```
+
+## Interpretar interacciones
+
+Con interacción, los efectos principales no deben interpretarse de forma aislada.
+
+## Estratificación
+
+Si una variable incumple proporcionalidad, puede utilizarse como estrato.
+
+```python
+cph.fit(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event",
+    strata=[
+        "center"
+    ]
+)
+```
+
+## Qué hace la estratificación
+
+Permite que cada estrato tenga su propio hazard basal.
+
+Pero no estima un HR para la variable estratificada.
+
+## Ejemplo por centro
+
+```text
+Centro A
+→ hazard basal propio
+
+Centro B
+→ hazard basal propio
+```
+
+## Penalización
+
+Puede utilizarse cuando:
+
+- Hay muchas covariables.
+- Hay colinealidad.
+- Hay pocos eventos.
+- Se necesita estabilidad.
+
+## Ridge en Cox
+
+```python
+cph = CoxPHFitter(
+    penalizer=0.1,
+    l1_ratio=0.0
+)
+```
+
+## Lasso en Cox
+
+```python
+cph = CoxPHFitter(
+    penalizer=0.1,
+    l1_ratio=1.0
+)
+```
+
+## Elastic Net
+
+```python
+cph = CoxPHFitter(
+    penalizer=0.1,
+    l1_ratio=0.5
+)
+```
+
+## Elegir penalización
+
+Debe seleccionarse mediante validación interna adecuada.
+
+## Cluster robust standard errors
+
+Cuando existen observaciones agrupadas:
+
+- Paciente.
+- Hospital.
+- Familia.
+- Centro.
+
+pueden utilizarse errores robustos.
+
+```python
+cph.fit(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event",
+    cluster_col="center_id",
+    robust=True
+)
+```
+
+## Frailty
+
+Los modelos de frailty incorporan heterogeneidad no observada compartida.
+
+Ejemplos:
+
+- Centro.
+- Familia.
+- Paciente con eventos recurrentes.
+
+## Cox y tiempo dependiente
+
+Para covariables temporales se utiliza formato start-stop.
+
+```text
+patient_id | start | stop | event | treatment
+```
+
+## Ajustar modelo temporal
+
+```python
+from lifelines import CoxTimeVaryingFitter
+
+ctv = CoxTimeVaryingFitter()
+```
+
+```python
+ctv.fit(
+    interval_df,
+    id_col="patient_id",
+    start_col="start",
+    stop_col="stop",
+    event_col="event"
+)
+```
+
+## Supuesto de riesgos proporcionales
+
+El modelo asume:
+
+$$
+\frac{
+h(t\mid X_a)
+}{
+h(t\mid X_b)
+}
+=
+\text{constante en }t
+$$
+
+## Violación del supuesto
+
+Ejemplo:
+
+```text
+Tratamiento beneficioso al inicio
+→ efecto desaparece después
+```
+
+En ese caso, un único HR puede ser engañoso.
+
+## Revisar supuesto
+
+```python
+cph.check_assumptions(
+    cox_df,
+    p_value_threshold=0.05,
+    show_plots=True
+)
+```
+
+## Residuos de Schoenfeld
+
+Se utilizan para evaluar si el efecto de una covariable cambia con el tiempo.
+
+## Soluciones ante incumplimiento
+
+- Estratificación.
+- Interacción con tiempo.
+- Coeficientes dependientes del tiempo.
+- Dividir periodo.
+- Modelos paramétricos flexibles.
+- RMST.
+- Modelos AFT.
+
+## Interacción con tiempo
+
+```python
+cox_df[
+    "treatment_log_time"
+] = (
+    cox_df[
+        "treatment_yes"
+    ]
+    *
+    np.log1p(
+        cox_df[
+            "follow_up_days"
+        ]
+    )
+)
+```
+
+Debe implementarse con una estructura y formulación adecuadas, evitando usar tiempo final como covariable basal de forma ingenua.
+
+## Ties
+
+Los empates ocurren cuando varios eventos tienen el mismo tiempo.
+
+Son frecuentes con fechas registradas por día.
+
+Los métodos de aproximación incluyen:
+
+- Breslow.
+- Efron.
+- Exacto.
+
+## Predicción absoluta
+
+El HR es relativo.
+
+Para obtener riesgo absoluto se necesita:
+
+- Hazard basal.
+- Horizonte.
+- Perfil de covariables.
+
+## Supervivencia individual
+
+$$
+S(t\mid X)
+=
+S_0(t)^{
+\exp(
+\beta^\top X
+)
+}
+$$
+
+## Curvas ajustadas por perfiles
+
+Puede compararse:
+
+```text
+Paciente de bajo riesgo
+Paciente de riesgo medio
+Paciente de alto riesgo
+```
+
+manteniendo definidos los perfiles.
+
+## Curvas estandarizadas
+
+Para comparar grupos ajustados puede promediarse la supervivencia predicha sobre una población común.
+
+## Evaluación del modelo
+
+Debe incluir:
+
+- Discriminación.
+- Calibración.
+- Rendimiento temporal.
+- Validación externa.
+- Supuestos.
+- Estabilidad.
+
+## Concordance index
+
+```python
+concordance = (
+    cph.concordance_index_
+)
+```
+
+## Limitaciones del C-index
+
+- No mide calibración.
+- Puede ser optimista.
+- No refleja horizontes concretos.
+- No indica utilidad clínica.
+
+## Validación interna
+
+Opciones:
+
+- Bootstrap.
+- Cross-validation.
+- Penalización.
+- Corrección de optimismo.
+
+## Cross-validation
+
+```python
+from lifelines.utils import k_fold_cross_validation
+
+scores = k_fold_cross_validation(
+    cph,
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event",
+    k=5,
+    scoring_method="concordance_index"
+)
+```
+
+## Limitación del k-fold aleatorio
+
+Si existe estructura temporal o multicentro, el split debe reflejarla.
+
+## Validación temporal
+
+```text
+Periodo antiguo
+→ desarrollo
+
+Periodo posterior
+→ validación
+```
+
+## Validación externa
+
+```text
+Centro A
+→ desarrollo
+
+Centro B
+→ validación
+```
+
+## Bootstrap
+
+Puede utilizarse para:
+
+- Optimismo.
+- Estabilidad de coeficientes.
+- Intervalos.
+- Selección de variables.
+
+## Calibration curve
+
+Debe compararse supervivencia predicha y observada en tiempos concretos.
+
+Ejemplo:
+
+```text
+Supervivencia predicha a 1 año
+vs
+Kaplan-Meier observada a 1 año
+```
+
+## Modelos explicativos y predictivos
+
+### Explicativo
+
+Objetivo:
+
+- Estimar asociaciones.
+- Controlar confusión.
+- Interpretar HR.
+
+### Predictivo
+
+Objetivo:
+
+- Predecir riesgo individual.
+- Maximizar rendimiento.
+- Evaluar calibración y validación.
+
+Las decisiones metodológicas pueden diferir.
+
+## Causalidad
+
+Un HR ajustado no demuestra causalidad.
+
+Puede persistir:
+
+- Confusión residual.
+- Sesgo de selección.
+- Confounding by indication.
+- Medición imperfecta.
+- Variables no observadas.
+
+## Reporting
+
+Debe incluir:
+
+- Población.
+- Tiempo cero.
+- Evento.
+- Censura.
+- Número de eventos.
+- Covariables.
+- Missing.
+- HR e intervalos.
+- Supuestos.
+- Validación.
+- Métricas.
+
+## Forest plot
+
+```python
+cph.plot()
+
+plt.title(
+    "Hazard ratios del modelo de Cox"
+)
+
+plt.show()
+```
+
+## Tabla para forest plot
+
+```python
+forest_table = (
+    cph.summary[
+        [
+            "exp(coef)",
+            "exp(coef) lower 95%",
+            "exp(coef) upper 95%",
+            "p"
+        ]
+    ]
+    .rename(
+        columns={
+            "exp(coef)":
+            "hazard_ratio",
+            "exp(coef) lower 95%":
+            "ci_lower",
+            "exp(coef) upper 95%":
+            "ci_upper"
+        }
+    )
+)
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+El modelo de Cox es adecuado para estudiar asociaciones ajustadas y estimar supervivencia individual cuando sus supuestos son razonables.
+:::
+
+Debe revisarse:
+
+- Tiempo cero.
+- Confusores.
+- Forma funcional.
+- Proporcionalidad.
+- Eventos por parámetro.
+- Calibración.
+- Validación externa.
+
+## Errores frecuentes
+
+- Interpretar HR como riesgo absoluto.
+- Seleccionar variables solo por p-value.
+- No comprobar proporcionalidad.
+- Categorizar continuas sin necesidad.
+- Incluir mediadores.
+- Usar variables futuras.
+- Ignorar colinealidad.
+- Sobreajustar con pocos eventos.
+- Reportar solo C-index.
+- No evaluar calibración.
+- Interpretar asociación como causalidad.
+- No validar externamente.
+
+## Flujo recomendado
+
+1. Definir pregunta.
+2. Seleccionar covariables.
+3. Revisar missing.
+4. Revisar colinealidad.
+5. Ajustar modelo.
+6. Interpretar HR.
+7. Revisar forma funcional.
+8. Comprobar proporcionalidad.
+9. Revisar residuos.
+10. Evaluar discriminación.
+11. Evaluar calibración.
+12. Validar externamente.
+
+## Checklist para proyectos
+
+- [ ] He definido el objetivo explicativo o predictivo.
+- [ ] He definido covariables a priori.
+- [ ] He revisado missing.
+- [ ] He codificado categóricas.
+- [ ] He revisado colinealidad.
+- [ ] He ajustado el modelo.
+- [ ] He reportado HR e IC.
+- [ ] He revisado linealidad.
+- [ ] He comprobado riesgos proporcionales.
+- [ ] He considerado interacciones.
+- [ ] He considerado penalización.
+- [ ] He evaluado C-index.
+- [ ] He evaluado calibración.
+- [ ] He realizado validación interna.
+- [ ] He planificado validación externa.
+
+## Recursos
+
+### Conceptos
+
+- Cox proportional hazards.
+- Partial likelihood.
+- Hazard ratio.
+- Baseline hazard.
+- Proportional hazards.
+- Schoenfeld residuals.
+- Penalized Cox.
+- Stratified Cox.
+- Time-varying Cox.
+
+### Librerías de Python
+
+- `lifelines.CoxPHFitter`.
+- `lifelines.CoxTimeVaryingFitter`.
+- `scikit-survival`.
+- `statsmodels`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus covariables, hazard ratios, supuestos, penalización, validación y decisiones clínicas.

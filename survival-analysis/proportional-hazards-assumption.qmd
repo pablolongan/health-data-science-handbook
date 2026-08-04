@@ -1,0 +1,1119 @@
+---
+title: "Supuesto de riesgos proporcionales"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+El modelo de Cox asume que el efecto relativo de cada covariable es constante en el tiempo.
+
+Esto significa que el hazard ratio entre dos perfiles no cambia con \(t\).
+
+Debe evaluarse mediante:
+
+- Conocimiento clínico.
+- Gráficos.
+- Residuos de Schoenfeld.
+- Pruebas estadísticas.
+- Inspección de efectos temporales.
+
+Cuando el supuesto falla pueden utilizarse:
+
+- Estratificación.
+- Interacciones con tiempo.
+- Coeficientes dependientes del tiempo.
+- Modelos paramétricos flexibles.
+- RMST.
+- Modelos AFT.
+:::
+
+## ¿Qué significa proporcionalidad?
+
+En un modelo de Cox:
+
+$$
+h(t\mid X)
+=
+h_0(t)
+\exp(
+\beta^\top X
+)
+$$
+
+Para dos individuos \(A\) y \(B\):
+
+$$
+\frac{
+h(t\mid X_A)
+}{
+h(t\mid X_B)
+}
+=
+\exp[
+\beta^\top
+(
+X_A-X_B
+)
+]
+$$
+
+El tiempo desaparece de la razón.
+
+::: {.callout-note}
+## Idea clave
+
+El hazard ratio se interpreta como constante durante todo el seguimiento.
+:::
+
+## Ejemplo conceptual
+
+Supongamos:
+
+```text
+Tratamiento A frente a B
+HR = 0.70
+```
+
+Bajo riesgos proporcionales, el hazard relativo sería aproximadamente 0.70:
+
+- Al mes 1.
+- Al mes 6.
+- Al año.
+- Al final del seguimiento.
+
+## Qué puede ocurrir realmente
+
+```text
+Inicio
+→ tratamiento muy beneficioso
+
+Más adelante
+→ efecto se reduce
+
+Final
+→ efecto desaparece
+```
+
+En ese caso, un único HR promedio puede ocultar una dinámica importante.
+
+## Forma de las curvas de hazard
+
+La proporcionalidad implica:
+
+```text
+Hazard grupo A
+=
+constante × hazard grupo B
+```
+
+Las curvas pueden cambiar con el tiempo, pero deben mantener una relación multiplicativa constante.
+
+## Supervivencia y proporcionalidad
+
+Bajo Cox:
+
+$$
+S(t\mid X)
+=
+S_0(t)^{
+\exp(
+\beta^\top X
+)
+}
+$$
+
+La proporcionalidad se refiere al hazard, no a una distancia constante entre curvas de supervivencia.
+
+## Curvas Kaplan-Meier
+
+Las curvas Kaplan-Meier pueden dar pistas.
+
+Señales de posible incumplimiento:
+
+- Cruce de curvas.
+- Separación solo temprana.
+- Separación solo tardía.
+- Diferencias que cambian de dirección.
+
+Pero no bastan por sí solas.
+
+## Curvas cruzadas
+
+```text
+Grupo A mejor al inicio
+Grupo B mejor después
+```
+
+Esto sugiere que el efecto relativo cambia con el tiempo.
+
+## Ajustar el modelo
+
+```python
+from lifelines import CoxPHFitter
+
+cph = CoxPHFitter()
+
+cph.fit(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event"
+)
+```
+
+## Diagnóstico integrado
+
+```python
+cph.check_assumptions(
+    cox_df,
+    p_value_threshold=0.05,
+    show_plots=True
+)
+```
+
+Este método combina:
+
+- Pruebas estadísticas.
+- Residuos escalados de Schoenfeld.
+- Transformaciones del tiempo.
+- Sugerencias de diagnóstico.
+
+## No usar el p-value de forma aislada
+
+Con muchos pacientes, diferencias pequeñas pueden resultar significativas.
+
+Con pocos pacientes, violaciones relevantes pueden no detectarse.
+
+Debe combinarse:
+
+- Test.
+- Gráfico.
+- Plausibilidad clínica.
+- Magnitud del cambio.
+- Impacto en la interpretación.
+
+## Residuos de Schoenfeld
+
+Para cada evento y covariable se compara:
+
+```text
+Valor observado de la covariable
+-
+valor esperado dentro del risk set
+```
+
+Si el efecto es constante, los residuos no deberían mostrar una tendencia sistemática con el tiempo.
+
+## Residuos escalados
+
+Los residuos escalados de Schoenfeld permiten estudiar cómo podría variar \(\beta(t)\).
+
+```text
+Línea aproximadamente horizontal
+→ compatible con proporcionalidad
+
+Tendencia clara
+→ posible efecto dependiente del tiempo
+```
+
+## Calcular residuos
+
+```python
+schoenfeld_residuals = (
+    cph.compute_residuals(
+        cox_df,
+        kind="schoenfeld"
+    )
+)
+```
+
+## Residuos escalados
+
+```python
+scaled_schoenfeld = (
+    cph.compute_residuals(
+        cox_df,
+        kind="scaled_schoenfeld"
+    )
+)
+```
+
+## Inspeccionar
+
+```python
+scaled_schoenfeld.head()
+```
+
+## Añadir tiempo de evento
+
+Los residuos de Schoenfeld se definen en tiempos con evento.
+
+```python
+event_times = cox_df.loc[
+    cox_df[
+        "event"
+    ]
+    ==
+    1,
+    "follow_up_days"
+]
+```
+
+## Visualización simple
+
+```python
+import matplotlib.pyplot as plt
+
+covariate = "treatment"
+
+plt.figure(
+    figsize=(
+        9,
+        5
+    )
+)
+
+plt.scatter(
+    event_times,
+    scaled_schoenfeld[
+        covariate
+    ]
+)
+
+plt.axhline(
+    0,
+    linestyle="--"
+)
+
+plt.xlabel(
+    "Tiempo del evento"
+)
+
+plt.ylabel(
+    "Residuo escalado de Schoenfeld"
+)
+
+plt.title(
+    f"Proporcionalidad para {covariate}"
+)
+
+plt.show()
+```
+
+## Añadir suavizado
+
+```python
+from statsmodels.nonparametric.smoothers_lowess import lowess
+```
+
+```python
+smoothed = lowess(
+    endog=scaled_schoenfeld[
+        covariate
+    ],
+    exog=event_times,
+    frac=0.4
+)
+```
+
+```python
+plt.figure(
+    figsize=(
+        9,
+        5
+    )
+)
+
+plt.scatter(
+    event_times,
+    scaled_schoenfeld[
+        covariate
+    ],
+    alpha=0.4
+)
+
+plt.plot(
+    smoothed[
+        :,
+        0
+    ],
+    smoothed[
+        :,
+        1
+    ]
+)
+
+plt.axhline(
+    0,
+    linestyle="--"
+)
+
+plt.show()
+```
+
+## Interpretar el gráfico
+
+Buscar:
+
+- Tendencia ascendente.
+- Tendencia descendente.
+- Cambio de signo.
+- Curvatura.
+- Variación temprana o tardía.
+- Pocos datos en la cola.
+
+## Prueba de proporcionalidad
+
+```python
+from lifelines.statistics import proportional_hazard_test
+```
+
+```python
+ph_test = proportional_hazard_test(
+    fitted_cox_model=cph,
+    training_df=cox_df,
+    time_transform="rank"
+)
+```
+
+## Resultados
+
+```python
+ph_test.print_summary()
+```
+
+## Transformaciones del tiempo
+
+Pueden utilizarse:
+
+- `rank`.
+- `km`.
+- `identity`.
+- `log`.
+- `all`.
+
+## Todas las transformaciones
+
+```python
+ph_test = proportional_hazard_test(
+    fitted_cox_model=cph,
+    training_df=cox_df,
+    time_transform="all"
+)
+```
+
+## Hipótesis
+
+```text
+H₀
+→ el efecto de la covariable es constante en el tiempo
+
+H₁
+→ el efecto cambia con el tiempo
+```
+
+## Test por covariable
+
+Cada variable puede mostrar un resultado distinto.
+
+Ejemplo:
+
+```text
+Edad
+→ compatible con PH
+
+Tratamiento
+→ posible violación
+
+Centro
+→ posible violación
+```
+
+## Test global
+
+También debe revisarse el resultado global del modelo.
+
+Un modelo puede mostrar:
+
+- Varias pequeñas violaciones.
+- Una violación dominante.
+- Resultado global significativo.
+- Resultados por variable no concluyentes.
+
+## Multiplicidad
+
+Con muchas covariables, algunas pruebas pueden resultar significativas por azar.
+
+No debe corregirse de forma mecánica sin considerar:
+
+- Objetivo del modelo.
+- Número de variables.
+- Evidencia visual.
+- Magnitud.
+- Plausibilidad.
+
+## Forma funcional incorrecta
+
+Una relación no lineal mal especificada puede parecer una violación de riesgos proporcionales.
+
+Ejemplo:
+
+```text
+Edad
+→ efecto curvo
+
+Modelo
+→ la incluye linealmente
+```
+
+Antes de concluir que el efecto cambia con el tiempo, debe revisarse la forma funcional.
+
+## Revisar no linealidad
+
+```python
+cph_spline = CoxPHFitter()
+
+cph_spline.fit(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event",
+    formula=(
+        "bs(age, df=4)"
+        " + treatment"
+        " + baseline_lvef"
+    )
+)
+```
+
+## Repetir diagnóstico
+
+```python
+cph_spline.check_assumptions(
+    cox_df,
+    p_value_threshold=0.05,
+    show_plots=True
+)
+```
+
+## Variables categóricas con muchos niveles
+
+Una variable como centro puede incumplir PH porque cada centro tiene:
+
+- Hazard basal distinto.
+- Calendario distinto.
+- Seguimiento distinto.
+- Protocolos diferentes.
+
+En estos casos puede ser razonable estratificar.
+
+## Estratificación
+
+```python
+cph_stratified = CoxPHFitter()
+
+cph_stratified.fit(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event",
+    strata=[
+        "center"
+    ]
+)
+```
+
+## Qué hace la estratificación
+
+Permite un hazard basal diferente por estrato:
+
+$$
+h_k(t\mid X)
+=
+h_{0k}(t)
+\exp(
+\beta^\top X
+)
+$$
+
+## Ventaja
+
+No obliga a que la variable estratificada tenga hazards proporcionales.
+
+## Limitación
+
+No se estima un HR para esa variable.
+
+## Cuándo estratificar
+
+Puede ser razonable cuando:
+
+- La variable no es el efecto principal.
+- Tiene pocos niveles.
+- Se desea ajustar por ella.
+- La proporcionalidad falla claramente.
+- Hay suficientes eventos por estrato.
+
+## Interacción con tiempo
+
+Puede modelarse un efecto variable:
+
+$$
+h(t\mid X)
+=
+h_0(t)
+\exp[
+\beta_1X
++
+\beta_2Xg(t)
+]
+$$
+
+donde \(g(t)\) puede ser:
+
+- \(t\).
+- \(\log(t)\).
+- Función por tramos.
+- Spline temporal.
+
+## Interpretación
+
+El log-hazard ratio es:
+
+$$
+\log HR(t)
+=
+\beta_1
++
+\beta_2g(t)
+$$
+
+Por tanto:
+
+$$
+HR(t)
+=
+\exp[
+\beta_1
++
+\beta_2g(t)
+]
+$$
+
+## Ejemplo con log del tiempo
+
+Conceptualmente:
+
+```text
+treatment
++
+treatment × log(time)
+```
+
+## Precaución de implementación
+
+No debe añadirse simplemente el tiempo final observado como una covariable basal.
+
+El dataset debe representarse correctamente mediante intervalos o una formulación compatible con efectos temporales.
+
+## Formato start-stop
+
+```text
+patient_id | start | stop | event | treatment
+```
+
+Ejemplo:
+
+```text
+1 | 0   | 30  | 0 | 1
+1 | 30  | 90  | 0 | 1
+1 | 90  | 120 | 1 | 1
+```
+
+## Crear episodios
+
+```python
+from lifelines.utils import to_episodic_format
+```
+
+```python
+episodic_df = to_episodic_format(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event",
+    id_col="patient_id",
+    time_gaps=30
+)
+```
+
+## Añadir interacción temporal
+
+```python
+import numpy as np
+
+episodic_df[
+    "treatment_log_time"
+] = (
+    episodic_df[
+        "treatment"
+    ]
+    *
+    np.log1p(
+        episodic_df[
+            "stop"
+        ]
+    )
+)
+```
+
+## Ajustar Cox temporal
+
+```python
+from lifelines import CoxTimeVaryingFitter
+
+ctv = CoxTimeVaryingFitter()
+
+ctv.fit(
+    episodic_df,
+    id_col="patient_id",
+    start_col="start",
+    stop_col="stop",
+    event_col="event"
+)
+```
+
+## Coeficientes por tramos
+
+Otra opción es dividir el seguimiento.
+
+Ejemplo:
+
+```text
+0 a 180 días
+> 180 días
+```
+
+## Crear indicador de periodo
+
+```python
+episodic_df[
+    "late_period"
+] = (
+    episodic_df[
+        "start"
+    ]
+    >=
+    180
+).astype(int)
+```
+
+## Interacción por periodo
+
+```python
+episodic_df[
+    "treatment_late"
+] = (
+    episodic_df[
+        "treatment"
+    ]
+    *
+    episodic_df[
+        "late_period"
+    ]
+)
+```
+
+## Interpretación por periodos
+
+```text
+HR temprano
+→ exp(beta_treatment)
+
+HR tardío
+→ exp(beta_treatment + beta_treatment_late)
+```
+
+## Elegir punto de corte
+
+Debe definirse con:
+
+- Justificación clínica.
+- Plan previo.
+- Evidencia externa.
+- Evitando buscar el corte que mejor resultado produzca.
+
+## Coeficientes temporales flexibles
+
+Pueden modelarse con splines del tiempo.
+
+Esto permite que el efecto cambie suavemente.
+
+## Modelos paramétricos flexibles
+
+Alternativas:
+
+- Royston-Parmar.
+- Flexible parametric survival models.
+- Piecewise exponential models.
+- AFT.
+- Aalen additive models.
+
+## Aalen additive model
+
+Modela efectos aditivos sobre el hazard:
+
+$$
+h(t\mid X)
+=
+b_0(t)
++
+b_1(t)X_1
++
+\cdots
++
+b_p(t)X_p
+$$
+
+Los coeficientes pueden variar con el tiempo.
+
+## Ajustar Aalen
+
+```python
+from lifelines import AalenAdditiveFitter
+
+aaf = AalenAdditiveFitter(
+    coef_penalizer=1.0
+)
+```
+
+```python
+aaf.fit(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event"
+)
+```
+
+## Ventajas
+
+- Efectos dependientes del tiempo.
+- Interpretación aditiva.
+- Flexibilidad.
+
+## Limitaciones
+
+- Interpretación distinta a HR.
+- Puede ser menos familiar.
+- Requiere cuidado con estabilidad.
+
+## RMST como alternativa
+
+Cuando las curvas no son proporcionales, puede compararse el tiempo medio libre de evento hasta \(\tau\).
+
+$$
+RMST(\tau)
+=
+\int_0^\tau S(t)\,dt
+$$
+
+## Ventaja de RMST
+
+No requiere un HR constante.
+
+Ejemplo:
+
+```text
+Durante 2 años,
+el grupo A permaneció libre del evento
+una media de 45 días más que el grupo B
+```
+
+## Modelos AFT
+
+Los modelos Accelerated Failure Time modelan el tiempo directamente.
+
+$$
+\log(T)
+=
+\beta^\top X
++
+\varepsilon
+$$
+
+Pueden ser adecuados cuando la interpretación mediante time ratio resulta más natural.
+
+## ¿Debe descartarse Cox?
+
+No siempre.
+
+Una violación estadística pequeña puede tener poco impacto práctico.
+
+Debe preguntarse:
+
+- ¿Cambia la conclusión?
+- ¿Cambia la predicción?
+- ¿Afecta a la variable principal?
+- ¿El HR promedio sigue siendo útil?
+- ¿Hay suficiente información para un modelo más complejo?
+
+## Efecto principal frente a covariables de ajuste
+
+Si incumple PH una covariable secundaria, puede estratificarse.
+
+Si incumple PH la exposición principal, un único HR suele ser insuficiente.
+
+## Reportar efecto temporal
+
+Puede reportarse:
+
+- HR a tiempos específicos.
+- HR temprano y tardío.
+- Curvas ajustadas.
+- RMST.
+- Diferencias absolutas.
+- Interacción con tiempo.
+
+## Ejemplo de HR temporal
+
+```python
+beta_main = -0.20
+
+beta_time = 0.15
+
+times = np.array(
+    [
+        30,
+        180,
+        365,
+        730
+    ]
+)
+```
+
+```python
+hazard_ratio_over_time = np.exp(
+    beta_main
+    +
+    beta_time
+    *
+    np.log1p(
+        times
+    )
+)
+```
+
+## Visualizar HR temporal
+
+```python
+plt.figure(
+    figsize=(
+        9,
+        5
+    )
+)
+
+plt.plot(
+    times,
+    hazard_ratio_over_time
+)
+
+plt.axhline(
+    1,
+    linestyle="--"
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Hazard ratio"
+)
+
+plt.title(
+    "Efecto dependiente del tiempo"
+)
+
+plt.show()
+```
+
+## Proporcionalidad y predicción
+
+Un modelo puede conservar cierta discriminación aunque incumpla PH.
+
+Pero puede producir:
+
+- Curvas mal calibradas.
+- Riesgos absolutos sesgados.
+- Efectos mal interpretados.
+- Rendimiento distinto por horizonte.
+
+## Evaluar por horizonte
+
+```text
+C-index global
+```
+
+no basta.
+
+Debe evaluarse:
+
+- Calibración a 6 meses.
+- Calibración a 1 año.
+- Brier score temporal.
+- AUC dependiente del tiempo.
+- Error en periodos tempranos y tardíos.
+
+## Proporcionalidad en subgrupos
+
+El supuesto puede cumplirse globalmente pero fallar en:
+
+- Un centro.
+- Una edad.
+- Una fase clínica.
+- Un periodo histórico.
+
+## Interacción con centro
+
+Antes de estratificar o añadir interacciones, debe revisarse tamaño de muestra y número de eventos.
+
+## Competing risks
+
+La proporcionalidad de hazards también aparece en modelos cause-specific.
+
+Cada causa puede tener:
+
+- Su propio efecto.
+- Su propio patrón temporal.
+- Su propia violación.
+
+## Interpretación clínica
+
+::: {.callout-note}
+## Aplicación clínica
+
+La pregunta no es solo si el test es significativo, sino si el efecto cambia de forma clínicamente relevante.
+:::
+
+Ejemplo:
+
+```text
+Tratamiento protector durante 6 meses
+→ sin efecto después
+```
+
+Esto puede modificar:
+
+- Seguimiento.
+- Duración de tratamiento.
+- Comunicación de resultados.
+- Diseño de intervención.
+
+## Reporting recomendado
+
+Debe indicarse:
+
+- Método de evaluación.
+- Transformaciones de tiempo.
+- Variables con posible violación.
+- Evidencia visual.
+- Solución aplicada.
+- Efectos temporales estimados.
+- Impacto en conclusiones.
+
+## Ejemplo de redacción
+
+```text
+El supuesto de riesgos proporcionales se evaluó
+mediante residuos escalados de Schoenfeld
+y pruebas basadas en transformaciones del tiempo.
+
+Se observó evidencia de no proporcionalidad
+para la variable tratamiento.
+
+Se modeló una interacción entre tratamiento
+y periodo de seguimiento,
+reportándose HR separados antes y después
+de los 180 días.
+```
+
+## Errores frecuentes
+
+- No comprobar el supuesto.
+- Mirar solo el p-value.
+- Ignorar forma funcional.
+- Interpretar curvas cruzadas con un único HR.
+- Añadir el tiempo final como covariable basal.
+- Estratificar la exposición principal sin pensar.
+- Buscar cortes temporales post hoc.
+- No reportar la solución.
+- Mantener un HR constante cuando cambia de signo.
+- No evaluar impacto predictivo.
+- Confundir variable temporal con efecto temporal.
+- Asumir que no significación demuestra proporcionalidad.
+
+## Flujo recomendado
+
+1. Ajustar el modelo inicial.
+2. Revisar curvas y contexto.
+3. Ejecutar `check_assumptions`.
+4. Revisar tests por variable.
+5. Inspeccionar residuos de Schoenfeld.
+6. Revisar forma funcional.
+7. Determinar relevancia clínica.
+8. Elegir solución.
+9. Reajustar modelo.
+10. Repetir diagnóstico.
+11. Evaluar por horizonte.
+12. Reportar efectos temporales.
+
+## Checklist para proyectos
+
+- [ ] He definido qué variables requieren interpretación causal o clínica.
+- [ ] He inspeccionado curvas.
+- [ ] He ejecutado pruebas de PH.
+- [ ] He revisado el test global.
+- [ ] He revisado tests por variable.
+- [ ] He visualizado residuos.
+- [ ] He revisado no linealidad.
+- [ ] He considerado multiplicidad.
+- [ ] He evaluado relevancia clínica.
+- [ ] He considerado estratificación.
+- [ ] He considerado interacción temporal.
+- [ ] He evitado usar tiempo futuro incorrectamente.
+- [ ] He repetido diagnóstico tras modificar el modelo.
+- [ ] He evaluado por horizonte.
+- [ ] He documentado la solución.
+
+## Recursos
+
+### Conceptos
+
+- Proportional hazards.
+- Schoenfeld residuals.
+- Scaled Schoenfeld residuals.
+- Time-varying coefficients.
+- Stratified Cox.
+- Time interactions.
+- RMST.
+- Aalen additive model.
+- Flexible parametric survival models.
+
+### Librerías de Python
+
+- `CoxPHFitter.check_assumptions`.
+- `proportional_hazard_test`.
+- `compute_residuals`.
+- `CoxTimeVaryingFitter`.
+- `to_episodic_format`.
+- `AalenAdditiveFitter`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus tests, residuos, variables problemáticas, soluciones y efectos temporales.
