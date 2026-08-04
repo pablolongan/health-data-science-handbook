@@ -1,0 +1,2327 @@
+---
+title: "Workflow multiestado para cardiotoxicidad"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Este workflow aplica los modelos multiestado a la evolución de la cardiotoxicidad pediátrica:
+
+```text
+S0
+→ estado cardiovascular normal
+
+S1
+→ cardiotoxicidad leve
+
+S2
+→ cardiotoxicidad moderada
+
+S3
+→ cardiotoxicidad grave
+```
+
+El objetivo es transformar valoraciones cardiovasculares longitudinales en trayectorias clínicas y modelar:
+
+- Transiciones entre estados.
+- Tiempo hasta la siguiente transición.
+- Recuperación y progresión.
+- Probabilidad de ocupar cada estado.
+- Riesgo individual de alcanzar S2 o S3.
+:::
+
+## Pregunta clínica
+
+Una formulación general:
+
+```text
+En pacientes pediátricos oncológicos,
+¿qué factores se asocian con las transiciones
+entre estados de cardiotoxicidad
+y cuánto tiempo transcurre hasta cada cambio?
+```
+
+## Pregunta predictiva
+
+```text
+Dado el estado cardiovascular actual
+y la información clínica disponible,
+¿cuál es la probabilidad de que el paciente
+progrese, permanezca estable o se recupere
+durante los próximos 6, 12 y 24 meses?
+```
+
+::: {.callout-note}
+## Idea clave
+
+El objetivo no es predecir únicamente cardiotoxicidad sí/no, sino reconstruir y anticipar la trayectoria clínica completa.
+:::
+
+## Definición de estados
+
+## S0. Normal
+
+Criterio conceptual:
+
+```text
+FEVI ≥ 50 %
+y
+sin descenso relativo de GLS ≥ 15 %
+respecto al baseline
+y
+sin biomarcadores alterados
+```
+
+## S1. Leve
+
+Criterio conceptual:
+
+```text
+FEVI ≥ 50 %
+y al menos uno:
+- descenso relativo de GLS ≥ 15 %
+- troponina alterada
+- NT-proBNP alterado
+```
+
+## S2. Moderada
+
+Criterio conceptual:
+
+```text
+FEVI 40–49 %
+con una caída clínicamente relevante
+respecto al baseline
+o acompañada de alteración de GLS
+o biomarcadores
+```
+
+## S3. Grave
+
+```text
+FEVI < 40 %
+```
+
+## Estado terminal opcional
+
+Puede añadirse:
+
+```text
+D
+→ fallecimiento
+```
+
+como estado absorbente.
+
+## Versionar la definición
+
+```python
+STATE_DEFINITION_VERSION = (
+    "cardiotoxicity_v1.0"
+)
+```
+
+Cada fila clasificada debería conservar esta versión.
+
+## Variables de entrada
+
+### Ecocardiografía
+
+- FEVI Simpson.
+- FEVI modo M.
+- GLS 4 cámaras.
+- GLS 3 cámaras.
+- GLS 2 cámaras.
+- Calidad del estudio.
+- Fecha.
+
+### Biomarcadores
+
+- Troponina I.
+- NT-proBNP.
+- Fecha analítica.
+- Unidad.
+- Calidad o validación.
+
+### ECG
+
+- QTc.
+- Arritmia.
+- Alteración de onda T.
+- Ritmo sinusal.
+- Calidad.
+- Fecha.
+
+### Tratamiento
+
+- Antraciclinas.
+- Dosis acumulada.
+- Dexrazoxano.
+- Carvedilol.
+- Radioterapia torácica.
+- Trasplante.
+- Otros tratamientos cardiotóxicos.
+
+### Variables basales
+
+- Edad.
+- Sexo.
+- Diagnóstico.
+- Centro.
+- FEVI basal.
+- GLS basal.
+- Biomarcadores basales.
+- Comorbilidades.
+
+## Tiempo cero
+
+La opción principal:
+
+```text
+Inicio del tratamiento oncológico
+```
+
+Alternativas:
+
+- Diagnóstico.
+- Primera exposición a antraciclinas.
+- Primera valoración cardiovascular.
+- Inicio del seguimiento prospectivo.
+
+## Recomendación
+
+Usar una definición única y clínicamente reproducible.
+
+## Estado basal
+
+Para cada paciente:
+
+```text
+Primera valoración cardiovascular
+alrededor del tiempo cero
+```
+
+Debe definirse una ventana.
+
+Ejemplo:
+
+```text
+-30 a +14 días
+respecto al inicio del tratamiento
+```
+
+## Elección de baseline
+
+Si existen varias valoraciones:
+
+- La más cercana a tiempo cero.
+- Priorizar antes del tratamiento.
+- Exigir calidad mínima.
+- Documentar la regla.
+
+## GLS basal
+
+El descenso relativo se calcula respecto al valor basal.
+
+$$
+\text{descenso relativo GLS}
+=
+\frac{
+|GLS_{baseline}|
+-
+|GLS_t|
+}{
+|GLS_{baseline}|
+}
+$$
+
+## Ejemplo
+
+```text
+GLS basal = -20 %
+GLS actual = -16 %
+
+Descenso relativo:
+(20 - 16) / 20 = 0.20
+→ 20 %
+```
+
+## Implementación
+
+```python
+def gls_relative_drop(
+    baseline_gls,
+    current_gls
+):
+
+    if (
+        pd.isna(
+            baseline_gls
+        )
+        or
+        pd.isna(
+            current_gls
+        )
+        or
+        baseline_gls
+        ==
+        0
+    ):
+        return pd.NA
+
+    return (
+        abs(
+            baseline_gls
+        )
+        -
+        abs(
+            current_gls
+        )
+    ) / abs(
+        baseline_gls
+    )
+```
+
+## FEVI prioritaria
+
+Regla recomendada:
+
+```text
+1. FEVI Simpson
+2. FEVI modo M
+```
+
+## Implementación
+
+```python
+def choose_lvef(
+    lvef_simpson,
+    lvef_mmode
+):
+
+    if pd.notna(
+        lvef_simpson
+    ):
+        return lvef_simpson
+
+    if pd.notna(
+        lvef_mmode
+    ):
+        return lvef_mmode
+
+    return pd.NA
+```
+
+## Biomarcadores alterados
+
+Ejemplo de umbrales del proyecto:
+
+```text
+Troponina I > 0.02
+
+NT-proBNP > 150
+```
+
+## Implementación
+
+```python
+def biomarker_flags(
+    troponin_i,
+    ntprobnp
+):
+
+    troponin_high = (
+        pd.notna(
+            troponin_i
+        )
+        and
+        troponin_i
+        >
+        0.02
+    )
+
+    ntprobnp_high = (
+        pd.notna(
+            ntprobnp
+        )
+        and
+        ntprobnp
+        >
+        150
+    )
+
+    return (
+        troponin_high,
+        ntprobnp_high
+    )
+```
+
+## Clasificador de estado
+
+```python
+def classify_cardiotoxicity_state(
+    lvef,
+    baseline_lvef,
+    gls_drop,
+    troponin_high,
+    ntprobnp_high
+):
+
+    biomarker_high = (
+        troponin_high
+        or
+        ntprobnp_high
+    )
+
+    if pd.notna(
+        lvef
+    ) and lvef < 40:
+        return "S3"
+
+    if pd.notna(
+        lvef
+    ) and 40 <= lvef < 50:
+
+        lvef_drop = (
+            baseline_lvef
+            -
+            lvef
+            if pd.notna(
+                baseline_lvef
+            )
+            else pd.NA
+        )
+
+        if (
+            pd.notna(
+                lvef_drop
+            )
+            and
+            lvef_drop
+            >
+            10
+        ):
+            return "S2"
+
+        if (
+            pd.notna(
+                gls_drop
+            )
+            and
+            gls_drop
+            >=
+            0.15
+        ):
+            return "S2"
+
+        if biomarker_high:
+            return "S2"
+
+        return "S2"
+
+    if pd.notna(
+        lvef
+    ) and lvef >= 50:
+
+        if (
+            (
+                pd.notna(
+                    gls_drop
+                )
+                and
+                gls_drop
+                >=
+                0.15
+            )
+            or
+            biomarker_high
+        ):
+            return "S1"
+
+        return "S0"
+
+    return pd.NA
+```
+
+## Importante
+
+La función debe reflejar exactamente la definición clínica validada.
+
+No debe modificarse durante el análisis sin:
+
+- Nueva versión.
+- Nueva clasificación.
+- Análisis de sensibilidad.
+
+## Dataset longitudinal de entrada
+
+```text
+record_id
+assessment_date
+time_study
+lvef_simpson
+lvef_mmode
+gls_4c
+troponin_i
+ntprobnp
+ecg_abnormal
+cumulative_anthracycline
+center
+```
+
+## Preparar fecha
+
+```python
+cv_df[
+    "assessment_date"
+] = pd.to_datetime(
+    cv_df[
+        "assessment_date"
+    ],
+    errors="coerce",
+    dayfirst=True
+)
+```
+
+## Ordenar
+
+```python
+cv_df = (
+    cv_df
+    .sort_values(
+        [
+            "record_id",
+            "assessment_date"
+        ]
+    )
+    .reset_index(
+        drop=True
+    )
+)
+```
+
+## Resolver duplicados
+
+Duplicado conceptual:
+
+```text
+mismo paciente
+misma fecha
+```
+
+Puede deberse a:
+
+- Segunda ecocardiografía.
+- Medición complementaria.
+- Importación duplicada.
+- Varias fuentes.
+
+## Combinar valores
+
+```python
+def first_non_null(
+    series
+):
+
+    non_null = series.dropna()
+
+    if non_null.empty:
+        return pd.NA
+
+    return non_null.iloc[
+        0
+    ]
+```
+
+## Agregación
+
+```python
+aggregation_rules = {
+    "lvef_simpson":
+    first_non_null,
+
+    "lvef_mmode":
+    first_non_null,
+
+    "gls_4c":
+    first_non_null,
+
+    "troponin_i":
+    first_non_null,
+
+    "ntprobnp":
+    first_non_null,
+
+    "cumulative_anthracycline":
+    "max"
+}
+```
+
+```python
+cv_daily = (
+    cv_df
+    .groupby(
+        [
+            "record_id",
+            "assessment_date"
+        ],
+        as_index=False
+    )
+    .agg(
+        aggregation_rules
+    )
+)
+```
+
+## Priorizar la medición más grave
+
+Si dos valores generan estados diferentes el mismo día:
+
+```text
+asignar el estado de mayor severidad
+```
+
+Debe conservarse trazabilidad.
+
+## Construir baseline
+
+```python
+baseline_df = (
+    cv_daily
+    .loc[
+        cv_daily[
+            "type_study"
+        ]
+        ==
+        1
+    ]
+    .sort_values(
+        [
+            "record_id",
+            "assessment_date"
+        ]
+    )
+    .groupby(
+        "record_id",
+        as_index=False
+    )
+    .first()
+)
+```
+
+## Renombrar baseline
+
+```python
+baseline_df = baseline_df.rename(
+    columns={
+        "lvef_selected":
+        "baseline_lvef",
+
+        "gls_4c":
+        "baseline_gls"
+    }
+)
+```
+
+## Añadir baseline a todas las visitas
+
+```python
+cv_daily = cv_daily.merge(
+    baseline_df[
+        [
+            "record_id",
+            "baseline_lvef",
+            "baseline_gls"
+        ]
+    ],
+    on="record_id",
+    how="left"
+)
+```
+
+## Calcular variables derivadas
+
+```python
+cv_daily[
+    "lvef"
+] = cv_daily.apply(
+    lambda row:
+    choose_lvef(
+        row[
+            "lvef_simpson"
+        ],
+        row[
+            "lvef_mmode"
+        ]
+    ),
+    axis=1
+)
+```
+
+```python
+cv_daily[
+    "gls_relative_drop"
+] = cv_daily.apply(
+    lambda row:
+    gls_relative_drop(
+        row[
+            "baseline_gls"
+        ],
+        row[
+            "gls_4c"
+        ]
+    ),
+    axis=1
+)
+```
+
+## Flags analíticos
+
+```python
+cv_daily[
+    "troponin_high"
+] = (
+    cv_daily[
+        "troponin_i"
+    ]
+    >
+    0.02
+)
+```
+
+```python
+cv_daily[
+    "ntprobnp_high"
+] = (
+    cv_daily[
+        "ntprobnp"
+    ]
+    >
+    150
+)
+```
+
+## Clasificar visitas
+
+```python
+cv_daily[
+    "state"
+] = cv_daily.apply(
+    lambda row:
+    classify_cardiotoxicity_state(
+        lvef=row[
+            "lvef"
+        ],
+        baseline_lvef=row[
+            "baseline_lvef"
+        ],
+        gls_drop=row[
+            "gls_relative_drop"
+        ],
+        troponin_high=row[
+            "troponin_high"
+        ],
+        ntprobnp_high=row[
+            "ntprobnp_high"
+        ]
+    ),
+    axis=1
+)
+```
+
+## Estado no calculable
+
+Puede ocurrir por:
+
+- FEVI missing.
+- GLS basal missing.
+- Biomarcadores missing.
+- Mala calidad.
+- Fecha incompleta.
+
+## No convertir missing en S0
+
+```text
+Sin datos
+≠
+normal
+```
+
+## Campo recomendado
+
+```python
+cv_daily[
+    "state_computable"
+] = cv_daily[
+    "state"
+].notna()
+```
+
+## Motivo
+
+```python
+cv_daily[
+    "state_missing_reason"
+]
+```
+
+Ejemplos:
+
+- `missing_lvef`.
+- `missing_baseline_gls`.
+- `poor_quality`.
+- `insufficient_components`.
+
+## Tiempo desde tratamiento
+
+```python
+cv_daily = cv_daily.merge(
+    treatment_start_df,
+    on="record_id",
+    how="left"
+)
+```
+
+```python
+cv_daily[
+    "time"
+] = (
+    cv_daily[
+        "assessment_date"
+    ]
+    -
+    cv_daily[
+        "treatment_start_date"
+    ]
+).dt.days
+```
+
+## Baseline antes de tiempo cero
+
+Puede producir tiempos negativos.
+
+Opciones:
+
+- Mantener como baseline.
+- Truncar a 0.
+- Definir delayed entry.
+- Excluir del proceso posterior.
+
+## Recomendación
+
+Conservar la fecha real y crear:
+
+```python
+cv_daily[
+    "analysis_time"
+] = cv_daily[
+    "time"
+].clip(
+    lower=0
+)
+```
+
+solo si está justificado.
+
+## Validar secuencias
+
+```python
+cv_daily[
+    "previous_state"
+] = (
+    cv_daily
+    .groupby("record_id")[
+        "state"
+    ]
+    .shift()
+)
+```
+
+```python
+cv_daily[
+    "previous_time"
+] = (
+    cv_daily
+    .groupby("record_id")[
+        "time"
+    ]
+    .shift()
+)
+```
+
+## Transiciones permitidas
+
+```python
+allowed_transitions = {
+    ("S0", "S1"),
+    ("S0", "S2"),
+    ("S1", "S0"),
+    ("S1", "S2"),
+    ("S2", "S1"),
+    ("S2", "S3")
+}
+```
+
+## Posibles ampliaciones
+
+```text
+S3 → S2
+```
+
+si se decide modelar recuperación grave.
+
+```text
+S0 → S3
+```
+
+si se acepta salto directo observado.
+
+## Detectar cambios
+
+```python
+transition_rows = cv_daily.loc[
+    cv_daily[
+        "previous_state"
+    ]
+    .notna()
+    &
+    (
+        cv_daily[
+            "state"
+        ]
+        !=
+        cv_daily[
+            "previous_state"
+        ]
+    )
+].copy()
+```
+
+## Validar arco
+
+```python
+transition_rows[
+    "allowed"
+] = transition_rows.apply(
+    lambda row:
+    (
+        row[
+            "previous_state"
+        ],
+        row[
+            "state"
+        ]
+    )
+    in
+    allowed_transitions,
+    axis=1
+)
+```
+
+## Tabla de revisión
+
+```python
+invalid_transitions = transition_rows.loc[
+    ~transition_rows[
+        "allowed"
+    ]
+]
+```
+
+## Revisión clínica
+
+Cada transición imposible debe clasificarse como:
+
+- Error de datos.
+- Error de estado.
+- Salto no observado.
+- Recuperación real.
+- Regla incompleta.
+
+## Construir intervalos
+
+```python
+intervals = cv_daily.loc[
+    cv_daily[
+        "previous_state"
+    ]
+    .notna()
+].copy()
+```
+
+```python
+intervals = intervals.rename(
+    columns={
+        "record_id":
+        "patient_id",
+
+        "previous_state":
+        "from_state",
+
+        "state":
+        "to_state",
+
+        "previous_time":
+        "start",
+
+        "time":
+        "stop"
+    }
+)
+```
+
+## Indicador de transición
+
+```python
+intervals[
+    "status"
+] = (
+    intervals[
+        "from_state"
+    ]
+    !=
+    intervals[
+        "to_state"
+    ]
+).astype(int)
+```
+
+## Intervalo final censurado
+
+Se necesita la última fecha de seguimiento.
+
+```python
+last_follow_up_df[
+    "last_follow_up_date"
+] = pd.to_datetime(
+    last_follow_up_df[
+        "last_follow_up_date"
+    ]
+)
+```
+
+## Combinar
+
+```python
+last_visits = (
+    cv_daily
+    .sort_values(
+        [
+            "record_id",
+            "time"
+        ]
+    )
+    .groupby(
+        "record_id",
+        as_index=False
+    )
+    .tail(
+        1
+    )
+)
+```
+
+## Final del seguimiento
+
+```python
+last_visits = last_visits.merge(
+    last_follow_up_df,
+    on="record_id",
+    how="left"
+)
+```
+
+```python
+last_visits[
+    "follow_up_end_time"
+] = (
+    last_visits[
+        "last_follow_up_date"
+    ]
+    -
+    last_visits[
+        "treatment_start_date"
+    ]
+).dt.days
+```
+
+## Crear censura
+
+```python
+censored_intervals = pd.DataFrame(
+    {
+        "patient_id":
+        last_visits[
+            "record_id"
+        ],
+
+        "from_state":
+        last_visits[
+            "state"
+        ],
+
+        "to_state":
+        last_visits[
+            "state"
+        ],
+
+        "start":
+        last_visits[
+            "time"
+        ],
+
+        "stop":
+        last_visits[
+            "follow_up_end_time"
+        ],
+
+        "status":
+        0
+    }
+)
+```
+
+## Añadir fallecimiento
+
+Si existe:
+
+```text
+D
+→ estado absorbente
+```
+
+La fecha de fallecimiento debe competir con el final del seguimiento.
+
+## Arcos de muerte
+
+```python
+death_transitions = {
+    ("S0", "D"),
+    ("S1", "D"),
+    ("S2", "D"),
+    ("S3", "D")
+}
+```
+
+## Elegir fecha final
+
+```python
+patient_end_date = min(
+    last_follow_up_date,
+    death_date,
+    administrative_end_date
+)
+```
+
+## Panel data
+
+Las evaluaciones cardiovasculares son observaciones por panel.
+
+Ejemplo:
+
+```text
+S0 en enero
+S2 en junio
+```
+
+No sabemos si:
+
+```text
+S0 → S2
+```
+
+fue directa o pasó por S1.
+
+## Análisis principal
+
+Puede utilizar:
+
+```text
+fecha de primera detección
+```
+
+## Sensibilidad
+
+Comparar con:
+
+- Punto medio.
+- Saltos directos.
+- Modelo Markov de panel.
+- Hidden Markov Model.
+
+## Frecuencia de visitas
+
+Calcular:
+
+```python
+cv_daily[
+    "gap"
+] = (
+    cv_daily[
+        "time"
+    ]
+    -
+    cv_daily[
+        "previous_time"
+    ]
+)
+```
+
+## Resumen por centro
+
+```python
+gap_summary = (
+    cv_daily
+    .groupby("center")[
+        "gap"
+    ]
+    .describe()
+)
+```
+
+## Por qué importa
+
+Un centro con más visitas puede detectar:
+
+- Más estados leves.
+- Transiciones más tempranas.
+- Más recuperaciones.
+- Más oscilaciones.
+
+## Dataset expandido por transición
+
+```python
+outgoing_transitions = {
+    "S0": [
+        "S1",
+        "S2"
+    ],
+    "S1": [
+        "S0",
+        "S2"
+    ],
+    "S2": [
+        "S1",
+        "S3"
+    ],
+    "S3": []
+}
+```
+
+## Expandir
+
+```python
+expanded_rows = []
+
+for _, row in interval_data.iterrows():
+
+    for destination in outgoing_transitions[
+        row[
+            "from_state"
+        ]
+    ]:
+
+        expanded_rows.append(
+            {
+                "patient_id":
+                row[
+                    "patient_id"
+                ],
+
+                "from_state":
+                row[
+                    "from_state"
+                ],
+
+                "destination":
+                destination,
+
+                "start":
+                row[
+                    "start"
+                ],
+
+                "stop":
+                row[
+                    "stop"
+                ],
+
+                "event":
+                int(
+                    row[
+                        "status"
+                    ]
+                    ==
+                    1
+                    and
+                    row[
+                        "to_state"
+                    ]
+                    ==
+                    destination
+                )
+            }
+        )
+```
+
+```python
+expanded_data = pd.DataFrame(
+    expanded_rows
+)
+```
+
+## Identificador de transición
+
+```python
+transition_ids = {
+    ("S0", "S1"): 1,
+    ("S0", "S2"): 2,
+    ("S1", "S0"): 3,
+    ("S1", "S2"): 4,
+    ("S2", "S1"): 5,
+    ("S2", "S3"): 6
+}
+```
+
+## Añadir ID
+
+```python
+expanded_data[
+    "transition_id"
+] = expanded_data.apply(
+    lambda row:
+    transition_ids[
+        (
+            row[
+                "from_state"
+            ],
+            row[
+                "destination"
+            ]
+        )
+    ],
+    axis=1
+)
+```
+
+## Covariables basales
+
+```python
+baseline_covariates = patient_df[
+    [
+        "patient_id",
+        "age_at_treatment",
+        "sex",
+        "diagnosis",
+        "center",
+        "baseline_lvef",
+        "baseline_gls"
+    ]
+]
+```
+
+## Añadir
+
+```python
+expanded_data = expanded_data.merge(
+    baseline_covariates,
+    on="patient_id",
+    how="left"
+)
+```
+
+## Covariables temporales
+
+- Dosis acumulada.
+- FEVI actual.
+- GLS actual.
+- Troponina.
+- NT-proBNP.
+- Tratamiento cardioprotector.
+- Estado previo.
+- Tiempo desde última valoración.
+
+## Valor al inicio
+
+```text
+Intervalo 180–270
+→ usar valor disponible en día 180
+```
+
+## Merge temporal
+
+```python
+expanded_data = pd.merge_asof(
+    expanded_data.sort_values(
+        [
+            "patient_id",
+            "start"
+        ]
+    ),
+    longitudinal_covariates.sort_values(
+        [
+            "patient_id",
+            "measurement_time"
+        ]
+    ),
+    left_on="start",
+    right_on="measurement_time",
+    by="patient_id",
+    direction="backward"
+)
+```
+
+## Ventana de validez analítica
+
+Ejemplo:
+
+```text
+Biomarcador válido
+si está a ±60 días
+de la valoración
+```
+
+Para predicción prospectiva no debe utilizarse un valor futuro.
+
+## Distinción importante
+
+### Clasificación retrospectiva
+
+Puede vincular una analítica alrededor de una valoración según una regla clínica.
+
+### Predicción prospectiva
+
+Solo puede utilizar analíticas ya conocidas.
+
+## Análisis descriptivo
+
+## Recuento de estados
+
+```python
+state_counts = (
+    cv_daily[
+        "state"
+    ]
+    .value_counts(
+        dropna=False
+    )
+)
+```
+
+## Pacientes por estado
+
+```python
+patients_per_state = (
+    cv_daily
+    .groupby("state")[
+        "record_id"
+    ]
+    .nunique()
+)
+```
+
+## Recuento de transiciones
+
+```python
+transition_summary = (
+    transition_rows
+    .groupby(
+        [
+            "previous_state",
+            "state"
+        ]
+    )
+    .agg(
+        transitions=(
+            "record_id",
+            "size"
+        ),
+        patients=(
+            "record_id",
+            "nunique"
+        )
+    )
+    .reset_index()
+)
+```
+
+## Tiempo en riesgo
+
+```python
+interval_data[
+    "duration"
+] = (
+    interval_data[
+        "stop"
+    ]
+    -
+    interval_data[
+        "start"
+    ]
+)
+```
+
+```python
+time_at_risk = (
+    interval_data
+    .groupby(
+        "from_state"
+    )[
+        "duration"
+    ]
+    .sum()
+)
+```
+
+## Aalen-Johansen
+
+Objetivo:
+
+```text
+Probabilidad de ocupar
+S0, S1, S2 y S3
+a lo largo del tiempo
+```
+
+## Curvas principales
+
+- Cohorte total.
+- Por centro.
+- Por diagnóstico.
+- Por grupo de dosis.
+- Por estado inicial.
+
+## Resultados a horizontes
+
+```text
+6 meses
+12 meses
+24 meses
+```
+
+## Tabla
+
+| Horizonte | S0 | S1 | S2 | S3 |
+|---|---:|---:|---:|---:|
+| 6 meses | ... | ... | ... | ... |
+| 12 meses | ... | ... | ... | ... |
+| 24 meses | ... | ... | ... | ... |
+
+## First-passage a S2/S3
+
+Pregunta principal:
+
+```text
+Probabilidad de alcanzar por primera vez
+cardiotoxicidad moderada o grave
+```
+
+## Endpoint absorbente auxiliar
+
+```text
+Clinically_relevant_CTRCD
+```
+
+## Modelo inicial por transición
+
+### Modelo 1
+
+```text
+S0 → S1
+```
+
+### Modelo 2
+
+```text
+S0 → S2
+```
+
+### Modelo 3
+
+```text
+S1 → S0
+```
+
+### Modelo 4
+
+```text
+S1 → S2
+```
+
+### Modelo 5
+
+```text
+S2 → S1
+```
+
+### Modelo 6
+
+```text
+S2 → S3
+```
+
+## Variables iniciales
+
+### Comunes
+
+- Edad.
+- Sexo.
+- Diagnóstico.
+- Centro.
+
+### Progresión
+
+- Dosis acumulada.
+- FEVI.
+- GLS.
+- Troponina.
+- NT-proBNP.
+
+### Recuperación
+
+- Carvedilol.
+- Suspensión de tratamiento.
+- Tiempo en estado.
+- Estado previo.
+- FEVI y GLS actuales.
+
+## Modelo Cox por transición
+
+```python
+from lifelines import CoxPHFitter
+
+transition_models = {}
+
+for transition_id in sorted(
+    expanded_data[
+        "transition_id"
+    ]
+    .unique()
+):
+
+    transition_df = expanded_data.loc[
+        expanded_data[
+            "transition_id"
+        ]
+        ==
+        transition_id
+    ].copy()
+
+    model = CoxPHFitter(
+        penalizer=0.05
+    )
+
+    model.fit(
+        transition_df[
+            [
+                "start",
+                "stop",
+                "event",
+                "age_at_treatment",
+                "baseline_lvef",
+                "cumulative_anthracycline"
+            ]
+        ],
+        duration_col="stop",
+        event_col="event",
+        entry_col="start"
+    )
+
+    transition_models[
+        transition_id
+    ] = model
+```
+
+## Revisar eventos por arco
+
+```python
+events_per_transition = (
+    expanded_data
+    .groupby(
+        "transition_id"
+    )[
+        "event"
+    ]
+    .sum()
+)
+```
+
+## Arcos escasos
+
+```text
+S2 → S3
+```
+
+puede tener muy pocos eventos.
+
+Opciones:
+
+- No ajustar modelo multivariable.
+- Penalización.
+- Efectos compartidos.
+- Combinar S2/S3.
+- Describir sin inferencia.
+- Esperar más datos.
+
+## Modelo Markov
+
+Pregunta:
+
+```text
+¿El futuro depende principalmente
+del estado actual?
+```
+
+## Modelo semi-Markov
+
+Pregunta:
+
+```text
+¿El riesgo cambia con el tiempo
+que el paciente lleva en S1 o S2?
+```
+
+## Comparación clínica
+
+Puede ser especialmente relevante para:
+
+```text
+S1 → S2
+S2 → S1
+```
+
+## Sojourn time
+
+```python
+episode_df[
+    "sojourn_time"
+] = (
+    episode_df[
+        "episode_stop"
+    ]
+    -
+    episode_df[
+        "episode_start"
+    ]
+)
+```
+
+## Hidden Markov Model
+
+Útil si se considera que:
+
+- Los estados observados tienen error.
+- FEVI y GLS son ruidosos.
+- Faltan componentes.
+- Existen saltos entre visitas.
+- La clasificación rígida es inestable.
+
+## Emisiones candidatas
+
+- FEVI.
+- GLS.
+- Troponina.
+- NT-proBNP.
+- ECG.
+- Calidad.
+
+## Predicción dinámica
+
+En cada valoración:
+
+```text
+Estado actual
++
+dosis acumulada
++
+biomarcadores
++
+función ventricular
+→
+probabilidades futuras
+```
+
+## Output clínico
+
+```text
+Próximos 12 meses:
+
+P(S0) = 0.40
+P(S1) = 0.35
+P(S2) = 0.20
+P(S3) = 0.05
+```
+
+## Output de transición
+
+```text
+Desde S1:
+
+P(recuperar a S0) = 0.28
+P(permanecer en S1) = 0.49
+P(progresar a S2) = 0.21
+P(alcanzar S3) = 0.02
+```
+
+## Evaluación
+
+### Discriminación
+
+- C-index por transición.
+- AUC temporal.
+- First-passage AUC.
+
+### Calibración
+
+- Ocupación observada y predicha.
+- Riesgo S2/S3.
+- Calibración por centro.
+- Calibración por horizonte.
+
+### Error probabilístico
+
+- Brier multiestado.
+- Integrated Brier Score.
+- Log-loss en HMM.
+
+## Validación temporal
+
+```text
+Cohorte retrospectiva temprana
+→ desarrollo
+
+Cohorte retrospectiva posterior
+→ test temporal
+```
+
+## Validación multicéntrica
+
+```text
+HSJD
+→ desarrollo inicial
+
+Helsinki y Coimbra
+→ validación externa
+```
+
+También puede plantearse leave-one-center-out.
+
+## Federated learning
+
+Si los datos permanecen en cada centro:
+
+- Mismo diccionario.
+- Misma definición de estados.
+- Mismo código de preparación.
+- Mismos outputs agregados.
+- Validación local.
+- Agregación de parámetros o métricas.
+
+## Requisito esencial
+
+La clasificación S0–S3 debe ser idéntica en todos los centros.
+
+## Controles multicéntricos
+
+Comparar por centro:
+
+- Disponibilidad de FEVI.
+- Disponibilidad de GLS.
+- Biomarcadores.
+- Frecuencia de visitas.
+- Estados.
+- Transiciones.
+- Tiempo de seguimiento.
+- Unidades.
+- Umbrales.
+
+## Data quality report
+
+```python
+quality_by_center = (
+    cv_daily
+    .groupby("center")
+    .agg(
+        patients=(
+            "record_id",
+            "nunique"
+        ),
+        assessments=(
+            "record_id",
+            "size"
+        ),
+        lvef_available=(
+            "lvef",
+            lambda series:
+            series.notna().mean()
+        ),
+        gls_available=(
+            "gls_4c",
+            lambda series:
+            series.notna().mean()
+        ),
+        state_computable=(
+            "state",
+            lambda series:
+            series.notna().mean()
+        )
+    )
+)
+```
+
+## Sensitivity analyses
+
+1. S3 absorbente.
+2. S3 reversible.
+3. S0 → S2 permitido.
+4. S0 → S2 tratado como S0 → S1 → S2 oculto.
+5. Primera detección.
+6. Punto medio.
+7. Solo FEVI Simpson.
+8. FEVI Simpson con fallback modo M.
+9. Biomarcadores con distintas ventanas.
+10. Solo estados con calidad alta.
+
+## Análisis de missing
+
+Debe describirse por:
+
+- Centro.
+- Estado.
+- Tiempo.
+- Outcome.
+- Tipo de tratamiento.
+
+## Missing informativo
+
+Una prueba puede faltar porque:
+
+- El paciente está estable.
+- El paciente está demasiado grave.
+- El centro no la realiza.
+- La visita no estaba protocolizada.
+
+## No asumir MAR automáticamente
+
+Puede ser necesario:
+
+- Indicador de disponibilidad.
+- Modelar proceso de observación.
+- Análisis por centro.
+- Sensibilidad.
+
+## Visitas informativas
+
+La frecuencia de evaluación puede depender del riesgo clínico.
+
+```text
+Paciente de mayor riesgo
+→ más ecocardiografías
+```
+
+Esto puede aumentar la detección de estados.
+
+## Estrategias
+
+- Incluir centro.
+- Incluir tiempo desde última visita.
+- Modelar intensidad de observación.
+- Landmark.
+- Joint models.
+- Sensitivity analysis.
+
+## Output para Tableau
+
+Puede generarse una tabla de trayectorias.
+
+```text
+record_id
+assessment_date
+time
+state
+previous_state
+transition
+lvef
+gls
+troponin
+ntprobnp
+center
+```
+
+## KPIs
+
+- Pacientes por estado actual.
+- Número de transiciones.
+- Progresiones.
+- Recuperaciones.
+- Tiempo medio en estado.
+- S2/S3 acumulado.
+- Probabilidad a 1 y 2 años.
+- Datos faltantes.
+- Seguimiento por centro.
+
+## Visualizaciones
+
+- Diagrama de estados.
+- Sankey.
+- Alluvial.
+- Curvas de ocupación.
+- Matriz de transición.
+- Forest plot por arco.
+- Trayectoria individual.
+- Calibración.
+
+## Trayectoria individual
+
+```python
+state_rank = {
+    "S0": 0,
+    "S1": 1,
+    "S2": 2,
+    "S3": 3
+}
+```
+
+```python
+patient_trajectory[
+    "state_rank"
+] = patient_trajectory[
+    "state"
+].map(
+    state_rank
+)
+```
+
+```python
+import matplotlib.pyplot as plt
+
+plt.step(
+    patient_trajectory[
+        "time"
+    ],
+    patient_trajectory[
+        "state_rank"
+    ],
+    where="post"
+)
+
+plt.yticks(
+    [
+        0,
+        1,
+        2,
+        3
+    ],
+    [
+        "S0",
+        "S1",
+        "S2",
+        "S3"
+    ]
+)
+
+plt.xlabel(
+    "Días desde tratamiento"
+)
+
+plt.ylabel(
+    "Estado"
+)
+
+plt.show()
+```
+
+## Flujo retrospectivo
+
+```text
+REDCap
+→ extracción
+→ control de calidad
+→ baseline
+→ clasificación S0–S3
+→ trayectorias
+→ intervalos
+→ Aalen-Johansen
+→ modelos por transición
+→ validación
+```
+
+## Flujo prospectivo
+
+```text
+Nueva valoración
+→ cálculo del estado
+→ actualización de covariables
+→ predicción dinámica
+→ revisión clínica
+→ almacenamiento de output
+```
+
+## Shadow mode
+
+Antes de mostrar predicciones:
+
+- Ejecutar silenciosamente.
+- Comparar con evolución real.
+- Medir latencia.
+- Revisar alertas.
+- Identificar errores.
+- Calibrar.
+
+## Posible alerta
+
+```text
+P(S2 o S3 en 6 meses) ≥ 30 %
+```
+
+Debe definirse con cardiólogos.
+
+## Acción asociada
+
+Una alerta solo es útil si conduce a una acción:
+
+- Adelantar ecocardiografía.
+- Solicitar biomarcadores.
+- Revisar tratamiento.
+- Derivar a cardio-oncología.
+- Intensificar seguimiento.
+
+## Human-in-the-loop
+
+La predicción debe apoyar, no sustituir:
+
+- Interpretación clínica.
+- Revisión de calidad.
+- Contexto terapéutico.
+- Decisión médica.
+
+## Monitorización prospectiva
+
+- Distribución de estados.
+- Incidencia S2/S3.
+- Calibración.
+- Missing.
+- Drift.
+- Frecuencia de visitas.
+- Alertas.
+- Tiempo de anticipación.
+- Rendimiento por centro.
+
+## Reproducibilidad
+
+Guardar:
+
+- Versión de clasificación.
+- Extracción REDCap.
+- Código.
+- Dataset analítico.
+- Matriz de transiciones.
+- Modelos.
+- Métricas.
+- Logs.
+- Fecha.
+
+## Estructura de proyecto
+
+```text
+cardiotoxicity_multistate/
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── analytic/
+├── src/
+│   ├── classify_states.py
+│   ├── build_intervals.py
+│   ├── validate_transitions.py
+│   ├── fit_models.py
+│   └── evaluate.py
+├── reports/
+├── models/
+├── tests/
+└── README.md
+```
+
+## Tests de clasificación
+
+```python
+def test_s3():
+
+    state = classify_cardiotoxicity_state(
+        lvef=35,
+        baseline_lvef=60,
+        gls_drop=0.10,
+        troponin_high=False,
+        ntprobnp_high=False
+    )
+
+    assert state == "S3"
+```
+
+## Test S1
+
+```python
+def test_s1_by_gls():
+
+    state = classify_cardiotoxicity_state(
+        lvef=55,
+        baseline_lvef=60,
+        gls_drop=0.20,
+        troponin_high=False,
+        ntprobnp_high=False
+    )
+
+    assert state == "S1"
+```
+
+## Test S0
+
+```python
+def test_s0():
+
+    state = classify_cardiotoxicity_state(
+        lvef=60,
+        baseline_lvef=60,
+        gls_drop=0.05,
+        troponin_high=False,
+        ntprobnp_high=False
+    )
+
+    assert state == "S0"
+```
+
+## Test de transición
+
+```python
+def test_transition_allowed():
+
+    assert (
+        "S1",
+        "S2"
+    ) in allowed_transitions
+```
+
+## Tabla final de decisiones
+
+| Elemento | Decisión inicial |
+|---|---|
+| Tiempo cero | Inicio tratamiento |
+| Estados | S0–S3 |
+| Estado terminal | Muerte opcional |
+| S3 absorbente | Sensibilidad |
+| Escala principal | Clock-forward |
+| Escala alternativa | Clock-reset |
+| Saltos | Permitidos y revisados |
+| Fecha de cambio | Primera detección |
+| Descriptivo | Aalen-Johansen |
+| Ajustado | Cox por transición |
+| Predicción | Dinámica |
+| Validación | Temporal y por centro |
+
+## Workflow recomendado
+
+1. Congelar definición S0–S3.
+2. Versionar reglas.
+3. Extraer datos.
+4. Resolver duplicados.
+5. Construir baseline.
+6. Clasificar visitas.
+7. Revisar saltos.
+8. Crear intervalos.
+9. Añadir covariables.
+10. Estimar ocupación.
+11. Ajustar transiciones.
+12. Comparar Markov y semi-Markov.
+13. Evaluar predicción.
+14. Validar por centro.
+15. Ejecutar prospectivamente.
+
+## Errores frecuentes
+
+- Modificar estados después de ver resultados.
+- Usar missing como normal.
+- Mezclar FEVI sin prioridad.
+- Calcular GLS sin baseline.
+- Usar dosis futura.
+- Ignorar ventanas analíticas.
+- No añadir intervalo censurado.
+- No revisar saltos.
+- Comparar centros sin revisar frecuencia de visitas.
+- Ajustar demasiados parámetros.
+- Evaluar solo C-index.
+- Desplegar sin shadow mode.
+
+## Checklist final
+
+- [ ] Definición S0–S3 validada.
+- [ ] Versión congelada.
+- [ ] Tiempo cero definido.
+- [ ] Baseline definido.
+- [ ] FEVI priorizada.
+- [ ] GLS relativo calculado.
+- [ ] Biomarcadores normalizados.
+- [ ] Estados clasificables revisados.
+- [ ] Missing documentado.
+- [ ] Transiciones validadas.
+- [ ] Intervalos start-stop creados.
+- [ ] Censura final añadida.
+- [ ] Covariables temporales sin leakage.
+- [ ] Aalen-Johansen estimado.
+- [ ] Modelos por transición ajustados.
+- [ ] Markov comparado con semi-Markov.
+- [ ] Validación temporal realizada.
+- [ ] Validación multicéntrica realizada.
+- [ ] Shadow mode planificado.
+- [ ] Monitorización definida.
+
+## Cierre de la sección
+
+Los modelos multiestado permiten representar la cardiotoxicidad como un proceso longitudinal de progresión, estabilidad y recuperación.
+
+El valor clínico aparece cuando se conectan:
+
+- Definiciones reproducibles.
+- Datos temporales de calidad.
+- Modelos por transición.
+- Probabilidades absolutas.
+- Validación multicéntrica.
+- Predicción dinámica.
+
+## Recursos
+
+### Componentes del proyecto
+
+- REDCap.
+- Ecocardiografía.
+- Biomarcadores.
+- ECG.
+- Tratamiento.
+- Clasificación S0–S3.
+- Cohortes multicéntricas.
+- Validación prospectiva.
+
+### Métodos
+
+- Aalen-Johansen.
+- Cox por transición.
+- Markov.
+- Semi-Markov.
+- Hidden Markov Models.
+- First-passage.
+- Predicción dinámica.
+- Brier multiestado.
+
+### Material del proyecto
+
+Añadir aquí:
+
+- Diccionario REDCap.
+- Reglas definitivas.
+- Matriz de transiciones.
+- Conteos por centro.
+- Código de clasificación.
+- Resultados.
+- Plan prospectivo.
+
+## Notas personales
+
+Añade aquí las decisiones clínicas, reglas definitivas, outputs, resultados y próximos pasos.
