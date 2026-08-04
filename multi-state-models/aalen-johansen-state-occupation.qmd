@@ -1,0 +1,1412 @@
+---
+title: "Aalen-Johansen y ocupación de estados"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+El estimador de Aalen-Johansen es la extensión natural de Kaplan-Meier a procesos multiestado.
+
+Permite estimar:
+
+- Probabilidades de transición.
+- Probabilidades de ocupación de estado.
+- Incidencias acumuladas en competing risks.
+- Evolución no paramétrica del proceso.
+
+No exige intensidades constantes ni una distribución paramétrica concreta.
+:::
+
+## ¿Qué estima Aalen-Johansen?
+
+Para un proceso con estados \(r\) y \(s\), estima:
+
+$$
+P_{rs}(u,t)
+=
+P[
+X(t)=s
+\mid
+X(u)=r
+]
+$$
+
+Es decir, la probabilidad de estar en el estado \(s\) en el tiempo \(t\), partiendo del estado \(r\) en el tiempo \(u\).
+
+::: {.callout-note}
+## Idea clave
+
+Kaplan-Meier estima permanencia libre de un evento; Aalen-Johansen estima movimiento entre varios estados.
+:::
+
+## Relación con competing risks
+
+Un modelo de competing risks es un multiestado simple:
+
+```text
+Estado 0
+├──→ Evento 1
+└──→ Evento 2
+```
+
+Aalen-Johansen estima la incidencia acumulada de cada destino.
+
+## Relación con Kaplan-Meier
+
+Con solo dos estados:
+
+```text
+0 → 1
+```
+
+y estado 1 absorbente, Aalen-Johansen coincide con Kaplan-Meier para la supervivencia correspondiente.
+
+## Product integral
+
+El estimador se basa en el producto integral:
+
+$$
+\hat{P}(u,t)
+=
+\prod_{(u,t]}
+[
+I+d\hat{A}(v)
+]
+$$
+
+donde:
+
+- \(I\): matriz identidad.
+- \(\hat{A}(v)\): matriz de intensidades acumuladas estimadas.
+- \(d\hat{A}(v)\): incrementos en tiempos de transición.
+
+## Matriz de incrementos
+
+Para cada tiempo de transición:
+
+$$
+d\hat{A}_{rs}(t)
+=
+\frac{
+dN_{rs}(t)
+}{
+Y_r(t)
+}
+$$
+
+donde:
+
+- \(dN_{rs}(t)\): transiciones observadas \(r \rightarrow s\).
+- \(Y_r(t)\): personas en riesgo en \(r\) justo antes de \(t\).
+
+## Diagonal
+
+$$
+d\hat{A}_{rr}(t)
+=
+-
+\sum_{s\neq r}
+d\hat{A}_{rs}(t)
+$$
+
+## Interpretación
+
+En cada tiempo de evento se actualiza la matriz de transición acumulada.
+
+## Competing risks con lifelines
+
+Para un evento de interés concreto:
+
+```python
+from lifelines import AalenJohansenFitter
+
+ajf = AalenJohansenFitter(
+    alpha=0.05
+)
+```
+
+```python
+ajf.fit(
+    durations=competing_df[
+        "follow_up_days"
+    ],
+    event_observed=competing_df[
+        "event_type"
+    ],
+    event_of_interest=1
+)
+```
+
+## Visualizar incidencia acumulada
+
+```python
+import matplotlib.pyplot as plt
+
+ajf.plot_cumulative_density(
+    figsize=(
+        9,
+        6
+    )
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Incidencia acumulada"
+)
+
+plt.title(
+    "Aalen-Johansen para el evento de interés"
+)
+
+plt.show()
+```
+
+## Interpretación
+
+```text
+CIF(365) = 0.15
+```
+
+significa una probabilidad estimada del 15 % de experimentar el evento de interés antes de un año, considerando los eventos competidores.
+
+## Estimar otra causa
+
+```python
+ajf_competing = AalenJohansenFitter()
+
+ajf_competing.fit(
+    durations=competing_df[
+        "follow_up_days"
+    ],
+    event_observed=competing_df[
+        "event_type"
+    ],
+    event_of_interest=2
+)
+```
+
+## Superponer causas
+
+```python
+ax = ajf.plot_cumulative_density(
+    figsize=(
+        9,
+        6
+    )
+)
+
+ajf_competing.plot_cumulative_density(
+    ax=ax
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Incidencia acumulada"
+)
+
+plt.show()
+```
+
+## Con scikit-survival
+
+```python
+from sksurv.nonparametric import (
+    cumulative_incidence_competing_risks
+)
+```
+
+```python
+time, cumulative_incidence = (
+    cumulative_incidence_competing_risks(
+        event=competing_df[
+            "event_type"
+        ].to_numpy(),
+        time_exit=competing_df[
+            "follow_up_days"
+        ].to_numpy()
+    )
+)
+```
+
+## Interpretar salida
+
+```text
+cumulative_incidence[0]
+→ incidencia total
+
+cumulative_incidence[1]
+→ causa 1
+
+cumulative_incidence[2]
+→ causa 2
+```
+
+## Visualizar
+
+```python
+plt.figure(
+    figsize=(
+        9,
+        6
+    )
+)
+
+plt.step(
+    time,
+    cumulative_incidence[
+        1
+    ],
+    where="post",
+    label="Evento 1"
+)
+
+plt.step(
+    time,
+    cumulative_incidence[
+        2
+    ],
+    where="post",
+    label="Evento 2"
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Incidencia acumulada"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## De competing risks a multiestado
+
+En un modelo general:
+
+```text
+S0 ↔ S1 ↔ S2 → S3
+```
+
+Aalen-Johansen estima matrices de transición entre todos los estados.
+
+## Dataset de intervalos
+
+```text
+patient_id | from_state | to_state | start | stop | status
+```
+
+## Transiciones observadas
+
+```python
+transition_rows = interval_data.loc[
+    interval_data[
+        "status"
+    ]
+    ==
+    1
+].copy()
+```
+
+## Tiempos únicos
+
+```python
+event_times = (
+    transition_rows[
+        "stop"
+    ]
+    .sort_values()
+    .unique()
+)
+```
+
+## Estados
+
+```python
+states = [
+    "S0",
+    "S1",
+    "S2",
+    "S3"
+]
+
+state_to_index = {
+    state:
+    index
+    for index, state
+    in enumerate(
+        states
+    )
+}
+```
+
+## Inicializar matriz
+
+```python
+import numpy as np
+
+P = np.eye(
+    len(
+        states
+    )
+)
+```
+
+## Risk set por estado
+
+En cada tiempo \(t\), debe contarse quién está en cada estado justo antes del tiempo.
+
+## Función conceptual
+
+```python
+def at_risk_in_state(
+    data,
+    state,
+    time
+):
+
+    return data.loc[
+        (
+            data[
+                "from_state"
+            ]
+            ==
+            state
+        )
+        &
+        (
+            data[
+                "start"
+            ]
+            <
+            time
+        )
+        &
+        (
+            data[
+                "stop"
+            ]
+            >=
+            time
+        )
+    ]
+```
+
+## Incremento de A
+
+```python
+def cumulative_hazard_increment(
+    data,
+    states,
+    time
+):
+
+    dA = np.zeros(
+        (
+            len(
+                states
+            ),
+            len(
+                states
+            )
+        )
+    )
+
+    for origin in states:
+
+        origin_index = state_to_index[
+            origin
+        ]
+
+        risk_set = at_risk_in_state(
+            data,
+            origin,
+            time
+        )
+
+        y_r = len(
+            risk_set
+        )
+
+        if y_r == 0:
+            continue
+
+        events_at_time = data.loc[
+            (
+                data[
+                    "from_state"
+                ]
+                ==
+                origin
+            )
+            &
+            (
+                data[
+                    "status"
+                ]
+                ==
+                1
+            )
+            &
+            (
+                data[
+                    "stop"
+                ]
+                ==
+                time
+            )
+        ]
+
+        for destination in states:
+
+            if destination == origin:
+                continue
+
+            destination_index = state_to_index[
+                destination
+            ]
+
+            d_n = (
+                events_at_time[
+                    "to_state"
+                ]
+                ==
+                destination
+            ).sum()
+
+            dA[
+                origin_index,
+                destination_index
+            ] = (
+                d_n
+                /
+                y_r
+            )
+
+        dA[
+            origin_index,
+            origin_index
+        ] = (
+            -
+            dA[
+                origin_index,
+                :
+            ].sum()
+        )
+
+    return dA
+```
+
+## Actualizar product integral
+
+```python
+transition_matrices = []
+
+for time in event_times:
+
+    dA = cumulative_hazard_increment(
+        data=interval_data,
+        states=states,
+        time=time
+    )
+
+    P = (
+        P
+        @
+        (
+            np.eye(
+                len(
+                    states
+                )
+            )
+            +
+            dA
+        )
+    )
+
+    transition_matrices.append(
+        {
+            "time": time,
+            "P": P.copy()
+        }
+    )
+```
+
+## Precaución
+
+Este código es didáctico.
+
+Una implementación real debe tratar correctamente:
+
+- Empates.
+- Censura.
+- Delayed entry.
+- Pesos.
+- Estados absorbentes.
+- Incertidumbre.
+- Observación por panel.
+
+## Probabilidad desde S0
+
+```python
+p_s0_to_s2 = (
+    transition_matrices[
+        -1
+    ][
+        "P"
+    ][
+        state_to_index[
+            "S0"
+        ],
+        state_to_index[
+            "S2"
+        ]
+    ]
+)
+```
+
+## Ocupación de estados
+
+Si todos empiezan en S0:
+
+```python
+initial_distribution = np.array(
+    [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+    ]
+)
+```
+
+## Ocupación en cada tiempo
+
+```python
+occupancy_rows = []
+
+for item in transition_matrices:
+
+    occupancy = (
+        initial_distribution
+        @
+        item[
+            "P"
+        ]
+    )
+
+    row = {
+        "time":
+        item[
+            "time"
+        ]
+    }
+
+    for index, state in enumerate(
+        states
+    ):
+
+        row[
+            state
+        ] = occupancy[
+            index
+        ]
+
+    occupancy_rows.append(
+        row
+    )
+```
+
+```python
+occupancy_df = pd.DataFrame(
+    occupancy_rows
+)
+```
+
+## Visualizar ocupación
+
+```python
+for state in states:
+
+    plt.step(
+        occupancy_df[
+            "time"
+        ],
+        occupancy_df[
+            state
+        ],
+        where="post",
+        label=state
+    )
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Probabilidad de ocupación"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## Interpretación
+
+```text
+P(S2 a 1 año) = 0.12
+```
+
+significa que un 12 % de la cohorte se espera que esté en S2 al año, bajo la distribución inicial elegida.
+
+## Ocupación no es incidencia acumulada
+
+Un paciente puede:
+
+```text
+S0 → S1 → S0
+```
+
+Entonces:
+
+- Ha experimentado S1.
+- Pero puede no estar en S1 en el horizonte.
+
+## Diferencia
+
+```text
+Incidencia acumulada de haber alcanzado S1
+≠
+probabilidad de ocupar S1 en t
+```
+
+## Estado reversible
+
+La ocupación puede subir y después bajar.
+
+## Estado absorbente
+
+La probabilidad de ocupación solo puede aumentar o mantenerse.
+
+Ejemplo:
+
+```text
+S3 absorbente
+```
+
+## Probabilidad de haber alcanzado un estado
+
+Puede requerir:
+
+- Estado absorbente auxiliar.
+- Transformación del modelo.
+- Análisis de first passage.
+- Simulación.
+
+## First passage probability
+
+Pregunta:
+
+```text
+¿Cuál es la probabilidad
+de alcanzar S2 antes de 2 años?
+```
+
+No es necesariamente igual a:
+
+```text
+P(estar en S2 a 2 años)
+```
+
+porque el paciente podría haber regresado a S1.
+
+## Estado auxiliar
+
+Puede crearse:
+
+```text
+Ever_S2
+```
+
+como estado absorbente para analizar primera llegada.
+
+## Probabilidad condicional desde un landmark
+
+Si un paciente está en S1 en el mes 6:
+
+```text
+P(S2 en mes 12 | S1 en mes 6)
+```
+
+corresponde a:
+
+$$
+P_{12}(6,12)
+$$
+
+## Landmark
+
+```text
+u = 6 meses
+t = 12 meses
+```
+
+## Matriz entre dos tiempos
+
+En un modelo no homogéneo, debe estimarse el product integral entre \(u\) y \(t\), no desde 0.
+
+## Distribución inicial observada
+
+No todos los pacientes tienen que empezar en S0.
+
+```python
+initial_counts = (
+    initial_states[
+        "state"
+    ]
+    .value_counts()
+    .reindex(
+        states,
+        fill_value=0
+    )
+)
+```
+
+```python
+initial_distribution = (
+    initial_counts
+    /
+    initial_counts.sum()
+)
+```
+
+## Curvas por subgrupos
+
+Puede estimarse ocupación para:
+
+- Tratamiento.
+- Diagnóstico.
+- Centro.
+- Grupo de riesgo.
+
+## Precaución
+
+Las diferencias son descriptivas y no ajustadas.
+
+## Bootstrap por paciente
+
+Para obtener intervalos:
+
+1. Re-muestrear pacientes.
+2. Reconstruir trayectorias completas.
+3. Recalcular Aalen-Johansen.
+4. Extraer probabilidades.
+5. Repetir.
+
+## Ejemplo conceptual
+
+```python
+rng = np.random.default_rng(
+    42
+)
+
+patient_ids = interval_data[
+    "patient_id"
+].unique()
+```
+
+```python
+bootstrap_occupancy = []
+
+for iteration in range(
+    1000
+):
+
+    sampled_ids = rng.choice(
+        patient_ids,
+        size=len(
+            patient_ids
+        ),
+        replace=True
+    )
+
+    sampled_data = pd.concat(
+        [
+            interval_data.loc[
+                interval_data[
+                    "patient_id"
+                ]
+                ==
+                patient_id
+            ]
+            .assign(
+                bootstrap_patient_id=(
+                    f"{iteration}_{sample_index}"
+                )
+            )
+            for sample_index, patient_id
+            in enumerate(
+                sampled_ids
+            )
+        ],
+        ignore_index=True
+    )
+
+    estimate = estimate_occupancy(
+        sampled_data
+    )
+
+    bootstrap_occupancy.append(
+        estimate
+    )
+```
+
+## Intervalos percentiles
+
+```python
+lower = np.percentile(
+    bootstrap_values,
+    2.5,
+    axis=0
+)
+
+upper = np.percentile(
+    bootstrap_values,
+    97.5,
+    axis=0
+)
+```
+
+## Comparar con modelo Markov
+
+## Markov homogéneo
+
+```python
+from scipy.linalg import expm
+
+P_markov = expm(
+    Q
+    *
+    time
+)
+```
+
+## Aalen-Johansen
+
+```text
+No paramétrico
+→ utiliza transiciones observadas
+```
+
+## Comparación
+
+| Aspecto | Aalen-Johansen | Markov paramétrico |
+|---|---|---|
+| Intensidades | No paramétricas | Especificadas |
+| Homogeneidad | No necesaria | Puede asumirse |
+| Covariables | Limitadas directamente | Sí |
+| Extrapolación | No | Sí, bajo supuestos |
+| Interpretación | Descriptiva | Ajustada y predictiva |
+
+## Uso diagnóstico
+
+Aalen-Johansen puede servir como referencia para comprobar si un modelo Markov reproduce:
+
+- Ocupación.
+- Transiciones.
+- Estados absorbentes.
+- Curvas temporales.
+
+## Ejemplo
+
+```text
+Aalen-Johansen:
+P(S2 a 1 año) = 0.10
+
+Modelo Markov:
+P(S2 a 1 año) = 0.22
+```
+
+La discrepancia puede indicar:
+
+- Intensidades constantes inadecuadas.
+- Estructura incorrecta.
+- Efectos temporales.
+- Problemas de observación.
+
+## Comparar gráficamente
+
+```python
+plt.step(
+    occupancy_aj[
+        "time"
+    ],
+    occupancy_aj[
+        "S2"
+    ],
+    where="post",
+    label="Aalen-Johansen"
+)
+
+plt.plot(
+    timeline,
+    occupancy_markov[
+        :,
+        state_to_index[
+            "S2"
+        ]
+    ],
+    label="Markov"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## Estado inicial condicionado
+
+Puede estimarse una matriz completa:
+
+```text
+Partiendo de S0
+Partiendo de S1
+Partiendo de S2
+```
+
+## Matriz en horizonte
+
+```python
+P_horizon_df = pd.DataFrame(
+    P_horizon,
+    index=states,
+    columns=states
+)
+```
+
+## Heatmap conceptual
+
+Filas:
+
+```text
+Estado de origen
+```
+
+Columnas:
+
+```text
+Estado de destino
+```
+
+## Número en riesgo
+
+Debe acompañar las curvas de ocupación.
+
+La cola puede ser inestable cuando:
+
+- Quedan pocos pacientes.
+- Hay muchas censuras.
+- Algunas transiciones son raras.
+
+## Soporte temporal
+
+No debe interpretarse más allá del seguimiento observado.
+
+## Panel data
+
+Aalen-Johansen estándar presupone conocer tiempos de transición con suficiente precisión.
+
+Con estados observados solo en visitas:
+
+```text
+S0 en día 0
+S2 en día 100
+```
+
+la transición exacta es incierta.
+
+## Limitación
+
+Asignar el cambio al día 100 puede sesgar:
+
+- Intensidades.
+- Ocupación.
+- Tiempo en estado.
+
+## Alternativas
+
+- Punto medio.
+- Sensitivity analysis.
+- Modelo Markov de panel.
+- Hidden Markov Model.
+- Censura por intervalo.
+
+## Delayed entry
+
+El risk set debe incluir a cada paciente solo desde su entrada.
+
+## Censura independiente
+
+Se asume que, condicionado a la información disponible, la censura no depende del proceso futuro de forma informativa.
+
+## Censura informativa
+
+Ejemplo:
+
+```text
+Pacientes graves
+→ pierden seguimiento con mayor frecuencia
+```
+
+Puede sesgar las probabilidades.
+
+## IPCW
+
+Puede considerarse ponderación por probabilidad inversa de censura cuando existe un modelo razonable de censura.
+
+## Estados mal clasificados
+
+Aalen-Johansen trata los estados observados como correctos.
+
+Si existe error relevante, puede ser preferible un Hidden Markov Model.
+
+## Frecuencia de visitas
+
+Los grupos con más evaluaciones pueden mostrar transiciones antes.
+
+Esto afecta especialmente a estados derivados de pruebas.
+
+## Ajuste por covariables
+
+Aalen-Johansen es principalmente descriptivo.
+
+Para ajuste pueden utilizarse:
+
+- Cox por transición.
+- Pseudo-observations.
+- Standardization.
+- Modelos Markov con covariables.
+- Modelos de landmark.
+
+## Standardized state occupation
+
+Conceptualmente:
+
+1. Ajustar modelos por transición.
+2. Predecir para todos bajo un escenario.
+3. Promediar probabilidades.
+4. Comparar escenarios.
+
+## Riesgo causal
+
+Una diferencia ajustada no es causal sin supuestos adicionales.
+
+## Resumen por horizontes
+
+```python
+horizons = [
+    180,
+    365,
+    730
+]
+```
+
+Tabla:
+
+| Horizonte | S0 | S1 | S2 | S3 |
+|---|---:|---:|---:|---:|
+| 6 meses | ... | ... | ... | ... |
+| 1 año | ... | ... | ... | ... |
+| 2 años | ... | ... | ... | ... |
+
+## Interpolación escalonada
+
+Las probabilidades son funciones escalonadas.
+
+Para obtener el último valor antes de un horizonte:
+
+```python
+def step_value_at_time(
+    times,
+    values,
+    horizon
+):
+
+    valid = (
+        times
+        <=
+        horizon
+    )
+
+    if not valid.any():
+        return values[
+            0
+        ]
+
+    return values[
+        valid
+    ][
+        -1
+    ]
+```
+
+## Tiempo esperado en estado
+
+El área bajo la curva de ocupación hasta \(\tau\):
+
+$$
+E[
+T_s(0,\tau)
+]
+=
+\int_0^\tau
+P[
+X(t)=s
+]dt
+$$
+
+## Aproximación numérica
+
+```python
+from numpy import trapezoid
+
+expected_time_s1 = trapezoid(
+    y=occupancy_df[
+        "S1"
+    ],
+    x=occupancy_df[
+        "time"
+    ]
+)
+```
+
+## Interpretación
+
+```text
+Durante los primeros 2 años,
+el tiempo esperado en S1
+fue de 90 días
+```
+
+## Paso constante
+
+Como la curva es escalonada, una integración por tramos puede ser más exacta.
+
+```python
+def integrate_step_function(
+    times,
+    values,
+    horizon
+):
+
+    total = 0.0
+
+    for index in range(
+        len(
+            times
+        )
+        -
+        1
+    ):
+
+        start = times[
+            index
+        ]
+
+        stop = min(
+            times[
+                index
+                +
+                1
+            ],
+            horizon
+        )
+
+        if stop <= start:
+            continue
+
+        total += (
+            values[
+                index
+            ]
+            *
+            (
+                stop
+                -
+                start
+            )
+        )
+
+        if stop == horizon:
+            break
+
+    return total
+```
+
+## Restricted mean time in state
+
+Es el equivalente multiestado de RMST.
+
+Puede resumir:
+
+- Tiempo esperado normal.
+- Tiempo esperado leve.
+- Tiempo esperado moderado.
+- Tiempo esperado grave.
+
+## Aplicación clínica
+
+::: {.callout-note}
+## Aplicación clínica
+
+La probabilidad de ocupación suele ser más intuitiva que una intensidad aislada.
+:::
+
+Ejemplo:
+
+```text
+A 2 años:
+65 % en S0
+20 % en S1
+10 % en S2
+5 % en S3
+```
+
+## Aplicación a cardiotoxicidad
+
+Resultados útiles:
+
+- Probabilidad de S0, S1, S2 y S3.
+- Tiempo esperado en cada estado.
+- Probabilidad de recuperación.
+- Probabilidad de alcanzar S2/S3.
+- Comparación entre centros.
+- Comparación con modelo Markov.
+
+## Figura recomendada
+
+- Curvas de ocupación.
+- Intervalos de confianza.
+- Número en riesgo.
+- Horizonte clínico.
+- Estados claramente etiquetados.
+- Estado absorbente destacado.
+
+## Reporting
+
+Debe incluir:
+
+- Estructura de estados.
+- Estado inicial.
+- Método.
+- Censura.
+- Delayed entry.
+- Probabilidades por horizonte.
+- Tiempo esperado por estado.
+- Intervalos.
+- Limitaciones de panel data.
+
+## Ejemplo de redacción
+
+```text
+Las probabilidades de ocupación de estado
+se estimaron mediante Aalen-Johansen.
+
+A los 12 meses,
+la probabilidad de permanecer en S0 fue del 68 %,
+mientras que las probabilidades de ocupar
+S1, S2 y S3 fueron del 19 %, 10 % y 3 %.
+```
+
+## Errores frecuentes
+
+- Usar Kaplan-Meier para varios destinos.
+- Confundir ocupación e incidencia acumulada.
+- Interpretar más allá del seguimiento.
+- Ignorar pocos pacientes en la cola.
+- No indicar estado inicial.
+- No considerar delayed entry.
+- Tratar panel data como observación exacta.
+- Ignorar error de clasificación.
+- Comparar grupos como si estuvieran ajustados.
+- No re-muestrear por paciente.
+- No validar que las filas suman 1.
+- Confundir haber alcanzado un estado con ocuparlo.
+
+## Flujo recomendado
+
+1. Definir estados.
+2. Preparar intervalos.
+3. Identificar risk sets.
+4. Calcular incrementos.
+5. Construir product integral.
+6. Estimar matrices.
+7. Calcular ocupación.
+8. Añadir incertidumbre.
+9. Comparar con Markov.
+10. Resumir horizontes.
+11. Calcular tiempo en estado.
+12. Comunicar resultados.
+
+## Checklist
+
+- [ ] He definido el estado inicial.
+- [ ] He preparado intervalos válidos.
+- [ ] He considerado competing transitions.
+- [ ] He estimado Aalen-Johansen.
+- [ ] He calculado probabilidades de transición.
+- [ ] Las filas suman 1.
+- [ ] He calculado ocupación.
+- [ ] He diferenciado ocupación e incidencia.
+- [ ] He evaluado horizontes clínicos.
+- [ ] He calculado tiempo esperado en estado.
+- [ ] He añadido intervalos.
+- [ ] He re-muestreado por paciente.
+- [ ] He revisado la cola.
+- [ ] He considerado panel data.
+- [ ] He comparado con modelos paramétricos.
+
+## Recursos
+
+### Conceptos
+
+- Aalen-Johansen estimator.
+- Product integral.
+- Transition probability matrix.
+- State occupation probability.
+- Cumulative incidence.
+- Competing transitions.
+- Restricted mean time in state.
+- First passage probability.
+
+### Herramientas
+
+- `lifelines.AalenJohansenFitter`.
+- `sksurv.nonparametric.cumulative_incidence_competing_risks`.
+- `numpy`.
+- `pandas`.
+- `mstate` en R.
+
+### Material del proyecto
+
+Añadir aquí:
+
+- Curvas de ocupación.
+- Probabilidades a 6, 12 y 24 meses.
+- Tiempo esperado en estado.
+- Comparación con Markov.
+- Bootstrap.
+- Resultados por centro.
+
+## Notas personales
+
+Añade aquí tus probabilidades, curvas, horizontes, intervalos y decisiones clínicas.

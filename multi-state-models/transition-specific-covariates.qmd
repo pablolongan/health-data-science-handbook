@@ -1,0 +1,1397 @@
+---
+title: "Covariables específicas por transición"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+En un modelo multiestado, una misma covariable puede tener efectos distintos según la transición.
+
+Ejemplo:
+
+```text
+Edad
+→ puede aumentar S0 → S1
+
+Edad
+→ puede no afectar S1 → S2
+
+Edad
+→ puede reducir S1 → S0
+```
+
+Esto puede modelarse mediante:
+
+- Modelos separados por transición.
+- Modelos conjuntos estratificados.
+- Interacciones entre covariables y transición.
+- Efectos comunes para varios arcos.
+- Regularización o modelos jerárquicos.
+:::
+
+## ¿Por qué efectos específicos?
+
+En un modelo de Cox convencional se estima un único coeficiente por covariable.
+
+En multiestado, cada arco puede representar un proceso clínico diferente.
+
+```text
+S0 → S1
+→ aparición de alteración leve
+
+S1 → S2
+→ progresión
+
+S1 → S0
+→ recuperación
+```
+
+No es razonable asumir automáticamente el mismo efecto para todos.
+
+::: {.callout-note}
+## Idea clave
+
+La unidad de interpretación no es solo la covariable, sino la combinación covariable–transición.
+:::
+
+## Intensidad con covariables
+
+Para una transición \(r \rightarrow s\):
+
+$$
+q_{rs}(t\mid X)
+=
+q_{rs,0}(t)
+\exp(
+\beta_{rs}^{\top}X
+)
+$$
+
+Cada transición puede tener:
+
+- Su propio baseline hazard.
+- Sus propios coeficientes.
+- Sus propias covariables.
+- Su propia escala temporal.
+
+## Hazard ratio específico
+
+Para una covariable \(X_j\):
+
+$$
+HR_{rs,j}
+=
+\exp(
+\beta_{rs,j}
+)
+$$
+
+## Ejemplo
+
+```text
+Dosis acumulada
+HR S0 → S1 = 1.25
+
+Dosis acumulada
+HR S1 → S2 = 1.60
+
+Dosis acumulada
+HR S1 → S0 = 0.70
+```
+
+Interpretación:
+
+- Mayor aparición de alteración leve.
+- Mayor progresión.
+- Menor recuperación.
+
+## Dataset expandido por transición
+
+```text
+patient_id | transition_id | from | destination | start | stop | event
+----------------------------------------------------------------------------
+1          | 1             | S0   | S1          | 0     | 90   | 1
+1          | 2             | S0   | S2          | 0     | 90   | 0
+```
+
+Cada intervalo se replica para las salidas posibles desde el estado de origen.
+
+## Ejemplo de estructura
+
+```python
+expanded_data[
+    [
+        "patient_id",
+        "transition_id",
+        "from_state",
+        "destination",
+        "start",
+        "stop",
+        "event",
+        "age",
+        "baseline_lvef",
+        "cumulative_dose"
+    ]
+].head()
+```
+
+## Estrategia 1. Modelos separados
+
+Se ajusta un modelo por arco.
+
+## Seleccionar transición
+
+```python
+transition_s0_s1 = expanded_data.loc[
+    expanded_data[
+        "transition_id"
+    ]
+    ==
+    1
+].copy()
+```
+
+## Ajustar Cox
+
+```python
+from lifelines import CoxPHFitter
+
+cph_s0_s1 = CoxPHFitter()
+
+cph_s0_s1.fit(
+    transition_s0_s1[
+        [
+            "start",
+            "stop",
+            "event",
+            "age",
+            "baseline_lvef",
+            "cumulative_dose"
+        ]
+    ],
+    duration_col="stop",
+    event_col="event",
+    entry_col="start"
+)
+```
+
+## Repetir por transición
+
+```python
+transition_models = {}
+
+for transition_id in sorted(
+    expanded_data[
+        "transition_id"
+    ]
+    .unique()
+):
+
+    transition_df = expanded_data.loc[
+        expanded_data[
+            "transition_id"
+        ]
+        ==
+        transition_id
+    ].copy()
+
+    model = CoxPHFitter(
+        penalizer=0.01
+    )
+
+    model.fit(
+        transition_df[
+            [
+                "start",
+                "stop",
+                "event",
+                "age",
+                "baseline_lvef",
+                "cumulative_dose"
+            ]
+        ],
+        duration_col="stop",
+        event_col="event",
+        entry_col="start"
+    )
+
+    transition_models[
+        transition_id
+    ] = model
+```
+
+## Ventajas
+
+- Máxima flexibilidad.
+- Interpretación sencilla por arco.
+- Diferentes covariables.
+- Diferentes supuestos.
+- Diferentes escalas temporales.
+
+## Limitaciones
+
+- Muchos modelos.
+- Poca potencia en transiciones raras.
+- Comparación menos directa.
+- Mayor riesgo de multiplicidad.
+- Coeficientes inestables.
+
+## Estrategia 2. Modelo conjunto estratificado
+
+Se apilan todas las transiciones y se estratifica por `transition_id`.
+
+```python
+joint_model = CoxPHFitter()
+```
+
+```python
+joint_model.fit(
+    expanded_data[
+        [
+            "start",
+            "stop",
+            "event",
+            "transition_id",
+            "age",
+            "baseline_lvef",
+            "cumulative_dose"
+        ]
+    ],
+    duration_col="stop",
+    event_col="event",
+    entry_col="start",
+    strata=[
+        "transition_id"
+    ]
+)
+```
+
+## Qué implica
+
+Cada transición tiene su propio baseline hazard.
+
+Pero, por defecto:
+
+```text
+beta_age
+beta_lvef
+beta_dose
+```
+
+son comunes a todos los arcos.
+
+## Efecto común
+
+$$
+\beta_{01}
+=
+\beta_{02}
+=
+\beta_{10}
+=
+\cdots
+$$
+
+## Ventaja
+
+- Menos parámetros.
+- Mayor estabilidad.
+- Comparte información.
+- Útil con pocas transiciones.
+
+## Limitación
+
+Puede imponer una igualdad clínicamente falsa.
+
+## Estrategia 3. Interacciones con transición
+
+Permite efectos específicos dentro de un modelo conjunto.
+
+## Variables indicadoras
+
+```python
+transition_ids = sorted(
+    expanded_data[
+        "transition_id"
+    ]
+    .unique()
+)
+```
+
+```python
+for transition_id in transition_ids:
+
+    expanded_data[
+        f"is_t{transition_id}"
+    ] = (
+        expanded_data[
+            "transition_id"
+        ]
+        ==
+        transition_id
+    ).astype(int)
+```
+
+## Interacción específica
+
+```python
+for transition_id in transition_ids:
+
+    expanded_data[
+        f"dose_t{transition_id}"
+    ] = (
+        expanded_data[
+            "cumulative_dose"
+        ]
+        *
+        expanded_data[
+            f"is_t{transition_id}"
+        ]
+    )
+```
+
+## Ajustar modelo
+
+```python
+interaction_columns = [
+    f"dose_t{transition_id}"
+    for transition_id
+    in transition_ids
+]
+```
+
+```python
+joint_specific_model = CoxPHFitter(
+    penalizer=0.01
+)
+```
+
+```python
+joint_specific_model.fit(
+    expanded_data[
+        [
+            "start",
+            "stop",
+            "event",
+            "transition_id",
+            "age",
+            "baseline_lvef",
+            *interaction_columns
+        ]
+    ],
+    duration_col="stop",
+    event_col="event",
+    entry_col="start",
+    strata=[
+        "transition_id"
+    ]
+)
+```
+
+## Interpretación
+
+```text
+dose_t1
+→ efecto de dosis en transición 1
+
+dose_t2
+→ efecto de dosis en transición 2
+```
+
+## Interacción parcial
+
+No todas las covariables necesitan efectos específicos.
+
+Ejemplo:
+
+```text
+Edad
+→ efecto común
+
+Dosis
+→ efecto específico
+
+Centro
+→ estrato
+```
+
+## Modelo híbrido
+
+```python
+joint_hybrid_model.fit(
+    expanded_data[
+        [
+            "start",
+            "stop",
+            "event",
+            "transition_id",
+            "age",
+            "center",
+            *interaction_columns
+        ]
+    ],
+    duration_col="stop",
+    event_col="event",
+    entry_col="start",
+    strata=[
+        "transition_id",
+        "center"
+    ]
+)
+```
+
+## Covariables basales
+
+Ejemplos:
+
+- Sexo.
+- Diagnóstico.
+- Edad basal.
+- Genética.
+- FEVI basal.
+- Centro.
+
+Se mantienen constantes durante toda la trayectoria.
+
+## Covariables temporales
+
+Ejemplos:
+
+- Dosis acumulada.
+- Troponina.
+- FEVI actual.
+- GLS actual.
+- Tratamiento activo.
+- Estado previo.
+
+## Valor causal
+
+Debe utilizarse el valor disponible al inicio del intervalo.
+
+```text
+Intervalo 90–180
+→ covariable conocida en día 90
+```
+
+## Evitar leakage
+
+Incorrecto:
+
+```text
+Dosis acumulada al final del seguimiento
+```
+
+Correcto:
+
+```text
+Dosis acumulada al inicio del intervalo
+```
+
+## Estandarización
+
+Puede facilitar la comparación entre efectos.
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+expanded_data[
+    [
+        "age_scaled",
+        "lvef_scaled",
+        "dose_scaled"
+    ]
+] = scaler.fit_transform(
+    expanded_data[
+        [
+            "age",
+            "baseline_lvef",
+            "cumulative_dose"
+        ]
+    ]
+)
+```
+
+El scaler debe ajustarse solo con train en un contexto predictivo.
+
+## Interpretación por desviación estándar
+
+```text
+HR por 1 DE de dosis acumulada
+```
+
+## Escala clínica
+
+A menudo es más interpretable escalar por una unidad relevante.
+
+```python
+expanded_data[
+    "dose_per_100"
+] = (
+    expanded_data[
+        "cumulative_dose"
+    ]
+    /
+    100
+)
+```
+
+## Interpretación
+
+```text
+HR por cada 100 mg/m²
+```
+
+## No linealidad
+
+El efecto puede no ser lineal.
+
+```text
+Dosis baja
+→ poco cambio
+
+Dosis alta
+→ aumento brusco
+```
+
+## Splines por transición
+
+```python
+joint_model.fit(
+    expanded_data,
+    duration_col="stop",
+    event_col="event",
+    entry_col="start",
+    strata=[
+        "transition_id"
+    ],
+    formula=(
+        "bs(dose_per_100, df=4)"
+        " + age"
+        " + baseline_lvef"
+    )
+)
+```
+
+## Problema
+
+Una misma forma spline común puede no ser válida para todos los arcos.
+
+## Splines específicos
+
+Puede crearse una base spline y multiplicarla por indicadores de transición.
+
+Esto aumenta mucho el número de parámetros.
+
+## Categorías clínicas
+
+```python
+expanded_data[
+    "dose_group"
+] = pd.cut(
+    expanded_data[
+        "cumulative_dose"
+    ],
+    bins=[
+        0,
+        100,
+        250,
+        float(
+            "inf"
+        )
+    ],
+    labels=[
+        "low",
+        "moderate",
+        "high"
+    ]
+)
+```
+
+Categorizar simplifica, pero pierde información.
+
+## Interacciones clínicas
+
+Puede existir interacción entre:
+
+- Dosis y edad.
+- Dosis y sexo.
+- Biomarcador y FEVI.
+- Estado previo y tratamiento.
+- Centro y protocolo.
+
+## Interacción específica por transición
+
+```python
+expanded_data[
+    "dose_age_t4"
+] = (
+    expanded_data[
+        "dose_per_100"
+    ]
+    *
+    expanded_data[
+        "age"
+    ]
+    *
+    (
+        expanded_data[
+            "transition_id"
+        ]
+        ==
+        4
+    )
+)
+```
+
+## Cuidado
+
+Las interacciones requieren muchos eventos.
+
+## Efectos compartidos por grupos de transiciones
+
+Puede asumirse un mismo efecto para:
+
+```text
+Transiciones de progresión
+→ S0 → S1
+→ S1 → S2
+→ S2 → S3
+```
+
+y otro para:
+
+```text
+Transiciones de recuperación
+→ S1 → S0
+→ S2 → S1
+```
+
+## Crear tipo de transición
+
+```python
+progression_ids = {
+    1,
+    4,
+    6
+}
+
+recovery_ids = {
+    3,
+    5
+}
+```
+
+```python
+expanded_data[
+    "progression_transition"
+] = (
+    expanded_data[
+        "transition_id"
+    ]
+    .isin(
+        progression_ids
+    )
+).astype(int)
+```
+
+## Efecto compartido de progresión
+
+```python
+expanded_data[
+    "dose_progression"
+] = (
+    expanded_data[
+        "dose_per_100"
+    ]
+    *
+    expanded_data[
+        "progression_transition"
+    ]
+)
+```
+
+## Ventaja
+
+- Reduce parámetros.
+- Conserva interpretación clínica.
+- Comparte información.
+
+## Hipótesis explícita
+
+```text
+La dosis afecta de forma similar
+a todas las progresiones
+```
+
+Debe comprobarse.
+
+## Contrastes
+
+Puede compararse:
+
+$$
+H_0:
+\beta_{01}
+=
+\beta_{12}
+$$
+
+## Diferencia de coeficientes
+
+```text
+beta_01 - beta_12
+```
+
+Puede evaluarse mediante:
+
+- Wald test.
+- Likelihood ratio test.
+- Bootstrap.
+- Modelo con y sin restricción.
+
+## Likelihood ratio test
+
+Conceptualmente:
+
+```text
+Modelo reducido
+→ efecto común
+
+Modelo completo
+→ efecto específico
+```
+
+## Estadístico
+
+$$
+2(
+\ell_{completo}
+-
+\ell_{reducido}
+)
+$$
+
+## Interpretación
+
+Si el modelo completo mejora claramente, puede justificarse heterogeneidad entre transiciones.
+
+## Multiplicidad
+
+Con muchas transiciones y covariables aparecen muchos tests.
+
+Debe evitarse:
+
+- Interpretar cada p-value de forma aislada.
+- Selección masiva post hoc.
+- Resultados espurios.
+
+## Priorizar
+
+- Covariables principales.
+- Hipótesis clínicas.
+- Transiciones relevantes.
+- Magnitud e intervalos.
+
+## Eventos por parámetro
+
+Cada coeficiente específico consume información del arco correspondiente.
+
+## Ejemplo
+
+```text
+6 transiciones
+×
+5 covariables
+=
+30 coeficientes
+```
+
+Puede ser inviable con pocos eventos.
+
+## Regularización
+
+## Ridge
+
+```python
+ridge_model = CoxPHFitter(
+    penalizer=0.1,
+    l1_ratio=0.0
+)
+```
+
+## Lasso
+
+```python
+lasso_model = CoxPHFitter(
+    penalizer=0.1,
+    l1_ratio=1.0
+)
+```
+
+## Elastic Net
+
+```python
+elastic_model = CoxPHFitter(
+    penalizer=0.1,
+    l1_ratio=0.5
+)
+```
+
+## Ventajas
+
+- Estabilidad.
+- Reducción de coeficientes extremos.
+- Manejo de colinealidad.
+- Selección parcial.
+
+## Limitaciones
+
+- Interpretación más compleja.
+- Intervalos estándar pueden no ser adecuados.
+- Penalización debe ajustarse.
+- Selección puede ser inestable.
+
+## Tuning
+
+Debe realizarse con validación interna.
+
+## Split por paciente
+
+Toda la trayectoria de un paciente debe permanecer en un único conjunto.
+
+## Split por centro o tiempo
+
+Preferible cuando el objetivo es generalización externa.
+
+## Modelos jerárquicos
+
+Pueden asumir:
+
+```text
+beta_transition
+=
+beta_global
++
+desviación_transition
+```
+
+Esto permite compartir información sin imponer igualdad exacta.
+
+## Ventaja
+
+- Shrinkage parcial.
+- Mejor manejo de arcos raros.
+- Incertidumbre coherente.
+
+## Enfoque bayesiano
+
+Puede incorporar priors:
+
+```text
+Transiciones similares
+→ efectos similares
+```
+
+## Frailty por paciente
+
+Varias transiciones del mismo paciente están correlacionadas.
+
+Puede existir una propensión individual no observada.
+
+## Frailty compartida
+
+```text
+Paciente con mayor fragilidad
+→ mayor riesgo en varios arcos
+```
+
+## Errores robustos
+
+Cuando el software lo permite, agrupar por paciente puede mejorar la estimación de incertidumbre.
+
+## Centro
+
+Opciones:
+
+- Covariable fija.
+- Estrato.
+- Frailty.
+- Efecto aleatorio.
+- Validación externa.
+
+## Estratificar por centro
+
+Permite baselines diferentes.
+
+```python
+model.fit(
+    expanded_data,
+    duration_col="stop",
+    event_col="event",
+    entry_col="start",
+    strata=[
+        "transition_id",
+        "center"
+    ]
+)
+```
+
+## Limitación
+
+No estima un coeficiente de centro.
+
+## Estado previo
+
+Puede incorporarse como covariable.
+
+```python
+expanded_data[
+    "came_from_more_severe_state"
+] = (
+    expanded_data[
+        "previous_state_before_episode"
+    ]
+    .isin(
+        [
+            "S2",
+            "S3"
+        ]
+    )
+).astype(int)
+```
+
+## Interpretación
+
+Un paciente recuperado a S1 puede tener un riesgo diferente de un paciente que progresa por primera vez a S1.
+
+## Número de episodios
+
+```python
+expanded_data[
+    "episode_number"
+]
+```
+
+puede capturar recurrencia o memoria.
+
+## Máxima severidad previa
+
+```python
+expanded_data[
+    "max_previous_state_rank"
+]
+```
+
+resume parte de la historia.
+
+## Tiempo acumulado en estados graves
+
+```python
+expanded_data[
+    "previous_time_in_s2_s3"
+]
+```
+
+puede ser clínicamente relevante.
+
+## Markov extendido
+
+Añadir historia resumida puede mejorar el modelo sin crear demasiados estados.
+
+## Covariable mediadora
+
+Debe distinguirse:
+
+```text
+Dosis
+→ biomarcador
+→ cardiotoxicidad
+```
+
+Si el objetivo es efecto total de dosis, ajustar por biomarcador puede ser sobreajuste causal.
+
+## Objetivo explicativo
+
+Seleccionar covariables con un DAG o conocimiento clínico.
+
+## Objetivo predictivo
+
+Incluir variables disponibles que aporten rendimiento, con validación adecuada.
+
+## Interpretación causal
+
+Un HR específico por transición sigue siendo asociativo salvo diseño causal válido.
+
+## Confounding by indication
+
+Ejemplo:
+
+```text
+Mayor gravedad
+→ más tratamiento cardioprotector
+→ mayor riesgo
+```
+
+El tratamiento puede parecer perjudicial aunque se prescriba por mayor riesgo.
+
+## Covariables dependientes de visitas
+
+Ejemplo:
+
+```text
+Troponina solo se mide
+cuando existe sospecha clínica
+```
+
+El valor y su disponibilidad pueden ser informativos.
+
+## Indicadores de medición
+
+```python
+expanded_data[
+    "troponin_measured_recently"
+] = (
+    expanded_data[
+        "days_since_troponin"
+    ]
+    <=
+    30
+).astype(int)
+```
+
+## Interacción entre valor y recencia
+
+```python
+expanded_data[
+    "troponin_recent_value"
+] = (
+    expanded_data[
+        "troponin"
+    ]
+    *
+    expanded_data[
+        "troponin_measured_recently"
+    ]
+)
+```
+
+## Predicción
+
+Para predecir una trayectoria se necesitan efectos específicos y baselines por arco.
+
+## Matriz individual de intensidades
+
+```text
+Q(X)
+```
+
+debe actualizar cada arco según sus covariables.
+
+## Ejemplo conceptual
+
+```python
+q01_patient = (
+    q01_baseline
+    *
+    np.exp(
+        beta_age_01
+        *
+        age
+        +
+        beta_dose_01
+        *
+        dose
+    )
+)
+```
+
+## Recalcular diagonal
+
+Después de actualizar intensidades fuera de la diagonal:
+
+```python
+for row_index in range(
+    Q_patient.shape[
+        0
+    ]
+):
+
+    Q_patient[
+        row_index,
+        row_index
+    ] = (
+        -
+        (
+            Q_patient[
+                row_index,
+                :
+            ].sum()
+            -
+            Q_patient[
+                row_index,
+                row_index
+            ]
+        )
+    )
+```
+
+## Reporting
+
+Debe incluir una tabla por transición.
+
+| Covariable | S0→S1 HR | S1→S2 HR | S1→S0 HR |
+|---|---:|---:|---:|
+| Edad | 1.10 | 1.02 | 0.90 |
+| Dosis | 1.25 | 1.60 | 0.70 |
+| FEVI | 0.85 | 0.75 | 1.20 |
+
+## Forest plot por transición
+
+Puede crearse:
+
+- Un panel por transición.
+- Un color por arco.
+- Una tabla agrupada por covariable.
+
+## Extraer resultados
+
+```python
+result_tables = []
+
+for transition_id, model in (
+    transition_models.items()
+):
+
+    table = (
+        model.summary
+        .reset_index()
+    )
+
+    table[
+        "transition_id"
+    ] = transition_id
+
+    result_tables.append(
+        table
+    )
+```
+
+```python
+all_results = pd.concat(
+    result_tables,
+    ignore_index=True
+)
+```
+
+## Preparar HR
+
+```python
+all_results[
+    "hazard_ratio"
+] = np.exp(
+    all_results[
+        "coef"
+    ]
+)
+```
+
+## Intervalos
+
+```python
+all_results[
+    [
+        "covariate",
+        "transition_id",
+        "exp(coef)",
+        "exp(coef) lower 95%",
+        "exp(coef) upper 95%"
+    ]
+]
+```
+
+## Evaluación
+
+Debe revisarse por transición:
+
+- Discriminación.
+- Calibración.
+- Número de eventos.
+- Supuestos PH.
+- Forma funcional.
+- Estabilidad.
+- Validación externa.
+
+## No basta un C-index global
+
+Puede haber:
+
+```text
+Buen rendimiento en S0 → S1
+
+Mal rendimiento en S2 → S3
+```
+
+## Calibración de transición
+
+Ejemplo:
+
+```text
+Probabilidad predicha de S1 → S2
+a 6 meses
+```
+
+debe compararse con la transición observada.
+
+## Sensitivity analysis
+
+Comparar:
+
+- Efectos comunes.
+- Efectos específicos.
+- Efectos agrupados por progresión.
+- Penalización.
+- Exclusión de arcos raros.
+- Diferentes escalas.
+
+## Selección del modelo
+
+Debe equilibrar:
+
+- Plausibilidad clínica.
+- Parsimonia.
+- Eventos disponibles.
+- Rendimiento.
+- Interpretabilidad.
+- Estabilidad.
+
+## Aplicación a cardiotoxicidad
+
+Covariables candidatas:
+
+- Edad.
+- Sexo.
+- Diagnóstico.
+- Dosis acumulada de antraciclinas.
+- FEVI.
+- GLS.
+- Troponina.
+- NT-proBNP.
+- Tratamiento cardioprotector.
+- Centro.
+- Estado previo.
+
+## Hipótesis clínicas
+
+```text
+Dosis acumulada
+→ mayor efecto en progresión
+
+Tratamiento cardioprotector
+→ mayor efecto en recuperación
+
+FEVI basal
+→ mayor efecto en transiciones iniciales
+```
+
+## Estrategia razonable
+
+```text
+Baselines específicos por transición
+
+Edad y sexo
+→ efectos comunes inicialmente
+
+Dosis y biomarcadores
+→ efectos específicos de progresión
+
+Estado previo
+→ específico de recuperación
+```
+
+## Errores frecuentes
+
+- Asumir efectos comunes sin comprobar.
+- Ajustar efectos específicos para todo.
+- Ignorar eventos por arco.
+- Usar covariables futuras.
+- No escalar clínicamente.
+- Interpretar HR como probabilidad.
+- No considerar historia previa.
+- No ajustar incertidumbre por paciente.
+- Seleccionar por p-value.
+- No controlar multiplicidad.
+- No validar por transición.
+- Confundir asociación y causalidad.
+
+## Flujo recomendado
+
+1. Definir covariables.
+2. Definir hipótesis por transición.
+3. Contar eventos.
+4. Ajustar modelo común.
+5. Ajustar efectos específicos.
+6. Comparar modelos.
+7. Regularizar si procede.
+8. Revisar supuestos.
+9. Evaluar por arco.
+10. Validar externamente.
+11. Construir \(Q(X)\).
+12. Comunicar resultados.
+
+## Checklist
+
+- [ ] He definido covariables basales.
+- [ ] He definido covariables temporales.
+- [ ] He evitado leakage.
+- [ ] He contado eventos por transición.
+- [ ] He ajustado un modelo común.
+- [ ] He considerado efectos específicos.
+- [ ] He considerado grupos de transiciones.
+- [ ] He evaluado interacciones.
+- [ ] He escalado variables clínicamente.
+- [ ] He revisado no linealidad.
+- [ ] He considerado regularización.
+- [ ] He agrupado incertidumbre por paciente.
+- [ ] He validado por transición.
+- [ ] He comparado modelos.
+- [ ] He documentado hipótesis.
+
+## Recursos
+
+### Conceptos
+
+- Transition-specific effects.
+- Shared effects.
+- Stratified Cox.
+- Interaction by transition.
+- Partial pooling.
+- Penalized multi-state models.
+- Frailty.
+- Time-varying covariates.
+- Transition-specific prediction.
+
+### Herramientas
+
+- `lifelines.CoxPHFitter`.
+- `pandas`.
+- `numpy`.
+- `mstate` en R.
+- `coxme` en R.
+- Modelos bayesianos jerárquicos.
+
+### Material del proyecto
+
+Añadir aquí:
+
+- Hipótesis por transición.
+- Tabla de eventos.
+- Covariables candidatas.
+- Modelos comunes y específicos.
+- Resultados de sensibilidad.
+- Forest plots.
+
+## Notas personales
+
+Añade aquí tus coeficientes, hipótesis, interacciones, regularización y decisiones clínicas.

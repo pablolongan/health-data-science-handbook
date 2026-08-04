@@ -1,0 +1,1316 @@
+---
+title: "Modelos semi-Markov"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Un modelo semi-Markov permite que el riesgo de la siguiente transición dependa del tiempo que el paciente lleva en el estado actual.
+
+A diferencia de un modelo Markov puro:
+
+```text
+Markov
+→ importa el estado actual
+
+Semi-Markov
+→ importa el estado actual
+  y cuánto tiempo lleva en él
+```
+
+Esto resulta útil cuando la duración en un estado modifica el riesgo de progresión, recuperación o salida.
+:::
+
+## ¿Por qué semi-Markov?
+
+En muchos procesos clínicos, dos pacientes en el mismo estado no tienen el mismo riesgo futuro si llevan tiempos muy distintos en él.
+
+Ejemplo:
+
+```text
+Paciente A
+→ acaba de entrar en S1
+
+Paciente B
+→ lleva 12 meses en S1
+```
+
+Un modelo Markov puro puede tratarlos igual.
+
+Un modelo semi-Markov permite tratarlos de forma distinta.
+
+::: {.callout-note}
+## Idea clave
+
+El reloj relevante se reinicia al entrar en cada estado.
+:::
+
+## Propiedad semi-Markov
+
+La siguiente transición puede depender de:
+
+- Estado actual.
+- Tiempo desde entrada en el estado.
+- Covariables.
+- Tiempo global, si se incluye.
+- Historia resumida.
+
+## Sojourn time
+
+El tiempo de permanencia en un estado se denomina:
+
+```text
+sojourn time
+```
+
+Si un paciente entra en S1 en el día 90 y sale en el día 180:
+
+```text
+sojourn time
+→ 90 días
+```
+
+## Clock-reset
+
+En un modelo semi-Markov se utiliza habitualmente:
+
+```text
+clock-reset
+```
+
+El tiempo se mide desde la entrada en el estado actual.
+
+## Clock-forward frente a clock-reset
+
+### Clock-forward
+
+```text
+Tiempo desde el origen global
+```
+
+### Clock-reset
+
+```text
+Tiempo desde la entrada en el estado
+```
+
+## Ejemplo
+
+```text
+Inicio tratamiento
+→ día 0
+
+Entrada en S1
+→ día 100
+
+Salida de S1
+→ día 160
+```
+
+Clock-forward:
+
+```text
+start = 100
+stop = 160
+```
+
+Clock-reset:
+
+```text
+start = 0
+stop = 60
+```
+
+## Intensidad semi-Markov
+
+Para una transición \(r \rightarrow s\):
+
+$$
+q_{rs}(u)
+$$
+
+donde \(u\) es el tiempo desde entrada en el estado \(r\).
+
+## Con covariables
+
+$$
+q_{rs}(u\mid X)
+=
+q_{rs,0}(u)
+\exp(
+\beta_{rs}^{\top}X
+)
+$$
+
+## Interpretación
+
+El baseline hazard puede variar con la duración en el estado.
+
+Ejemplo:
+
+```text
+S1 → S2
+→ riesgo alto durante los primeros 3 meses
+→ riesgo menor después
+```
+
+## Diferencia frente a Markov no homogéneo
+
+### Markov no homogéneo
+
+La intensidad depende del tiempo global:
+
+```text
+q_rs(t)
+```
+
+### Semi-Markov
+
+La intensidad depende del tiempo desde entrada:
+
+```text
+q_rs(u)
+```
+
+## Ejemplo clínico
+
+El riesgo de progresión de S1 a S2 puede depender de:
+
+- Tiempo desde inicio del tratamiento.
+- Tiempo desde entrada en S1.
+
+Estas dos escalas no son equivalentes.
+
+## Preparar episodios de estado
+
+Partimos de observaciones:
+
+```text
+patient_id | time | state
+```
+
+## Detectar entrada en nuevo estado
+
+```python
+state_df = (
+    state_df
+    .sort_values(
+        [
+            "patient_id",
+            "time"
+        ]
+    )
+    .reset_index(
+        drop=True
+    )
+)
+```
+
+```python
+state_df[
+    "previous_state"
+] = (
+    state_df
+    .groupby("patient_id")[
+        "state"
+    ]
+    .shift()
+)
+```
+
+```python
+state_df[
+    "new_episode"
+] = (
+    state_df[
+        "state"
+    ]
+    !=
+    state_df[
+        "previous_state"
+    ]
+).astype(int)
+```
+
+Para la primera observación:
+
+```python
+state_df.loc[
+    state_df[
+        "previous_state"
+    ]
+    .isna(),
+    "new_episode"
+] = 1
+```
+
+## Identificador de episodio
+
+```python
+state_df[
+    "episode_id"
+] = (
+    state_df
+    .groupby("patient_id")[
+        "new_episode"
+    ]
+    .cumsum()
+)
+```
+
+## Tiempo de entrada en estado
+
+```python
+entry_times = (
+    state_df
+    .groupby(
+        [
+            "patient_id",
+            "episode_id"
+        ]
+    )[
+        "time"
+    ]
+    .min()
+    .rename(
+        "state_entry_time"
+    )
+    .reset_index()
+)
+```
+
+## Añadir entrada
+
+```python
+state_df = state_df.merge(
+    entry_times,
+    on=[
+        "patient_id",
+        "episode_id"
+    ],
+    how="left"
+)
+```
+
+## Tiempo desde entrada
+
+```python
+state_df[
+    "time_since_state_entry"
+] = (
+    state_df[
+        "time"
+    ]
+    -
+    state_df[
+        "state_entry_time"
+    ]
+)
+```
+
+## Construir intervalos clock-reset
+
+Partimos de intervalos globales:
+
+```text
+patient_id | from_state | to_state | start | stop | status
+```
+
+## Entrada al episodio
+
+```python
+interval_data = interval_data.merge(
+    episode_entry_table,
+    on=[
+        "patient_id",
+        "episode_id"
+    ],
+    how="left"
+)
+```
+
+## Tiempo reset
+
+```python
+interval_data[
+    "reset_start"
+] = (
+    interval_data[
+        "start"
+    ]
+    -
+    interval_data[
+        "state_entry_time"
+    ]
+)
+```
+
+```python
+interval_data[
+    "reset_stop"
+] = (
+    interval_data[
+        "stop"
+    ]
+    -
+    interval_data[
+        "state_entry_time"
+    ]
+)
+```
+
+## Resultado
+
+```text
+patient_id | from | to | reset_start | reset_stop | status
+----------------------------------------------------------------
+1          | S1   | S1 | 0           | 30         | 0
+1          | S1   | S2 | 30          | 90         | 1
+```
+
+## Riesgo en clock-reset
+
+Para una transición desde S1:
+
+```text
+reset_start
+reset_stop
+```
+
+representan tiempo en S1, no tiempo desde el origen global.
+
+## Cox clock-reset
+
+```python
+from lifelines import CoxPHFitter
+
+transition_model = CoxPHFitter()
+```
+
+```python
+transition_model.fit(
+    transition_df[
+        [
+            "reset_start",
+            "reset_stop",
+            "event",
+            "age",
+            "baseline_lvef",
+            "cumulative_dose"
+        ]
+    ],
+    duration_col="reset_stop",
+    event_col="event",
+    entry_col="reset_start"
+)
+```
+
+## Interpretación
+
+El baseline hazard se interpreta en función del tiempo desde entrada en el estado.
+
+## Cause-specific por transición
+
+Para S1:
+
+```text
+S1 → S0
+S1 → S2
+```
+
+se ajustan modelos específicos por destino.
+
+## Dataset expandido
+
+```python
+s1_to_s0 = expanded_data.loc[
+    expanded_data[
+        "transition"
+    ]
+    ==
+    "S1 → S0"
+].copy()
+```
+
+```python
+s1_to_s2 = expanded_data.loc[
+    expanded_data[
+        "transition"
+    ]
+    ==
+    "S1 → S2"
+].copy()
+```
+
+## Riesgos competidores dentro del estado
+
+Cuando ocurre S1 → S0, se deja de estar en riesgo de S1 → S2 en ese episodio.
+
+## Reentrada en un estado
+
+Un paciente puede:
+
+```text
+S0 → S1 → S0 → S1
+```
+
+Cada entrada en S1 crea un nuevo episodio.
+
+## Episodios repetidos
+
+```text
+S1 episodio 1
+S1 episodio 2
+```
+
+Pueden tener:
+
+- Riesgo diferente.
+- Historia diferente.
+- Duración diferente.
+- Tratamiento diferente.
+
+## Dependencia entre episodios
+
+Los episodios del mismo paciente no son independientes.
+
+Puede ser necesario:
+
+- Error robusto por paciente.
+- Frailty.
+- Efectos aleatorios.
+- Modelo de recurrencia.
+
+## Identificador de episodio
+
+```python
+expanded_data[
+    "state_episode_key"
+] = (
+    expanded_data[
+        "patient_id"
+    ]
+    .astype(str)
+    +
+    "_"
+    +
+    expanded_data[
+        "episode_id"
+    ]
+    .astype(str)
+)
+```
+
+## Estado previo como covariable
+
+Para conservar parte de la memoria:
+
+```python
+expanded_data[
+    "previous_state_before_episode"
+]
+```
+
+Ejemplo:
+
+```text
+Entrada en S1 desde S0
+vs
+entrada en S1 desde S2
+```
+
+## Interacción con origen previo
+
+```python
+expanded_data[
+    "entered_s1_from_s2"
+] = (
+    expanded_data[
+        "previous_state_before_episode"
+    ]
+    ==
+    "S2"
+).astype(int)
+```
+
+## Tiempo en estado como covariable
+
+Otra aproximación es incluir explícitamente la duración.
+
+```python
+expanded_data[
+    "time_in_state_at_start"
+] = (
+    expanded_data[
+        "reset_start"
+    ]
+)
+```
+
+## No linealidad
+
+El efecto de la duración puede no ser lineal.
+
+```python
+model.fit(
+    transition_df,
+    duration_col="reset_stop",
+    event_col="event",
+    entry_col="reset_start",
+    formula=(
+        "bs(time_in_state_at_start, df=4)"
+        " + age"
+        " + cumulative_dose"
+    )
+)
+```
+
+## Atención
+
+Si el baseline ya está definido sobre clock-reset, añadir tiempo en estado como covariable puede ser redundante o cambiar la interpretación.
+
+Debe decidirse qué parte se modela en el baseline y cuál como covariable.
+
+## Parametric semi-Markov
+
+Puede especificarse una distribución para el tiempo de salida del estado.
+
+Ejemplos:
+
+- Weibull.
+- Log-normal.
+- Log-logístico.
+- Piecewise exponential.
+
+## Weibull por transición
+
+```python
+from lifelines import WeibullAFTFitter
+
+weibull_transition = WeibullAFTFitter()
+```
+
+```python
+weibull_transition.fit(
+    transition_df[
+        [
+            "sojourn_time",
+            "event",
+            "age",
+            "cumulative_dose"
+        ]
+    ],
+    duration_col="sojourn_time",
+    event_col="event"
+)
+```
+
+## Interpretación AFT
+
+El modelo describe cómo las covariables aceleran o retrasan la salida del estado.
+
+## Ejemplo
+
+```text
+TR = 0.75
+```
+
+puede indicar un tiempo hasta salida aproximadamente un 25 % menor.
+
+## Salida hacia varios destinos
+
+Si un estado tiene varias salidas, puede modelarse:
+
+- Cause-specific AFT.
+- Competing risks paramétrico.
+- Distribución conjunta de tiempo y destino.
+- Modelos multiestado especializados.
+
+## Piecewise exponential
+
+Puede permitir una intensidad distinta según duración.
+
+```text
+0–30 días en S1
+→ intensidad 1
+
+30–90 días
+→ intensidad 2
+
+>90 días
+→ intensidad 3
+```
+
+## Dividir episodios
+
+```python
+cuts = [
+    30,
+    90
+]
+```
+
+Cada episodio debe dividirse al cruzar esos puntos.
+
+## Hazard por duración
+
+Puede visualizarse:
+
+```text
+Hazard S1 → S2
+frente a tiempo desde entrada en S1
+```
+
+## Modelo con splines
+
+Los splines permiten una forma suave.
+
+```python
+transition_model.fit(
+    transition_df,
+    duration_col="reset_stop",
+    event_col="event",
+    entry_col="reset_start",
+    formula=(
+        "age"
+        " + baseline_lvef"
+        " + cumulative_dose"
+    )
+)
+```
+
+El baseline de Cox ya puede variar flexiblemente con el tiempo reset.
+
+## Semi-Markov con covariables temporales
+
+Ejemplo:
+
+```text
+Dosis acumulada
+→ cambia mientras el paciente permanece en S1
+```
+
+El dataset debe dividirse cada vez que cambia la covariable.
+
+## Intervalos dentro de episodio
+
+```text
+S1, día 0–30
+→ dosis 100
+
+S1, día 30–60
+→ dosis 150
+
+S1, día 60–90
+→ dosis 200
+```
+
+## Start-stop reset
+
+```text
+reset_start | reset_stop | dose
+0           | 30         | 100
+30          | 60         | 150
+60          | 90         | 200
+```
+
+## Disponibilidad causal
+
+La covariable debe estar disponible al inicio del subintervalo.
+
+## Evento al final
+
+```text
+event = 1
+```
+
+solo en el intervalo donde se produce la transición.
+
+## Distribución del sojourn time
+
+```python
+sojourn_summary = (
+    episode_df
+    .groupby(
+        "state"
+    )[
+        "sojourn_time"
+    ]
+    .describe()
+)
+```
+
+## Visualización
+
+```python
+import matplotlib.pyplot as plt
+
+for state, group in episode_df.groupby(
+    "state"
+):
+
+    group[
+        "sojourn_time"
+    ].hist(
+        alpha=0.5,
+        label=state
+    )
+
+plt.xlabel(
+    "Tiempo en estado"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## Kaplan-Meier de permanencia
+
+Puede estimarse el tiempo hasta salida de un estado.
+
+## Ejemplo para S1
+
+```python
+from lifelines import KaplanMeierFitter
+
+s1_episodes = episode_df.loc[
+    episode_df[
+        "state"
+    ]
+    ==
+    "S1"
+]
+```
+
+```python
+kmf = KaplanMeierFitter()
+
+kmf.fit(
+    durations=s1_episodes[
+        "sojourn_time"
+    ],
+    event_observed=s1_episodes[
+        "left_state"
+    ],
+    label="Permanencia en S1"
+)
+```
+
+## Limitación
+
+Si existen varios destinos, las salidas son competing risks.
+
+Kaplan-Meier de salida total estudia:
+
+```text
+Tiempo hasta abandonar S1
+```
+
+no el destino específico.
+
+## CIF por destino
+
+Desde S1:
+
+```text
+S1 → S0
+S1 → S2
+```
+
+pueden estimarse incidencias acumuladas específicas por tiempo en estado.
+
+## Comparar Markov y semi-Markov
+
+| Aspecto | Markov | Semi-Markov |
+|---|---|---|
+| Memoria | Estado actual | Estado + duración |
+| Reloj | Global | Reinicia por estado |
+| Sojourn time | Exponencial en homogéneo | Flexible |
+| Complejidad | Menor | Mayor |
+| Interpretación | Simple | Más clínica si importa duración |
+
+## Pregunta diagnóstica
+
+```text
+¿El riesgo cambia con el tiempo
+desde entrada en el estado?
+```
+
+Si la respuesta es sí, semi-Markov puede ser más adecuado.
+
+## Comparación empírica
+
+Puede compararse:
+
+- Log-likelihood.
+- AIC.
+- Ocupación predicha.
+- Tiempo en estado.
+- Calibración.
+- Validación externa.
+
+## AIC
+
+Solo es comparable entre modelos ajustados sobre la misma estructura de datos y outcome.
+
+## Estado ampliado como alternativa
+
+En vez de semi-Markov:
+
+```text
+S1_early
+S1_late
+```
+
+## Ventaja
+
+Permite mantener una estructura Markov.
+
+## Limitación
+
+- Más estados.
+- Cortes artificiales.
+- Menos eventos.
+- Mayor complejidad.
+
+## Modelo de fases
+
+```text
+S1_0_30
+S1_30_90
+S1_90_plus
+```
+
+Puede aproximar un proceso semi-Markov.
+
+## Historia resumida
+
+Puede añadirse:
+
+- Número de entradas previas.
+- Estado anterior.
+- Tiempo acumulado en estado.
+- Máxima severidad previa.
+- Número de recuperaciones.
+
+## Número de episodios previos
+
+```python
+episode_df[
+    "episode_number"
+] = (
+    episode_df
+    .groupby(
+        [
+            "patient_id",
+            "state"
+        ]
+    )
+    .cumcount()
+    +
+    1
+)
+```
+
+## Tiempo acumulado previo en estado
+
+```python
+episode_df[
+    "previous_time_in_state"
+] = (
+    episode_df
+    .groupby(
+        [
+            "patient_id",
+            "state"
+        ]
+    )[
+        "sojourn_time"
+    ]
+    .cumsum()
+    .shift()
+)
+```
+
+La implementación debe revisarse para no mezclar pacientes ni incluir el episodio actual.
+
+## Frailty
+
+Puede capturar heterogeneidad persistente entre pacientes.
+
+```text
+Paciente con alta propensión
+a progresar en varios episodios
+```
+
+## Modelos jerárquicos
+
+Pueden compartir información entre:
+
+- Transiciones.
+- Centros.
+- Pacientes.
+- Episodios.
+
+## Predicción semi-Markov
+
+La predicción necesita conocer:
+
+- Estado actual.
+- Tiempo ya pasado en el estado.
+- Covariables actuales.
+- Historia relevante.
+
+## Ejemplo
+
+```text
+Paciente en S1
+desde hace 60 días
+```
+
+La predicción no debe reiniciarse como si acabara de entrar.
+
+## Residual life
+
+Interesa:
+
+```text
+Tiempo adicional esperado
+antes de salir del estado
+```
+
+condicionado a haber permanecido ya \(u\) unidades.
+
+## Supervivencia residual
+
+$$
+P(
+T > u + v
+\mid
+T > u
+)
+=
+\frac{
+S(u+v)
+}{
+S(u)
+}
+$$
+
+## Ejemplo en Python
+
+```python
+survival_u = model.predict(
+    u
+)
+
+survival_u_plus_v = model.predict(
+    u
+    +
+    v
+)
+
+residual_survival = (
+    survival_u_plus_v
+    /
+    survival_u
+)
+```
+
+## Probabilidad de salida futura
+
+```text
+Probabilidad de salir de S1
+durante los próximos 30 días,
+dado que ya lleva 60 días
+```
+
+## Ocupación semi-Markov
+
+Calcular probabilidades de ocupación puede requerir:
+
+- Ecuaciones de renovación.
+- Simulación.
+- Integración numérica.
+- Software especializado.
+
+No siempre puede obtenerse con una única exponencial matricial.
+
+## Simulación
+
+Una estrategia práctica es simular:
+
+1. Tiempo hasta salida.
+2. Destino.
+3. Nueva entrada.
+4. Repetir hasta horizonte.
+
+## Simulación conceptual
+
+```python
+def simulate_sojourn_time(
+    state,
+    patient,
+    rng
+):
+
+    if state == "S1":
+
+        shape = 1.5
+        scale = 60
+
+        return rng.weibull(
+            shape
+        ) * scale
+
+    return rng.exponential(
+        90
+    )
+```
+
+## Elegir destino
+
+```python
+def choose_destination(
+    state,
+    rng
+):
+
+    if state == "S1":
+
+        return rng.choice(
+            [
+                "S0",
+                "S2"
+            ],
+            p=[
+                0.55,
+                0.45
+            ]
+        )
+
+    return state
+```
+
+## Validación
+
+Debe evaluarse:
+
+- Distribución de sojourn times.
+- Destinos.
+- Ocupación.
+- Transiciones.
+- Probabilidades a horizontes.
+- Rendimiento externo.
+
+## Comparar tiempo observado y predicho
+
+```text
+Mediana observada en S1
+vs
+mediana predicha en S1
+```
+
+## Calibración por estado
+
+Ejemplo:
+
+```text
+Probabilidad de seguir en S1
+30 días después de entrar
+```
+
+## Calibración por duración
+
+Puede evaluarse en pacientes con:
+
+- 0–30 días en estado.
+- 30–90 días.
+- Más de 90 días.
+
+## Panel data
+
+Con visitas espaciadas, el tiempo exacto de entrada y salida puede ser incierto.
+
+Esto afecta directamente al sojourn time.
+
+## Riesgo de sesgo
+
+Usar fecha de primera detección puede sobreestimar el tiempo en el estado previo y subestimar el del nuevo estado.
+
+## Opciones
+
+- Punto medio.
+- Censura por intervalo.
+- Hidden semi-Markov models.
+- Sensitivity analysis.
+
+## Hidden semi-Markov models
+
+Permiten:
+
+- Estados latentes.
+- Error de clasificación.
+- Duraciones no geométricas.
+- Observación irregular.
+
+## Aplicación a cardiotoxicidad
+
+Preguntas clave:
+
+```text
+¿El riesgo S1 → S2 aumenta
+cuanto más tiempo se permanece en S1?
+
+¿La recuperación S2 → S1 depende
+de la duración de S2?
+
+¿Un S1 recuperado se comporta
+igual que un S1 inicial?
+```
+
+## Posible estructura
+
+```text
+S0 ↔ S1 ↔ S2 → S3
+```
+
+con clock-reset por estado.
+
+## Covariables relevantes
+
+- Dosis acumulada al entrar.
+- Dosis durante el episodio.
+- FEVI al entrar.
+- GLS al entrar.
+- Biomarcadores.
+- Estado previo.
+- Número de episodios.
+- Centro.
+
+## Dataset analítico
+
+```text
+patient_id
+episode_id
+from_state
+destination
+reset_start
+reset_stop
+event
+previous_state
+episode_number
+cumulative_dose_start
+troponin_start
+```
+
+## Reporting
+
+Debe incluir:
+
+- Definición del reloj.
+- Inicio y final de episodios.
+- Sojourn times.
+- Distribución elegida.
+- Hazard o time ratio.
+- Efectos por transición.
+- Predicciones residuales.
+- Validación.
+
+## Ejemplo de redacción
+
+```text
+Se utilizó una formulación semi-Markov
+con reloj reiniciado al entrar en cada estado.
+
+El tiempo hasta la siguiente transición
+se modeló desde el inicio del episodio,
+permitiendo que la intensidad dependiera
+de la duración en el estado.
+```
+
+## Errores frecuentes
+
+- Llamar semi-Markov a un modelo clock-forward.
+- No reiniciar el reloj.
+- Mezclar episodios.
+- No identificar reentradas.
+- Asumir independencia entre episodios.
+- Usar tiempo total en estado futuro.
+- Ignorar salidas competidoras.
+- No considerar incertidumbre de fechas.
+- Comparar AIC de estructuras distintas sin cuidado.
+- No validar sojourn times.
+- Crear demasiados subestados.
+- No declarar la escala temporal.
+
+## Flujo recomendado
+
+1. Identificar episodios.
+2. Definir entrada en estado.
+3. Calcular clock-reset.
+4. Construir intervalos.
+5. Definir destinos competidores.
+6. Ajustar modelos por transición.
+7. Modelar duración.
+8. Incluir covariables.
+9. Revisar episodios repetidos.
+10. Estimar predicciones.
+11. Validar.
+12. Comparar con Markov.
+
+## Checklist
+
+- [ ] He definido sojourn time.
+- [ ] He identificado episodios.
+- [ ] He reiniciado el reloj.
+- [ ] He construido reset_start y reset_stop.
+- [ ] He tratado reentradas.
+- [ ] He definido destinos competidores.
+- [ ] He evitado covariables futuras.
+- [ ] He considerado historia previa.
+- [ ] He evaluado dependencia entre episodios.
+- [ ] He comparado con Markov.
+- [ ] He evaluado distribución de permanencia.
+- [ ] He calculado predicción residual.
+- [ ] He considerado panel data.
+- [ ] He validado externamente.
+- [ ] He documentado la escala temporal.
+
+## Recursos
+
+### Conceptos
+
+- Semi-Markov process.
+- Sojourn time.
+- Clock-reset.
+- Residual lifetime.
+- Renewal process.
+- Recurrent state episodes.
+- Cause-specific transition model.
+- Hidden semi-Markov model.
+
+### Herramientas
+
+- `lifelines.CoxPHFitter`.
+- `lifelines.WeibullAFTFitter`.
+- `scipy`.
+- `mstate` en R.
+- `flexsurv` en R.
+- `msm` en R.
+
+### Material del proyecto
+
+Añadir aquí:
+
+- Episodios por estado.
+- Sojourn times.
+- Modelos clock-reset.
+- Comparación Markov vs semi-Markov.
+- Predicciones residuales.
+- Decisiones sobre reentradas.
+
+## Notas personales
+
+Añade aquí tus episodios, tiempos en estado, modelos, resultados y decisiones clínicas.
