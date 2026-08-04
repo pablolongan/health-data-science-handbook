@@ -1,0 +1,2971 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Hidden Markov Models – Health Data Science Handbook</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-2aa33e8751edae3f9b77d048c1294c38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Health Data Science Handbook</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> <i class="bi bi-info-circle" role="img" aria-label="Sobre el proyecto">
+</i> 
+<span class="menu-text">Sobre el proyecto</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/pablolongan/health-data-science-handbook"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../multi-state-models/index.html">Multi-state Models</a></li><li class="breadcrumb-item"><a href="../multi-state-models/hidden-markov-models.html">Hidden Markov Models</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/data-exploration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory data analysis (EDA)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación de modelos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/classification-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métricas de clasificación</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/regression-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métricas de regresión</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/cross-validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Validación cruzada</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Preprocesamiento</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/train-test-split.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Train, validation and test</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/data-leakage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data leakage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/missing-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Valores ausentes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/scaling-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Escalado y normalización</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/categorical-encoding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variables categóricas y encoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/outliers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Outliers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/pipelines-columntransformer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pipelines y ColumnTransformer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Reducción de dimensionalidad</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/pca.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PCA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Selección de variables</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/filter-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos filter</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/wrapper-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos wrapper</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/embedded-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos embedded</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regularización</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/logistic-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Árboles de decisión</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/random-forest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random forest</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/gradient-boosting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gradient boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support Vector Machines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/model-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparación de modelos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje no supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/k-means.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">K-means</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/hierarchical-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Clustering jerárquico</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/dbscan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DBSCAN y clustering por densidad</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/gaussian-mixture-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gaussian Mixture Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/clustering-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación del clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/anomaly-detection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Detección de anomalías</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/method-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparación de métodos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Series temporales</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/time-series-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fundamentos y preparación temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/decomposition-stationarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Descomposición y estacionariedad</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/exponential-smoothing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exponential smoothing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/arima-sarima.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ARIMA y SARIMA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/temporal-feature-engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Feature engineering temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/machine-learning-forecasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Machine learning para forecasting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/backtesting-and-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Backtesting y evaluación temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/clinical-time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Series temporales clínicas</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Deep learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Survival Analysis</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/survival-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fundamentos, tiempos y censura</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/kaplan-meier-log-rank.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kaplan-Meier y log-rank</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/cox-proportional-hazards.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelo de Cox</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/proportional-hazards-assumption.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Supuesto de riesgos proporcionales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/parametric-survival-aft.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelos paramétricos y Accelerated Failure Time</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/time-varying-covariates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variables dependientes del tiempo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/competing-risks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Competing risks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/survival-machine-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Machine learning para Survival Analysis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/survival-evaluation-calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación y calibración</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/clinical-survival-workflow.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Workflow clínico completo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">Multi-state Models</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multi-state Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+ <span class="menu-text">Introducción</span>
+  </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/state-design-and-transitions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Diseño de estados y transiciones</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/data-preparation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preparación de datos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/transition-intensities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Intensidades y matriz de transición</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelos de Markov</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/semi-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelos semi-Markov</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/transition-specific-covariates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Covariables específicas por transición</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/aalen-johansen-state-occupation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Aalen-Johansen y ocupación de estados</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/hidden-markov-models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Hidden Markov Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/prediction-and-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Predicción y evaluación</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">Guías de proyectos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../project-guides/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Recetario de código</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#por-qué-estados-ocultos" id="toc-por-qué-estados-ocultos" class="nav-link active" data-scroll-target="#por-qué-estados-ocultos">¿Por qué estados ocultos?</a></li>
+  <li><a href="#ejemplo-clínico" id="toc-ejemplo-clínico" class="nav-link" data-scroll-target="#ejemplo-clínico">Ejemplo clínico</a></li>
+  <li><a href="#hmm-básico" id="toc-hmm-básico" class="nav-link" data-scroll-target="#hmm-básico">HMM básico</a></li>
+  <li><a href="#estados-ocultos" id="toc-estados-ocultos" class="nav-link" data-scroll-target="#estados-ocultos">Estados ocultos</a></li>
+  <li><a href="#observación" id="toc-observación" class="nav-link" data-scroll-target="#observación">Observación</a></li>
+  <li><a href="#estructura-probabilística" id="toc-estructura-probabilística" class="nav-link" data-scroll-target="#estructura-probabilística">Estructura probabilística</a></li>
+  <li><a href="#supuesto-de-markov-latente" id="toc-supuesto-de-markov-latente" class="nav-link" data-scroll-target="#supuesto-de-markov-latente">Supuesto de Markov latente</a></li>
+  <li><a href="#independencia-condicional-de-observaciones" id="toc-independencia-condicional-de-observaciones" class="nav-link" data-scroll-target="#independencia-condicional-de-observaciones">Independencia condicional de observaciones</a></li>
+  <li><a href="#matriz-de-transición" id="toc-matriz-de-transición" class="nav-link" data-scroll-target="#matriz-de-transición">Matriz de transición</a></li>
+  <li><a href="#ejemplo" id="toc-ejemplo" class="nav-link" data-scroll-target="#ejemplo">Ejemplo</a></li>
+  <li><a href="#validar-filas" id="toc-validar-filas" class="nav-link" data-scroll-target="#validar-filas">Validar filas</a></li>
+  <li><a href="#interpretación" id="toc-interpretación" class="nav-link" data-scroll-target="#interpretación">Interpretación</a></li>
+  <li><a href="#estado-absorbente" id="toc-estado-absorbente" class="nav-link" data-scroll-target="#estado-absorbente">Estado absorbente</a></li>
+  <li><a href="#matriz-de-emisión" id="toc-matriz-de-emisión" class="nav-link" data-scroll-target="#matriz-de-emisión">Matriz de emisión</a></li>
+  <li><a href="#ejemplo-de-clasificación-observada" id="toc-ejemplo-de-clasificación-observada" class="nav-link" data-scroll-target="#ejemplo-de-clasificación-observada">Ejemplo de clasificación observada</a></li>
+  <li><a href="#matriz-casi-diagonal" id="toc-matriz-casi-diagonal" class="nav-link" data-scroll-target="#matriz-casi-diagonal">Matriz casi diagonal</a></li>
+  <li><a href="#interpretación-1" id="toc-interpretación-1" class="nav-link" data-scroll-target="#interpretación-1">Interpretación</a></li>
+  <li><a href="#sensibilidad-y-especificidad" id="toc-sensibilidad-y-especificidad" class="nav-link" data-scroll-target="#sensibilidad-y-especificidad">Sensibilidad y especificidad</a></li>
+  <li><a href="#distribución-inicial" id="toc-distribución-inicial" class="nav-link" data-scroll-target="#distribución-inicial">Distribución inicial</a></li>
+  <li><a href="#validar" id="toc-validar" class="nav-link" data-scroll-target="#validar">Validar</a></li>
+  <li><a href="#los-tres-problemas-clásicos" id="toc-los-tres-problemas-clásicos" class="nav-link" data-scroll-target="#los-tres-problemas-clásicos">Los tres problemas clásicos</a></li>
+  <li><a href="#problema-1.-evaluación" id="toc-problema-1.-evaluación" class="nav-link" data-scroll-target="#problema-1.-evaluación">Problema 1. Evaluación</a></li>
+  <li><a href="#forward-probabilities" id="toc-forward-probabilities" class="nav-link" data-scroll-target="#forward-probabilities">Forward probabilities</a></li>
+  <li><a href="#inicialización" id="toc-inicialización" class="nav-link" data-scroll-target="#inicialización">Inicialización</a></li>
+  <li><a href="#recursión" id="toc-recursión" class="nav-link" data-scroll-target="#recursión">Recursión</a></li>
+  <li><a href="#implementación-didáctica" id="toc-implementación-didáctica" class="nav-link" data-scroll-target="#implementación-didáctica">Implementación didáctica</a></li>
+  <li><a href="#problema-numérico" id="toc-problema-numérico" class="nav-link" data-scroll-target="#problema-numérico">Problema numérico</a></li>
+  <li><a href="#forward-en-log-space" id="toc-forward-en-log-space" class="nav-link" data-scroll-target="#forward-en-log-space">Forward en log-space</a></li>
+  <li><a href="#problema-2.-decodificación" id="toc-problema-2.-decodificación" class="nav-link" data-scroll-target="#problema-2.-decodificación">Problema 2. Decodificación</a></li>
+  <li><a href="#viterbi" id="toc-viterbi" class="nav-link" data-scroll-target="#viterbi">Viterbi</a></li>
+  <li><a href="#implementación-conceptual" id="toc-implementación-conceptual" class="nav-link" data-scroll-target="#implementación-conceptual">Implementación conceptual</a></li>
+  <li><a href="#viterbi-no-es-posterior-marginal" id="toc-viterbi-no-es-posterior-marginal" class="nav-link" data-scroll-target="#viterbi-no-es-posterior-marginal">Viterbi no es posterior marginal</a></li>
+  <li><a href="#problema-3.-aprendizaje" id="toc-problema-3.-aprendizaje" class="nav-link" data-scroll-target="#problema-3.-aprendizaje">Problema 3. Aprendizaje</a></li>
+  <li><a href="#backward-probabilities" id="toc-backward-probabilities" class="nav-link" data-scroll-target="#backward-probabilities">Backward probabilities</a></li>
+  <li><a href="#recursión-backward" id="toc-recursión-backward" class="nav-link" data-scroll-target="#recursión-backward">Recursión backward</a></li>
+  <li><a href="#posterior-de-estado" id="toc-posterior-de-estado" class="nav-link" data-scroll-target="#posterior-de-estado">Posterior de estado</a></li>
+  <li><a href="#interpretación-2" id="toc-interpretación-2" class="nav-link" data-scroll-target="#interpretación-2">Interpretación</a></li>
+  <li><a href="#smoothing" id="toc-smoothing" class="nav-link" data-scroll-target="#smoothing">Smoothing</a></li>
+  <li><a href="#filtering" id="toc-filtering" class="nav-link" data-scroll-target="#filtering">Filtering</a></li>
+  <li><a href="#prediction" id="toc-prediction" class="nav-link" data-scroll-target="#prediction">Prediction</a></li>
+  <li><a href="#ejemplo-1" id="toc-ejemplo-1" class="nav-link" data-scroll-target="#ejemplo-1">Ejemplo</a></li>
+  <li><a href="#observaciones-categóricas" id="toc-observaciones-categóricas" class="nav-link" data-scroll-target="#observaciones-categóricas">Observaciones categóricas</a></li>
+  <li><a href="#observaciones-continuas" id="toc-observaciones-continuas" class="nav-link" data-scroll-target="#observaciones-continuas">Observaciones continuas</a></li>
+  <li><a href="#emisión-gaussiana" id="toc-emisión-gaussiana" class="nav-link" data-scroll-target="#emisión-gaussiana">Emisión gaussiana</a></li>
+  <li><a href="#ejemplo-univariante" id="toc-ejemplo-univariante" class="nav-link" data-scroll-target="#ejemplo-univariante">Ejemplo univariante</a></li>
+  <li><a href="#likelihood-de-emisión" id="toc-likelihood-de-emisión" class="nav-link" data-scroll-target="#likelihood-de-emisión">Likelihood de emisión</a></li>
+  <li><a href="#emisión-multivariante" id="toc-emisión-multivariante" class="nav-link" data-scroll-target="#emisión-multivariante">Emisión multivariante</a></li>
+  <li><a href="#covarianza" id="toc-covarianza" class="nav-link" data-scroll-target="#covarianza">Covarianza</a></li>
+  <li><a href="#problemas-con-pocas-observaciones" id="toc-problemas-con-pocas-observaciones" class="nav-link" data-scroll-target="#problemas-con-pocas-observaciones">Problemas con pocas observaciones</a></li>
+  <li><a href="#distribuciones-no-gaussianas" id="toc-distribuciones-no-gaussianas" class="nav-link" data-scroll-target="#distribuciones-no-gaussianas">Distribuciones no gaussianas</a></li>
+  <li><a href="#biomarcadores-sesgados" id="toc-biomarcadores-sesgados" class="nav-link" data-scroll-target="#biomarcadores-sesgados">Biomarcadores sesgados</a></li>
+  <li><a href="#observaciones-mixtas" id="toc-observaciones-mixtas" class="nav-link" data-scroll-target="#observaciones-mixtas">Observaciones mixtas</a></li>
+  <li><a href="#missing-en-observaciones" id="toc-missing-en-observaciones" class="nav-link" data-scroll-target="#missing-en-observaciones">Missing en observaciones</a></li>
+  <li><a href="#no-confundir-missing-con-normal" id="toc-no-confundir-missing-con-normal" class="nav-link" data-scroll-target="#no-confundir-missing-con-normal">No confundir missing con normal</a></li>
+  <li><a href="#observaciones-irregulares" id="toc-observaciones-irregulares" class="nav-link" data-scroll-target="#observaciones-irregulares">Observaciones irregulares</a></li>
+  <li><a href="#problema" id="toc-problema" class="nav-link" data-scroll-target="#problema">Problema</a></li>
+  <li><a href="#continuous-time-hmm" id="toc-continuous-time-hmm" class="nav-link" data-scroll-target="#continuous-time-hmm">Continuous-time HMM</a></li>
+  <li><a href="#ejemplo-2" id="toc-ejemplo-2" class="nav-link" data-scroll-target="#ejemplo-2">Ejemplo</a></li>
+  <li><a href="#ventaja" id="toc-ventaja" class="nav-link" data-scroll-target="#ventaja">Ventaja</a></li>
+  <li><a href="#emisiones-en-continuous-time-hmm" id="toc-emisiones-en-continuous-time-hmm" class="nav-link" data-scroll-target="#emisiones-en-continuous-time-hmm">Emisiones en continuous-time HMM</a></li>
+  <li><a href="#panel-data" id="toc-panel-data" class="nav-link" data-scroll-target="#panel-data">Panel data</a></li>
+  <li><a href="#hidden-markov-frente-a-markov-observado" id="toc-hidden-markov-frente-a-markov-observado" class="nav-link" data-scroll-target="#hidden-markov-frente-a-markov-observado">Hidden Markov frente a Markov observado</a></li>
+  <li><a href="#hidden-semi-markov" id="toc-hidden-semi-markov" class="nav-link" data-scroll-target="#hidden-semi-markov">Hidden semi-Markov</a></li>
+  <li><a href="#cuándo-usarlo" id="toc-cuándo-usarlo" class="nav-link" data-scroll-target="#cuándo-usarlo">Cuándo usarlo</a></li>
+  <li><a href="#label-switching" id="toc-label-switching" class="nav-link" data-scroll-target="#label-switching">Label switching</a></li>
+  <li><a href="#solución" id="toc-solución" class="nav-link" data-scroll-target="#solución">Solución</a></li>
+  <li><a href="#identificabilidad" id="toc-identificabilidad" class="nav-link" data-scroll-target="#identificabilidad">Identificabilidad</a></li>
+  <li><a href="#número-de-estados" id="toc-número-de-estados" class="nav-link" data-scroll-target="#número-de-estados">Número de estados</a></li>
+  <li><a href="#no-elegir-solo-por-aic" id="toc-no-elegir-solo-por-aic" class="nav-link" data-scroll-target="#no-elegir-solo-por-aic">No elegir solo por AIC</a></li>
+  <li><a href="#inicialización-1" id="toc-inicialización-1" class="nav-link" data-scroll-target="#inicialización-1">Inicialización</a></li>
+  <li><a href="#inicialización-por-clasificación-observada" id="toc-inicialización-por-clasificación-observada" class="nav-link" data-scroll-target="#inicialización-por-clasificación-observada">Inicialización por clasificación observada</a></li>
+  <li><a href="#inicialización-por-clustering" id="toc-inicialización-por-clustering" class="nav-link" data-scroll-target="#inicialización-por-clustering">Inicialización por clustering</a></li>
+  <li><a href="#regularización" id="toc-regularización" class="nav-link" data-scroll-target="#regularización">Regularización</a></li>
+  <li><a href="#priors-clínicos" id="toc-priors-clínicos" class="nav-link" data-scroll-target="#priors-clínicos">Priors clínicos</a></li>
+  <li><a href="#transiciones-permitidas" id="toc-transiciones-permitidas" class="nav-link" data-scroll-target="#transiciones-permitidas">Transiciones permitidas</a></li>
+  <li><a href="#aplicar-máscara" id="toc-aplicar-máscara" class="nav-link" data-scroll-target="#aplicar-máscara">Aplicar máscara</a></li>
+  <li><a href="#autotransición" id="toc-autotransición" class="nav-link" data-scroll-target="#autotransición">Autotransición</a></li>
+  <li><a href="#duración-implícita" id="toc-duración-implícita" class="nav-link" data-scroll-target="#duración-implícita">Duración implícita</a></li>
+  <li><a href="#duración-esperada" id="toc-duración-esperada" class="nav-link" data-scroll-target="#duración-esperada">Duración esperada</a></li>
+  <li><a href="#ejemplo-3" id="toc-ejemplo-3" class="nav-link" data-scroll-target="#ejemplo-3">Ejemplo</a></li>
+  <li><a href="#covariables-en-transiciones" id="toc-covariables-en-transiciones" class="nav-link" data-scroll-target="#covariables-en-transiciones">Covariables en transiciones</a></li>
+  <li><a href="#ejemplo-conceptual" id="toc-ejemplo-conceptual" class="nav-link" data-scroll-target="#ejemplo-conceptual">Ejemplo conceptual</a></li>
+  <li><a href="#covariables-en-emisiones" id="toc-covariables-en-emisiones" class="nav-link" data-scroll-target="#covariables-en-emisiones">Covariables en emisiones</a></li>
+  <li><a href="#efecto-de-centro" id="toc-efecto-de-centro" class="nav-link" data-scroll-target="#efecto-de-centro">Efecto de centro</a></li>
+  <li><a href="#error-diferencial" id="toc-error-diferencial" class="nav-link" data-scroll-target="#error-diferencial">Error diferencial</a></li>
+  <li><a href="#interpretación-clínica-de-estados-latentes" id="toc-interpretación-clínica-de-estados-latentes" class="nav-link" data-scroll-target="#interpretación-clínica-de-estados-latentes">Interpretación clínica de estados latentes</a></li>
+  <li><a href="#tabla-de-emisiones" id="toc-tabla-de-emisiones" class="nav-link" data-scroll-target="#tabla-de-emisiones">Tabla de emisiones</a></li>
+  <li><a href="#posterior-de-estado-1" id="toc-posterior-de-estado-1" class="nav-link" data-scroll-target="#posterior-de-estado-1">Posterior de estado</a></li>
+  <li><a href="#decisión-clínica" id="toc-decisión-clínica" class="nav-link" data-scroll-target="#decisión-clínica">Decisión clínica</a></li>
+  <li><a href="#entropía" id="toc-entropía" class="nav-link" data-scroll-target="#entropía">Entropía</a></li>
+  <li><a href="#calcularla" id="toc-calcularla" class="nav-link" data-scroll-target="#calcularla">Calcularla</a></li>
+  <li><a href="#interpretación-3" id="toc-interpretación-3" class="nav-link" data-scroll-target="#interpretación-3">Interpretación</a></li>
+  <li><a href="#validación-interna" id="toc-validación-interna" class="nav-link" data-scroll-target="#validación-interna">Validación interna</a></li>
+  <li><a href="#validación-externa" id="toc-validación-externa" class="nav-link" data-scroll-target="#validación-externa">Validación externa</a></li>
+  <li><a href="#posterior-predictive-checks" id="toc-posterior-predictive-checks" class="nav-link" data-scroll-target="#posterior-predictive-checks">Posterior predictive checks</a></li>
+  <li><a href="#simulación-conceptual" id="toc-simulación-conceptual" class="nav-link" data-scroll-target="#simulación-conceptual">Simulación conceptual</a></li>
+  <li><a href="#comparación-con-clasificación-determinista" id="toc-comparación-con-clasificación-determinista" class="nav-link" data-scroll-target="#comparación-con-clasificación-determinista">Comparación con clasificación determinista</a>
+  <ul class="collapse">
+  <li><a href="#clasificación-determinista" id="toc-clasificación-determinista" class="nav-link" data-scroll-target="#clasificación-determinista">Clasificación determinista</a></li>
+  <li><a href="#hmm" id="toc-hmm" class="nav-link" data-scroll-target="#hmm">HMM</a></li>
+  </ul></li>
+  <li><a href="#ventajas-del-hmm" id="toc-ventajas-del-hmm" class="nav-link" data-scroll-target="#ventajas-del-hmm">Ventajas del HMM</a></li>
+  <li><a href="#limitaciones" id="toc-limitaciones" class="nav-link" data-scroll-target="#limitaciones">Limitaciones</a></li>
+  <li><a href="#leakage-retrospectivo" id="toc-leakage-retrospectivo" class="nav-link" data-scroll-target="#leakage-retrospectivo">Leakage retrospectivo</a></li>
+  <li><a href="#para-tiempo-real" id="toc-para-tiempo-real" class="nav-link" data-scroll-target="#para-tiempo-real">Para tiempo real</a></li>
+  <li><a href="#evaluación-online" id="toc-evaluación-online" class="nav-link" data-scroll-target="#evaluación-online">Evaluación online</a></li>
+  <li><a href="#métricas" id="toc-métricas" class="nav-link" data-scroll-target="#métricas">Métricas</a></li>
+  <li><a href="#brier-multiclase" id="toc-brier-multiclase" class="nav-link" data-scroll-target="#brier-multiclase">Brier multiclase</a></li>
+  <li><a href="#evaluación-con-estado-real-desconocido" id="toc-evaluación-con-estado-real-desconocido" class="nav-link" data-scroll-target="#evaluación-con-estado-real-desconocido">Evaluación con estado real desconocido</a></li>
+  <li><a href="#gold-standard" id="toc-gold-standard" class="nav-link" data-scroll-target="#gold-standard">Gold standard</a></li>
+  <li><a href="#aplicación-a-cardiotoxicidad" id="toc-aplicación-a-cardiotoxicidad" class="nav-link" data-scroll-target="#aplicación-a-cardiotoxicidad">Aplicación a cardiotoxicidad</a></li>
+  <li><a href="#preguntas-clínicas" id="toc-preguntas-clínicas" class="nav-link" data-scroll-target="#preguntas-clínicas">Preguntas clínicas</a></li>
+  <li><a href="#modelo-continuous-time-recomendado" id="toc-modelo-continuous-time-recomendado" class="nav-link" data-scroll-target="#modelo-continuous-time-recomendado">Modelo continuous-time recomendado</a></li>
+  <li><a href="#decisiones-pendientes" id="toc-decisiones-pendientes" class="nav-link" data-scroll-target="#decisiones-pendientes">Decisiones pendientes</a></li>
+  <li><a href="#reporting" id="toc-reporting" class="nav-link" data-scroll-target="#reporting">Reporting</a></li>
+  <li><a href="#ejemplo-de-redacción" id="toc-ejemplo-de-redacción" class="nav-link" data-scroll-target="#ejemplo-de-redacción">Ejemplo de redacción</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#checklist" id="toc-checklist" class="nav-link" data-scroll-target="#checklist">Checklist</a></li>
+  <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
+  <ul class="collapse">
+  <li><a href="#conceptos" id="toc-conceptos" class="nav-link" data-scroll-target="#conceptos">Conceptos</a></li>
+  <li><a href="#herramientas" id="toc-herramientas" class="nav-link" data-scroll-target="#herramientas">Herramientas</a></li>
+  <li><a href="#material-del-proyecto" id="toc-material-del-proyecto" class="nav-link" data-scroll-target="#material-del-proyecto">Material del proyecto</a></li>
+  </ul></li>
+  <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../multi-state-models/index.html">Multi-state Models</a></li><li class="breadcrumb-item"><a href="../multi-state-models/hidden-markov-models.html">Hidden Markov Models</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Hidden Markov Models</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un Hidden Markov Model, o HMM, distingue entre:</p>
+<ul>
+<li><strong>Estado clínico real</strong>, que permanece oculto.</li>
+<li><strong>Observación registrada</strong>, que puede contener error.</li>
+</ul>
+<p>Ejemplo:</p>
+<pre class="text"><code>Estado real
+→ S1
+
+Observación ecocardiográfica
+→ clasificada como S0</code></pre>
+<p>Los HMM permiten estimar:</p>
+<ul>
+<li>Probabilidad de cada estado latente.</li>
+<li>Probabilidad de error de clasificación.</li>
+<li>Secuencia más probable de estados.</li>
+<li>Intensidades o probabilidades de transición.</li>
+<li>Predicción del siguiente estado.</li>
+</ul>
+</div>
+</div>
+<section id="por-qué-estados-ocultos" class="level2">
+<h2 data-anchor-id="por-qué-estados-ocultos">¿Por qué estados ocultos?</h2>
+<p>En muchos procesos clínicos el estado real no se observa directamente.</p>
+<p>Se infiere mediante:</p>
+<ul>
+<li>Biomarcadores.</li>
+<li>Pruebas de imagen.</li>
+<li>Escalas.</li>
+<li>Diagnósticos.</li>
+<li>Evaluación profesional.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>La observación es una señal imperfecta del estado clínico subyacente.</p>
+</div>
+</div>
+</section>
+<section id="ejemplo-clínico" class="level2">
+<h2 data-anchor-id="ejemplo-clínico">Ejemplo clínico</h2>
+<pre class="text"><code>Estado latente
+→ cardiotoxicidad leve
+
+Observaciones:
+- FEVI normal
+- GLS alterado
+- troponina elevada</code></pre>
+<p>La combinación de observaciones aporta evidencia sobre el estado real, pero no lo determina con certeza absoluta.</p>
+</section>
+<section id="hmm-básico" class="level2">
+<h2 data-anchor-id="hmm-básico">HMM básico</h2>
+<p>Un HMM contiene:</p>
+<ol type="1">
+<li>Estados ocultos.</li>
+<li>Observaciones.</li>
+<li>Probabilidades de transición.</li>
+<li>Probabilidades de emisión.</li>
+<li>Distribución inicial.</li>
+</ol>
+</section>
+<section id="estados-ocultos" class="level2">
+<h2 data-anchor-id="estados-ocultos">Estados ocultos</h2>
+<pre class="text"><code>Z_t ∈ {S0, S1, S2, S3}</code></pre>
+</section>
+<section id="observación" class="level2">
+<h2 data-anchor-id="observación">Observación</h2>
+<pre class="text"><code>Y_t</code></pre>
+<p>puede ser:</p>
+<ul>
+<li>Estado registrado.</li>
+<li>Resultado de prueba.</li>
+<li>Vector de biomarcadores.</li>
+<li>Categoría clínica.</li>
+<li>Señal continua.</li>
+</ul>
+</section>
+<section id="estructura-probabilística" class="level2">
+<h2 data-anchor-id="estructura-probabilística">Estructura probabilística</h2>
+<pre class="text"><code>Z₁ → Z₂ → Z₃ → Z₄
+↓    ↓    ↓    ↓
+Y₁   Y₂   Y₃   Y₄</code></pre>
+</section>
+<section id="supuesto-de-markov-latente" class="level2">
+<h2 data-anchor-id="supuesto-de-markov-latente">Supuesto de Markov latente</h2>
+<p><span class="math display">\[
+P(
+Z_t
+\mid
+Z_{1:t-1}
+)
+=
+P(
+Z_t
+\mid
+Z_{t-1}
+)
+\]</span></p>
+</section>
+<section id="independencia-condicional-de-observaciones" class="level2">
+<h2 data-anchor-id="independencia-condicional-de-observaciones">Independencia condicional de observaciones</h2>
+<p><span class="math display">\[
+P(
+Y_t
+\mid
+Z_{1:t},Y_{1:t-1}
+)
+=
+P(
+Y_t
+\mid
+Z_t
+)
+\]</span></p>
+</section>
+<section id="matriz-de-transición" class="level2">
+<h2 data-anchor-id="matriz-de-transición">Matriz de transición</h2>
+<p>Para un HMM discreto:</p>
+<p><span class="math display">\[
+A_{rs}
+=
+P(
+Z_{t+1}=s
+\mid
+Z_t=r
+)
+\]</span></p>
+</section>
+<section id="ejemplo" class="level2">
+<h2 data-anchor-id="ejemplo">Ejemplo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>A <span class="op">=</span> np.array(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.85</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.13</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.02</span>,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.00</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.15</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.65</span>,</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.18</span>,</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.02</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.00</span>,</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.15</span>,</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.70</span>,</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.15</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.00</span>,</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.00</span>,</span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.00</span>,</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>            <span class="fl">1.00</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="validar-filas" class="level2">
+<h2 data-anchor-id="validar-filas">Validar filas</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>np.allclose(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    A.<span class="bu">sum</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        axis<span class="op">=</span><span class="dv">1</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación" class="level2">
+<h2 data-anchor-id="interpretación">Interpretación</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>A[</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">2</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>es la probabilidad de pasar de S1 a S2 entre dos tiempos de observación consecutivos.</p>
+</section>
+<section id="estado-absorbente" class="level2">
+<h2 data-anchor-id="estado-absorbente">Estado absorbente</h2>
+<pre class="text"><code>S3</code></pre>
+<p>puede representarse con:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>A[</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">3</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    :</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> [</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="matriz-de-emisión" class="level2">
+<h2 data-anchor-id="matriz-de-emisión">Matriz de emisión</h2>
+<p>La matriz de emisión describe:</p>
+<p><span class="math display">\[
+B_{sk}
+=
+P(
+Y_t=k
+\mid
+Z_t=s
+)
+\]</span></p>
+</section>
+<section id="ejemplo-de-clasificación-observada" class="level2">
+<h2 data-anchor-id="ejemplo-de-clasificación-observada">Ejemplo de clasificación observada</h2>
+<p>Estados reales:</p>
+<pre class="text"><code>S0, S1, S2, S3</code></pre>
+<p>Estados observados:</p>
+<pre class="text"><code>S0, S1, S2, S3</code></pre>
+</section>
+<section id="matriz-casi-diagonal" class="level2">
+<h2 data-anchor-id="matriz-casi-diagonal">Matriz casi diagonal</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>B <span class="op">=</span> np.array(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.90</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.08</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.02</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.00</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.10</span>,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.75</span>,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.13</span>,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.02</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.01</span>,</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.14</span>,</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.75</span>,</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.10</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.00</span>,</span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.02</span>,</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.08</span>,</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>            <span class="fl">0.90</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación-1" class="level2">
+<h2 data-anchor-id="interpretación-1">Interpretación</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>B[</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">0</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>es la probabilidad de observar S0 cuando el estado latente real es S1.</p>
+</section>
+<section id="sensibilidad-y-especificidad" class="level2">
+<h2 data-anchor-id="sensibilidad-y-especificidad">Sensibilidad y especificidad</h2>
+<p>La diagonal representa clasificación correcta.</p>
+<p>Los elementos fuera de la diagonal representan error.</p>
+</section>
+<section id="distribución-inicial" class="level2">
+<h2 data-anchor-id="distribución-inicial">Distribución inicial</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pi <span class="op">=</span> np.array(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0.80</span>,</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0.15</span>,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0.05</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0.00</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="validar" class="level2">
+<h2 data-anchor-id="validar">Validar</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>np.isclose(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    pi.<span class="bu">sum</span>(),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="los-tres-problemas-clásicos" class="level2">
+<h2 data-anchor-id="los-tres-problemas-clásicos">Los tres problemas clásicos</h2>
+<p>Un HMM suele resolver tres tareas:</p>
+<ol type="1">
+<li>Evaluación de probabilidad.</li>
+<li>Decodificación.</li>
+<li>Aprendizaje de parámetros.</li>
+</ol>
+</section>
+<section id="problema-1.-evaluación" class="level2">
+<h2 data-anchor-id="problema-1.-evaluación">Problema 1. Evaluación</h2>
+<pre class="text"><code>¿Cuál es la probabilidad
+de la secuencia observada?</code></pre>
+<p>Se resuelve con el algoritmo forward.</p>
+</section>
+<section id="forward-probabilities" class="level2">
+<h2 data-anchor-id="forward-probabilities">Forward probabilities</h2>
+<p><span class="math display">\[
+\alpha_t(s)
+=
+P(
+Y_1,\ldots,Y_t,
+Z_t=s
+)
+\]</span></p>
+</section>
+<section id="inicialización" class="level2">
+<h2 data-anchor-id="inicialización">Inicialización</h2>
+<p><span class="math display">\[
+\alpha_1(s)
+=
+\pi_s
+B_s(Y_1)
+\]</span></p>
+</section>
+<section id="recursión" class="level2">
+<h2 data-anchor-id="recursión">Recursión</h2>
+<p><span class="math display">\[
+\alpha_t(s)
+=
+B_s(Y_t)
+\sum_r
+\alpha_{t-1}(r)
+A_{rs}
+\]</span></p>
+</section>
+<section id="implementación-didáctica" class="level2">
+<h2 data-anchor-id="implementación-didáctica">Implementación didáctica</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> forward_algorithm(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    observations,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    initial_probabilities,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    transition_matrix,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    emission_matrix</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    n_states <span class="op">=</span> (</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        transition_matrix.shape[</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>            <span class="dv">0</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    n_times <span class="op">=</span> <span class="bu">len</span>(</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>        observations</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    alpha <span class="op">=</span> np.zeros(</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>            n_times,</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>            n_states</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>    first_observation <span class="op">=</span> observations[</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>        <span class="dv">0</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    alpha[</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>        <span class="dv">0</span>,</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>        :</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>    ] <span class="op">=</span> (</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>        initial_probabilities</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>        emission_matrix[</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>            :,</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>            first_observation</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> time_index <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span>,</span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>        n_times</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>        observation <span class="op">=</span> observations[</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>            time_index</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>        alpha[</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>            time_index,</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>            :</span>
+<span id="cb18-53"><a href="#cb18-53" aria-hidden="true" tabindex="-1"></a>        ] <span class="op">=</span> (</span>
+<span id="cb18-54"><a href="#cb18-54" aria-hidden="true" tabindex="-1"></a>            alpha[</span>
+<span id="cb18-55"><a href="#cb18-55" aria-hidden="true" tabindex="-1"></a>                time_index</span>
+<span id="cb18-56"><a href="#cb18-56" aria-hidden="true" tabindex="-1"></a>                <span class="op">-</span></span>
+<span id="cb18-57"><a href="#cb18-57" aria-hidden="true" tabindex="-1"></a>                <span class="dv">1</span>,</span>
+<span id="cb18-58"><a href="#cb18-58" aria-hidden="true" tabindex="-1"></a>                :</span>
+<span id="cb18-59"><a href="#cb18-59" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb18-60"><a href="#cb18-60" aria-hidden="true" tabindex="-1"></a>            <span class="op">@</span></span>
+<span id="cb18-61"><a href="#cb18-61" aria-hidden="true" tabindex="-1"></a>            transition_matrix</span>
+<span id="cb18-62"><a href="#cb18-62" aria-hidden="true" tabindex="-1"></a>        ) <span class="op">*</span> emission_matrix[</span>
+<span id="cb18-63"><a href="#cb18-63" aria-hidden="true" tabindex="-1"></a>            :,</span>
+<span id="cb18-64"><a href="#cb18-64" aria-hidden="true" tabindex="-1"></a>            observation</span>
+<span id="cb18-65"><a href="#cb18-65" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb18-66"><a href="#cb18-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-67"><a href="#cb18-67" aria-hidden="true" tabindex="-1"></a>    sequence_probability <span class="op">=</span> (</span>
+<span id="cb18-68"><a href="#cb18-68" aria-hidden="true" tabindex="-1"></a>        alpha[</span>
+<span id="cb18-69"><a href="#cb18-69" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span><span class="dv">1</span>,</span>
+<span id="cb18-70"><a href="#cb18-70" aria-hidden="true" tabindex="-1"></a>            :</span>
+<span id="cb18-71"><a href="#cb18-71" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb18-72"><a href="#cb18-72" aria-hidden="true" tabindex="-1"></a>        .<span class="bu">sum</span>()</span>
+<span id="cb18-73"><a href="#cb18-73" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-74"><a href="#cb18-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-75"><a href="#cb18-75" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb18-76"><a href="#cb18-76" aria-hidden="true" tabindex="-1"></a>        alpha,</span>
+<span id="cb18-77"><a href="#cb18-77" aria-hidden="true" tabindex="-1"></a>        sequence_probability</span>
+<span id="cb18-78"><a href="#cb18-78" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="problema-numérico" class="level2">
+<h2 data-anchor-id="problema-numérico">Problema numérico</h2>
+<p>Con secuencias largas, las probabilidades pueden hacerse extremadamente pequeñas.</p>
+<p>Soluciones:</p>
+<ul>
+<li>Escalado.</li>
+<li>Log-probabilidades.</li>
+<li>Log-sum-exp.</li>
+</ul>
+</section>
+<section id="forward-en-log-space" class="level2">
+<h2 data-anchor-id="forward-en-log-space">Forward en log-space</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.special <span class="im">import</span> logsumexp</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="problema-2.-decodificación" class="level2">
+<h2 data-anchor-id="problema-2.-decodificación">Problema 2. Decodificación</h2>
+<pre class="text"><code>¿Cuál es la secuencia de estados
+más probable?</code></pre>
+<p>Se utiliza Viterbi.</p>
+</section>
+<section id="viterbi" class="level2">
+<h2 data-anchor-id="viterbi">Viterbi</h2>
+<p><span class="math display">\[
+\delta_t(s)
+=
+\max_r
+[
+\delta_{t-1}(r)
+A_{rs}
+]
+B_s(Y_t)
+\]</span></p>
+</section>
+<section id="implementación-conceptual" class="level2">
+<h2 data-anchor-id="implementación-conceptual">Implementación conceptual</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> viterbi(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    observations,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    initial_probabilities,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    transition_matrix,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    emission_matrix</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    log_pi <span class="op">=</span> np.log(</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        initial_probabilities</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    log_a <span class="op">=</span> np.log(</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>        transition_matrix</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>    log_b <span class="op">=</span> np.log(</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>        emission_matrix</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    n_states <span class="op">=</span> (</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>        transition_matrix.shape[</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>            <span class="dv">0</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    n_times <span class="op">=</span> <span class="bu">len</span>(</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>        observations</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>    delta <span class="op">=</span> np.full(</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>            n_times,</span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>            n_states</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span>np.inf</span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>    psi <span class="op">=</span> np.zeros(</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>            n_times,</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>            n_states</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>        ),</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>        dtype<span class="op">=</span><span class="bu">int</span></span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>    delta[</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>        <span class="dv">0</span>,</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>        :</span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>    ] <span class="op">=</span> (</span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>        log_pi</span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span></span>
+<span id="cb21-52"><a href="#cb21-52" aria-hidden="true" tabindex="-1"></a>        log_b[</span>
+<span id="cb21-53"><a href="#cb21-53" aria-hidden="true" tabindex="-1"></a>            :,</span>
+<span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>            observations[</span>
+<span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a>                <span class="dv">0</span></span>
+<span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb21-57"><a href="#cb21-57" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb21-58"><a href="#cb21-58" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-59"><a href="#cb21-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-60"><a href="#cb21-60" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> time_index <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb21-61"><a href="#cb21-61" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span>,</span>
+<span id="cb21-62"><a href="#cb21-62" aria-hidden="true" tabindex="-1"></a>        n_times</span>
+<span id="cb21-63"><a href="#cb21-63" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb21-64"><a href="#cb21-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-65"><a href="#cb21-65" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> state <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb21-66"><a href="#cb21-66" aria-hidden="true" tabindex="-1"></a>            n_states</span>
+<span id="cb21-67"><a href="#cb21-67" aria-hidden="true" tabindex="-1"></a>        ):</span>
+<span id="cb21-68"><a href="#cb21-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-69"><a href="#cb21-69" aria-hidden="true" tabindex="-1"></a>            candidates <span class="op">=</span> (</span>
+<span id="cb21-70"><a href="#cb21-70" aria-hidden="true" tabindex="-1"></a>                delta[</span>
+<span id="cb21-71"><a href="#cb21-71" aria-hidden="true" tabindex="-1"></a>                    time_index</span>
+<span id="cb21-72"><a href="#cb21-72" aria-hidden="true" tabindex="-1"></a>                    <span class="op">-</span></span>
+<span id="cb21-73"><a href="#cb21-73" aria-hidden="true" tabindex="-1"></a>                    <span class="dv">1</span>,</span>
+<span id="cb21-74"><a href="#cb21-74" aria-hidden="true" tabindex="-1"></a>                    :</span>
+<span id="cb21-75"><a href="#cb21-75" aria-hidden="true" tabindex="-1"></a>                ]</span>
+<span id="cb21-76"><a href="#cb21-76" aria-hidden="true" tabindex="-1"></a>                <span class="op">+</span></span>
+<span id="cb21-77"><a href="#cb21-77" aria-hidden="true" tabindex="-1"></a>                log_a[</span>
+<span id="cb21-78"><a href="#cb21-78" aria-hidden="true" tabindex="-1"></a>                    :,</span>
+<span id="cb21-79"><a href="#cb21-79" aria-hidden="true" tabindex="-1"></a>                    state</span>
+<span id="cb21-80"><a href="#cb21-80" aria-hidden="true" tabindex="-1"></a>                ]</span>
+<span id="cb21-81"><a href="#cb21-81" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb21-82"><a href="#cb21-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-83"><a href="#cb21-83" aria-hidden="true" tabindex="-1"></a>            psi[</span>
+<span id="cb21-84"><a href="#cb21-84" aria-hidden="true" tabindex="-1"></a>                time_index,</span>
+<span id="cb21-85"><a href="#cb21-85" aria-hidden="true" tabindex="-1"></a>                state</span>
+<span id="cb21-86"><a href="#cb21-86" aria-hidden="true" tabindex="-1"></a>            ] <span class="op">=</span> np.argmax(</span>
+<span id="cb21-87"><a href="#cb21-87" aria-hidden="true" tabindex="-1"></a>                candidates</span>
+<span id="cb21-88"><a href="#cb21-88" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb21-89"><a href="#cb21-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-90"><a href="#cb21-90" aria-hidden="true" tabindex="-1"></a>            delta[</span>
+<span id="cb21-91"><a href="#cb21-91" aria-hidden="true" tabindex="-1"></a>                time_index,</span>
+<span id="cb21-92"><a href="#cb21-92" aria-hidden="true" tabindex="-1"></a>                state</span>
+<span id="cb21-93"><a href="#cb21-93" aria-hidden="true" tabindex="-1"></a>            ] <span class="op">=</span> (</span>
+<span id="cb21-94"><a href="#cb21-94" aria-hidden="true" tabindex="-1"></a>                candidates[</span>
+<span id="cb21-95"><a href="#cb21-95" aria-hidden="true" tabindex="-1"></a>                    psi[</span>
+<span id="cb21-96"><a href="#cb21-96" aria-hidden="true" tabindex="-1"></a>                        time_index,</span>
+<span id="cb21-97"><a href="#cb21-97" aria-hidden="true" tabindex="-1"></a>                        state</span>
+<span id="cb21-98"><a href="#cb21-98" aria-hidden="true" tabindex="-1"></a>                    ]</span>
+<span id="cb21-99"><a href="#cb21-99" aria-hidden="true" tabindex="-1"></a>                ]</span>
+<span id="cb21-100"><a href="#cb21-100" aria-hidden="true" tabindex="-1"></a>                <span class="op">+</span></span>
+<span id="cb21-101"><a href="#cb21-101" aria-hidden="true" tabindex="-1"></a>                log_b[</span>
+<span id="cb21-102"><a href="#cb21-102" aria-hidden="true" tabindex="-1"></a>                    state,</span>
+<span id="cb21-103"><a href="#cb21-103" aria-hidden="true" tabindex="-1"></a>                    observations[</span>
+<span id="cb21-104"><a href="#cb21-104" aria-hidden="true" tabindex="-1"></a>                        time_index</span>
+<span id="cb21-105"><a href="#cb21-105" aria-hidden="true" tabindex="-1"></a>                    ]</span>
+<span id="cb21-106"><a href="#cb21-106" aria-hidden="true" tabindex="-1"></a>                ]</span>
+<span id="cb21-107"><a href="#cb21-107" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb21-108"><a href="#cb21-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-109"><a href="#cb21-109" aria-hidden="true" tabindex="-1"></a>    path <span class="op">=</span> np.zeros(</span>
+<span id="cb21-110"><a href="#cb21-110" aria-hidden="true" tabindex="-1"></a>        n_times,</span>
+<span id="cb21-111"><a href="#cb21-111" aria-hidden="true" tabindex="-1"></a>        dtype<span class="op">=</span><span class="bu">int</span></span>
+<span id="cb21-112"><a href="#cb21-112" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-113"><a href="#cb21-113" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-114"><a href="#cb21-114" aria-hidden="true" tabindex="-1"></a>    path[</span>
+<span id="cb21-115"><a href="#cb21-115" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb21-116"><a href="#cb21-116" aria-hidden="true" tabindex="-1"></a>    ] <span class="op">=</span> np.argmax(</span>
+<span id="cb21-117"><a href="#cb21-117" aria-hidden="true" tabindex="-1"></a>        delta[</span>
+<span id="cb21-118"><a href="#cb21-118" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span><span class="dv">1</span>,</span>
+<span id="cb21-119"><a href="#cb21-119" aria-hidden="true" tabindex="-1"></a>            :</span>
+<span id="cb21-120"><a href="#cb21-120" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb21-121"><a href="#cb21-121" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-122"><a href="#cb21-122" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-123"><a href="#cb21-123" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> time_index <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb21-124"><a href="#cb21-124" aria-hidden="true" tabindex="-1"></a>        n_times</span>
+<span id="cb21-125"><a href="#cb21-125" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span></span>
+<span id="cb21-126"><a href="#cb21-126" aria-hidden="true" tabindex="-1"></a>        <span class="dv">2</span>,</span>
+<span id="cb21-127"><a href="#cb21-127" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span><span class="dv">1</span>,</span>
+<span id="cb21-128"><a href="#cb21-128" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb21-129"><a href="#cb21-129" aria-hidden="true" tabindex="-1"></a>    ):</span>
+<span id="cb21-130"><a href="#cb21-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-131"><a href="#cb21-131" aria-hidden="true" tabindex="-1"></a>        path[</span>
+<span id="cb21-132"><a href="#cb21-132" aria-hidden="true" tabindex="-1"></a>            time_index</span>
+<span id="cb21-133"><a href="#cb21-133" aria-hidden="true" tabindex="-1"></a>        ] <span class="op">=</span> psi[</span>
+<span id="cb21-134"><a href="#cb21-134" aria-hidden="true" tabindex="-1"></a>            time_index</span>
+<span id="cb21-135"><a href="#cb21-135" aria-hidden="true" tabindex="-1"></a>            <span class="op">+</span></span>
+<span id="cb21-136"><a href="#cb21-136" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span>,</span>
+<span id="cb21-137"><a href="#cb21-137" aria-hidden="true" tabindex="-1"></a>            path[</span>
+<span id="cb21-138"><a href="#cb21-138" aria-hidden="true" tabindex="-1"></a>                time_index</span>
+<span id="cb21-139"><a href="#cb21-139" aria-hidden="true" tabindex="-1"></a>                <span class="op">+</span></span>
+<span id="cb21-140"><a href="#cb21-140" aria-hidden="true" tabindex="-1"></a>                <span class="dv">1</span></span>
+<span id="cb21-141"><a href="#cb21-141" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb21-142"><a href="#cb21-142" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb21-143"><a href="#cb21-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-144"><a href="#cb21-144" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> path</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="viterbi-no-es-posterior-marginal" class="level2">
+<h2 data-anchor-id="viterbi-no-es-posterior-marginal">Viterbi no es posterior marginal</h2>
+<p>La secuencia Viterbi es la trayectoria conjunta más probable.</p>
+<p>No coincide necesariamente con elegir en cada tiempo el estado posterior más probable.</p>
+</section>
+<section id="problema-3.-aprendizaje" class="level2">
+<h2 data-anchor-id="problema-3.-aprendizaje">Problema 3. Aprendizaje</h2>
+<pre class="text"><code>¿Cómo estimar A, B y pi
+a partir de los datos?</code></pre>
+<p>Puede utilizarse:</p>
+<ul>
+<li>Máxima verosimilitud.</li>
+<li>Baum-Welch.</li>
+<li>Expectation-Maximization.</li>
+<li>Métodos bayesianos.</li>
+</ul>
+</section>
+<section id="backward-probabilities" class="level2">
+<h2 data-anchor-id="backward-probabilities">Backward probabilities</h2>
+<p><span class="math display">\[
+\beta_t(r)
+=
+P(
+Y_{t+1:T}
+\mid
+Z_t=r
+)
+\]</span></p>
+</section>
+<section id="recursión-backward" class="level2">
+<h2 data-anchor-id="recursión-backward">Recursión backward</h2>
+<p><span class="math display">\[
+\beta_t(r)
+=
+\sum_s
+A_{rs}
+B_s(Y_{t+1})
+\beta_{t+1}(s)
+\]</span></p>
+</section>
+<section id="posterior-de-estado" class="level2">
+<h2 data-anchor-id="posterior-de-estado">Posterior de estado</h2>
+<p><span class="math display">\[
+\gamma_t(s)
+=
+P(
+Z_t=s
+\mid
+Y_{1:T}
+)
+\]</span></p>
+<p>Se obtiene combinando forward y backward.</p>
+</section>
+<section id="interpretación-2" class="level2">
+<h2 data-anchor-id="interpretación-2">Interpretación</h2>
+<pre class="text"><code>En visita t:
+P(S0) = 0.10
+P(S1) = 0.65
+P(S2) = 0.24
+P(S3) = 0.01</code></pre>
+</section>
+<section id="smoothing" class="level2">
+<h2 data-anchor-id="smoothing">Smoothing</h2>
+<p>Utiliza toda la secuencia, incluyendo observaciones posteriores.</p>
+<p>Útil para:</p>
+<ul>
+<li>Análisis retrospectivo.</li>
+<li>Adjudicación.</li>
+<li>Reconstrucción de trayectorias.</li>
+</ul>
+</section>
+<section id="filtering" class="level2">
+<h2 data-anchor-id="filtering">Filtering</h2>
+<p>Utiliza solo información hasta el tiempo actual.</p>
+<p><span class="math display">\[
+P(
+Z_t
+\mid
+Y_{1:t}
+)
+\]</span></p>
+<p>Útil para:</p>
+<ul>
+<li>Predicción online.</li>
+<li>Alertas.</li>
+<li>Apoyo clínico en tiempo real.</li>
+</ul>
+</section>
+<section id="prediction" class="level2">
+<h2 data-anchor-id="prediction">Prediction</h2>
+<p><span class="math display">\[
+P(
+Z_{t+1}
+\mid
+Y_{1:t}
+)
+\]</span></p>
+<p>Se obtiene propagando la distribución filtrada mediante la matriz de transición.</p>
+</section>
+<section id="ejemplo-1" class="level2">
+<h2 data-anchor-id="ejemplo-1">Ejemplo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>filtered_state_probability <span class="op">=</span> np.array(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0.10</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0.70</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0.19</span>,</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>        <span class="fl">0.01</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>next_state_probability <span class="op">=</span> (</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    filtered_state_probability</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">@</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    A</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="observaciones-categóricas" class="level2">
+<h2 data-anchor-id="observaciones-categóricas">Observaciones categóricas</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>Estado clínico registrado</code></pre>
+<p>La matriz de emisión es categórica.</p>
+</section>
+<section id="observaciones-continuas" class="level2">
+<h2 data-anchor-id="observaciones-continuas">Observaciones continuas</h2>
+<p>Ejemplos:</p>
+<ul>
+<li>FEVI.</li>
+<li>GLS.</li>
+<li>Troponina.</li>
+<li>NT-proBNP.</li>
+</ul>
+<p>Puede asumirse una distribución por estado.</p>
+</section>
+<section id="emisión-gaussiana" class="level2">
+<h2 data-anchor-id="emisión-gaussiana">Emisión gaussiana</h2>
+<p><span class="math display">\[
+Y_t
+\mid
+Z_t=s
+\sim
+N(
+\mu_s,
+\Sigma_s
+)
+\]</span></p>
+</section>
+<section id="ejemplo-univariante" class="level2">
+<h2 data-anchor-id="ejemplo-univariante">Ejemplo univariante</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>state_means <span class="op">=</span> np.array(</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>        <span class="dv">60</span>,</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>        <span class="dv">55</span>,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>        <span class="dv">45</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>        <span class="dv">35</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>state_standard_deviations <span class="op">=</span> np.array(</span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span>,</span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>        <span class="dv">5</span>,</span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>        <span class="dv">6</span>,</span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>        <span class="dv">7</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="likelihood-de-emisión" class="level2">
+<h2 data-anchor-id="likelihood-de-emisión">Likelihood de emisión</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> norm</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gaussian_emission_probability(</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    value,</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    state</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> norm.pdf(</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>        value,</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>        loc<span class="op">=</span>state_means[</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>            state</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>        scale<span class="op">=</span>state_standard_deviations[</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>            state</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="emisión-multivariante" class="level2">
+<h2 data-anchor-id="emisión-multivariante">Emisión multivariante</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> multivariate_normal</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>observation <span class="op">=</span> np.array(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>        lvef,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        gls,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        troponin</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cada estado puede tener:</p>
+<ul>
+<li>Vector de medias.</li>
+<li>Matriz de covarianza.</li>
+</ul>
+</section>
+<section id="covarianza" class="level2">
+<h2 data-anchor-id="covarianza">Covarianza</h2>
+<p>Puede asumirse:</p>
+<ul>
+<li>Diagonal.</li>
+<li>Completa.</li>
+<li>Compartida.</li>
+<li>Específica por estado.</li>
+</ul>
+</section>
+<section id="problemas-con-pocas-observaciones" class="level2">
+<h2 data-anchor-id="problemas-con-pocas-observaciones">Problemas con pocas observaciones</h2>
+<p>Una matriz de covarianza completa requiere muchos datos.</p>
+<p>Puede preferirse:</p>
+<ul>
+<li>Diagonal.</li>
+<li>Regularización.</li>
+<li>Selección de variables.</li>
+<li>Priors.</li>
+</ul>
+</section>
+<section id="distribuciones-no-gaussianas" class="level2">
+<h2 data-anchor-id="distribuciones-no-gaussianas">Distribuciones no gaussianas</h2>
+<p>Ejemplos:</p>
+<ul>
+<li>Log-normal para biomarcadores.</li>
+<li>Poisson para recuentos.</li>
+<li>Bernoulli para flags.</li>
+<li>Multinomial para categorías.</li>
+<li>Distribuciones mixtas.</li>
+</ul>
+</section>
+<section id="biomarcadores-sesgados" class="level2">
+<h2 data-anchor-id="biomarcadores-sesgados">Biomarcadores sesgados</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>log_troponin <span class="op">=</span> np.log1p(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    troponin</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Puede ser más compatible con una emisión gaussiana.</p>
+</section>
+<section id="observaciones-mixtas" class="level2">
+<h2 data-anchor-id="observaciones-mixtas">Observaciones mixtas</h2>
+<p>Un estado puede emitir simultáneamente:</p>
+<ul>
+<li>FEVI continua.</li>
+<li>Troponina continua.</li>
+<li>ECG anormal binario.</li>
+<li>Calidad categórica.</li>
+</ul>
+<p>Se necesita una función de emisión conjunta o una aproximación condicional.</p>
+</section>
+<section id="missing-en-observaciones" class="level2">
+<h2 data-anchor-id="missing-en-observaciones">Missing en observaciones</h2>
+<p>Una ventaja de los HMM es que pueden integrar información parcial.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>FEVI disponible
+GLS missing
+Troponina disponible</code></pre>
+<p>La likelihood puede calcularse solo con las variables observadas, si el modelo lo permite.</p>
+</section>
+<section id="no-confundir-missing-con-normal" class="level2">
+<h2 data-anchor-id="no-confundir-missing-con-normal">No confundir missing con normal</h2>
+<pre class="text"><code>GLS no medido
+≠
+GLS normal</code></pre>
+</section>
+<section id="observaciones-irregulares" class="level2">
+<h2 data-anchor-id="observaciones-irregulares">Observaciones irregulares</h2>
+<p>El HMM discreto estándar supone pasos equivalentes.</p>
+<p>Pero en salud:</p>
+<pre class="text"><code>Visita 1 → día 0
+Visita 2 → día 30
+Visita 3 → día 200</code></pre>
+<p>Los intervalos son distintos.</p>
+</section>
+<section id="problema" class="level2">
+<h2 data-anchor-id="problema">Problema</h2>
+<p>Usar la misma matriz (A) para 30 y 170 días no es coherente.</p>
+</section>
+<section id="continuous-time-hmm" class="level2">
+<h2 data-anchor-id="continuous-time-hmm">Continuous-time HMM</h2>
+<p>Utiliza una matriz generadora (Q).</p>
+<p>Para un intervalo (t):</p>
+<p><span class="math display">\[
+P(\Delta t)
+=
+\exp(
+Q\Delta t
+)
+\]</span></p>
+</section>
+<section id="ejemplo-2" class="level2">
+<h2 data-anchor-id="ejemplo-2">Ejemplo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.linalg <span class="im">import</span> expm</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>delta_t <span class="op">=</span> <span class="dv">170</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>P_delta <span class="op">=</span> expm(</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    Q</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    delta_t</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ventaja" class="level2">
+<h2 data-anchor-id="ventaja">Ventaja</h2>
+<p>Permite:</p>
+<ul>
+<li>Visitas irregulares.</li>
+<li>Intensidades continuas.</li>
+<li>Transiciones ocultas entre visitas.</li>
+<li>Relación con modelos multiestado.</li>
+</ul>
+</section>
+<section id="emisiones-en-continuous-time-hmm" class="level2">
+<h2 data-anchor-id="emisiones-en-continuous-time-hmm">Emisiones en continuous-time HMM</h2>
+<p>En cada visita se observa una señal condicionada al estado latente de ese momento.</p>
+</section>
+<section id="panel-data" class="level2">
+<h2 data-anchor-id="panel-data">Panel data</h2>
+<p>El estado puede cambiar varias veces entre visitas.</p>
+<p>Un continuous-time HMM integra sobre esas trayectorias posibles.</p>
+</section>
+<section id="hidden-markov-frente-a-markov-observado" class="level2">
+<h2 data-anchor-id="hidden-markov-frente-a-markov-observado">Hidden Markov frente a Markov observado</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Aspecto</th>
+<th>Markov observado</th>
+<th>Hidden Markov</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Estado</td>
+<td>Observado</td>
+<td>Latente</td>
+</tr>
+<tr class="even">
+<td>Error de clasificación</td>
+<td>No</td>
+<td>Sí</td>
+</tr>
+<tr class="odd">
+<td>Emisiones</td>
+<td>No</td>
+<td>Sí</td>
+</tr>
+<tr class="even">
+<td>Trayectorias ocultas</td>
+<td>Limitadas</td>
+<td>Integradas</td>
+</tr>
+<tr class="odd">
+<td>Complejidad</td>
+<td>Menor</td>
+<td>Mayor</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="hidden-semi-markov" class="level2">
+<h2 data-anchor-id="hidden-semi-markov">Hidden semi-Markov</h2>
+<p>Un HMM estándar implica una distribución geométrica de duración en tiempo discreto.</p>
+<p>Un Hidden Semi-Markov Model permite distribuciones de permanencia más flexibles.</p>
+</section>
+<section id="cuándo-usarlo" class="level2">
+<h2 data-anchor-id="cuándo-usarlo">Cuándo usarlo</h2>
+<ul>
+<li>Duración en estado importante.</li>
+<li>Estados latentes.</li>
+<li>Transiciones no observadas.</li>
+<li>Observación irregular.</li>
+<li>Error de clasificación.</li>
+</ul>
+</section>
+<section id="label-switching" class="level2">
+<h2 data-anchor-id="label-switching">Label switching</h2>
+<p>En modelos latentes, los nombres de estados pueden intercambiarse sin cambiar la likelihood.</p>
+</section>
+<section id="solución" class="level2">
+<h2 data-anchor-id="solución">Solución</h2>
+<p>Imponer restricciones clínicas:</p>
+<pre class="text"><code>Media FEVI S0 &gt; S1 &gt; S2 &gt; S3</code></pre>
+<p>o inicializar parámetros con conocimiento experto.</p>
+</section>
+<section id="identificabilidad" class="level2">
+<h2 data-anchor-id="identificabilidad">Identificabilidad</h2>
+<p>Puede ser difícil distinguir estados si:</p>
+<ul>
+<li>Emisiones muy similares.</li>
+<li>Pocas visitas.</li>
+<li>Pocas transiciones.</li>
+<li>Mucho missing.</li>
+<li>Demasiados estados.</li>
+</ul>
+</section>
+<section id="número-de-estados" class="level2">
+<h2 data-anchor-id="número-de-estados">Número de estados</h2>
+<p>Puede elegirse mediante:</p>
+<ul>
+<li>Conocimiento clínico.</li>
+<li>AIC.</li>
+<li>BIC.</li>
+<li>Validación.</li>
+<li>Interpretabilidad.</li>
+<li>Estabilidad.</li>
+</ul>
+</section>
+<section id="no-elegir-solo-por-aic" class="level2">
+<h2 data-anchor-id="no-elegir-solo-por-aic">No elegir solo por AIC</h2>
+<p>Un modelo con más estados puede ajustar mejor, pero producir estados clínicamente indistinguibles.</p>
+</section>
+<section id="inicialización-1" class="level2">
+<h2 data-anchor-id="inicialización-1">Inicialización</h2>
+<p>La optimización puede converger a máximos locales.</p>
+<p>Debe probarse:</p>
+<ul>
+<li>Varias semillas.</li>
+<li>Inicialización clínica.</li>
+<li>Inicialización por clustering.</li>
+<li>Restricciones.</li>
+</ul>
+</section>
+<section id="inicialización-por-clasificación-observada" class="level2">
+<h2 data-anchor-id="inicialización-por-clasificación-observada">Inicialización por clasificación observada</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>initial_state_labels <span class="op">=</span> (</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    observed_state</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Puede utilizarse para estimar matrices iniciales.</p>
+</section>
+<section id="inicialización-por-clustering" class="level2">
+<h2 data-anchor-id="inicialización-por-clustering">Inicialización por clustering</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>kmeans <span class="op">=</span> KMeans(</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    n_clusters<span class="op">=</span><span class="dv">4</span>,</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>initial_clusters <span class="op">=</span> kmeans.fit_predict(</span>
+<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>    biomarker_matrix</span>
+<span id="cb38-10"><a href="#cb38-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Los clusters no deben interpretarse automáticamente como estados clínicos.</p>
+</section>
+<section id="regularización" class="level2">
+<h2 data-anchor-id="regularización">Regularización</h2>
+<p>Puede aplicarse a:</p>
+<ul>
+<li>Transiciones.</li>
+<li>Covarianzas.</li>
+<li>Emisiones.</li>
+<li>Efectos de covariables.</li>
+</ul>
+</section>
+<section id="priors-clínicos" class="level2">
+<h2 data-anchor-id="priors-clínicos">Priors clínicos</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>S0 → S3
+→ transición directa poco probable</code></pre>
+<p>Puede imponerse:</p>
+<ul>
+<li>Probabilidad 0.</li>
+<li>Prior bajo.</li>
+<li>Restricción estructural.</li>
+</ul>
+</section>
+<section id="transiciones-permitidas" class="level2">
+<h2 data-anchor-id="transiciones-permitidas">Transiciones permitidas</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>allowed <span class="op">=</span> np.array(</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>        [<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>],</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>        [<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>],</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>        [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>],</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>        [<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="aplicar-máscara" class="level2">
+<h2 data-anchor-id="aplicar-máscara">Aplicar máscara</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>A_masked <span class="op">=</span> (</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    A</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    allowed</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Después debe normalizarse cada fila.</p>
+</section>
+<section id="autotransición" class="level2">
+<h2 data-anchor-id="autotransición">Autotransición</h2>
+<p>En un HMM discreto, la diagonal representa permanecer en el estado entre dos observaciones.</p>
+</section>
+<section id="duración-implícita" class="level2">
+<h2 data-anchor-id="duración-implícita">Duración implícita</h2>
+<p>Con probabilidad de permanencia (a_{ss}), la duración discreta tiene distribución geométrica.</p>
+</section>
+<section id="duración-esperada" class="level2">
+<h2 data-anchor-id="duración-esperada">Duración esperada</h2>
+<p><span class="math display">\[
+E(D_s)
+=
+\frac{
+1
+}{
+1-a_{ss}
+}
+\]</span></p>
+</section>
+<section id="ejemplo-3" class="level2">
+<h2 data-anchor-id="ejemplo-3">Ejemplo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>expected_duration_s1 <span class="op">=</span> (</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>        A[</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span>,</span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>            <span class="dv">1</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Esto se expresa en número de pasos, no necesariamente en días.</p>
+</section>
+<section id="covariables-en-transiciones" class="level2">
+<h2 data-anchor-id="covariables-en-transiciones">Covariables en transiciones</h2>
+<p>La probabilidad de transición puede depender de covariables.</p>
+<p><span class="math display">\[
+P(
+Z_{t+1}=s
+\mid
+Z_t=r,X_t
+)
+\]</span></p>
+<p>Puede modelarse con una función multinomial.</p>
+</section>
+<section id="ejemplo-conceptual" class="level2">
+<h2 data-anchor-id="ejemplo-conceptual">Ejemplo conceptual</h2>
+<pre class="text"><code>Mayor dosis acumulada
+→ aumenta probabilidad S1 → S2</code></pre>
+</section>
+<section id="covariables-en-emisiones" class="level2">
+<h2 data-anchor-id="covariables-en-emisiones">Covariables en emisiones</h2>
+<p>La observación también puede depender de:</p>
+<ul>
+<li>Estado.</li>
+<li>Edad.</li>
+<li>Centro.</li>
+<li>Técnica.</li>
+<li>Calidad.</li>
+</ul>
+</section>
+<section id="efecto-de-centro" class="level2">
+<h2 data-anchor-id="efecto-de-centro">Efecto de centro</h2>
+<pre class="text"><code>Misma FEVI real
+→ diferencias sistemáticas por equipo o centro</code></pre>
+<p>Puede modelarse en la emisión.</p>
+</section>
+<section id="error-diferencial" class="level2">
+<h2 data-anchor-id="error-diferencial">Error diferencial</h2>
+<p>La precisión de una prueba puede cambiar según:</p>
+<ul>
+<li>Centro.</li>
+<li>Edad.</li>
+<li>Calidad.</li>
+<li>Observador.</li>
+<li>Técnica.</li>
+</ul>
+</section>
+<section id="interpretación-clínica-de-estados-latentes" class="level2">
+<h2 data-anchor-id="interpretación-clínica-de-estados-latentes">Interpretación clínica de estados latentes</h2>
+<p>Cada estado debe describirse mediante:</p>
+<ul>
+<li>Distribución de biomarcadores.</li>
+<li>Probabilidad de observaciones.</li>
+<li>Transiciones.</li>
+<li>Duración.</li>
+<li>Outcomes posteriores.</li>
+</ul>
+</section>
+<section id="tabla-de-emisiones" class="level2">
+<h2 data-anchor-id="tabla-de-emisiones">Tabla de emisiones</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Estado latente</th>
+<th style="text-align: right;">FEVI media</th>
+<th style="text-align: right;">GLS medio</th>
+<th style="text-align: right;">Troponina alta</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>S0</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">-20</td>
+<td style="text-align: right;">5 %</td>
+</tr>
+<tr class="even">
+<td>S1</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">-17</td>
+<td style="text-align: right;">35 %</td>
+</tr>
+<tr class="odd">
+<td>S2</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">-15</td>
+<td style="text-align: right;">60 %</td>
+</tr>
+<tr class="even">
+<td>S3</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">-12</td>
+<td style="text-align: right;">80 %</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="posterior-de-estado-1" class="level2">
+<h2 data-anchor-id="posterior-de-estado-1">Posterior de estado</h2>
+<p>Debe reportarse incertidumbre.</p>
+<p>Incorrecto:</p>
+<pre class="text"><code>Paciente = S1</code></pre>
+<p>Más correcto:</p>
+<pre class="text"><code>P(S1) = 0.65
+P(S2) = 0.30</code></pre>
+</section>
+<section id="decisión-clínica" class="level2">
+<h2 data-anchor-id="decisión-clínica">Decisión clínica</h2>
+<p>Puede establecerse un threshold:</p>
+<pre class="text"><code>Alertar si
+P(S2 o S3) ≥ 0.50</code></pre>
+<p>Debe validarse.</p>
+</section>
+<section id="entropía" class="level2">
+<h2 data-anchor-id="entropía">Entropía</h2>
+<p>Mide incertidumbre del posterior.</p>
+<p><span class="math display">\[
+H_t
+=
+-
+\sum_s
+p_{ts}
+\log(
+p_{ts}
+)
+\]</span></p>
+</section>
+<section id="calcularla" class="level2">
+<h2 data-anchor-id="calcularla">Calcularla</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> state_entropy(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    probabilities</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    probabilities <span class="op">=</span> np.asarray(</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>        probabilities</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>    valid <span class="op">=</span> (</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>        probabilities</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">&gt;</span></span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>        <span class="dv">0</span></span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb48-14"><a href="#cb48-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb48-15"><a href="#cb48-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (</span>
+<span id="cb48-16"><a href="#cb48-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span></span>
+<span id="cb48-17"><a href="#cb48-17" aria-hidden="true" tabindex="-1"></a>        np.<span class="bu">sum</span>(</span>
+<span id="cb48-18"><a href="#cb48-18" aria-hidden="true" tabindex="-1"></a>            probabilities[</span>
+<span id="cb48-19"><a href="#cb48-19" aria-hidden="true" tabindex="-1"></a>                valid</span>
+<span id="cb48-20"><a href="#cb48-20" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb48-21"><a href="#cb48-21" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span></span>
+<span id="cb48-22"><a href="#cb48-22" aria-hidden="true" tabindex="-1"></a>            np.log(</span>
+<span id="cb48-23"><a href="#cb48-23" aria-hidden="true" tabindex="-1"></a>                probabilities[</span>
+<span id="cb48-24"><a href="#cb48-24" aria-hidden="true" tabindex="-1"></a>                    valid</span>
+<span id="cb48-25"><a href="#cb48-25" aria-hidden="true" tabindex="-1"></a>                ]</span>
+<span id="cb48-26"><a href="#cb48-26" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb48-27"><a href="#cb48-27" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb48-28"><a href="#cb48-28" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación-3" class="level2">
+<h2 data-anchor-id="interpretación-3">Interpretación</h2>
+<pre class="text"><code>Entropía baja
+→ estado claro
+
+Entropía alta
+→ estado incierto</code></pre>
+</section>
+<section id="validación-interna" class="level2">
+<h2 data-anchor-id="validación-interna">Validación interna</h2>
+<p>Debe revisar:</p>
+<ul>
+<li>Log-likelihood.</li>
+<li>AIC/BIC.</li>
+<li>Estabilidad.</li>
+<li>Matriz de transición.</li>
+<li>Emisiones.</li>
+<li>Clasificación.</li>
+<li>Predicción.</li>
+</ul>
+</section>
+<section id="validación-externa" class="level2">
+<h2 data-anchor-id="validación-externa">Validación externa</h2>
+<p>Comprobar en otra cohorte:</p>
+<ul>
+<li>Emisiones.</li>
+<li>Frecuencia de estados.</li>
+<li>Transiciones.</li>
+<li>Calibración posterior.</li>
+<li>Predicción del siguiente estado.</li>
+</ul>
+</section>
+<section id="posterior-predictive-checks" class="level2">
+<h2 data-anchor-id="posterior-predictive-checks">Posterior predictive checks</h2>
+<p>Simular datos desde el modelo y comparar:</p>
+<ul>
+<li>Distribución de observaciones.</li>
+<li>Duración en estados.</li>
+<li>Número de transiciones.</li>
+<li>Secuencias.</li>
+<li>Missing.</li>
+<li>Estados graves.</li>
+</ul>
+</section>
+<section id="simulación-conceptual" class="level2">
+<h2 data-anchor-id="simulación-conceptual">Simulación conceptual</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>rng <span class="op">=</span> np.random.default_rng(</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">42</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>current_state <span class="op">=</span> rng.choice(</span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">4</span>,</span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    p<span class="op">=</span>pi</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>simulated_states <span class="op">=</span> [</span>
+<span id="cb50-11"><a href="#cb50-11" aria-hidden="true" tabindex="-1"></a>    current_state</span>
+<span id="cb50-12"><a href="#cb50-12" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb50-13"><a href="#cb50-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb50-14"><a href="#cb50-14" aria-hidden="true" tabindex="-1"></a>simulated_observations <span class="op">=</span> []</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> time_index <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">20</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>    observation <span class="op">=</span> rng.choice(</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span>,</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>        p<span class="op">=</span>B[</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>            current_state,</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>            :</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>    simulated_observations.append(</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>        observation</span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>    current_state <span class="op">=</span> rng.choice(</span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span>,</span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a>        p<span class="op">=</span>A[</span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a>            current_state,</span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a>            :</span>
+<span id="cb51-22"><a href="#cb51-22" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb51-23"><a href="#cb51-23" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb51-24"><a href="#cb51-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-25"><a href="#cb51-25" aria-hidden="true" tabindex="-1"></a>    simulated_states.append(</span>
+<span id="cb51-26"><a href="#cb51-26" aria-hidden="true" tabindex="-1"></a>        current_state</span>
+<span id="cb51-27"><a href="#cb51-27" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="comparación-con-clasificación-determinista" class="level2">
+<h2 data-anchor-id="comparación-con-clasificación-determinista">Comparación con clasificación determinista</h2>
+<section id="clasificación-determinista" class="level3">
+<h3 data-anchor-id="clasificación-determinista">Clasificación determinista</h3>
+<pre class="text"><code>Regla fija
+→ un estado</code></pre>
+</section>
+<section id="hmm" class="level3">
+<h3 data-anchor-id="hmm">HMM</h3>
+<pre class="text"><code>Modelo probabilístico
+→ distribución sobre estados</code></pre>
+</section>
+</section>
+<section id="ventajas-del-hmm" class="level2">
+<h2 data-anchor-id="ventajas-del-hmm">Ventajas del HMM</h2>
+<ul>
+<li>Maneja error.</li>
+<li>Suaviza secuencias.</li>
+<li>Integra varias pruebas.</li>
+<li>Tolera observaciones parciales.</li>
+<li>Detecta transiciones latentes.</li>
+<li>Produce incertidumbre.</li>
+</ul>
+</section>
+<section id="limitaciones" class="level2">
+<h2 data-anchor-id="limitaciones">Limitaciones</h2>
+<ul>
+<li>Complejidad.</li>
+<li>Identificabilidad.</li>
+<li>Sensibilidad a inicialización.</li>
+<li>Supuestos fuertes.</li>
+<li>Difícil comunicación.</li>
+<li>Mayor necesidad de datos.</li>
+</ul>
+</section>
+<section id="leakage-retrospectivo" class="level2">
+<h2 data-anchor-id="leakage-retrospectivo">Leakage retrospectivo</h2>
+<p>El smoothing usa observaciones futuras.</p>
+<p>No debe presentarse como predicción disponible en tiempo real.</p>
+</section>
+<section id="para-tiempo-real" class="level2">
+<h2 data-anchor-id="para-tiempo-real">Para tiempo real</h2>
+<p>Usar filtering:</p>
+<pre class="text"><code>P(Z_t | Y_1:t)</code></pre>
+<p>no smoothing:</p>
+<pre class="text"><code>P(Z_t | Y_1:T)</code></pre>
+</section>
+<section id="evaluación-online" class="level2">
+<h2 data-anchor-id="evaluación-online">Evaluación online</h2>
+<p>En cada visita:</p>
+<ol type="1">
+<li>Usar solo datos previos.</li>
+<li>Actualizar posterior.</li>
+<li>Predecir siguiente estado.</li>
+<li>Comparar con futuro observado.</li>
+</ol>
+</section>
+<section id="métricas" class="level2">
+<h2 data-anchor-id="métricas">Métricas</h2>
+<ul>
+<li>Log-loss.</li>
+<li>Brier score multiclase.</li>
+<li>Accuracy del estado observado, con cautela.</li>
+<li>Calibration.</li>
+<li>AUC para estados graves.</li>
+<li>Tiempo de anticipación.</li>
+<li>Probabilidad de transición.</li>
+</ul>
+</section>
+<section id="brier-multiclase" class="level2">
+<h2 data-anchor-id="brier-multiclase">Brier multiclase</h2>
+<p><span class="math display">\[
+BS
+=
+\frac{1}{n}
+\sum_i
+\sum_s
+(
+p_{is}
+-
+y_{is}
+)^2
+\]</span></p>
+</section>
+<section id="evaluación-con-estado-real-desconocido" class="level2">
+<h2 data-anchor-id="evaluación-con-estado-real-desconocido">Evaluación con estado real desconocido</h2>
+<p>Es difícil porque el target latente no está disponible.</p>
+<p>Opciones:</p>
+<ul>
+<li>Gold standard parcial.</li>
+<li>Adjudicación experta.</li>
+<li>Simulación.</li>
+<li>Outcomes posteriores.</li>
+<li>Consistencia interna.</li>
+</ul>
+</section>
+<section id="gold-standard" class="level2">
+<h2 data-anchor-id="gold-standard">Gold standard</h2>
+<p>Puede existir en un subconjunto:</p>
+<ul>
+<li>Revisión central.</li>
+<li>Prueba de alta precisión.</li>
+<li>Adjudicación por comité.</li>
+</ul>
+</section>
+<section id="aplicación-a-cardiotoxicidad" class="level2">
+<h2 data-anchor-id="aplicación-a-cardiotoxicidad">Aplicación a cardiotoxicidad</h2>
+<p>Observaciones posibles:</p>
+<ul>
+<li>FEVI Simpson.</li>
+<li>FEVI modo M.</li>
+<li>GLS.</li>
+<li>Troponina.</li>
+<li>NT-proBNP.</li>
+<li>ECG.</li>
+<li>Calidad de prueba.</li>
+</ul>
+<p>Estados latentes:</p>
+<pre class="text"><code>S0
+S1
+S2
+S3</code></pre>
+</section>
+<section id="preguntas-clínicas" class="level2">
+<h2 data-anchor-id="preguntas-clínicas">Preguntas clínicas</h2>
+<ul>
+<li>¿Cuál es el estado más probable hoy?</li>
+<li>¿Existe evidencia de progresión antes de cumplir una regla rígida?</li>
+<li>¿Qué probabilidad hay de S2 en la próxima evaluación?</li>
+<li>¿Qué pacientes tienen estado incierto?</li>
+<li>¿Qué pruebas reducirían más la incertidumbre?</li>
+</ul>
+</section>
+<section id="modelo-continuous-time-recomendado" class="level2">
+<h2 data-anchor-id="modelo-continuous-time-recomendado">Modelo continuous-time recomendado</h2>
+<p>Por visitas irregulares:</p>
+<pre class="text"><code>Q
+→ intensidades latentes
+
+exp(Q Δt)
+→ transición entre visitas</code></pre>
+<p>Emisiones:</p>
+<pre class="text"><code>P(observaciones | estado latente)</code></pre>
+</section>
+<section id="decisiones-pendientes" class="level2">
+<h2 data-anchor-id="decisiones-pendientes">Decisiones pendientes</h2>
+<ul>
+<li>Número de estados.</li>
+<li>Restricciones de transición.</li>
+<li>S3 absorbente o reversible.</li>
+<li>Distribuciones de emisión.</li>
+<li>Missing.</li>
+<li>Centro.</li>
+<li>Calidad.</li>
+<li>Escala temporal.</li>
+<li>Filtrado frente a smoothing.</li>
+</ul>
+</section>
+<section id="reporting" class="level2">
+<h2 data-anchor-id="reporting">Reporting</h2>
+<p>Debe incluir:</p>
+<ul>
+<li>Estados latentes.</li>
+<li>Observaciones.</li>
+<li>Matriz de transición o (Q).</li>
+<li>Emisiones.</li>
+<li>Inicialización.</li>
+<li>Restricciones.</li>
+<li>Algoritmo.</li>
+<li>Incertidumbre.</li>
+<li>Validación.</li>
+<li>Uso online o retrospectivo.</li>
+</ul>
+</section>
+<section id="ejemplo-de-redacción" class="level2">
+<h2 data-anchor-id="ejemplo-de-redacción">Ejemplo de redacción</h2>
+<pre class="text"><code>Se ajustó un continuous-time Hidden Markov Model
+con cuatro estados latentes.
+
+Las mediciones ecocardiográficas y los biomarcadores
+se modelaron como emisiones dependientes del estado.
+
+Las probabilidades clínicas en tiempo real
+se calcularon mediante filtrado,
+sin utilizar observaciones posteriores.</code></pre>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>Tratar el estado observado como verdad.</li>
+<li>Usar una matriz discreta con intervalos irregulares.</li>
+<li>Ignorar label switching.</li>
+<li>Elegir demasiados estados.</li>
+<li>Interpretar clusters como estados clínicos.</li>
+<li>No probar varias inicializaciones.</li>
+<li>Usar smoothing como predicción online.</li>
+<li>Ignorar missing.</li>
+<li>No restringir transiciones imposibles.</li>
+<li>No revisar identifiabilidad.</li>
+<li>Reportar solo Viterbi.</li>
+<li>No validar incertidumbre.</li>
+</ul>
+</section>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Definir estados latentes.</li>
+<li>Definir observaciones.</li>
+<li>Elegir tiempo discreto o continuo.</li>
+<li>Especificar transiciones.</li>
+<li>Especificar emisiones.</li>
+<li>Inicializar parámetros.</li>
+<li>Ajustar modelo.</li>
+<li>Calcular posterior.</li>
+<li>Decodificar trayectorias.</li>
+<li>Evaluar estabilidad.</li>
+<li>Validar externamente.</li>
+<li>Diseñar uso online.</li>
+</ol>
+</section>
+<section id="checklist" class="level2">
+<h2 data-anchor-id="checklist">Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">He distinguido estado real y observado.</label></li>
+<li><label><input type="checkbox">He definido emisiones.</label></li>
+<li><label><input type="checkbox">He definido transiciones.</label></li>
+<li><label><input type="checkbox">He considerado intervalos irregulares.</label></li>
+<li><label><input type="checkbox">He elegido HMM o continuous-time HMM.</label></li>
+<li><label><input type="checkbox">He restringido transiciones imposibles.</label></li>
+<li><label><input type="checkbox">He revisado label switching.</label></li>
+<li><label><input type="checkbox">He probado varias inicializaciones.</label></li>
+<li><label><input type="checkbox">He evaluado identificabilidad.</label></li>
+<li><label><input type="checkbox">He calculado posteriors.</label></li>
+<li><label><input type="checkbox">He distinguido filtering y smoothing.</label></li>
+<li><label><input type="checkbox">He evaluado Viterbi con cautela.</label></li>
+<li><label><input type="checkbox">He realizado posterior predictive checks.</label></li>
+<li><label><input type="checkbox">He planificado validación externa.</label></li>
+<li><label><input type="checkbox">He documentado incertidumbre.</label></li>
+</ul>
+</section>
+<section id="recursos" class="level2">
+<h2 data-anchor-id="recursos">Recursos</h2>
+<section id="conceptos" class="level3">
+<h3 data-anchor-id="conceptos">Conceptos</h3>
+<ul>
+<li>Hidden Markov Model.</li>
+<li>Latent state.</li>
+<li>Emission probability.</li>
+<li>Forward-backward.</li>
+<li>Viterbi.</li>
+<li>Baum-Welch.</li>
+<li>Continuous-time HMM.</li>
+<li>Hidden semi-Markov model.</li>
+<li>Filtering.</li>
+<li>Smoothing.</li>
+<li>Label switching.</li>
+</ul>
+</section>
+<section id="herramientas" class="level3">
+<h3 data-anchor-id="herramientas">Herramientas</h3>
+<ul>
+<li><code>numpy</code>.</li>
+<li><code>scipy</code>.</li>
+<li><code>hmmlearn</code>.</li>
+<li><code>pomegranate</code>.</li>
+<li><code>statsmodels</code>.</li>
+<li><code>msm</code> en R.</li>
+<li><code>depmixS4</code> en R.</li>
+</ul>
+</section>
+<section id="material-del-proyecto" class="level3">
+<h3 data-anchor-id="material-del-proyecto">Material del proyecto</h3>
+<p>Añadir aquí:</p>
+<ul>
+<li>Estados latentes.</li>
+<li>Variables de emisión.</li>
+<li>Restricciones.</li>
+<li>Matriz (Q).</li>
+<li>Posteriores.</li>
+<li>Trayectorias Viterbi.</li>
+<li>Validación con cardiólogos.</li>
+</ul>
+</section>
+</section>
+<section id="notas-personales" class="level2">
+<h2 data-anchor-id="notas-personales">Notas personales</h2>
+<p>Añade aquí tus emisiones, estados latentes, restricciones, posteriors y decisiones clínicas.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/pablolongan\.github\.io\/health-data-science-handbook\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
