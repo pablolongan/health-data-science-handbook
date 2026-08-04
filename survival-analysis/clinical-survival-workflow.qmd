@@ -1,0 +1,1332 @@
+---
+title: "Workflow clínico de Survival Analysis"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Un proyecto clínico de supervivencia debe conectar:
+
+- Pregunta clínica.
+- Definición temporal.
+- Preparación de la cohorte.
+- Análisis descriptivo.
+- Modelado.
+- Evaluación.
+- Validación.
+- Comunicación.
+- Implantación.
+
+El objetivo no es solo obtener un hazard ratio, sino construir un análisis temporal válido, reproducible y clínicamente interpretable.
+:::
+
+## Visión general
+
+```text
+Pregunta clínica
+      ↓
+Diseño de cohorte
+      ↓
+Tiempo cero y evento
+      ↓
+Censura y competing risks
+      ↓
+Preparación de datos
+      ↓
+Kaplan-Meier
+      ↓
+Modelo ajustado
+      ↓
+Validación
+      ↓
+Comunicación clínica
+```
+
+::: {.callout-note}
+## Idea clave
+
+La mayor parte de los errores graves ocurre antes de entrenar el modelo.
+:::
+
+## Paso 1. Formular la pregunta
+
+Una buena pregunta debe especificar:
+
+- Población.
+- Tiempo cero.
+- Evento.
+- Horizonte.
+- Predictores.
+- Contexto.
+- Objetivo explicativo o predictivo.
+
+## Ejemplo
+
+```text
+En pacientes pediátricos oncológicos
+sin cardiotoxicidad basal,
+¿qué factores se asocian con el tiempo
+hasta la primera cardiotoxicidad moderada o grave
+desde el inicio del tratamiento?
+```
+
+## Pregunta explicativa
+
+Busca asociaciones.
+
+```text
+¿Qué variables se relacionan
+con el hazard del evento?
+```
+
+## Pregunta predictiva
+
+Busca riesgo individual.
+
+```text
+¿Cuál es la probabilidad
+de permanecer libre del evento
+a 1 y 2 años?
+```
+
+## Diferencias de enfoque
+
+| Aspecto | Explicativo | Predictivo |
+|---|---|---|
+| Objetivo | Asociación | Predicción |
+| Variables | Confusores y exposición | Variables útiles |
+| Métrica principal | HR e intervalos | Discriminación y calibración |
+| Validación | Importante | Esencial |
+| Interpretación causal | Solo con diseño adecuado | No necesaria |
+
+## Paso 2. Definir la población
+
+Debe establecerse:
+
+- Criterios de inclusión.
+- Criterios de exclusión.
+- Periodo de reclutamiento.
+- Centros.
+- Seguimiento mínimo.
+- Estado basal.
+
+## Ejemplo
+
+```text
+Incluir:
+- pacientes oncológicos pediátricos
+- inicio de tratamiento registrado
+- al menos una valoración cardiovascular
+- ausencia de S2/S3 basal
+
+Excluir:
+- cardiotoxicidad previa
+- fechas imposibles
+- seguimiento no interpretable
+```
+
+## Diagrama de flujo
+
+```text
+Pacientes identificados
+        ↓
+Exclusiones administrativas
+        ↓
+Exclusiones clínicas
+        ↓
+Cohorte final
+        ↓
+Eventos y censuras
+```
+
+## Tabla de selección
+
+```python
+flow_table = pd.DataFrame(
+    {
+        "step": [
+            "Identificados",
+            "Sin fecha de inicio",
+            "Evento basal",
+            "Duplicados",
+            "Cohorte final"
+        ],
+        "n": [
+            500,
+            20,
+            15,
+            5,
+            460
+        ]
+    }
+)
+```
+
+## Paso 3. Definir tiempo cero
+
+Debe ser:
+
+- Común conceptualmente.
+- Anterior al evento.
+- Clínicamente relevante.
+- Observable.
+- Reproducible.
+
+Ejemplos:
+
+- Inicio de tratamiento.
+- Diagnóstico.
+- Alta.
+- Primera exposición.
+- Entrada en un estado.
+
+## Paso 4. Definir el evento
+
+Debe especificarse:
+
+- Criterio.
+- Fecha.
+- Fuente.
+- Severidad.
+- Primera ocurrencia.
+- Adjudicación.
+- Regla ante discordancias.
+
+## Ejemplo de especificación
+
+```text
+Evento:
+primera transición a S2 o S3
+
+Fecha:
+fecha de la valoración cardiovascular
+en que se clasifica por primera vez
+como S2 o S3
+
+Prioridad:
+si hay varias evaluaciones el mismo día,
+usar la clasificación de mayor severidad
+```
+
+## Paso 5. Definir censura
+
+Posibles fechas:
+
+- Último seguimiento libre del evento.
+- Fin administrativo.
+- Pérdida de seguimiento.
+- Retirada.
+- Evento competidor.
+
+## No censurar de forma ingenua
+
+Un fallecimiento puede ser:
+
+- Evento competidor.
+- Parte de endpoint compuesto.
+- Evento terminal.
+
+Depende de la pregunta.
+
+## Paso 6. Identificar competing risks
+
+Preguntas:
+
+- ¿Qué eventos impiden el outcome?
+- ¿Son frecuentes?
+- ¿Cambian entre centros?
+- ¿Deben modelarse por separado?
+
+## Ejemplo
+
+```text
+Evento principal:
+cardiotoxicidad S2/S3
+
+Competidor:
+fallecimiento sin S2/S3 previo
+```
+
+## Paso 7. Crear el dataset basal
+
+```python
+survival_df = patient_df[
+    [
+        "patient_id",
+        "time_zero",
+        "event_date",
+        "last_follow_up_date",
+        "event",
+        "age",
+        "sex",
+        "diagnosis",
+        "baseline_lvef",
+        "cumulative_anthracycline_baseline"
+    ]
+].copy()
+```
+
+## Calcular fecha final
+
+```python
+survival_df[
+    "end_date"
+] = survival_df[
+    [
+        "event_date",
+        "last_follow_up_date"
+    ]
+].min(
+    axis=1
+)
+```
+
+## Calcular tiempo
+
+```python
+survival_df[
+    "follow_up_days"
+] = (
+    survival_df[
+        "end_date"
+    ]
+    -
+    survival_df[
+        "time_zero"
+    ]
+).dt.days
+```
+
+## Paso 8. Validar datos
+
+## Tiempos negativos
+
+```python
+negative_times = survival_df.loc[
+    survival_df[
+        "follow_up_days"
+    ]
+    <
+    0
+]
+```
+
+## Eventos antes del inicio
+
+```python
+events_before_start = survival_df.loc[
+    survival_df[
+        "event_date"
+    ]
+    <
+    survival_df[
+        "time_zero"
+    ]
+]
+```
+
+## Duplicados
+
+```python
+duplicates = survival_df.loc[
+    survival_df.duplicated(
+        subset=[
+            "patient_id"
+        ],
+        keep=False
+    )
+]
+```
+
+## Missing del outcome
+
+```python
+outcome_missing = (
+    survival_df[
+        [
+            "follow_up_days",
+            "event"
+        ]
+    ]
+    .isna()
+    .sum()
+)
+```
+
+## Validar códigos
+
+```python
+invalid_events = survival_df.loc[
+    ~survival_df[
+        "event"
+    ]
+    .isin(
+        [
+            0,
+            1
+        ]
+    )
+]
+```
+
+## Paso 9. Describir la cohorte
+
+Debe incluir:
+
+- Número de pacientes.
+- Número de eventos.
+- Seguimiento.
+- Variables basales.
+- Missing.
+- Centros.
+- Fechas.
+
+## Resumen básico
+
+```python
+summary = {
+    "n": len(
+        survival_df
+    ),
+    "events": int(
+        survival_df[
+            "event"
+        ]
+        .sum()
+    ),
+    "event_proportion": float(
+        survival_df[
+            "event"
+        ]
+        .mean()
+    ),
+    "median_follow_up": float(
+        survival_df[
+            "follow_up_days"
+        ]
+        .median()
+    )
+}
+```
+
+## Tabla 1
+
+```python
+table_one = (
+    survival_df
+    .groupby(
+        "event"
+    )[
+        [
+            "age",
+            "baseline_lvef"
+        ]
+    ]
+    .describe()
+)
+```
+
+## Missingness
+
+```python
+missing_table = (
+    survival_df
+    .isna()
+    .mean()
+    .sort_values(
+        ascending=False
+    )
+    .to_frame(
+        "missing_proportion"
+    )
+)
+```
+
+## Paso 10. Explorar seguimiento
+
+## Cronología individual
+
+```python
+import matplotlib.pyplot as plt
+
+plot_df = (
+    survival_df
+    .sort_values(
+        "follow_up_days"
+    )
+    .reset_index(
+        drop=True
+    )
+)
+
+plt.figure(
+    figsize=(
+        10,
+        8
+    )
+)
+
+for index, row in plot_df.iterrows():
+
+    plt.hlines(
+        y=index,
+        xmin=0,
+        xmax=row[
+            "follow_up_days"
+        ]
+    )
+
+    marker = (
+        "o"
+        if row[
+            "event"
+        ]
+        ==
+        1
+        else
+        "|"
+    )
+
+    plt.plot(
+        row[
+            "follow_up_days"
+        ],
+        index,
+        marker=marker
+    )
+
+plt.show()
+```
+
+## Distribución del seguimiento
+
+```python
+survival_df[
+    "follow_up_days"
+].hist(
+    bins=30
+)
+
+plt.xlabel(
+    "Días de seguimiento"
+)
+
+plt.show()
+```
+
+## Paso 11. Kaplan-Meier
+
+```python
+from lifelines import KaplanMeierFitter
+
+kmf = KaplanMeierFitter()
+
+kmf.fit(
+    durations=survival_df[
+        "follow_up_days"
+    ],
+    event_observed=survival_df[
+        "event"
+    ],
+    label="Cohorte"
+)
+```
+
+## Visualizar
+
+```python
+from lifelines.plotting import add_at_risk_counts
+
+ax = kmf.plot_survival_function(
+    figsize=(
+        9,
+        6
+    )
+)
+
+add_at_risk_counts(
+    kmf,
+    ax=ax
+)
+
+plt.xlabel(
+    "Días desde el inicio"
+)
+
+plt.ylabel(
+    "Probabilidad libre del evento"
+)
+
+plt.show()
+```
+
+## Resultados descriptivos
+
+Reportar:
+
+- Supervivencia a tiempos clínicos.
+- Mediana si se alcanza.
+- Intervalos.
+- Número en riesgo.
+- Censuras.
+
+## Paso 12. Comparar grupos
+
+```python
+from lifelines.statistics import logrank_test
+```
+
+```python
+group_a = survival_df.loc[
+    survival_df[
+        "treatment"
+    ]
+    ==
+    "A"
+]
+
+group_b = survival_df.loc[
+    survival_df[
+        "treatment"
+    ]
+    ==
+    "B"
+]
+```
+
+```python
+logrank_result = logrank_test(
+    group_a[
+        "follow_up_days"
+    ],
+    group_b[
+        "follow_up_days"
+    ],
+    event_observed_A=group_a[
+        "event"
+    ],
+    event_observed_B=group_b[
+        "event"
+    ]
+)
+```
+
+## No confundir comparación con ajuste
+
+El log-rank no ajusta por:
+
+- Edad.
+- Diagnóstico.
+- Centro.
+- Riesgo basal.
+- Tratamiento concomitante.
+
+## Paso 13. Modelo de Cox
+
+```python
+from lifelines import CoxPHFitter
+
+cox_df = survival_df[
+    [
+        "follow_up_days",
+        "event",
+        "age",
+        "baseline_lvef",
+        "treatment",
+        "diagnosis"
+    ]
+].copy()
+```
+
+## Codificar
+
+```python
+cox_df = pd.get_dummies(
+    cox_df,
+    columns=[
+        "treatment",
+        "diagnosis"
+    ],
+    drop_first=True
+)
+```
+
+## Ajustar
+
+```python
+cph = CoxPHFitter(
+    penalizer=0.01
+)
+
+cph.fit(
+    cox_df,
+    duration_col="follow_up_days",
+    event_col="event"
+)
+```
+
+## Revisar resultados
+
+```python
+cph.print_summary()
+```
+
+## Paso 14. Revisar supuestos
+
+```python
+cph.check_assumptions(
+    cox_df,
+    p_value_threshold=0.05,
+    show_plots=True
+)
+```
+
+Revisar:
+
+- Proporcionalidad.
+- Linealidad.
+- Colinealidad.
+- Influencia.
+- Convergencia.
+- Eventos por parámetro.
+
+## Paso 15. Considerar alternativas
+
+Según el problema:
+
+- Cox estratificado.
+- Cox temporal.
+- AFT.
+- Modelos paramétricos.
+- Fine-Gray.
+- Random Survival Forest.
+- Multi-state models.
+
+## Árbol de decisión conceptual
+
+```text
+¿Hay competing risks?
+├── Sí → CIF + cause-specific/Fine-Gray
+└── No
+
+¿Hay covariables temporales?
+├── Sí → Cox start-stop / joint model
+└── No
+
+¿Falla PH?
+├── Sí → interacción temporal / estratos / AFT
+└── No → Cox estándar
+```
+
+## Paso 16. Machine learning
+
+Solo después de construir un baseline sólido.
+
+```text
+Baseline
+→ Kaplan-Meier
+
+Modelo clínico
+→ Cox
+
+Modelo complejo
+→ RSF o boosting
+```
+
+## Comparar modelos
+
+| Modelo | C-index | AUC 1 año | IBS | Calibración |
+|---|---:|---:|---:|---:|
+| Cox | ... | ... | ... | ... |
+| Coxnet | ... | ... | ... | ... |
+| RSF | ... | ... | ... | ... |
+
+## Paso 17. Dividir datos correctamente
+
+## Split temporal
+
+```python
+train_df = survival_df.loc[
+    survival_df[
+        "time_zero"
+    ]
+    <
+    "2024-01-01"
+]
+
+test_df = survival_df.loc[
+    survival_df[
+        "time_zero"
+    ]
+    >=
+    "2024-01-01"
+]
+```
+
+## Split por centro
+
+```python
+train_df = survival_df.loc[
+    survival_df[
+        "center"
+    ]
+    !=
+    "External Center"
+]
+
+test_df = survival_df.loc[
+    survival_df[
+        "center"
+    ]
+    ==
+    "External Center"
+]
+```
+
+## Paso 18. Evitar leakage
+
+No usar:
+
+- Fecha de alta.
+- Duración total.
+- Diagnóstico final.
+- Dosis acumulada futura.
+- Resultado posterior.
+- Estado adjudicado después.
+- Imputación con test.
+
+## Pipeline
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+```
+
+```python
+pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median",
+                add_indicator=True
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            survival_model
+        )
+    ]
+)
+```
+
+## Paso 19. Evaluar discriminación
+
+```python
+from sksurv.metrics import (
+    concordance_index_ipcw
+)
+
+risk_score = model.predict(
+    X_test
+)
+
+uno_c = concordance_index_ipcw(
+    y_train,
+    y_test,
+    risk_score
+)[0]
+```
+
+## AUC temporal
+
+```python
+from sksurv.metrics import (
+    cumulative_dynamic_auc
+)
+
+times = [
+    180,
+    365,
+    730
+]
+
+auc_values, mean_auc = cumulative_dynamic_auc(
+    y_train,
+    y_test,
+    risk_score,
+    times
+)
+```
+
+## Paso 20. Evaluar error probabilístico
+
+```python
+from sksurv.metrics import (
+    integrated_brier_score
+)
+
+ibs = integrated_brier_score(
+    y_train,
+    y_test,
+    survival_probabilities,
+    times
+)
+```
+
+## Paso 21. Evaluar calibración
+
+Horizontes:
+
+```text
+6 meses
+1 año
+2 años
+```
+
+Debe compararse:
+
+- Riesgo predicho.
+- Riesgo observado.
+- Calibración global.
+- Slope.
+- ICI.
+
+## Paso 22. Bootstrap
+
+```python
+rng = np.random.default_rng(
+    42
+)
+
+bootstrap_metrics = []
+
+for iteration in range(
+    1000
+):
+
+    sampled_indices = rng.choice(
+        len(
+            test_df
+        ),
+        size=len(
+            test_df
+        ),
+        replace=True
+    )
+
+    sampled_df = test_df.iloc[
+        sampled_indices
+    ]
+
+    bootstrap_metrics.append(
+        evaluate_model(
+            sampled_df
+        )
+    )
+```
+
+Para datos longitudinales, re-muestrear por paciente.
+
+## Paso 23. Análisis por subgrupos
+
+Revisar por:
+
+- Centro.
+- Sexo.
+- Edad.
+- Diagnóstico.
+- Tratamiento.
+- Periodo.
+- Riesgo basal.
+
+## Precaución
+
+No interpretar diferencias pequeñas con pocos eventos.
+
+Reportar intervalos.
+
+## Paso 24. Sensitivity analyses
+
+Ejemplos:
+
+- Cambiar definición de evento.
+- Excluir eventos en primeros días.
+- Cambiar censura.
+- Incluir competing risks.
+- Cambiar baseline.
+- Imputación alternativa.
+- Modelo penalizado.
+- Horizonte distinto.
+
+## Ejemplo
+
+```text
+Análisis principal:
+S2 o S3
+
+Sensibilidad:
+solo S3
+```
+
+## Paso 25. Missing data
+
+Debe documentarse:
+
+- Proporción.
+- Patrón.
+- Relación con evento.
+- Relación con seguimiento.
+- Estrategia.
+
+## Complete case
+
+Ventajas:
+
+- Simple.
+
+Limitaciones:
+
+- Pérdida de muestra.
+- Sesgo si missing no es completamente aleatorio.
+- Menor potencia.
+
+## Imputación múltiple
+
+Puede ser más apropiada para análisis explicativos.
+
+Debe incluir:
+
+- Outcome.
+- Tiempo.
+- Evento.
+- Predictores auxiliares.
+- Estructura temporal cuando corresponda.
+
+## Paso 26. Presentar resultados
+
+Una presentación clínica debería incluir:
+
+1. Pregunta.
+2. Cohorte.
+3. Timeline.
+4. Eventos.
+5. Kaplan-Meier o CIF.
+6. HR o time ratios.
+7. Predicción absoluta.
+8. Calibración.
+9. Limitaciones.
+10. Aplicación clínica.
+
+## Forest plot
+
+```python
+cph.plot()
+
+plt.title(
+    "Hazard ratios ajustados"
+)
+
+plt.show()
+```
+
+## Curvas ajustadas
+
+```python
+profiles = cox_df.drop(
+    columns=[
+        "follow_up_days",
+        "event"
+    ]
+).iloc[
+    [
+        0,
+        1
+    ]
+]
+
+adjusted_survival = (
+    cph
+    .predict_survival_function(
+        profiles
+    )
+)
+```
+
+## Resultados absolutos
+
+Además de HR, reportar:
+
+- Riesgo a 1 año.
+- Diferencia absoluta.
+- RMST.
+- Incidencia acumulada.
+- Mediana, si procede.
+
+## Paso 27. Redactar limitaciones
+
+Ejemplos:
+
+- Pocos eventos.
+- Censura informativa.
+- Missing.
+- Medición irregular.
+- Confusión residual.
+- Cambio de protocolos.
+- Validación externa pendiente.
+- Pocos pacientes tardíos.
+
+## Paso 28. Reproducibilidad
+
+Guardar:
+
+- Dataset analítico versionado.
+- Diccionario de variables.
+- Reglas de cohorting.
+- Script de limpieza.
+- Seed.
+- Entorno.
+- Modelo.
+- Métricas.
+- Informe.
+
+## Estructura de proyecto
+
+```text
+project/
+├── data/
+├── notebooks/
+├── src/
+├── reports/
+├── models/
+├── tests/
+├── requirements.txt
+└── README.md
+```
+
+## Paso 29. Validación prospectiva
+
+Antes de uso clínico:
+
+- Shadow mode.
+- Cohorte prospectiva.
+- Latencia real.
+- Datos faltantes reales.
+- Impacto en workflow.
+- Revisión humana.
+
+## Shadow mode
+
+El modelo genera predicciones sin mostrarlas a profesionales.
+
+Permite estudiar:
+
+- Rendimiento.
+- Integración.
+- Alertas.
+- Drift.
+- Errores de datos.
+
+## Paso 30. Monitorización
+
+Debe incluir:
+
+- Censura.
+- Incidencia.
+- Missing.
+- Distribución de variables.
+- C-index.
+- Calibración.
+- Brier score.
+- Rendimiento por centro.
+- Alertas.
+
+## Drift clínico
+
+Puede aparecer por:
+
+- Nuevo tratamiento.
+- Nueva población.
+- Cambio de laboratorio.
+- Cambio de seguimiento.
+- Cambio de criterios.
+- Nueva tecnología.
+
+## Caso completo: cardiotoxicidad
+
+## Pregunta
+
+```text
+¿Cuál es el tiempo desde el inicio
+del tratamiento oncológico
+hasta la primera transición a S2 o S3?
+```
+
+## Tiempo cero
+
+```text
+Inicio del tratamiento
+```
+
+## Evento
+
+```text
+Primera valoración clasificada como S2 o S3
+```
+
+## Censura
+
+```text
+Última valoración cardiovascular libre de S2/S3
+o fin del estudio
+```
+
+## Competing risk
+
+```text
+Fallecimiento sin S2/S3 previo
+```
+
+## Covariables basales
+
+- Edad.
+- Sexo.
+- Diagnóstico.
+- FEVI basal.
+- GLS basal.
+- Troponina basal.
+- NT-proBNP basal.
+
+## Covariables temporales
+
+- Dosis acumulada.
+- Biomarcadores.
+- FEVI.
+- GLS.
+- Tratamiento cardioprotector.
+- Estado previo.
+
+## Análisis propuesto
+
+```text
+1. CIF de S2/S3
+2. Cause-specific Cox
+3. Fine-Gray si está disponible
+4. Cox temporal para dosis y biomarcadores
+5. Validación por centro
+6. Calibración a 1 y 2 años
+```
+
+## Tabla de decisiones
+
+| Elemento | Decisión |
+|---|---|
+| Población | Sin S2/S3 basal |
+| Tiempo cero | Inicio tratamiento |
+| Evento | Primera transición a S2/S3 |
+| Competidor | Muerte sin evento |
+| Horizonte | 1 y 2 años |
+| Modelo basal | Cause-specific Cox |
+| Modelo temporal | Cox start-stop |
+| Validación | Temporal y multicentro |
+
+## Errores frecuentes
+
+- Empezar por el modelo.
+- No definir tiempo cero.
+- Mezclar evento y predictor.
+- Tratar censurados como negativos.
+- Ignorar competidores.
+- Hacer split aleatorio sin pensar.
+- No evaluar calibración.
+- Reportar solo HR.
+- No presentar riesgos absolutos.
+- No documentar reglas.
+- No validar externamente.
+- Confundir predicción con causalidad.
+
+## Flujo final recomendado
+
+1. Formular pregunta.
+2. Definir cohorte.
+3. Definir tiempo cero.
+4. Definir evento y censura.
+5. Identificar competing risks.
+6. Validar datos.
+7. Describir seguimiento.
+8. Estimar Kaplan-Meier o CIF.
+9. Ajustar modelo base.
+10. Revisar supuestos.
+11. Evaluar discriminación.
+12. Evaluar calibración.
+13. Validar externamente.
+14. Comunicar riesgos absolutos.
+15. Monitorizar prospectivamente.
+
+## Checklist completo
+
+- [ ] He definido población.
+- [ ] He definido tiempo cero.
+- [ ] He definido evento.
+- [ ] He definido censura.
+- [ ] He identificado competidores.
+- [ ] He validado fechas.
+- [ ] He revisado duplicados.
+- [ ] He descrito missing.
+- [ ] He estimado Kaplan-Meier o CIF.
+- [ ] He ajustado un modelo basal.
+- [ ] He comprobado supuestos.
+- [ ] He evitado leakage.
+- [ ] He realizado split válido.
+- [ ] He evaluado C-index.
+- [ ] He evaluado AUC temporal.
+- [ ] He evaluado Brier score.
+- [ ] He evaluado calibración.
+- [ ] He realizado sensibilidad.
+- [ ] He validado externamente.
+- [ ] He preparado monitorización.
+
+## Cierre de la sección
+
+Survival analysis no consiste únicamente en ejecutar un modelo de Cox.
+
+Un análisis clínico riguroso exige:
+
+- Diseño temporal correcto.
+- Definición clínica reproducible.
+- Tratamiento adecuado de censura.
+- Evaluación probabilística.
+- Validación externa.
+- Comunicación de riesgos absolutos.
+
+## Recursos
+
+### Documentación
+
+- `KaplanMeierFitter`.
+- `CoxPHFitter`.
+- `AalenJohansenFitter`.
+- `CoxTimeVaryingFitter`.
+- `concordance_index_ipcw`.
+- `cumulative_dynamic_auc`.
+- `integrated_brier_score`.
+- `survival_probability_calibration`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Ejercicios.
+- Casos clínicos.
+- Apuntes de Notion.
+- Decisiones del proyecto.
+
+## Notas personales
+
+Añade aquí tu workflow final, definiciones clínicas, análisis, resultados y decisiones de validación.
