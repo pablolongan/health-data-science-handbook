@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Modelos semi-Markov – Health Data Science Handbook</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-2aa33e8751edae3f9b77d048c1294c38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Health Data Science Handbook</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> <i class="bi bi-info-circle" role="img" aria-label="Sobre el proyecto">
+</i> 
+<span class="menu-text">Sobre el proyecto</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/pablolongan/health-data-science-handbook"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../multi-state-models/index.html">Multi-state Models</a></li><li class="breadcrumb-item"><a href="../multi-state-models/semi-markov-models.html">Modelos semi-Markov</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/data-exploration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory data analysis (EDA)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación de modelos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/classification-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métricas de clasificación</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/regression-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métricas de regresión</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/cross-validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Validación cruzada</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Preprocesamiento</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/train-test-split.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Train, validation and test</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/data-leakage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data leakage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/missing-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Valores ausentes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/scaling-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Escalado y normalización</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/categorical-encoding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variables categóricas y encoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/outliers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Outliers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/pipelines-columntransformer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pipelines y ColumnTransformer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Reducción de dimensionalidad</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/pca.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PCA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Selección de variables</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/filter-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos filter</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/wrapper-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos wrapper</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/embedded-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos embedded</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regularización</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/logistic-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Árboles de decisión</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/random-forest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random forest</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/gradient-boosting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gradient boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support Vector Machines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/model-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparación de modelos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje no supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/k-means.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">K-means</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/hierarchical-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Clustering jerárquico</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/dbscan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DBSCAN y clustering por densidad</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/gaussian-mixture-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gaussian Mixture Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/clustering-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación del clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/anomaly-detection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Detección de anomalías</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/method-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparación de métodos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Series temporales</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/time-series-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fundamentos y preparación temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/decomposition-stationarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Descomposición y estacionariedad</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/exponential-smoothing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exponential smoothing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/arima-sarima.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ARIMA y SARIMA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/temporal-feature-engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Feature engineering temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/machine-learning-forecasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Machine learning para forecasting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/backtesting-and-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Backtesting y evaluación temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/clinical-time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Series temporales clínicas</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Deep learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Survival Analysis</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/survival-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fundamentos, tiempos y censura</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/kaplan-meier-log-rank.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kaplan-Meier y log-rank</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/cox-proportional-hazards.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelo de Cox</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/proportional-hazards-assumption.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Supuesto de riesgos proporcionales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/parametric-survival-aft.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelos paramétricos y Accelerated Failure Time</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/time-varying-covariates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variables dependientes del tiempo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/competing-risks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Competing risks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/survival-machine-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Machine learning para Survival Analysis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/survival-evaluation-calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación y calibración</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/clinical-survival-workflow.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Workflow clínico completo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">Multi-state Models</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multi-state Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+ <span class="menu-text">Introducción</span>
+  </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/state-design-and-transitions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Diseño de estados y transiciones</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/data-preparation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preparación de datos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/transition-intensities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Intensidades y matriz de transición</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelos de Markov</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/semi-markov-models.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Modelos semi-Markov</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/transition-specific-covariates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Covariables específicas por transición</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">Guías de proyectos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../project-guides/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Recetario de código</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#por-qué-semi-markov" id="toc-por-qué-semi-markov" class="nav-link active" data-scroll-target="#por-qué-semi-markov">¿Por qué semi-Markov?</a></li>
+  <li><a href="#propiedad-semi-markov" id="toc-propiedad-semi-markov" class="nav-link" data-scroll-target="#propiedad-semi-markov">Propiedad semi-Markov</a></li>
+  <li><a href="#sojourn-time" id="toc-sojourn-time" class="nav-link" data-scroll-target="#sojourn-time">Sojourn time</a></li>
+  <li><a href="#clock-reset" id="toc-clock-reset" class="nav-link" data-scroll-target="#clock-reset">Clock-reset</a></li>
+  <li><a href="#clock-forward-frente-a-clock-reset" id="toc-clock-forward-frente-a-clock-reset" class="nav-link" data-scroll-target="#clock-forward-frente-a-clock-reset">Clock-forward frente a clock-reset</a>
+  <ul class="collapse">
+  <li><a href="#clock-forward" id="toc-clock-forward" class="nav-link" data-scroll-target="#clock-forward">Clock-forward</a></li>
+  <li><a href="#clock-reset-1" id="toc-clock-reset-1" class="nav-link" data-scroll-target="#clock-reset-1">Clock-reset</a></li>
+  </ul></li>
+  <li><a href="#ejemplo" id="toc-ejemplo" class="nav-link" data-scroll-target="#ejemplo">Ejemplo</a></li>
+  <li><a href="#intensidad-semi-markov" id="toc-intensidad-semi-markov" class="nav-link" data-scroll-target="#intensidad-semi-markov">Intensidad semi-Markov</a></li>
+  <li><a href="#con-covariables" id="toc-con-covariables" class="nav-link" data-scroll-target="#con-covariables">Con covariables</a></li>
+  <li><a href="#interpretación" id="toc-interpretación" class="nav-link" data-scroll-target="#interpretación">Interpretación</a></li>
+  <li><a href="#diferencia-frente-a-markov-no-homogéneo" id="toc-diferencia-frente-a-markov-no-homogéneo" class="nav-link" data-scroll-target="#diferencia-frente-a-markov-no-homogéneo">Diferencia frente a Markov no homogéneo</a>
+  <ul class="collapse">
+  <li><a href="#markov-no-homogéneo" id="toc-markov-no-homogéneo" class="nav-link" data-scroll-target="#markov-no-homogéneo">Markov no homogéneo</a></li>
+  <li><a href="#semi-markov" id="toc-semi-markov" class="nav-link" data-scroll-target="#semi-markov">Semi-Markov</a></li>
+  </ul></li>
+  <li><a href="#ejemplo-clínico" id="toc-ejemplo-clínico" class="nav-link" data-scroll-target="#ejemplo-clínico">Ejemplo clínico</a></li>
+  <li><a href="#preparar-episodios-de-estado" id="toc-preparar-episodios-de-estado" class="nav-link" data-scroll-target="#preparar-episodios-de-estado">Preparar episodios de estado</a></li>
+  <li><a href="#detectar-entrada-en-nuevo-estado" id="toc-detectar-entrada-en-nuevo-estado" class="nav-link" data-scroll-target="#detectar-entrada-en-nuevo-estado">Detectar entrada en nuevo estado</a></li>
+  <li><a href="#identificador-de-episodio" id="toc-identificador-de-episodio" class="nav-link" data-scroll-target="#identificador-de-episodio">Identificador de episodio</a></li>
+  <li><a href="#tiempo-de-entrada-en-estado" id="toc-tiempo-de-entrada-en-estado" class="nav-link" data-scroll-target="#tiempo-de-entrada-en-estado">Tiempo de entrada en estado</a></li>
+  <li><a href="#añadir-entrada" id="toc-añadir-entrada" class="nav-link" data-scroll-target="#añadir-entrada">Añadir entrada</a></li>
+  <li><a href="#tiempo-desde-entrada" id="toc-tiempo-desde-entrada" class="nav-link" data-scroll-target="#tiempo-desde-entrada">Tiempo desde entrada</a></li>
+  <li><a href="#construir-intervalos-clock-reset" id="toc-construir-intervalos-clock-reset" class="nav-link" data-scroll-target="#construir-intervalos-clock-reset">Construir intervalos clock-reset</a></li>
+  <li><a href="#entrada-al-episodio" id="toc-entrada-al-episodio" class="nav-link" data-scroll-target="#entrada-al-episodio">Entrada al episodio</a></li>
+  <li><a href="#tiempo-reset" id="toc-tiempo-reset" class="nav-link" data-scroll-target="#tiempo-reset">Tiempo reset</a></li>
+  <li><a href="#resultado" id="toc-resultado" class="nav-link" data-scroll-target="#resultado">Resultado</a></li>
+  <li><a href="#riesgo-en-clock-reset" id="toc-riesgo-en-clock-reset" class="nav-link" data-scroll-target="#riesgo-en-clock-reset">Riesgo en clock-reset</a></li>
+  <li><a href="#cox-clock-reset" id="toc-cox-clock-reset" class="nav-link" data-scroll-target="#cox-clock-reset">Cox clock-reset</a></li>
+  <li><a href="#interpretación-1" id="toc-interpretación-1" class="nav-link" data-scroll-target="#interpretación-1">Interpretación</a></li>
+  <li><a href="#cause-specific-por-transición" id="toc-cause-specific-por-transición" class="nav-link" data-scroll-target="#cause-specific-por-transición">Cause-specific por transición</a></li>
+  <li><a href="#dataset-expandido" id="toc-dataset-expandido" class="nav-link" data-scroll-target="#dataset-expandido">Dataset expandido</a></li>
+  <li><a href="#riesgos-competidores-dentro-del-estado" id="toc-riesgos-competidores-dentro-del-estado" class="nav-link" data-scroll-target="#riesgos-competidores-dentro-del-estado">Riesgos competidores dentro del estado</a></li>
+  <li><a href="#reentrada-en-un-estado" id="toc-reentrada-en-un-estado" class="nav-link" data-scroll-target="#reentrada-en-un-estado">Reentrada en un estado</a></li>
+  <li><a href="#episodios-repetidos" id="toc-episodios-repetidos" class="nav-link" data-scroll-target="#episodios-repetidos">Episodios repetidos</a></li>
+  <li><a href="#dependencia-entre-episodios" id="toc-dependencia-entre-episodios" class="nav-link" data-scroll-target="#dependencia-entre-episodios">Dependencia entre episodios</a></li>
+  <li><a href="#identificador-de-episodio-1" id="toc-identificador-de-episodio-1" class="nav-link" data-scroll-target="#identificador-de-episodio-1">Identificador de episodio</a></li>
+  <li><a href="#estado-previo-como-covariable" id="toc-estado-previo-como-covariable" class="nav-link" data-scroll-target="#estado-previo-como-covariable">Estado previo como covariable</a></li>
+  <li><a href="#interacción-con-origen-previo" id="toc-interacción-con-origen-previo" class="nav-link" data-scroll-target="#interacción-con-origen-previo">Interacción con origen previo</a></li>
+  <li><a href="#tiempo-en-estado-como-covariable" id="toc-tiempo-en-estado-como-covariable" class="nav-link" data-scroll-target="#tiempo-en-estado-como-covariable">Tiempo en estado como covariable</a></li>
+  <li><a href="#no-linealidad" id="toc-no-linealidad" class="nav-link" data-scroll-target="#no-linealidad">No linealidad</a></li>
+  <li><a href="#atención" id="toc-atención" class="nav-link" data-scroll-target="#atención">Atención</a></li>
+  <li><a href="#parametric-semi-markov" id="toc-parametric-semi-markov" class="nav-link" data-scroll-target="#parametric-semi-markov">Parametric semi-Markov</a></li>
+  <li><a href="#weibull-por-transición" id="toc-weibull-por-transición" class="nav-link" data-scroll-target="#weibull-por-transición">Weibull por transición</a></li>
+  <li><a href="#interpretación-aft" id="toc-interpretación-aft" class="nav-link" data-scroll-target="#interpretación-aft">Interpretación AFT</a></li>
+  <li><a href="#ejemplo-1" id="toc-ejemplo-1" class="nav-link" data-scroll-target="#ejemplo-1">Ejemplo</a></li>
+  <li><a href="#salida-hacia-varios-destinos" id="toc-salida-hacia-varios-destinos" class="nav-link" data-scroll-target="#salida-hacia-varios-destinos">Salida hacia varios destinos</a></li>
+  <li><a href="#piecewise-exponential" id="toc-piecewise-exponential" class="nav-link" data-scroll-target="#piecewise-exponential">Piecewise exponential</a></li>
+  <li><a href="#dividir-episodios" id="toc-dividir-episodios" class="nav-link" data-scroll-target="#dividir-episodios">Dividir episodios</a></li>
+  <li><a href="#hazard-por-duración" id="toc-hazard-por-duración" class="nav-link" data-scroll-target="#hazard-por-duración">Hazard por duración</a></li>
+  <li><a href="#modelo-con-splines" id="toc-modelo-con-splines" class="nav-link" data-scroll-target="#modelo-con-splines">Modelo con splines</a></li>
+  <li><a href="#semi-markov-con-covariables-temporales" id="toc-semi-markov-con-covariables-temporales" class="nav-link" data-scroll-target="#semi-markov-con-covariables-temporales">Semi-Markov con covariables temporales</a></li>
+  <li><a href="#intervalos-dentro-de-episodio" id="toc-intervalos-dentro-de-episodio" class="nav-link" data-scroll-target="#intervalos-dentro-de-episodio">Intervalos dentro de episodio</a></li>
+  <li><a href="#start-stop-reset" id="toc-start-stop-reset" class="nav-link" data-scroll-target="#start-stop-reset">Start-stop reset</a></li>
+  <li><a href="#disponibilidad-causal" id="toc-disponibilidad-causal" class="nav-link" data-scroll-target="#disponibilidad-causal">Disponibilidad causal</a></li>
+  <li><a href="#evento-al-final" id="toc-evento-al-final" class="nav-link" data-scroll-target="#evento-al-final">Evento al final</a></li>
+  <li><a href="#distribución-del-sojourn-time" id="toc-distribución-del-sojourn-time" class="nav-link" data-scroll-target="#distribución-del-sojourn-time">Distribución del sojourn time</a></li>
+  <li><a href="#visualización" id="toc-visualización" class="nav-link" data-scroll-target="#visualización">Visualización</a></li>
+  <li><a href="#kaplan-meier-de-permanencia" id="toc-kaplan-meier-de-permanencia" class="nav-link" data-scroll-target="#kaplan-meier-de-permanencia">Kaplan-Meier de permanencia</a></li>
+  <li><a href="#ejemplo-para-s1" id="toc-ejemplo-para-s1" class="nav-link" data-scroll-target="#ejemplo-para-s1">Ejemplo para S1</a></li>
+  <li><a href="#limitación" id="toc-limitación" class="nav-link" data-scroll-target="#limitación">Limitación</a></li>
+  <li><a href="#cif-por-destino" id="toc-cif-por-destino" class="nav-link" data-scroll-target="#cif-por-destino">CIF por destino</a></li>
+  <li><a href="#comparar-markov-y-semi-markov" id="toc-comparar-markov-y-semi-markov" class="nav-link" data-scroll-target="#comparar-markov-y-semi-markov">Comparar Markov y semi-Markov</a></li>
+  <li><a href="#pregunta-diagnóstica" id="toc-pregunta-diagnóstica" class="nav-link" data-scroll-target="#pregunta-diagnóstica">Pregunta diagnóstica</a></li>
+  <li><a href="#comparación-empírica" id="toc-comparación-empírica" class="nav-link" data-scroll-target="#comparación-empírica">Comparación empírica</a></li>
+  <li><a href="#aic" id="toc-aic" class="nav-link" data-scroll-target="#aic">AIC</a></li>
+  <li><a href="#estado-ampliado-como-alternativa" id="toc-estado-ampliado-como-alternativa" class="nav-link" data-scroll-target="#estado-ampliado-como-alternativa">Estado ampliado como alternativa</a></li>
+  <li><a href="#ventaja" id="toc-ventaja" class="nav-link" data-scroll-target="#ventaja">Ventaja</a></li>
+  <li><a href="#limitación-1" id="toc-limitación-1" class="nav-link" data-scroll-target="#limitación-1">Limitación</a></li>
+  <li><a href="#modelo-de-fases" id="toc-modelo-de-fases" class="nav-link" data-scroll-target="#modelo-de-fases">Modelo de fases</a></li>
+  <li><a href="#historia-resumida" id="toc-historia-resumida" class="nav-link" data-scroll-target="#historia-resumida">Historia resumida</a></li>
+  <li><a href="#número-de-episodios-previos" id="toc-número-de-episodios-previos" class="nav-link" data-scroll-target="#número-de-episodios-previos">Número de episodios previos</a></li>
+  <li><a href="#tiempo-acumulado-previo-en-estado" id="toc-tiempo-acumulado-previo-en-estado" class="nav-link" data-scroll-target="#tiempo-acumulado-previo-en-estado">Tiempo acumulado previo en estado</a></li>
+  <li><a href="#frailty" id="toc-frailty" class="nav-link" data-scroll-target="#frailty">Frailty</a></li>
+  <li><a href="#modelos-jerárquicos" id="toc-modelos-jerárquicos" class="nav-link" data-scroll-target="#modelos-jerárquicos">Modelos jerárquicos</a></li>
+  <li><a href="#predicción-semi-markov" id="toc-predicción-semi-markov" class="nav-link" data-scroll-target="#predicción-semi-markov">Predicción semi-Markov</a></li>
+  <li><a href="#ejemplo-2" id="toc-ejemplo-2" class="nav-link" data-scroll-target="#ejemplo-2">Ejemplo</a></li>
+  <li><a href="#residual-life" id="toc-residual-life" class="nav-link" data-scroll-target="#residual-life">Residual life</a></li>
+  <li><a href="#supervivencia-residual" id="toc-supervivencia-residual" class="nav-link" data-scroll-target="#supervivencia-residual">Supervivencia residual</a></li>
+  <li><a href="#ejemplo-en-python" id="toc-ejemplo-en-python" class="nav-link" data-scroll-target="#ejemplo-en-python">Ejemplo en Python</a></li>
+  <li><a href="#probabilidad-de-salida-futura" id="toc-probabilidad-de-salida-futura" class="nav-link" data-scroll-target="#probabilidad-de-salida-futura">Probabilidad de salida futura</a></li>
+  <li><a href="#ocupación-semi-markov" id="toc-ocupación-semi-markov" class="nav-link" data-scroll-target="#ocupación-semi-markov">Ocupación semi-Markov</a></li>
+  <li><a href="#simulación" id="toc-simulación" class="nav-link" data-scroll-target="#simulación">Simulación</a></li>
+  <li><a href="#simulación-conceptual" id="toc-simulación-conceptual" class="nav-link" data-scroll-target="#simulación-conceptual">Simulación conceptual</a></li>
+  <li><a href="#elegir-destino" id="toc-elegir-destino" class="nav-link" data-scroll-target="#elegir-destino">Elegir destino</a></li>
+  <li><a href="#validación" id="toc-validación" class="nav-link" data-scroll-target="#validación">Validación</a></li>
+  <li><a href="#comparar-tiempo-observado-y-predicho" id="toc-comparar-tiempo-observado-y-predicho" class="nav-link" data-scroll-target="#comparar-tiempo-observado-y-predicho">Comparar tiempo observado y predicho</a></li>
+  <li><a href="#calibración-por-estado" id="toc-calibración-por-estado" class="nav-link" data-scroll-target="#calibración-por-estado">Calibración por estado</a></li>
+  <li><a href="#calibración-por-duración" id="toc-calibración-por-duración" class="nav-link" data-scroll-target="#calibración-por-duración">Calibración por duración</a></li>
+  <li><a href="#panel-data" id="toc-panel-data" class="nav-link" data-scroll-target="#panel-data">Panel data</a></li>
+  <li><a href="#riesgo-de-sesgo" id="toc-riesgo-de-sesgo" class="nav-link" data-scroll-target="#riesgo-de-sesgo">Riesgo de sesgo</a></li>
+  <li><a href="#opciones" id="toc-opciones" class="nav-link" data-scroll-target="#opciones">Opciones</a></li>
+  <li><a href="#hidden-semi-markov-models" id="toc-hidden-semi-markov-models" class="nav-link" data-scroll-target="#hidden-semi-markov-models">Hidden semi-Markov models</a></li>
+  <li><a href="#aplicación-a-cardiotoxicidad" id="toc-aplicación-a-cardiotoxicidad" class="nav-link" data-scroll-target="#aplicación-a-cardiotoxicidad">Aplicación a cardiotoxicidad</a></li>
+  <li><a href="#posible-estructura" id="toc-posible-estructura" class="nav-link" data-scroll-target="#posible-estructura">Posible estructura</a></li>
+  <li><a href="#covariables-relevantes" id="toc-covariables-relevantes" class="nav-link" data-scroll-target="#covariables-relevantes">Covariables relevantes</a></li>
+  <li><a href="#dataset-analítico" id="toc-dataset-analítico" class="nav-link" data-scroll-target="#dataset-analítico">Dataset analítico</a></li>
+  <li><a href="#reporting" id="toc-reporting" class="nav-link" data-scroll-target="#reporting">Reporting</a></li>
+  <li><a href="#ejemplo-de-redacción" id="toc-ejemplo-de-redacción" class="nav-link" data-scroll-target="#ejemplo-de-redacción">Ejemplo de redacción</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#checklist" id="toc-checklist" class="nav-link" data-scroll-target="#checklist">Checklist</a></li>
+  <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
+  <ul class="collapse">
+  <li><a href="#conceptos" id="toc-conceptos" class="nav-link" data-scroll-target="#conceptos">Conceptos</a></li>
+  <li><a href="#herramientas" id="toc-herramientas" class="nav-link" data-scroll-target="#herramientas">Herramientas</a></li>
+  <li><a href="#material-del-proyecto" id="toc-material-del-proyecto" class="nav-link" data-scroll-target="#material-del-proyecto">Material del proyecto</a></li>
+  </ul></li>
+  <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../multi-state-models/index.html">Multi-state Models</a></li><li class="breadcrumb-item"><a href="../multi-state-models/semi-markov-models.html">Modelos semi-Markov</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Modelos semi-Markov</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Un modelo semi-Markov permite que el riesgo de la siguiente transición dependa del tiempo que el paciente lleva en el estado actual.</p>
+<p>A diferencia de un modelo Markov puro:</p>
+<pre class="text"><code>Markov
+→ importa el estado actual
+
+Semi-Markov
+→ importa el estado actual
+  y cuánto tiempo lleva en él</code></pre>
+<p>Esto resulta útil cuando la duración en un estado modifica el riesgo de progresión, recuperación o salida.</p>
+</div>
+</div>
+<section id="por-qué-semi-markov" class="level2">
+<h2 data-anchor-id="por-qué-semi-markov">¿Por qué semi-Markov?</h2>
+<p>En muchos procesos clínicos, dos pacientes en el mismo estado no tienen el mismo riesgo futuro si llevan tiempos muy distintos en él.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Paciente A
+→ acaba de entrar en S1
+
+Paciente B
+→ lleva 12 meses en S1</code></pre>
+<p>Un modelo Markov puro puede tratarlos igual.</p>
+<p>Un modelo semi-Markov permite tratarlos de forma distinta.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El reloj relevante se reinicia al entrar en cada estado.</p>
+</div>
+</div>
+</section>
+<section id="propiedad-semi-markov" class="level2">
+<h2 data-anchor-id="propiedad-semi-markov">Propiedad semi-Markov</h2>
+<p>La siguiente transición puede depender de:</p>
+<ul>
+<li>Estado actual.</li>
+<li>Tiempo desde entrada en el estado.</li>
+<li>Covariables.</li>
+<li>Tiempo global, si se incluye.</li>
+<li>Historia resumida.</li>
+</ul>
+</section>
+<section id="sojourn-time" class="level2">
+<h2 data-anchor-id="sojourn-time">Sojourn time</h2>
+<p>El tiempo de permanencia en un estado se denomina:</p>
+<pre class="text"><code>sojourn time</code></pre>
+<p>Si un paciente entra en S1 en el día 90 y sale en el día 180:</p>
+<pre class="text"><code>sojourn time
+→ 90 días</code></pre>
+</section>
+<section id="clock-reset" class="level2">
+<h2 data-anchor-id="clock-reset">Clock-reset</h2>
+<p>En un modelo semi-Markov se utiliza habitualmente:</p>
+<pre class="text"><code>clock-reset</code></pre>
+<p>El tiempo se mide desde la entrada en el estado actual.</p>
+</section>
+<section id="clock-forward-frente-a-clock-reset" class="level2">
+<h2 data-anchor-id="clock-forward-frente-a-clock-reset">Clock-forward frente a clock-reset</h2>
+<section id="clock-forward" class="level3">
+<h3 data-anchor-id="clock-forward">Clock-forward</h3>
+<pre class="text"><code>Tiempo desde el origen global</code></pre>
+</section>
+<section id="clock-reset-1" class="level3">
+<h3 data-anchor-id="clock-reset-1">Clock-reset</h3>
+<pre class="text"><code>Tiempo desde la entrada en el estado</code></pre>
+</section>
+</section>
+<section id="ejemplo" class="level2">
+<h2 data-anchor-id="ejemplo">Ejemplo</h2>
+<pre class="text"><code>Inicio tratamiento
+→ día 0
+
+Entrada en S1
+→ día 100
+
+Salida de S1
+→ día 160</code></pre>
+<p>Clock-forward:</p>
+<pre class="text"><code>start = 100
+stop = 160</code></pre>
+<p>Clock-reset:</p>
+<pre class="text"><code>start = 0
+stop = 60</code></pre>
+</section>
+<section id="intensidad-semi-markov" class="level2">
+<h2 data-anchor-id="intensidad-semi-markov">Intensidad semi-Markov</h2>
+<p>Para una transición (r s):</p>
+<p><span class="math display">\[
+q_{rs}(u)
+\]</span></p>
+<p>donde (u) es el tiempo desde entrada en el estado (r).</p>
+</section>
+<section id="con-covariables" class="level2">
+<h2 data-anchor-id="con-covariables">Con covariables</h2>
+<p><span class="math display">\[
+q_{rs}(u\mid X)
+=
+q_{rs,0}(u)
+\exp(
+\beta_{rs}^{\top}X
+)
+\]</span></p>
+</section>
+<section id="interpretación" class="level2">
+<h2 data-anchor-id="interpretación">Interpretación</h2>
+<p>El baseline hazard puede variar con la duración en el estado.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>S1 → S2
+→ riesgo alto durante los primeros 3 meses
+→ riesgo menor después</code></pre>
+</section>
+<section id="diferencia-frente-a-markov-no-homogéneo" class="level2">
+<h2 data-anchor-id="diferencia-frente-a-markov-no-homogéneo">Diferencia frente a Markov no homogéneo</h2>
+<section id="markov-no-homogéneo" class="level3">
+<h3 data-anchor-id="markov-no-homogéneo">Markov no homogéneo</h3>
+<p>La intensidad depende del tiempo global:</p>
+<pre class="text"><code>q_rs(t)</code></pre>
+</section>
+<section id="semi-markov" class="level3">
+<h3 data-anchor-id="semi-markov">Semi-Markov</h3>
+<p>La intensidad depende del tiempo desde entrada:</p>
+<pre class="text"><code>q_rs(u)</code></pre>
+</section>
+</section>
+<section id="ejemplo-clínico" class="level2">
+<h2 data-anchor-id="ejemplo-clínico">Ejemplo clínico</h2>
+<p>El riesgo de progresión de S1 a S2 puede depender de:</p>
+<ul>
+<li>Tiempo desde inicio del tratamiento.</li>
+<li>Tiempo desde entrada en S1.</li>
+</ul>
+<p>Estas dos escalas no son equivalentes.</p>
+</section>
+<section id="preparar-episodios-de-estado" class="level2">
+<h2 data-anchor-id="preparar-episodios-de-estado">Preparar episodios de estado</h2>
+<p>Partimos de observaciones:</p>
+<pre class="text"><code>patient_id | time | state</code></pre>
+</section>
+<section id="detectar-entrada-en-nuevo-estado" class="level2">
+<h2 data-anchor-id="detectar-entrada-en-nuevo-estado">Detectar entrada en nuevo estado</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>state_df <span class="op">=</span> (</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    state_df</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    .sort_values(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"patient_id"</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"time"</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    .reset_index(</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        drop<span class="op">=</span><span class="va">True</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>state_df[</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"previous_state"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    state_df</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    .groupby(<span class="st">"patient_id"</span>)[</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"state"</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    .shift()</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>state_df[</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"new_episode"</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    state_df[</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"state"</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">!=</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    state_df[</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"previous_state"</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>).astype(<span class="bu">int</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Para la primera observación:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>state_df.loc[</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    state_df[</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"previous_state"</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    .isna(),</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"new_episode"</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="identificador-de-episodio" class="level2">
+<h2 data-anchor-id="identificador-de-episodio">Identificador de episodio</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>state_df[</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"episode_id"</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    state_df</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    .groupby(<span class="st">"patient_id"</span>)[</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"new_episode"</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    .cumsum()</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="tiempo-de-entrada-en-estado" class="level2">
+<h2 data-anchor-id="tiempo-de-entrada-en-estado">Tiempo de entrada en estado</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>entry_times <span class="op">=</span> (</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    state_df</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    .groupby(</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"patient_id"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"episode_id"</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>    )[</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"time"</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    .<span class="bu">min</span>()</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    .rename(</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"state_entry_time"</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    .reset_index()</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="añadir-entrada" class="level2">
+<h2 data-anchor-id="añadir-entrada">Añadir entrada</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>state_df <span class="op">=</span> state_df.merge(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    entry_times,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    on<span class="op">=</span>[</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"patient_id"</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"episode_id"</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    how<span class="op">=</span><span class="st">"left"</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="tiempo-desde-entrada" class="level2">
+<h2 data-anchor-id="tiempo-desde-entrada">Tiempo desde entrada</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>state_df[</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"time_since_state_entry"</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    state_df[</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"time"</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">-</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>    state_df[</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"state_entry_time"</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="construir-intervalos-clock-reset" class="level2">
+<h2 data-anchor-id="construir-intervalos-clock-reset">Construir intervalos clock-reset</h2>
+<p>Partimos de intervalos globales:</p>
+<pre class="text"><code>patient_id | from_state | to_state | start | stop | status</code></pre>
+</section>
+<section id="entrada-al-episodio" class="level2">
+<h2 data-anchor-id="entrada-al-episodio">Entrada al episodio</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>interval_data <span class="op">=</span> interval_data.merge(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    episode_entry_table,</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    on<span class="op">=</span>[</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"patient_id"</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"episode_id"</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    how<span class="op">=</span><span class="st">"left"</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="tiempo-reset" class="level2">
+<h2 data-anchor-id="tiempo-reset">Tiempo reset</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>interval_data[</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"reset_start"</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    interval_data[</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"start"</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">-</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    interval_data[</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"state_entry_time"</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>interval_data[</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"reset_stop"</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    interval_data[</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"stop"</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">-</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    interval_data[</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"state_entry_time"</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="resultado" class="level2">
+<h2 data-anchor-id="resultado">Resultado</h2>
+<pre class="text"><code>patient_id | from | to | reset_start | reset_stop | status
+----------------------------------------------------------------
+1          | S1   | S1 | 0           | 30         | 0
+1          | S1   | S2 | 30          | 90         | 1</code></pre>
+</section>
+<section id="riesgo-en-clock-reset" class="level2">
+<h2 data-anchor-id="riesgo-en-clock-reset">Riesgo en clock-reset</h2>
+<p>Para una transición desde S1:</p>
+<pre class="text"><code>reset_start
+reset_stop</code></pre>
+<p>representan tiempo en S1, no tiempo desde el origen global.</p>
+</section>
+<section id="cox-clock-reset" class="level2">
+<h2 data-anchor-id="cox-clock-reset">Cox clock-reset</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lifelines <span class="im">import</span> CoxPHFitter</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>transition_model <span class="op">=</span> CoxPHFitter()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>transition_model.fit(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    transition_df[</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"reset_start"</span>,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"reset_stop"</span>,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"event"</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"age"</span>,</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"baseline_lvef"</span>,</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cumulative_dose"</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"reset_stop"</span>,</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>    entry_col<span class="op">=</span><span class="st">"reset_start"</span></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación-1" class="level2">
+<h2 data-anchor-id="interpretación-1">Interpretación</h2>
+<p>El baseline hazard se interpreta en función del tiempo desde entrada en el estado.</p>
+</section>
+<section id="cause-specific-por-transición" class="level2">
+<h2 data-anchor-id="cause-specific-por-transición">Cause-specific por transición</h2>
+<p>Para S1:</p>
+<pre class="text"><code>S1 → S0
+S1 → S2</code></pre>
+<p>se ajustan modelos específicos por destino.</p>
+</section>
+<section id="dataset-expandido" class="level2">
+<h2 data-anchor-id="dataset-expandido">Dataset expandido</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>s1_to_s0 <span class="op">=</span> expanded_data.loc[</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition"</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">==</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S1 → S0"</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>].copy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>s1_to_s2 <span class="op">=</span> expanded_data.loc[</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition"</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">==</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S1 → S2"</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>].copy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="riesgos-competidores-dentro-del-estado" class="level2">
+<h2 data-anchor-id="riesgos-competidores-dentro-del-estado">Riesgos competidores dentro del estado</h2>
+<p>Cuando ocurre S1 → S0, se deja de estar en riesgo de S1 → S2 en ese episodio.</p>
+</section>
+<section id="reentrada-en-un-estado" class="level2">
+<h2 data-anchor-id="reentrada-en-un-estado">Reentrada en un estado</h2>
+<p>Un paciente puede:</p>
+<pre class="text"><code>S0 → S1 → S0 → S1</code></pre>
+<p>Cada entrada en S1 crea un nuevo episodio.</p>
+</section>
+<section id="episodios-repetidos" class="level2">
+<h2 data-anchor-id="episodios-repetidos">Episodios repetidos</h2>
+<pre class="text"><code>S1 episodio 1
+S1 episodio 2</code></pre>
+<p>Pueden tener:</p>
+<ul>
+<li>Riesgo diferente.</li>
+<li>Historia diferente.</li>
+<li>Duración diferente.</li>
+<li>Tratamiento diferente.</li>
+</ul>
+</section>
+<section id="dependencia-entre-episodios" class="level2">
+<h2 data-anchor-id="dependencia-entre-episodios">Dependencia entre episodios</h2>
+<p>Los episodios del mismo paciente no son independientes.</p>
+<p>Puede ser necesario:</p>
+<ul>
+<li>Error robusto por paciente.</li>
+<li>Frailty.</li>
+<li>Efectos aleatorios.</li>
+<li>Modelo de recurrencia.</li>
+</ul>
+</section>
+<section id="identificador-de-episodio-1" class="level2">
+<h2 data-anchor-id="identificador-de-episodio-1">Identificador de episodio</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"state_episode_key"</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"patient_id"</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    .astype(<span class="bu">str</span>)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span></span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"_"</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"episode_id"</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>    .astype(<span class="bu">str</span>)</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="estado-previo-como-covariable" class="level2">
+<h2 data-anchor-id="estado-previo-como-covariable">Estado previo como covariable</h2>
+<p>Para conservar parte de la memoria:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"previous_state_before_episode"</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Ejemplo:</p>
+<pre class="text"><code>Entrada en S1 desde S0
+vs
+entrada en S1 desde S2</code></pre>
+</section>
+<section id="interacción-con-origen-previo" class="level2">
+<h2 data-anchor-id="interacción-con-origen-previo">Interacción con origen previo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"entered_s1_from_s2"</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"previous_state_before_episode"</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">==</span></span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S2"</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>).astype(<span class="bu">int</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="tiempo-en-estado-como-covariable" class="level2">
+<h2 data-anchor-id="tiempo-en-estado-como-covariable">Tiempo en estado como covariable</h2>
+<p>Otra aproximación es incluir explícitamente la duración.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"time_in_state_at_start"</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"reset_start"</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="no-linealidad" class="level2">
+<h2 data-anchor-id="no-linealidad">No linealidad</h2>
+<p>El efecto de la duración puede no ser lineal.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>model.fit(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    transition_df,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"reset_stop"</span>,</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    entry_col<span class="op">=</span><span class="st">"reset_start"</span>,</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    formula<span class="op">=</span>(</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"bs(time_in_state_at_start, df=4)"</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">" + age"</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">" + cumulative_dose"</span></span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="atención" class="level2">
+<h2 data-anchor-id="atención">Atención</h2>
+<p>Si el baseline ya está definido sobre clock-reset, añadir tiempo en estado como covariable puede ser redundante o cambiar la interpretación.</p>
+<p>Debe decidirse qué parte se modela en el baseline y cuál como covariable.</p>
+</section>
+<section id="parametric-semi-markov" class="level2">
+<h2 data-anchor-id="parametric-semi-markov">Parametric semi-Markov</h2>
+<p>Puede especificarse una distribución para el tiempo de salida del estado.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Weibull.</li>
+<li>Log-normal.</li>
+<li>Log-logístico.</li>
+<li>Piecewise exponential.</li>
+</ul>
+</section>
+<section id="weibull-por-transición" class="level2">
+<h2 data-anchor-id="weibull-por-transición">Weibull por transición</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lifelines <span class="im">import</span> WeibullAFTFitter</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>weibull_transition <span class="op">=</span> WeibullAFTFitter()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>weibull_transition.fit(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    transition_df[</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"sojourn_time"</span>,</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"event"</span>,</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"age"</span>,</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cumulative_dose"</span></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"sojourn_time"</span>,</span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span></span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación-aft" class="level2">
+<h2 data-anchor-id="interpretación-aft">Interpretación AFT</h2>
+<p>El modelo describe cómo las covariables aceleran o retrasan la salida del estado.</p>
+</section>
+<section id="ejemplo-1" class="level2">
+<h2 data-anchor-id="ejemplo-1">Ejemplo</h2>
+<pre class="text"><code>TR = 0.75</code></pre>
+<p>puede indicar un tiempo hasta salida aproximadamente un 25 % menor.</p>
+</section>
+<section id="salida-hacia-varios-destinos" class="level2">
+<h2 data-anchor-id="salida-hacia-varios-destinos">Salida hacia varios destinos</h2>
+<p>Si un estado tiene varias salidas, puede modelarse:</p>
+<ul>
+<li>Cause-specific AFT.</li>
+<li>Competing risks paramétrico.</li>
+<li>Distribución conjunta de tiempo y destino.</li>
+<li>Modelos multiestado especializados.</li>
+</ul>
+</section>
+<section id="piecewise-exponential" class="level2">
+<h2 data-anchor-id="piecewise-exponential">Piecewise exponential</h2>
+<p>Puede permitir una intensidad distinta según duración.</p>
+<pre class="text"><code>0–30 días en S1
+→ intensidad 1
+
+30–90 días
+→ intensidad 2
+
+&gt;90 días
+→ intensidad 3</code></pre>
+</section>
+<section id="dividir-episodios" class="level2">
+<h2 data-anchor-id="dividir-episodios">Dividir episodios</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>cuts <span class="op">=</span> [</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">30</span>,</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">90</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cada episodio debe dividirse al cruzar esos puntos.</p>
+</section>
+<section id="hazard-por-duración" class="level2">
+<h2 data-anchor-id="hazard-por-duración">Hazard por duración</h2>
+<p>Puede visualizarse:</p>
+<pre class="text"><code>Hazard S1 → S2
+frente a tiempo desde entrada en S1</code></pre>
+</section>
+<section id="modelo-con-splines" class="level2">
+<h2 data-anchor-id="modelo-con-splines">Modelo con splines</h2>
+<p>Los splines permiten una forma suave.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>transition_model.fit(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    transition_df,</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"reset_stop"</span>,</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    entry_col<span class="op">=</span><span class="st">"reset_start"</span>,</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>    formula<span class="op">=</span>(</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span></span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">" + baseline_lvef"</span></span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">" + cumulative_dose"</span></span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>El baseline de Cox ya puede variar flexiblemente con el tiempo reset.</p>
+</section>
+<section id="semi-markov-con-covariables-temporales" class="level2">
+<h2 data-anchor-id="semi-markov-con-covariables-temporales">Semi-Markov con covariables temporales</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>Dosis acumulada
+→ cambia mientras el paciente permanece en S1</code></pre>
+<p>El dataset debe dividirse cada vez que cambia la covariable.</p>
+</section>
+<section id="intervalos-dentro-de-episodio" class="level2">
+<h2 data-anchor-id="intervalos-dentro-de-episodio">Intervalos dentro de episodio</h2>
+<pre class="text"><code>S1, día 0–30
+→ dosis 100
+
+S1, día 30–60
+→ dosis 150
+
+S1, día 60–90
+→ dosis 200</code></pre>
+</section>
+<section id="start-stop-reset" class="level2">
+<h2 data-anchor-id="start-stop-reset">Start-stop reset</h2>
+<pre class="text"><code>reset_start | reset_stop | dose
+0           | 30         | 100
+30          | 60         | 150
+60          | 90         | 200</code></pre>
+</section>
+<section id="disponibilidad-causal" class="level2">
+<h2 data-anchor-id="disponibilidad-causal">Disponibilidad causal</h2>
+<p>La covariable debe estar disponible al inicio del subintervalo.</p>
+</section>
+<section id="evento-al-final" class="level2">
+<h2 data-anchor-id="evento-al-final">Evento al final</h2>
+<pre class="text"><code>event = 1</code></pre>
+<p>solo en el intervalo donde se produce la transición.</p>
+</section>
+<section id="distribución-del-sojourn-time" class="level2">
+<h2 data-anchor-id="distribución-del-sojourn-time">Distribución del sojourn time</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>sojourn_summary <span class="op">=</span> (</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>    episode_df</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>    .groupby(</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"state"</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>    )[</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sojourn_time"</span></span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    .describe()</span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="visualización" class="level2">
+<h2 data-anchor-id="visualización">Visualización</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> state, group <span class="kw">in</span> episode_df.groupby(</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"state"</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>    group[</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sojourn_time"</span></span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>    ].hist(</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>        alpha<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>        label<span class="op">=</span>state</span>
+<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>plt.xlabel(</span>
+<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Tiempo en estado"</span></span>
+<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb54-19"><a href="#cb54-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb54-20"><a href="#cb54-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="kaplan-meier-de-permanencia" class="level2">
+<h2 data-anchor-id="kaplan-meier-de-permanencia">Kaplan-Meier de permanencia</h2>
+<p>Puede estimarse el tiempo hasta salida de un estado.</p>
+</section>
+<section id="ejemplo-para-s1" class="level2">
+<h2 data-anchor-id="ejemplo-para-s1">Ejemplo para S1</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lifelines <span class="im">import</span> KaplanMeierFitter</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>s1_episodes <span class="op">=</span> episode_df.loc[</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>    episode_df[</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"state"</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">==</span></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"S1"</span></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>kmf <span class="op">=</span> KaplanMeierFitter()</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>kmf.fit(</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>    durations<span class="op">=</span>s1_episodes[</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sojourn_time"</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>    event_observed<span class="op">=</span>s1_episodes[</span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"left_state"</span></span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">"Permanencia en S1"</span></span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="limitación" class="level2">
+<h2 data-anchor-id="limitación">Limitación</h2>
+<p>Si existen varios destinos, las salidas son competing risks.</p>
+<p>Kaplan-Meier de salida total estudia:</p>
+<pre class="text"><code>Tiempo hasta abandonar S1</code></pre>
+<p>no el destino específico.</p>
+</section>
+<section id="cif-por-destino" class="level2">
+<h2 data-anchor-id="cif-por-destino">CIF por destino</h2>
+<p>Desde S1:</p>
+<pre class="text"><code>S1 → S0
+S1 → S2</code></pre>
+<p>pueden estimarse incidencias acumuladas específicas por tiempo en estado.</p>
+</section>
+<section id="comparar-markov-y-semi-markov" class="level2">
+<h2 data-anchor-id="comparar-markov-y-semi-markov">Comparar Markov y semi-Markov</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Aspecto</th>
+<th>Markov</th>
+<th>Semi-Markov</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Memoria</td>
+<td>Estado actual</td>
+<td>Estado + duración</td>
+</tr>
+<tr class="even">
+<td>Reloj</td>
+<td>Global</td>
+<td>Reinicia por estado</td>
+</tr>
+<tr class="odd">
+<td>Sojourn time</td>
+<td>Exponencial en homogéneo</td>
+<td>Flexible</td>
+</tr>
+<tr class="even">
+<td>Complejidad</td>
+<td>Menor</td>
+<td>Mayor</td>
+</tr>
+<tr class="odd">
+<td>Interpretación</td>
+<td>Simple</td>
+<td>Más clínica si importa duración</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="pregunta-diagnóstica" class="level2">
+<h2 data-anchor-id="pregunta-diagnóstica">Pregunta diagnóstica</h2>
+<pre class="text"><code>¿El riesgo cambia con el tiempo
+desde entrada en el estado?</code></pre>
+<p>Si la respuesta es sí, semi-Markov puede ser más adecuado.</p>
+</section>
+<section id="comparación-empírica" class="level2">
+<h2 data-anchor-id="comparación-empírica">Comparación empírica</h2>
+<p>Puede compararse:</p>
+<ul>
+<li>Log-likelihood.</li>
+<li>AIC.</li>
+<li>Ocupación predicha.</li>
+<li>Tiempo en estado.</li>
+<li>Calibración.</li>
+<li>Validación externa.</li>
+</ul>
+</section>
+<section id="aic" class="level2">
+<h2 data-anchor-id="aic">AIC</h2>
+<p>Solo es comparable entre modelos ajustados sobre la misma estructura de datos y outcome.</p>
+</section>
+<section id="estado-ampliado-como-alternativa" class="level2">
+<h2 data-anchor-id="estado-ampliado-como-alternativa">Estado ampliado como alternativa</h2>
+<p>En vez de semi-Markov:</p>
+<pre class="text"><code>S1_early
+S1_late</code></pre>
+</section>
+<section id="ventaja" class="level2">
+<h2 data-anchor-id="ventaja">Ventaja</h2>
+<p>Permite mantener una estructura Markov.</p>
+</section>
+<section id="limitación-1" class="level2">
+<h2 data-anchor-id="limitación-1">Limitación</h2>
+<ul>
+<li>Más estados.</li>
+<li>Cortes artificiales.</li>
+<li>Menos eventos.</li>
+<li>Mayor complejidad.</li>
+</ul>
+</section>
+<section id="modelo-de-fases" class="level2">
+<h2 data-anchor-id="modelo-de-fases">Modelo de fases</h2>
+<pre class="text"><code>S1_0_30
+S1_30_90
+S1_90_plus</code></pre>
+<p>Puede aproximar un proceso semi-Markov.</p>
+</section>
+<section id="historia-resumida" class="level2">
+<h2 data-anchor-id="historia-resumida">Historia resumida</h2>
+<p>Puede añadirse:</p>
+<ul>
+<li>Número de entradas previas.</li>
+<li>Estado anterior.</li>
+<li>Tiempo acumulado en estado.</li>
+<li>Máxima severidad previa.</li>
+<li>Número de recuperaciones.</li>
+</ul>
+</section>
+<section id="número-de-episodios-previos" class="level2">
+<h2 data-anchor-id="número-de-episodios-previos">Número de episodios previos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>episode_df[</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"episode_number"</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>    episode_df</span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>    .groupby(</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"patient_id"</span>,</span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"state"</span></span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>    .cumcount()</span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span></span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span></span>
+<span id="cb62-14"><a href="#cb62-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="tiempo-acumulado-previo-en-estado" class="level2">
+<h2 data-anchor-id="tiempo-acumulado-previo-en-estado">Tiempo acumulado previo en estado</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>episode_df[</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"previous_time_in_state"</span></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>    episode_df</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>    .groupby(</span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"patient_id"</span>,</span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"state"</span></span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a>    )[</span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sojourn_time"</span></span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>    .cumsum()</span>
+<span id="cb63-14"><a href="#cb63-14" aria-hidden="true" tabindex="-1"></a>    .shift()</span>
+<span id="cb63-15"><a href="#cb63-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>La implementación debe revisarse para no mezclar pacientes ni incluir el episodio actual.</p>
+</section>
+<section id="frailty" class="level2">
+<h2 data-anchor-id="frailty">Frailty</h2>
+<p>Puede capturar heterogeneidad persistente entre pacientes.</p>
+<pre class="text"><code>Paciente con alta propensión
+a progresar en varios episodios</code></pre>
+</section>
+<section id="modelos-jerárquicos" class="level2">
+<h2 data-anchor-id="modelos-jerárquicos">Modelos jerárquicos</h2>
+<p>Pueden compartir información entre:</p>
+<ul>
+<li>Transiciones.</li>
+<li>Centros.</li>
+<li>Pacientes.</li>
+<li>Episodios.</li>
+</ul>
+</section>
+<section id="predicción-semi-markov" class="level2">
+<h2 data-anchor-id="predicción-semi-markov">Predicción semi-Markov</h2>
+<p>La predicción necesita conocer:</p>
+<ul>
+<li>Estado actual.</li>
+<li>Tiempo ya pasado en el estado.</li>
+<li>Covariables actuales.</li>
+<li>Historia relevante.</li>
+</ul>
+</section>
+<section id="ejemplo-2" class="level2">
+<h2 data-anchor-id="ejemplo-2">Ejemplo</h2>
+<pre class="text"><code>Paciente en S1
+desde hace 60 días</code></pre>
+<p>La predicción no debe reiniciarse como si acabara de entrar.</p>
+</section>
+<section id="residual-life" class="level2">
+<h2 data-anchor-id="residual-life">Residual life</h2>
+<p>Interesa:</p>
+<pre class="text"><code>Tiempo adicional esperado
+antes de salir del estado</code></pre>
+<p>condicionado a haber permanecido ya (u) unidades.</p>
+</section>
+<section id="supervivencia-residual" class="level2">
+<h2 data-anchor-id="supervivencia-residual">Supervivencia residual</h2>
+<p><span class="math display">\[
+P(
+T &gt; u + v
+\mid
+T &gt; u
+)
+=
+\frac{
+S(u+v)
+}{
+S(u)
+}
+\]</span></p>
+</section>
+<section id="ejemplo-en-python" class="level2">
+<h2 data-anchor-id="ejemplo-en-python">Ejemplo en Python</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>survival_u <span class="op">=</span> model.predict(</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>    u</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>survival_u_plus_v <span class="op">=</span> model.predict(</span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>    u</span>
+<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">+</span></span>
+<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a>    v</span>
+<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a>residual_survival <span class="op">=</span> (</span>
+<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a>    survival_u_plus_v</span>
+<span id="cb67-13"><a href="#cb67-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span></span>
+<span id="cb67-14"><a href="#cb67-14" aria-hidden="true" tabindex="-1"></a>    survival_u</span>
+<span id="cb67-15"><a href="#cb67-15" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="probabilidad-de-salida-futura" class="level2">
+<h2 data-anchor-id="probabilidad-de-salida-futura">Probabilidad de salida futura</h2>
+<pre class="text"><code>Probabilidad de salir de S1
+durante los próximos 30 días,
+dado que ya lleva 60 días</code></pre>
+</section>
+<section id="ocupación-semi-markov" class="level2">
+<h2 data-anchor-id="ocupación-semi-markov">Ocupación semi-Markov</h2>
+<p>Calcular probabilidades de ocupación puede requerir:</p>
+<ul>
+<li>Ecuaciones de renovación.</li>
+<li>Simulación.</li>
+<li>Integración numérica.</li>
+<li>Software especializado.</li>
+</ul>
+<p>No siempre puede obtenerse con una única exponencial matricial.</p>
+</section>
+<section id="simulación" class="level2">
+<h2 data-anchor-id="simulación">Simulación</h2>
+<p>Una estrategia práctica es simular:</p>
+<ol type="1">
+<li>Tiempo hasta salida.</li>
+<li>Destino.</li>
+<li>Nueva entrada.</li>
+<li>Repetir hasta horizonte.</li>
+</ol>
+</section>
+<section id="simulación-conceptual" class="level2">
+<h2 data-anchor-id="simulación-conceptual">Simulación conceptual</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> simulate_sojourn_time(</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>    state,</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>    patient,</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>    rng</span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-7"><a href="#cb69-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> state <span class="op">==</span> <span class="st">"S1"</span>:</span>
+<span id="cb69-8"><a href="#cb69-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-9"><a href="#cb69-9" aria-hidden="true" tabindex="-1"></a>        shape <span class="op">=</span> <span class="fl">1.5</span></span>
+<span id="cb69-10"><a href="#cb69-10" aria-hidden="true" tabindex="-1"></a>        scale <span class="op">=</span> <span class="dv">60</span></span>
+<span id="cb69-11"><a href="#cb69-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-12"><a href="#cb69-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> rng.weibull(</span>
+<span id="cb69-13"><a href="#cb69-13" aria-hidden="true" tabindex="-1"></a>            shape</span>
+<span id="cb69-14"><a href="#cb69-14" aria-hidden="true" tabindex="-1"></a>        ) <span class="op">*</span> scale</span>
+<span id="cb69-15"><a href="#cb69-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb69-16"><a href="#cb69-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rng.exponential(</span>
+<span id="cb69-17"><a href="#cb69-17" aria-hidden="true" tabindex="-1"></a>        <span class="dv">90</span></span>
+<span id="cb69-18"><a href="#cb69-18" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="elegir-destino" class="level2">
+<h2 data-anchor-id="elegir-destino">Elegir destino</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> choose_destination(</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>    state,</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>    rng</span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> state <span class="op">==</span> <span class="st">"S1"</span>:</span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> rng.choice(</span>
+<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a>            [</span>
+<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a>                <span class="st">"S0"</span>,</span>
+<span id="cb70-11"><a href="#cb70-11" aria-hidden="true" tabindex="-1"></a>                <span class="st">"S2"</span></span>
+<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a>            ],</span>
+<span id="cb70-13"><a href="#cb70-13" aria-hidden="true" tabindex="-1"></a>            p<span class="op">=</span>[</span>
+<span id="cb70-14"><a href="#cb70-14" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.55</span>,</span>
+<span id="cb70-15"><a href="#cb70-15" aria-hidden="true" tabindex="-1"></a>                <span class="fl">0.45</span></span>
+<span id="cb70-16"><a href="#cb70-16" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb70-17"><a href="#cb70-17" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb70-18"><a href="#cb70-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb70-19"><a href="#cb70-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> state</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="validación" class="level2">
+<h2 data-anchor-id="validación">Validación</h2>
+<p>Debe evaluarse:</p>
+<ul>
+<li>Distribución de sojourn times.</li>
+<li>Destinos.</li>
+<li>Ocupación.</li>
+<li>Transiciones.</li>
+<li>Probabilidades a horizontes.</li>
+<li>Rendimiento externo.</li>
+</ul>
+</section>
+<section id="comparar-tiempo-observado-y-predicho" class="level2">
+<h2 data-anchor-id="comparar-tiempo-observado-y-predicho">Comparar tiempo observado y predicho</h2>
+<pre class="text"><code>Mediana observada en S1
+vs
+mediana predicha en S1</code></pre>
+</section>
+<section id="calibración-por-estado" class="level2">
+<h2 data-anchor-id="calibración-por-estado">Calibración por estado</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>Probabilidad de seguir en S1
+30 días después de entrar</code></pre>
+</section>
+<section id="calibración-por-duración" class="level2">
+<h2 data-anchor-id="calibración-por-duración">Calibración por duración</h2>
+<p>Puede evaluarse en pacientes con:</p>
+<ul>
+<li>0–30 días en estado.</li>
+<li>30–90 días.</li>
+<li>Más de 90 días.</li>
+</ul>
+</section>
+<section id="panel-data" class="level2">
+<h2 data-anchor-id="panel-data">Panel data</h2>
+<p>Con visitas espaciadas, el tiempo exacto de entrada y salida puede ser incierto.</p>
+<p>Esto afecta directamente al sojourn time.</p>
+</section>
+<section id="riesgo-de-sesgo" class="level2">
+<h2 data-anchor-id="riesgo-de-sesgo">Riesgo de sesgo</h2>
+<p>Usar fecha de primera detección puede sobreestimar el tiempo en el estado previo y subestimar el del nuevo estado.</p>
+</section>
+<section id="opciones" class="level2">
+<h2 data-anchor-id="opciones">Opciones</h2>
+<ul>
+<li>Punto medio.</li>
+<li>Censura por intervalo.</li>
+<li>Hidden semi-Markov models.</li>
+<li>Sensitivity analysis.</li>
+</ul>
+</section>
+<section id="hidden-semi-markov-models" class="level2">
+<h2 data-anchor-id="hidden-semi-markov-models">Hidden semi-Markov models</h2>
+<p>Permiten:</p>
+<ul>
+<li>Estados latentes.</li>
+<li>Error de clasificación.</li>
+<li>Duraciones no geométricas.</li>
+<li>Observación irregular.</li>
+</ul>
+</section>
+<section id="aplicación-a-cardiotoxicidad" class="level2">
+<h2 data-anchor-id="aplicación-a-cardiotoxicidad">Aplicación a cardiotoxicidad</h2>
+<p>Preguntas clave:</p>
+<pre class="text"><code>¿El riesgo S1 → S2 aumenta
+cuanto más tiempo se permanece en S1?
+
+¿La recuperación S2 → S1 depende
+de la duración de S2?
+
+¿Un S1 recuperado se comporta
+igual que un S1 inicial?</code></pre>
+</section>
+<section id="posible-estructura" class="level2">
+<h2 data-anchor-id="posible-estructura">Posible estructura</h2>
+<pre class="text"><code>S0 ↔ S1 ↔ S2 → S3</code></pre>
+<p>con clock-reset por estado.</p>
+</section>
+<section id="covariables-relevantes" class="level2">
+<h2 data-anchor-id="covariables-relevantes">Covariables relevantes</h2>
+<ul>
+<li>Dosis acumulada al entrar.</li>
+<li>Dosis durante el episodio.</li>
+<li>FEVI al entrar.</li>
+<li>GLS al entrar.</li>
+<li>Biomarcadores.</li>
+<li>Estado previo.</li>
+<li>Número de episodios.</li>
+<li>Centro.</li>
+</ul>
+</section>
+<section id="dataset-analítico" class="level2">
+<h2 data-anchor-id="dataset-analítico">Dataset analítico</h2>
+<pre class="text"><code>patient_id
+episode_id
+from_state
+destination
+reset_start
+reset_stop
+event
+previous_state
+episode_number
+cumulative_dose_start
+troponin_start</code></pre>
+</section>
+<section id="reporting" class="level2">
+<h2 data-anchor-id="reporting">Reporting</h2>
+<p>Debe incluir:</p>
+<ul>
+<li>Definición del reloj.</li>
+<li>Inicio y final de episodios.</li>
+<li>Sojourn times.</li>
+<li>Distribución elegida.</li>
+<li>Hazard o time ratio.</li>
+<li>Efectos por transición.</li>
+<li>Predicciones residuales.</li>
+<li>Validación.</li>
+</ul>
+</section>
+<section id="ejemplo-de-redacción" class="level2">
+<h2 data-anchor-id="ejemplo-de-redacción">Ejemplo de redacción</h2>
+<pre class="text"><code>Se utilizó una formulación semi-Markov
+con reloj reiniciado al entrar en cada estado.
+
+El tiempo hasta la siguiente transición
+se modeló desde el inicio del episodio,
+permitiendo que la intensidad dependiera
+de la duración en el estado.</code></pre>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>Llamar semi-Markov a un modelo clock-forward.</li>
+<li>No reiniciar el reloj.</li>
+<li>Mezclar episodios.</li>
+<li>No identificar reentradas.</li>
+<li>Asumir independencia entre episodios.</li>
+<li>Usar tiempo total en estado futuro.</li>
+<li>Ignorar salidas competidoras.</li>
+<li>No considerar incertidumbre de fechas.</li>
+<li>Comparar AIC de estructuras distintas sin cuidado.</li>
+<li>No validar sojourn times.</li>
+<li>Crear demasiados subestados.</li>
+<li>No declarar la escala temporal.</li>
+</ul>
+</section>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Identificar episodios.</li>
+<li>Definir entrada en estado.</li>
+<li>Calcular clock-reset.</li>
+<li>Construir intervalos.</li>
+<li>Definir destinos competidores.</li>
+<li>Ajustar modelos por transición.</li>
+<li>Modelar duración.</li>
+<li>Incluir covariables.</li>
+<li>Revisar episodios repetidos.</li>
+<li>Estimar predicciones.</li>
+<li>Validar.</li>
+<li>Comparar con Markov.</li>
+</ol>
+</section>
+<section id="checklist" class="level2">
+<h2 data-anchor-id="checklist">Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">He definido sojourn time.</label></li>
+<li><label><input type="checkbox">He identificado episodios.</label></li>
+<li><label><input type="checkbox">He reiniciado el reloj.</label></li>
+<li><label><input type="checkbox">He construido reset_start y reset_stop.</label></li>
+<li><label><input type="checkbox">He tratado reentradas.</label></li>
+<li><label><input type="checkbox">He definido destinos competidores.</label></li>
+<li><label><input type="checkbox">He evitado covariables futuras.</label></li>
+<li><label><input type="checkbox">He considerado historia previa.</label></li>
+<li><label><input type="checkbox">He evaluado dependencia entre episodios.</label></li>
+<li><label><input type="checkbox">He comparado con Markov.</label></li>
+<li><label><input type="checkbox">He evaluado distribución de permanencia.</label></li>
+<li><label><input type="checkbox">He calculado predicción residual.</label></li>
+<li><label><input type="checkbox">He considerado panel data.</label></li>
+<li><label><input type="checkbox">He validado externamente.</label></li>
+<li><label><input type="checkbox">He documentado la escala temporal.</label></li>
+</ul>
+</section>
+<section id="recursos" class="level2">
+<h2 data-anchor-id="recursos">Recursos</h2>
+<section id="conceptos" class="level3">
+<h3 data-anchor-id="conceptos">Conceptos</h3>
+<ul>
+<li>Semi-Markov process.</li>
+<li>Sojourn time.</li>
+<li>Clock-reset.</li>
+<li>Residual lifetime.</li>
+<li>Renewal process.</li>
+<li>Recurrent state episodes.</li>
+<li>Cause-specific transition model.</li>
+<li>Hidden semi-Markov model.</li>
+</ul>
+</section>
+<section id="herramientas" class="level3">
+<h3 data-anchor-id="herramientas">Herramientas</h3>
+<ul>
+<li><code>lifelines.CoxPHFitter</code>.</li>
+<li><code>lifelines.WeibullAFTFitter</code>.</li>
+<li><code>scipy</code>.</li>
+<li><code>mstate</code> en R.</li>
+<li><code>flexsurv</code> en R.</li>
+<li><code>msm</code> en R.</li>
+</ul>
+</section>
+<section id="material-del-proyecto" class="level3">
+<h3 data-anchor-id="material-del-proyecto">Material del proyecto</h3>
+<p>Añadir aquí:</p>
+<ul>
+<li>Episodios por estado.</li>
+<li>Sojourn times.</li>
+<li>Modelos clock-reset.</li>
+<li>Comparación Markov vs semi-Markov.</li>
+<li>Predicciones residuales.</li>
+<li>Decisiones sobre reentradas.</li>
+</ul>
+</section>
+</section>
+<section id="notas-personales" class="level2">
+<h2 data-anchor-id="notas-personales">Notas personales</h2>
+<p>Añade aquí tus episodios, tiempos en estado, modelos, resultados y decisiones clínicas.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/pablolongan\.github\.io\/health-data-science-handbook\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

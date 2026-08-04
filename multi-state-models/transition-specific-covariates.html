@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Covariables específicas por transición – Health Data Science Handbook</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-2aa33e8751edae3f9b77d048c1294c38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Health Data Science Handbook</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> <i class="bi bi-info-circle" role="img" aria-label="Sobre el proyecto">
+</i> 
+<span class="menu-text">Sobre el proyecto</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/pablolongan/health-data-science-handbook"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../multi-state-models/index.html">Multi-state Models</a></li><li class="breadcrumb-item"><a href="../multi-state-models/transition-specific-covariates.html">Covariables específicas por transición</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/data-exploration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory data analysis (EDA)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación de modelos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/classification-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métricas de clasificación</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/regression-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métricas de regresión</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/cross-validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Validación cruzada</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Preprocesamiento</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/train-test-split.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Train, validation and test</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/data-leakage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data leakage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/missing-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Valores ausentes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/scaling-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Escalado y normalización</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/categorical-encoding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variables categóricas y encoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/outliers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Outliers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/pipelines-columntransformer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pipelines y ColumnTransformer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Reducción de dimensionalidad</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/pca.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PCA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Selección de variables</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/filter-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos filter</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/wrapper-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos wrapper</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/embedded-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos embedded</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regularización</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/logistic-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Árboles de decisión</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/random-forest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random forest</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/gradient-boosting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gradient boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support Vector Machines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/model-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparación de modelos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje no supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/k-means.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">K-means</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/hierarchical-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Clustering jerárquico</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/dbscan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DBSCAN y clustering por densidad</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/gaussian-mixture-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gaussian Mixture Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/clustering-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación del clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/anomaly-detection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Detección de anomalías</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/method-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparación de métodos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Series temporales</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/time-series-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fundamentos y preparación temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/decomposition-stationarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Descomposición y estacionariedad</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/exponential-smoothing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exponential smoothing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/arima-sarima.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ARIMA y SARIMA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/temporal-feature-engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Feature engineering temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/machine-learning-forecasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Machine learning para forecasting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/backtesting-and-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Backtesting y evaluación temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/clinical-time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Series temporales clínicas</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Deep learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false">
+ <span class="menu-text">Survival Analysis</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/survival-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fundamentos, tiempos y censura</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/kaplan-meier-log-rank.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kaplan-Meier y log-rank</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/cox-proportional-hazards.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelo de Cox</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/proportional-hazards-assumption.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Supuesto de riesgos proporcionales</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/parametric-survival-aft.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelos paramétricos y Accelerated Failure Time</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/time-varying-covariates.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variables dependientes del tiempo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/competing-risks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Competing risks</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/survival-machine-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Machine learning para Survival Analysis</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/survival-evaluation-calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación y calibración</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/clinical-survival-workflow.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Workflow clínico completo</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true">
+ <span class="menu-text">Multi-state Models</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Multi-state Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+ <span class="menu-text">Introducción</span>
+  </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/state-design-and-transitions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Diseño de estados y transiciones</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/data-preparation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preparación de datos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/transition-intensities.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Intensidades y matriz de transición</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelos de Markov</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/semi-markov-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Modelos semi-Markov</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../multi-state-models/transition-specific-covariates.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Covariables específicas por transición</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">Guías de proyectos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../project-guides/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
+ <span class="menu-text">Recetario de código</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#por-qué-efectos-específicos" id="toc-por-qué-efectos-específicos" class="nav-link active" data-scroll-target="#por-qué-efectos-específicos">¿Por qué efectos específicos?</a></li>
+  <li><a href="#intensidad-con-covariables" id="toc-intensidad-con-covariables" class="nav-link" data-scroll-target="#intensidad-con-covariables">Intensidad con covariables</a></li>
+  <li><a href="#hazard-ratio-específico" id="toc-hazard-ratio-específico" class="nav-link" data-scroll-target="#hazard-ratio-específico">Hazard ratio específico</a></li>
+  <li><a href="#ejemplo" id="toc-ejemplo" class="nav-link" data-scroll-target="#ejemplo">Ejemplo</a></li>
+  <li><a href="#dataset-expandido-por-transición" id="toc-dataset-expandido-por-transición" class="nav-link" data-scroll-target="#dataset-expandido-por-transición">Dataset expandido por transición</a></li>
+  <li><a href="#ejemplo-de-estructura" id="toc-ejemplo-de-estructura" class="nav-link" data-scroll-target="#ejemplo-de-estructura">Ejemplo de estructura</a></li>
+  <li><a href="#estrategia-1.-modelos-separados" id="toc-estrategia-1.-modelos-separados" class="nav-link" data-scroll-target="#estrategia-1.-modelos-separados">Estrategia 1. Modelos separados</a></li>
+  <li><a href="#seleccionar-transición" id="toc-seleccionar-transición" class="nav-link" data-scroll-target="#seleccionar-transición">Seleccionar transición</a></li>
+  <li><a href="#ajustar-cox" id="toc-ajustar-cox" class="nav-link" data-scroll-target="#ajustar-cox">Ajustar Cox</a></li>
+  <li><a href="#repetir-por-transición" id="toc-repetir-por-transición" class="nav-link" data-scroll-target="#repetir-por-transición">Repetir por transición</a></li>
+  <li><a href="#ventajas" id="toc-ventajas" class="nav-link" data-scroll-target="#ventajas">Ventajas</a></li>
+  <li><a href="#limitaciones" id="toc-limitaciones" class="nav-link" data-scroll-target="#limitaciones">Limitaciones</a></li>
+  <li><a href="#estrategia-2.-modelo-conjunto-estratificado" id="toc-estrategia-2.-modelo-conjunto-estratificado" class="nav-link" data-scroll-target="#estrategia-2.-modelo-conjunto-estratificado">Estrategia 2. Modelo conjunto estratificado</a></li>
+  <li><a href="#qué-implica" id="toc-qué-implica" class="nav-link" data-scroll-target="#qué-implica">Qué implica</a></li>
+  <li><a href="#efecto-común" id="toc-efecto-común" class="nav-link" data-scroll-target="#efecto-común">Efecto común</a></li>
+  <li><a href="#ventaja" id="toc-ventaja" class="nav-link" data-scroll-target="#ventaja">Ventaja</a></li>
+  <li><a href="#limitación" id="toc-limitación" class="nav-link" data-scroll-target="#limitación">Limitación</a></li>
+  <li><a href="#estrategia-3.-interacciones-con-transición" id="toc-estrategia-3.-interacciones-con-transición" class="nav-link" data-scroll-target="#estrategia-3.-interacciones-con-transición">Estrategia 3. Interacciones con transición</a></li>
+  <li><a href="#variables-indicadoras" id="toc-variables-indicadoras" class="nav-link" data-scroll-target="#variables-indicadoras">Variables indicadoras</a></li>
+  <li><a href="#interacción-específica" id="toc-interacción-específica" class="nav-link" data-scroll-target="#interacción-específica">Interacción específica</a></li>
+  <li><a href="#ajustar-modelo" id="toc-ajustar-modelo" class="nav-link" data-scroll-target="#ajustar-modelo">Ajustar modelo</a></li>
+  <li><a href="#interpretación" id="toc-interpretación" class="nav-link" data-scroll-target="#interpretación">Interpretación</a></li>
+  <li><a href="#interacción-parcial" id="toc-interacción-parcial" class="nav-link" data-scroll-target="#interacción-parcial">Interacción parcial</a></li>
+  <li><a href="#modelo-híbrido" id="toc-modelo-híbrido" class="nav-link" data-scroll-target="#modelo-híbrido">Modelo híbrido</a></li>
+  <li><a href="#covariables-basales" id="toc-covariables-basales" class="nav-link" data-scroll-target="#covariables-basales">Covariables basales</a></li>
+  <li><a href="#covariables-temporales" id="toc-covariables-temporales" class="nav-link" data-scroll-target="#covariables-temporales">Covariables temporales</a></li>
+  <li><a href="#valor-causal" id="toc-valor-causal" class="nav-link" data-scroll-target="#valor-causal">Valor causal</a></li>
+  <li><a href="#evitar-leakage" id="toc-evitar-leakage" class="nav-link" data-scroll-target="#evitar-leakage">Evitar leakage</a></li>
+  <li><a href="#estandarización" id="toc-estandarización" class="nav-link" data-scroll-target="#estandarización">Estandarización</a></li>
+  <li><a href="#interpretación-por-desviación-estándar" id="toc-interpretación-por-desviación-estándar" class="nav-link" data-scroll-target="#interpretación-por-desviación-estándar">Interpretación por desviación estándar</a></li>
+  <li><a href="#escala-clínica" id="toc-escala-clínica" class="nav-link" data-scroll-target="#escala-clínica">Escala clínica</a></li>
+  <li><a href="#interpretación-1" id="toc-interpretación-1" class="nav-link" data-scroll-target="#interpretación-1">Interpretación</a></li>
+  <li><a href="#no-linealidad" id="toc-no-linealidad" class="nav-link" data-scroll-target="#no-linealidad">No linealidad</a></li>
+  <li><a href="#splines-por-transición" id="toc-splines-por-transición" class="nav-link" data-scroll-target="#splines-por-transición">Splines por transición</a></li>
+  <li><a href="#problema" id="toc-problema" class="nav-link" data-scroll-target="#problema">Problema</a></li>
+  <li><a href="#splines-específicos" id="toc-splines-específicos" class="nav-link" data-scroll-target="#splines-específicos">Splines específicos</a></li>
+  <li><a href="#categorías-clínicas" id="toc-categorías-clínicas" class="nav-link" data-scroll-target="#categorías-clínicas">Categorías clínicas</a></li>
+  <li><a href="#interacciones-clínicas" id="toc-interacciones-clínicas" class="nav-link" data-scroll-target="#interacciones-clínicas">Interacciones clínicas</a></li>
+  <li><a href="#interacción-específica-por-transición" id="toc-interacción-específica-por-transición" class="nav-link" data-scroll-target="#interacción-específica-por-transición">Interacción específica por transición</a></li>
+  <li><a href="#cuidado" id="toc-cuidado" class="nav-link" data-scroll-target="#cuidado">Cuidado</a></li>
+  <li><a href="#efectos-compartidos-por-grupos-de-transiciones" id="toc-efectos-compartidos-por-grupos-de-transiciones" class="nav-link" data-scroll-target="#efectos-compartidos-por-grupos-de-transiciones">Efectos compartidos por grupos de transiciones</a></li>
+  <li><a href="#crear-tipo-de-transición" id="toc-crear-tipo-de-transición" class="nav-link" data-scroll-target="#crear-tipo-de-transición">Crear tipo de transición</a></li>
+  <li><a href="#efecto-compartido-de-progresión" id="toc-efecto-compartido-de-progresión" class="nav-link" data-scroll-target="#efecto-compartido-de-progresión">Efecto compartido de progresión</a></li>
+  <li><a href="#ventaja-1" id="toc-ventaja-1" class="nav-link" data-scroll-target="#ventaja-1">Ventaja</a></li>
+  <li><a href="#hipótesis-explícita" id="toc-hipótesis-explícita" class="nav-link" data-scroll-target="#hipótesis-explícita">Hipótesis explícita</a></li>
+  <li><a href="#contrastes" id="toc-contrastes" class="nav-link" data-scroll-target="#contrastes">Contrastes</a></li>
+  <li><a href="#diferencia-de-coeficientes" id="toc-diferencia-de-coeficientes" class="nav-link" data-scroll-target="#diferencia-de-coeficientes">Diferencia de coeficientes</a></li>
+  <li><a href="#likelihood-ratio-test" id="toc-likelihood-ratio-test" class="nav-link" data-scroll-target="#likelihood-ratio-test">Likelihood ratio test</a></li>
+  <li><a href="#estadístico" id="toc-estadístico" class="nav-link" data-scroll-target="#estadístico">Estadístico</a></li>
+  <li><a href="#interpretación-2" id="toc-interpretación-2" class="nav-link" data-scroll-target="#interpretación-2">Interpretación</a></li>
+  <li><a href="#multiplicidad" id="toc-multiplicidad" class="nav-link" data-scroll-target="#multiplicidad">Multiplicidad</a></li>
+  <li><a href="#priorizar" id="toc-priorizar" class="nav-link" data-scroll-target="#priorizar">Priorizar</a></li>
+  <li><a href="#eventos-por-parámetro" id="toc-eventos-por-parámetro" class="nav-link" data-scroll-target="#eventos-por-parámetro">Eventos por parámetro</a></li>
+  <li><a href="#ejemplo-1" id="toc-ejemplo-1" class="nav-link" data-scroll-target="#ejemplo-1">Ejemplo</a></li>
+  <li><a href="#regularización" id="toc-regularización" class="nav-link" data-scroll-target="#regularización">Regularización</a></li>
+  <li><a href="#ridge" id="toc-ridge" class="nav-link" data-scroll-target="#ridge">Ridge</a></li>
+  <li><a href="#lasso" id="toc-lasso" class="nav-link" data-scroll-target="#lasso">Lasso</a></li>
+  <li><a href="#elastic-net" id="toc-elastic-net" class="nav-link" data-scroll-target="#elastic-net">Elastic Net</a></li>
+  <li><a href="#ventajas-1" id="toc-ventajas-1" class="nav-link" data-scroll-target="#ventajas-1">Ventajas</a></li>
+  <li><a href="#limitaciones-1" id="toc-limitaciones-1" class="nav-link" data-scroll-target="#limitaciones-1">Limitaciones</a></li>
+  <li><a href="#tuning" id="toc-tuning" class="nav-link" data-scroll-target="#tuning">Tuning</a></li>
+  <li><a href="#split-por-paciente" id="toc-split-por-paciente" class="nav-link" data-scroll-target="#split-por-paciente">Split por paciente</a></li>
+  <li><a href="#split-por-centro-o-tiempo" id="toc-split-por-centro-o-tiempo" class="nav-link" data-scroll-target="#split-por-centro-o-tiempo">Split por centro o tiempo</a></li>
+  <li><a href="#modelos-jerárquicos" id="toc-modelos-jerárquicos" class="nav-link" data-scroll-target="#modelos-jerárquicos">Modelos jerárquicos</a></li>
+  <li><a href="#ventaja-2" id="toc-ventaja-2" class="nav-link" data-scroll-target="#ventaja-2">Ventaja</a></li>
+  <li><a href="#enfoque-bayesiano" id="toc-enfoque-bayesiano" class="nav-link" data-scroll-target="#enfoque-bayesiano">Enfoque bayesiano</a></li>
+  <li><a href="#frailty-por-paciente" id="toc-frailty-por-paciente" class="nav-link" data-scroll-target="#frailty-por-paciente">Frailty por paciente</a></li>
+  <li><a href="#frailty-compartida" id="toc-frailty-compartida" class="nav-link" data-scroll-target="#frailty-compartida">Frailty compartida</a></li>
+  <li><a href="#errores-robustos" id="toc-errores-robustos" class="nav-link" data-scroll-target="#errores-robustos">Errores robustos</a></li>
+  <li><a href="#centro" id="toc-centro" class="nav-link" data-scroll-target="#centro">Centro</a></li>
+  <li><a href="#estratificar-por-centro" id="toc-estratificar-por-centro" class="nav-link" data-scroll-target="#estratificar-por-centro">Estratificar por centro</a></li>
+  <li><a href="#limitación-1" id="toc-limitación-1" class="nav-link" data-scroll-target="#limitación-1">Limitación</a></li>
+  <li><a href="#estado-previo" id="toc-estado-previo" class="nav-link" data-scroll-target="#estado-previo">Estado previo</a></li>
+  <li><a href="#interpretación-3" id="toc-interpretación-3" class="nav-link" data-scroll-target="#interpretación-3">Interpretación</a></li>
+  <li><a href="#número-de-episodios" id="toc-número-de-episodios" class="nav-link" data-scroll-target="#número-de-episodios">Número de episodios</a></li>
+  <li><a href="#máxima-severidad-previa" id="toc-máxima-severidad-previa" class="nav-link" data-scroll-target="#máxima-severidad-previa">Máxima severidad previa</a></li>
+  <li><a href="#tiempo-acumulado-en-estados-graves" id="toc-tiempo-acumulado-en-estados-graves" class="nav-link" data-scroll-target="#tiempo-acumulado-en-estados-graves">Tiempo acumulado en estados graves</a></li>
+  <li><a href="#markov-extendido" id="toc-markov-extendido" class="nav-link" data-scroll-target="#markov-extendido">Markov extendido</a></li>
+  <li><a href="#covariable-mediadora" id="toc-covariable-mediadora" class="nav-link" data-scroll-target="#covariable-mediadora">Covariable mediadora</a></li>
+  <li><a href="#objetivo-explicativo" id="toc-objetivo-explicativo" class="nav-link" data-scroll-target="#objetivo-explicativo">Objetivo explicativo</a></li>
+  <li><a href="#objetivo-predictivo" id="toc-objetivo-predictivo" class="nav-link" data-scroll-target="#objetivo-predictivo">Objetivo predictivo</a></li>
+  <li><a href="#interpretación-causal" id="toc-interpretación-causal" class="nav-link" data-scroll-target="#interpretación-causal">Interpretación causal</a></li>
+  <li><a href="#confounding-by-indication" id="toc-confounding-by-indication" class="nav-link" data-scroll-target="#confounding-by-indication">Confounding by indication</a></li>
+  <li><a href="#covariables-dependientes-de-visitas" id="toc-covariables-dependientes-de-visitas" class="nav-link" data-scroll-target="#covariables-dependientes-de-visitas">Covariables dependientes de visitas</a></li>
+  <li><a href="#indicadores-de-medición" id="toc-indicadores-de-medición" class="nav-link" data-scroll-target="#indicadores-de-medición">Indicadores de medición</a></li>
+  <li><a href="#interacción-entre-valor-y-recencia" id="toc-interacción-entre-valor-y-recencia" class="nav-link" data-scroll-target="#interacción-entre-valor-y-recencia">Interacción entre valor y recencia</a></li>
+  <li><a href="#predicción" id="toc-predicción" class="nav-link" data-scroll-target="#predicción">Predicción</a></li>
+  <li><a href="#matriz-individual-de-intensidades" id="toc-matriz-individual-de-intensidades" class="nav-link" data-scroll-target="#matriz-individual-de-intensidades">Matriz individual de intensidades</a></li>
+  <li><a href="#ejemplo-conceptual" id="toc-ejemplo-conceptual" class="nav-link" data-scroll-target="#ejemplo-conceptual">Ejemplo conceptual</a></li>
+  <li><a href="#recalcular-diagonal" id="toc-recalcular-diagonal" class="nav-link" data-scroll-target="#recalcular-diagonal">Recalcular diagonal</a></li>
+  <li><a href="#reporting" id="toc-reporting" class="nav-link" data-scroll-target="#reporting">Reporting</a></li>
+  <li><a href="#forest-plot-por-transición" id="toc-forest-plot-por-transición" class="nav-link" data-scroll-target="#forest-plot-por-transición">Forest plot por transición</a></li>
+  <li><a href="#extraer-resultados" id="toc-extraer-resultados" class="nav-link" data-scroll-target="#extraer-resultados">Extraer resultados</a></li>
+  <li><a href="#preparar-hr" id="toc-preparar-hr" class="nav-link" data-scroll-target="#preparar-hr">Preparar HR</a></li>
+  <li><a href="#intervalos" id="toc-intervalos" class="nav-link" data-scroll-target="#intervalos">Intervalos</a></li>
+  <li><a href="#evaluación" id="toc-evaluación" class="nav-link" data-scroll-target="#evaluación">Evaluación</a></li>
+  <li><a href="#no-basta-un-c-index-global" id="toc-no-basta-un-c-index-global" class="nav-link" data-scroll-target="#no-basta-un-c-index-global">No basta un C-index global</a></li>
+  <li><a href="#calibración-de-transición" id="toc-calibración-de-transición" class="nav-link" data-scroll-target="#calibración-de-transición">Calibración de transición</a></li>
+  <li><a href="#sensitivity-analysis" id="toc-sensitivity-analysis" class="nav-link" data-scroll-target="#sensitivity-analysis">Sensitivity analysis</a></li>
+  <li><a href="#selección-del-modelo" id="toc-selección-del-modelo" class="nav-link" data-scroll-target="#selección-del-modelo">Selección del modelo</a></li>
+  <li><a href="#aplicación-a-cardiotoxicidad" id="toc-aplicación-a-cardiotoxicidad" class="nav-link" data-scroll-target="#aplicación-a-cardiotoxicidad">Aplicación a cardiotoxicidad</a></li>
+  <li><a href="#hipótesis-clínicas" id="toc-hipótesis-clínicas" class="nav-link" data-scroll-target="#hipótesis-clínicas">Hipótesis clínicas</a></li>
+  <li><a href="#estrategia-razonable" id="toc-estrategia-razonable" class="nav-link" data-scroll-target="#estrategia-razonable">Estrategia razonable</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#checklist" id="toc-checklist" class="nav-link" data-scroll-target="#checklist">Checklist</a></li>
+  <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
+  <ul class="collapse">
+  <li><a href="#conceptos" id="toc-conceptos" class="nav-link" data-scroll-target="#conceptos">Conceptos</a></li>
+  <li><a href="#herramientas" id="toc-herramientas" class="nav-link" data-scroll-target="#herramientas">Herramientas</a></li>
+  <li><a href="#material-del-proyecto" id="toc-material-del-proyecto" class="nav-link" data-scroll-target="#material-del-proyecto">Material del proyecto</a></li>
+  </ul></li>
+  <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../multi-state-models/index.html">Multi-state Models</a></li><li class="breadcrumb-item"><a href="../multi-state-models/transition-specific-covariates.html">Covariables específicas por transición</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Covariables específicas por transición</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>En un modelo multiestado, una misma covariable puede tener efectos distintos según la transición.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Edad
+→ puede aumentar S0 → S1
+
+Edad
+→ puede no afectar S1 → S2
+
+Edad
+→ puede reducir S1 → S0</code></pre>
+<p>Esto puede modelarse mediante:</p>
+<ul>
+<li>Modelos separados por transición.</li>
+<li>Modelos conjuntos estratificados.</li>
+<li>Interacciones entre covariables y transición.</li>
+<li>Efectos comunes para varios arcos.</li>
+<li>Regularización o modelos jerárquicos.</li>
+</ul>
+</div>
+</div>
+<section id="por-qué-efectos-específicos" class="level2">
+<h2 data-anchor-id="por-qué-efectos-específicos">¿Por qué efectos específicos?</h2>
+<p>En un modelo de Cox convencional se estima un único coeficiente por covariable.</p>
+<p>En multiestado, cada arco puede representar un proceso clínico diferente.</p>
+<pre class="text"><code>S0 → S1
+→ aparición de alteración leve
+
+S1 → S2
+→ progresión
+
+S1 → S0
+→ recuperación</code></pre>
+<p>No es razonable asumir automáticamente el mismo efecto para todos.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>La unidad de interpretación no es solo la covariable, sino la combinación covariable–transición.</p>
+</div>
+</div>
+</section>
+<section id="intensidad-con-covariables" class="level2">
+<h2 data-anchor-id="intensidad-con-covariables">Intensidad con covariables</h2>
+<p>Para una transición (r s):</p>
+<p><span class="math display">\[
+q_{rs}(t\mid X)
+=
+q_{rs,0}(t)
+\exp(
+\beta_{rs}^{\top}X
+)
+\]</span></p>
+<p>Cada transición puede tener:</p>
+<ul>
+<li>Su propio baseline hazard.</li>
+<li>Sus propios coeficientes.</li>
+<li>Sus propias covariables.</li>
+<li>Su propia escala temporal.</li>
+</ul>
+</section>
+<section id="hazard-ratio-específico" class="level2">
+<h2 data-anchor-id="hazard-ratio-específico">Hazard ratio específico</h2>
+<p>Para una covariable (X_j):</p>
+<p><span class="math display">\[
+HR_{rs,j}
+=
+\exp(
+\beta_{rs,j}
+)
+\]</span></p>
+</section>
+<section id="ejemplo" class="level2">
+<h2 data-anchor-id="ejemplo">Ejemplo</h2>
+<pre class="text"><code>Dosis acumulada
+HR S0 → S1 = 1.25
+
+Dosis acumulada
+HR S1 → S2 = 1.60
+
+Dosis acumulada
+HR S1 → S0 = 0.70</code></pre>
+<p>Interpretación:</p>
+<ul>
+<li>Mayor aparición de alteración leve.</li>
+<li>Mayor progresión.</li>
+<li>Menor recuperación.</li>
+</ul>
+</section>
+<section id="dataset-expandido-por-transición" class="level2">
+<h2 data-anchor-id="dataset-expandido-por-transición">Dataset expandido por transición</h2>
+<pre class="text"><code>patient_id | transition_id | from | destination | start | stop | event
+----------------------------------------------------------------------------
+1          | 1             | S0   | S1          | 0     | 90   | 1
+1          | 2             | S0   | S2          | 0     | 90   | 0</code></pre>
+<p>Cada intervalo se replica para las salidas posibles desde el estado de origen.</p>
+</section>
+<section id="ejemplo-de-estructura" class="level2">
+<h2 data-anchor-id="ejemplo-de-estructura">Ejemplo de estructura</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"patient_id"</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"from_state"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"destination"</span>,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"start"</span>,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"stop"</span>,</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"event"</span>,</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span>,</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"baseline_lvef"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cumulative_dose"</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>].head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="estrategia-1.-modelos-separados" class="level2">
+<h2 data-anchor-id="estrategia-1.-modelos-separados">Estrategia 1. Modelos separados</h2>
+<p>Se ajusta un modelo por arco.</p>
+</section>
+<section id="seleccionar-transición" class="level2">
+<h2 data-anchor-id="seleccionar-transición">Seleccionar transición</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>transition_s0_s1 <span class="op">=</span> expanded_data.loc[</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">==</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>].copy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ajustar-cox" class="level2">
+<h2 data-anchor-id="ajustar-cox">Ajustar Cox</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lifelines <span class="im">import</span> CoxPHFitter</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>cph_s0_s1 <span class="op">=</span> CoxPHFitter()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>cph_s0_s1.fit(</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    transition_s0_s1[</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"start"</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"stop"</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"event"</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>            <span class="st">"age"</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"baseline_lvef"</span>,</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cumulative_dose"</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"stop"</span>,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    entry_col<span class="op">=</span><span class="st">"start"</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="repetir-por-transición" class="level2">
+<h2 data-anchor-id="repetir-por-transición">Repetir por transición</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>transition_models <span class="op">=</span> {}</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> transition_id <span class="kw">in</span> <span class="bu">sorted</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    .unique()</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    transition_df <span class="op">=</span> expanded_data.loc[</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>        expanded_data[</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"transition_id"</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="op">==</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        transition_id</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    ].copy()</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> CoxPHFitter(</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>        penalizer<span class="op">=</span><span class="fl">0.01</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    model.fit(</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>        transition_df[</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>            [</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>                <span class="st">"start"</span>,</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>                <span class="st">"stop"</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>                <span class="st">"event"</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>                <span class="st">"age"</span>,</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>                <span class="st">"baseline_lvef"</span>,</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                <span class="st">"cumulative_dose"</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>        ],</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        duration_col<span class="op">=</span><span class="st">"stop"</span>,</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a>        event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        entry_col<span class="op">=</span><span class="st">"start"</span></span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>    transition_models[</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>        transition_id</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>    ] <span class="op">=</span> model</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ventajas" class="level2">
+<h2 data-anchor-id="ventajas">Ventajas</h2>
+<ul>
+<li>Máxima flexibilidad.</li>
+<li>Interpretación sencilla por arco.</li>
+<li>Diferentes covariables.</li>
+<li>Diferentes supuestos.</li>
+<li>Diferentes escalas temporales.</li>
+</ul>
+</section>
+<section id="limitaciones" class="level2">
+<h2 data-anchor-id="limitaciones">Limitaciones</h2>
+<ul>
+<li>Muchos modelos.</li>
+<li>Poca potencia en transiciones raras.</li>
+<li>Comparación menos directa.</li>
+<li>Mayor riesgo de multiplicidad.</li>
+<li>Coeficientes inestables.</li>
+</ul>
+</section>
+<section id="estrategia-2.-modelo-conjunto-estratificado" class="level2">
+<h2 data-anchor-id="estrategia-2.-modelo-conjunto-estratificado">Estrategia 2. Modelo conjunto estratificado</h2>
+<p>Se apilan todas las transiciones y se estratifica por <code>transition_id</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>joint_model <span class="op">=</span> CoxPHFitter()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>joint_model.fit(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"start"</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"stop"</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"event"</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"transition_id"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"age"</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"baseline_lvef"</span>,</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cumulative_dose"</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"stop"</span>,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    entry_col<span class="op">=</span><span class="st">"start"</span>,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    strata<span class="op">=</span>[</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="qué-implica" class="level2">
+<h2 data-anchor-id="qué-implica">Qué implica</h2>
+<p>Cada transición tiene su propio baseline hazard.</p>
+<p>Pero, por defecto:</p>
+<pre class="text"><code>beta_age
+beta_lvef
+beta_dose</code></pre>
+<p>son comunes a todos los arcos.</p>
+</section>
+<section id="efecto-común" class="level2">
+<h2 data-anchor-id="efecto-común">Efecto común</h2>
+<p><span class="math display">\[
+\beta_{01}
+=
+\beta_{02}
+=
+\beta_{10}
+=
+\cdots
+\]</span></p>
+</section>
+<section id="ventaja" class="level2">
+<h2 data-anchor-id="ventaja">Ventaja</h2>
+<ul>
+<li>Menos parámetros.</li>
+<li>Mayor estabilidad.</li>
+<li>Comparte información.</li>
+<li>Útil con pocas transiciones.</li>
+</ul>
+</section>
+<section id="limitación" class="level2">
+<h2 data-anchor-id="limitación">Limitación</h2>
+<p>Puede imponer una igualdad clínicamente falsa.</p>
+</section>
+<section id="estrategia-3.-interacciones-con-transición" class="level2">
+<h2 data-anchor-id="estrategia-3.-interacciones-con-transición">Estrategia 3. Interacciones con transición</h2>
+<p>Permite efectos específicos dentro de un modelo conjunto.</p>
+</section>
+<section id="variables-indicadoras" class="level2">
+<h2 data-anchor-id="variables-indicadoras">Variables indicadoras</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>transition_ids <span class="op">=</span> <span class="bu">sorted</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    .unique()</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> transition_id <span class="kw">in</span> transition_ids:</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"is_t</span><span class="sc">{</span>transition_id<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    ] <span class="op">=</span> (</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>        expanded_data[</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"transition_id"</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">==</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        transition_id</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    ).astype(<span class="bu">int</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interacción-específica" class="level2">
+<h2 data-anchor-id="interacción-específica">Interacción específica</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> transition_id <span class="kw">in</span> transition_ids:</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"dose_t</span><span class="sc">{</span>transition_id<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    ] <span class="op">=</span> (</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        expanded_data[</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cumulative_dose"</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>        expanded_data[</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"is_t</span><span class="sc">{</span>transition_id<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ajustar-modelo" class="level2">
+<h2 data-anchor-id="ajustar-modelo">Ajustar modelo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>interaction_columns <span class="op">=</span> [</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="ss">f"dose_t</span><span class="sc">{</span>transition_id<span class="sc">}</span><span class="ss">"</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> transition_id</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">in</span> transition_ids</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>joint_specific_model <span class="op">=</span> CoxPHFitter(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    penalizer<span class="op">=</span><span class="fl">0.01</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>joint_specific_model.fit(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"start"</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"stop"</span>,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"event"</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"transition_id"</span>,</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"age"</span>,</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"baseline_lvef"</span>,</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>interaction_columns</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"stop"</span>,</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    entry_col<span class="op">=</span><span class="st">"start"</span>,</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>    strata<span class="op">=</span>[</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación" class="level2">
+<h2 data-anchor-id="interpretación">Interpretación</h2>
+<pre class="text"><code>dose_t1
+→ efecto de dosis en transición 1
+
+dose_t2
+→ efecto de dosis en transición 2</code></pre>
+</section>
+<section id="interacción-parcial" class="level2">
+<h2 data-anchor-id="interacción-parcial">Interacción parcial</h2>
+<p>No todas las covariables necesitan efectos específicos.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Edad
+→ efecto común
+
+Dosis
+→ efecto específico
+
+Centro
+→ estrato</code></pre>
+</section>
+<section id="modelo-híbrido" class="level2">
+<h2 data-anchor-id="modelo-híbrido">Modelo híbrido</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>joint_hybrid_model.fit(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"start"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"stop"</span>,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"event"</span>,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"transition_id"</span>,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"age"</span>,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"center"</span>,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>interaction_columns</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"stop"</span>,</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    entry_col<span class="op">=</span><span class="st">"start"</span>,</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    strata<span class="op">=</span>[</span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span>,</span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"center"</span></span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="covariables-basales" class="level2">
+<h2 data-anchor-id="covariables-basales">Covariables basales</h2>
+<p>Ejemplos:</p>
+<ul>
+<li>Sexo.</li>
+<li>Diagnóstico.</li>
+<li>Edad basal.</li>
+<li>Genética.</li>
+<li>FEVI basal.</li>
+<li>Centro.</li>
+</ul>
+<p>Se mantienen constantes durante toda la trayectoria.</p>
+</section>
+<section id="covariables-temporales" class="level2">
+<h2 data-anchor-id="covariables-temporales">Covariables temporales</h2>
+<p>Ejemplos:</p>
+<ul>
+<li>Dosis acumulada.</li>
+<li>Troponina.</li>
+<li>FEVI actual.</li>
+<li>GLS actual.</li>
+<li>Tratamiento activo.</li>
+<li>Estado previo.</li>
+</ul>
+</section>
+<section id="valor-causal" class="level2">
+<h2 data-anchor-id="valor-causal">Valor causal</h2>
+<p>Debe utilizarse el valor disponible al inicio del intervalo.</p>
+<pre class="text"><code>Intervalo 90–180
+→ covariable conocida en día 90</code></pre>
+</section>
+<section id="evitar-leakage" class="level2">
+<h2 data-anchor-id="evitar-leakage">Evitar leakage</h2>
+<p>Incorrecto:</p>
+<pre class="text"><code>Dosis acumulada al final del seguimiento</code></pre>
+<p>Correcto:</p>
+<pre class="text"><code>Dosis acumulada al inicio del intervalo</code></pre>
+</section>
+<section id="estandarización" class="level2">
+<h2 data-anchor-id="estandarización">Estandarización</h2>
+<p>Puede facilitar la comparación entre efectos.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age_scaled"</span>,</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"lvef_scaled"</span>,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"dose_scaled"</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> scaler.fit_transform(</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"age"</span>,</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"baseline_lvef"</span>,</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">"cumulative_dose"</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>El scaler debe ajustarse solo con train en un contexto predictivo.</p>
+</section>
+<section id="interpretación-por-desviación-estándar" class="level2">
+<h2 data-anchor-id="interpretación-por-desviación-estándar">Interpretación por desviación estándar</h2>
+<pre class="text"><code>HR por 1 DE de dosis acumulada</code></pre>
+</section>
+<section id="escala-clínica" class="level2">
+<h2 data-anchor-id="escala-clínica">Escala clínica</h2>
+<p>A menudo es más interpretable escalar por una unidad relevante.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dose_per_100"</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cumulative_dose"</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">/</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">100</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación-1" class="level2">
+<h2 data-anchor-id="interpretación-1">Interpretación</h2>
+<pre class="text"><code>HR por cada 100 mg/m²</code></pre>
+</section>
+<section id="no-linealidad" class="level2">
+<h2 data-anchor-id="no-linealidad">No linealidad</h2>
+<p>El efecto puede no ser lineal.</p>
+<pre class="text"><code>Dosis baja
+→ poco cambio
+
+Dosis alta
+→ aumento brusco</code></pre>
+</section>
+<section id="splines-por-transición" class="level2">
+<h2 data-anchor-id="splines-por-transición">Splines por transición</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>joint_model.fit(</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    expanded_data,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"stop"</span>,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>    entry_col<span class="op">=</span><span class="st">"start"</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>    strata<span class="op">=</span>[</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    formula<span class="op">=</span>(</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>        <span class="st">"bs(dose_per_100, df=4)"</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">" + age"</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">" + baseline_lvef"</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="problema" class="level2">
+<h2 data-anchor-id="problema">Problema</h2>
+<p>Una misma forma spline común puede no ser válida para todos los arcos.</p>
+</section>
+<section id="splines-específicos" class="level2">
+<h2 data-anchor-id="splines-específicos">Splines específicos</h2>
+<p>Puede crearse una base spline y multiplicarla por indicadores de transición.</p>
+<p>Esto aumenta mucho el número de parámetros.</p>
+</section>
+<section id="categorías-clínicas" class="level2">
+<h2 data-anchor-id="categorías-clínicas">Categorías clínicas</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dose_group"</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> pd.cut(</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"cumulative_dose"</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span>[</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>        <span class="dv">0</span>,</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>        <span class="dv">100</span>,</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>        <span class="dv">250</span>,</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">float</span>(</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"inf"</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>    labels<span class="op">=</span>[</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"low"</span>,</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"moderate"</span>,</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"high"</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Categorizar simplifica, pero pierde información.</p>
+</section>
+<section id="interacciones-clínicas" class="level2">
+<h2 data-anchor-id="interacciones-clínicas">Interacciones clínicas</h2>
+<p>Puede existir interacción entre:</p>
+<ul>
+<li>Dosis y edad.</li>
+<li>Dosis y sexo.</li>
+<li>Biomarcador y FEVI.</li>
+<li>Estado previo y tratamiento.</li>
+<li>Centro y protocolo.</li>
+</ul>
+</section>
+<section id="interacción-específica-por-transición" class="level2">
+<h2 data-anchor-id="interacción-específica-por-transición">Interacción específica por transición</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dose_age_t4"</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"dose_per_100"</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>    (</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>        expanded_data[</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"transition_id"</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>        <span class="op">==</span></span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>        <span class="dv">4</span></span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="cuidado" class="level2">
+<h2 data-anchor-id="cuidado">Cuidado</h2>
+<p>Las interacciones requieren muchos eventos.</p>
+</section>
+<section id="efectos-compartidos-por-grupos-de-transiciones" class="level2">
+<h2 data-anchor-id="efectos-compartidos-por-grupos-de-transiciones">Efectos compartidos por grupos de transiciones</h2>
+<p>Puede asumirse un mismo efecto para:</p>
+<pre class="text"><code>Transiciones de progresión
+→ S0 → S1
+→ S1 → S2
+→ S2 → S3</code></pre>
+<p>y otro para:</p>
+<pre class="text"><code>Transiciones de recuperación
+→ S1 → S0
+→ S2 → S1</code></pre>
+</section>
+<section id="crear-tipo-de-transición" class="level2">
+<h2 data-anchor-id="crear-tipo-de-transición">Crear tipo de transición</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>progression_ids <span class="op">=</span> {</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>    <span class="dv">1</span>,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>    <span class="dv">4</span>,</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="dv">6</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>recovery_ids <span class="op">=</span> {</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">3</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>    <span class="dv">5</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"progression_transition"</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    .isin(</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>        progression_ids</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>).astype(<span class="bu">int</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="efecto-compartido-de-progresión" class="level2">
+<h2 data-anchor-id="efecto-compartido-de-progresión">Efecto compartido de progresión</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"dose_progression"</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"dose_per_100"</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"progression_transition"</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ventaja-1" class="level2">
+<h2 data-anchor-id="ventaja-1">Ventaja</h2>
+<ul>
+<li>Reduce parámetros.</li>
+<li>Conserva interpretación clínica.</li>
+<li>Comparte información.</li>
+</ul>
+</section>
+<section id="hipótesis-explícita" class="level2">
+<h2 data-anchor-id="hipótesis-explícita">Hipótesis explícita</h2>
+<pre class="text"><code>La dosis afecta de forma similar
+a todas las progresiones</code></pre>
+<p>Debe comprobarse.</p>
+</section>
+<section id="contrastes" class="level2">
+<h2 data-anchor-id="contrastes">Contrastes</h2>
+<p>Puede compararse:</p>
+<p><span class="math display">\[
+H_0:
+\beta_{01}
+=
+\beta_{12}
+\]</span></p>
+</section>
+<section id="diferencia-de-coeficientes" class="level2">
+<h2 data-anchor-id="diferencia-de-coeficientes">Diferencia de coeficientes</h2>
+<pre class="text"><code>beta_01 - beta_12</code></pre>
+<p>Puede evaluarse mediante:</p>
+<ul>
+<li>Wald test.</li>
+<li>Likelihood ratio test.</li>
+<li>Bootstrap.</li>
+<li>Modelo con y sin restricción.</li>
+</ul>
+</section>
+<section id="likelihood-ratio-test" class="level2">
+<h2 data-anchor-id="likelihood-ratio-test">Likelihood ratio test</h2>
+<p>Conceptualmente:</p>
+<pre class="text"><code>Modelo reducido
+→ efecto común
+
+Modelo completo
+→ efecto específico</code></pre>
+</section>
+<section id="estadístico" class="level2">
+<h2 data-anchor-id="estadístico">Estadístico</h2>
+<p><span class="math display">\[
+2(
+\ell_{completo}
+-
+\ell_{reducido}
+)
+\]</span></p>
+</section>
+<section id="interpretación-2" class="level2">
+<h2 data-anchor-id="interpretación-2">Interpretación</h2>
+<p>Si el modelo completo mejora claramente, puede justificarse heterogeneidad entre transiciones.</p>
+</section>
+<section id="multiplicidad" class="level2">
+<h2 data-anchor-id="multiplicidad">Multiplicidad</h2>
+<p>Con muchas transiciones y covariables aparecen muchos tests.</p>
+<p>Debe evitarse:</p>
+<ul>
+<li>Interpretar cada p-value de forma aislada.</li>
+<li>Selección masiva post hoc.</li>
+<li>Resultados espurios.</li>
+</ul>
+</section>
+<section id="priorizar" class="level2">
+<h2 data-anchor-id="priorizar">Priorizar</h2>
+<ul>
+<li>Covariables principales.</li>
+<li>Hipótesis clínicas.</li>
+<li>Transiciones relevantes.</li>
+<li>Magnitud e intervalos.</li>
+</ul>
+</section>
+<section id="eventos-por-parámetro" class="level2">
+<h2 data-anchor-id="eventos-por-parámetro">Eventos por parámetro</h2>
+<p>Cada coeficiente específico consume información del arco correspondiente.</p>
+</section>
+<section id="ejemplo-1" class="level2">
+<h2 data-anchor-id="ejemplo-1">Ejemplo</h2>
+<pre class="text"><code>6 transiciones
+×
+5 covariables
+=
+30 coeficientes</code></pre>
+<p>Puede ser inviable con pocos eventos.</p>
+</section>
+<section id="regularización" class="level2">
+<h2 data-anchor-id="regularización">Regularización</h2>
+</section>
+<section id="ridge" class="level2">
+<h2 data-anchor-id="ridge">Ridge</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>ridge_model <span class="op">=</span> CoxPHFitter(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    penalizer<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    l1_ratio<span class="op">=</span><span class="fl">0.0</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="lasso" class="level2">
+<h2 data-anchor-id="lasso">Lasso</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>lasso_model <span class="op">=</span> CoxPHFitter(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    penalizer<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    l1_ratio<span class="op">=</span><span class="fl">1.0</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="elastic-net" class="level2">
+<h2 data-anchor-id="elastic-net">Elastic Net</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>elastic_model <span class="op">=</span> CoxPHFitter(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    penalizer<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    l1_ratio<span class="op">=</span><span class="fl">0.5</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ventajas-1" class="level2">
+<h2 data-anchor-id="ventajas-1">Ventajas</h2>
+<ul>
+<li>Estabilidad.</li>
+<li>Reducción de coeficientes extremos.</li>
+<li>Manejo de colinealidad.</li>
+<li>Selección parcial.</li>
+</ul>
+</section>
+<section id="limitaciones-1" class="level2">
+<h2 data-anchor-id="limitaciones-1">Limitaciones</h2>
+<ul>
+<li>Interpretación más compleja.</li>
+<li>Intervalos estándar pueden no ser adecuados.</li>
+<li>Penalización debe ajustarse.</li>
+<li>Selección puede ser inestable.</li>
+</ul>
+</section>
+<section id="tuning" class="level2">
+<h2 data-anchor-id="tuning">Tuning</h2>
+<p>Debe realizarse con validación interna.</p>
+</section>
+<section id="split-por-paciente" class="level2">
+<h2 data-anchor-id="split-por-paciente">Split por paciente</h2>
+<p>Toda la trayectoria de un paciente debe permanecer en un único conjunto.</p>
+</section>
+<section id="split-por-centro-o-tiempo" class="level2">
+<h2 data-anchor-id="split-por-centro-o-tiempo">Split por centro o tiempo</h2>
+<p>Preferible cuando el objetivo es generalización externa.</p>
+</section>
+<section id="modelos-jerárquicos" class="level2">
+<h2 data-anchor-id="modelos-jerárquicos">Modelos jerárquicos</h2>
+<p>Pueden asumir:</p>
+<pre class="text"><code>beta_transition
+=
+beta_global
++
+desviación_transition</code></pre>
+<p>Esto permite compartir información sin imponer igualdad exacta.</p>
+</section>
+<section id="ventaja-2" class="level2">
+<h2 data-anchor-id="ventaja-2">Ventaja</h2>
+<ul>
+<li>Shrinkage parcial.</li>
+<li>Mejor manejo de arcos raros.</li>
+<li>Incertidumbre coherente.</li>
+</ul>
+</section>
+<section id="enfoque-bayesiano" class="level2">
+<h2 data-anchor-id="enfoque-bayesiano">Enfoque bayesiano</h2>
+<p>Puede incorporar priors:</p>
+<pre class="text"><code>Transiciones similares
+→ efectos similares</code></pre>
+</section>
+<section id="frailty-por-paciente" class="level2">
+<h2 data-anchor-id="frailty-por-paciente">Frailty por paciente</h2>
+<p>Varias transiciones del mismo paciente están correlacionadas.</p>
+<p>Puede existir una propensión individual no observada.</p>
+</section>
+<section id="frailty-compartida" class="level2">
+<h2 data-anchor-id="frailty-compartida">Frailty compartida</h2>
+<pre class="text"><code>Paciente con mayor fragilidad
+→ mayor riesgo en varios arcos</code></pre>
+</section>
+<section id="errores-robustos" class="level2">
+<h2 data-anchor-id="errores-robustos">Errores robustos</h2>
+<p>Cuando el software lo permite, agrupar por paciente puede mejorar la estimación de incertidumbre.</p>
+</section>
+<section id="centro" class="level2">
+<h2 data-anchor-id="centro">Centro</h2>
+<p>Opciones:</p>
+<ul>
+<li>Covariable fija.</li>
+<li>Estrato.</li>
+<li>Frailty.</li>
+<li>Efecto aleatorio.</li>
+<li>Validación externa.</li>
+</ul>
+</section>
+<section id="estratificar-por-centro" class="level2">
+<h2 data-anchor-id="estratificar-por-centro">Estratificar por centro</h2>
+<p>Permite baselines diferentes.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>model.fit(</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    expanded_data,</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"stop"</span>,</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    entry_col<span class="op">=</span><span class="st">"start"</span>,</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    strata<span class="op">=</span>[</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span>,</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"center"</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="limitación-1" class="level2">
+<h2 data-anchor-id="limitación-1">Limitación</h2>
+<p>No estima un coeficiente de centro.</p>
+</section>
+<section id="estado-previo" class="level2">
+<h2 data-anchor-id="estado-previo">Estado previo</h2>
+<p>Puede incorporarse como covariable.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"came_from_more_severe_state"</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"previous_state_before_episode"</span></span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>    .isin(</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"S2"</span>,</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"S3"</span></span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb48-12"><a href="#cb48-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb48-13"><a href="#cb48-13" aria-hidden="true" tabindex="-1"></a>).astype(<span class="bu">int</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación-3" class="level2">
+<h2 data-anchor-id="interpretación-3">Interpretación</h2>
+<p>Un paciente recuperado a S1 puede tener un riesgo diferente de un paciente que progresa por primera vez a S1.</p>
+</section>
+<section id="número-de-episodios" class="level2">
+<h2 data-anchor-id="número-de-episodios">Número de episodios</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"episode_number"</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>puede capturar recurrencia o memoria.</p>
+</section>
+<section id="máxima-severidad-previa" class="level2">
+<h2 data-anchor-id="máxima-severidad-previa">Máxima severidad previa</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"max_previous_state_rank"</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>resume parte de la historia.</p>
+</section>
+<section id="tiempo-acumulado-en-estados-graves" class="level2">
+<h2 data-anchor-id="tiempo-acumulado-en-estados-graves">Tiempo acumulado en estados graves</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"previous_time_in_s2_s3"</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>puede ser clínicamente relevante.</p>
+</section>
+<section id="markov-extendido" class="level2">
+<h2 data-anchor-id="markov-extendido">Markov extendido</h2>
+<p>Añadir historia resumida puede mejorar el modelo sin crear demasiados estados.</p>
+</section>
+<section id="covariable-mediadora" class="level2">
+<h2 data-anchor-id="covariable-mediadora">Covariable mediadora</h2>
+<p>Debe distinguirse:</p>
+<pre class="text"><code>Dosis
+→ biomarcador
+→ cardiotoxicidad</code></pre>
+<p>Si el objetivo es efecto total de dosis, ajustar por biomarcador puede ser sobreajuste causal.</p>
+</section>
+<section id="objetivo-explicativo" class="level2">
+<h2 data-anchor-id="objetivo-explicativo">Objetivo explicativo</h2>
+<p>Seleccionar covariables con un DAG o conocimiento clínico.</p>
+</section>
+<section id="objetivo-predictivo" class="level2">
+<h2 data-anchor-id="objetivo-predictivo">Objetivo predictivo</h2>
+<p>Incluir variables disponibles que aporten rendimiento, con validación adecuada.</p>
+</section>
+<section id="interpretación-causal" class="level2">
+<h2 data-anchor-id="interpretación-causal">Interpretación causal</h2>
+<p>Un HR específico por transición sigue siendo asociativo salvo diseño causal válido.</p>
+</section>
+<section id="confounding-by-indication" class="level2">
+<h2 data-anchor-id="confounding-by-indication">Confounding by indication</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>Mayor gravedad
+→ más tratamiento cardioprotector
+→ mayor riesgo</code></pre>
+<p>El tratamiento puede parecer perjudicial aunque se prescriba por mayor riesgo.</p>
+</section>
+<section id="covariables-dependientes-de-visitas" class="level2">
+<h2 data-anchor-id="covariables-dependientes-de-visitas">Covariables dependientes de visitas</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>Troponina solo se mide
+cuando existe sospecha clínica</code></pre>
+<p>El valor y su disponibilidad pueden ser informativos.</p>
+</section>
+<section id="indicadores-de-medición" class="level2">
+<h2 data-anchor-id="indicadores-de-medición">Indicadores de medición</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"troponin_measured_recently"</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"days_since_troponin"</span></span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">&lt;=</span></span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a>    <span class="dv">30</span></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>).astype(<span class="bu">int</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interacción-entre-valor-y-recencia" class="level2">
+<h2 data-anchor-id="interacción-entre-valor-y-recencia">Interacción entre valor y recencia</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>expanded_data[</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"troponin_recent_value"</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"troponin"</span></span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>    expanded_data[</span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"troponin_measured_recently"</span></span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="predicción" class="level2">
+<h2 data-anchor-id="predicción">Predicción</h2>
+<p>Para predecir una trayectoria se necesitan efectos específicos y baselines por arco.</p>
+</section>
+<section id="matriz-individual-de-intensidades" class="level2">
+<h2 data-anchor-id="matriz-individual-de-intensidades">Matriz individual de intensidades</h2>
+<pre class="text"><code>Q(X)</code></pre>
+<p>debe actualizar cada arco según sus covariables.</p>
+</section>
+<section id="ejemplo-conceptual" class="level2">
+<h2 data-anchor-id="ejemplo-conceptual">Ejemplo conceptual</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>q01_patient <span class="op">=</span> (</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>    q01_baseline</span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>    np.exp(</span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>        beta_age_01</span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>        age</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>        <span class="op">+</span></span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>        beta_dose_01</span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>        <span class="op">*</span></span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>        dose</span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="recalcular-diagonal" class="level2">
+<h2 data-anchor-id="recalcular-diagonal">Recalcular diagonal</h2>
+<p>Después de actualizar intensidades fuera de la diagonal:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row_index <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>    Q_patient.shape[</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>        <span class="dv">0</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>    Q_patient[</span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>        row_index,</span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>        row_index</span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a>    ] <span class="op">=</span> (</span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a>        <span class="op">-</span></span>
+<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a>        (</span>
+<span id="cb59-13"><a href="#cb59-13" aria-hidden="true" tabindex="-1"></a>            Q_patient[</span>
+<span id="cb59-14"><a href="#cb59-14" aria-hidden="true" tabindex="-1"></a>                row_index,</span>
+<span id="cb59-15"><a href="#cb59-15" aria-hidden="true" tabindex="-1"></a>                :</span>
+<span id="cb59-16"><a href="#cb59-16" aria-hidden="true" tabindex="-1"></a>            ].<span class="bu">sum</span>()</span>
+<span id="cb59-17"><a href="#cb59-17" aria-hidden="true" tabindex="-1"></a>            <span class="op">-</span></span>
+<span id="cb59-18"><a href="#cb59-18" aria-hidden="true" tabindex="-1"></a>            Q_patient[</span>
+<span id="cb59-19"><a href="#cb59-19" aria-hidden="true" tabindex="-1"></a>                row_index,</span>
+<span id="cb59-20"><a href="#cb59-20" aria-hidden="true" tabindex="-1"></a>                row_index</span>
+<span id="cb59-21"><a href="#cb59-21" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb59-22"><a href="#cb59-22" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb59-23"><a href="#cb59-23" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="reporting" class="level2">
+<h2 data-anchor-id="reporting">Reporting</h2>
+<p>Debe incluir una tabla por transición.</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Covariable</th>
+<th style="text-align: right;">S0→S1 HR</th>
+<th style="text-align: right;">S1→S2 HR</th>
+<th style="text-align: right;">S1→S0 HR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Edad</td>
+<td style="text-align: right;">1.10</td>
+<td style="text-align: right;">1.02</td>
+<td style="text-align: right;">0.90</td>
+</tr>
+<tr class="even">
+<td>Dosis</td>
+<td style="text-align: right;">1.25</td>
+<td style="text-align: right;">1.60</td>
+<td style="text-align: right;">0.70</td>
+</tr>
+<tr class="odd">
+<td>FEVI</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">1.20</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="forest-plot-por-transición" class="level2">
+<h2 data-anchor-id="forest-plot-por-transición">Forest plot por transición</h2>
+<p>Puede crearse:</p>
+<ul>
+<li>Un panel por transición.</li>
+<li>Un color por arco.</li>
+<li>Una tabla agrupada por covariable.</li>
+</ul>
+</section>
+<section id="extraer-resultados" class="level2">
+<h2 data-anchor-id="extraer-resultados">Extraer resultados</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>result_tables <span class="op">=</span> []</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> transition_id, model <span class="kw">in</span> (</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>    transition_models.items()</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>    table <span class="op">=</span> (</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>        model.summary</span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>        .reset_index()</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>    table[</span>
+<span id="cb60-13"><a href="#cb60-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span></span>
+<span id="cb60-14"><a href="#cb60-14" aria-hidden="true" tabindex="-1"></a>    ] <span class="op">=</span> transition_id</span>
+<span id="cb60-15"><a href="#cb60-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-16"><a href="#cb60-16" aria-hidden="true" tabindex="-1"></a>    result_tables.append(</span>
+<span id="cb60-17"><a href="#cb60-17" aria-hidden="true" tabindex="-1"></a>        table</span>
+<span id="cb60-18"><a href="#cb60-18" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>all_results <span class="op">=</span> pd.concat(</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>    result_tables,</span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>    ignore_index<span class="op">=</span><span class="va">True</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="preparar-hr" class="level2">
+<h2 data-anchor-id="preparar-hr">Preparar HR</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>all_results[</span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"hazard_ratio"</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> np.exp(</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>    all_results[</span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"coef"</span></span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="intervalos" class="level2">
+<h2 data-anchor-id="intervalos">Intervalos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>all_results[</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"covariate"</span>,</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"transition_id"</span>,</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"exp(coef)"</span>,</span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"exp(coef) lower 95%"</span>,</span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"exp(coef) upper 95%"</span></span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="evaluación" class="level2">
+<h2 data-anchor-id="evaluación">Evaluación</h2>
+<p>Debe revisarse por transición:</p>
+<ul>
+<li>Discriminación.</li>
+<li>Calibración.</li>
+<li>Número de eventos.</li>
+<li>Supuestos PH.</li>
+<li>Forma funcional.</li>
+<li>Estabilidad.</li>
+<li>Validación externa.</li>
+</ul>
+</section>
+<section id="no-basta-un-c-index-global" class="level2">
+<h2 data-anchor-id="no-basta-un-c-index-global">No basta un C-index global</h2>
+<p>Puede haber:</p>
+<pre class="text"><code>Buen rendimiento en S0 → S1
+
+Mal rendimiento en S2 → S3</code></pre>
+</section>
+<section id="calibración-de-transición" class="level2">
+<h2 data-anchor-id="calibración-de-transición">Calibración de transición</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>Probabilidad predicha de S1 → S2
+a 6 meses</code></pre>
+<p>debe compararse con la transición observada.</p>
+</section>
+<section id="sensitivity-analysis" class="level2">
+<h2 data-anchor-id="sensitivity-analysis">Sensitivity analysis</h2>
+<p>Comparar:</p>
+<ul>
+<li>Efectos comunes.</li>
+<li>Efectos específicos.</li>
+<li>Efectos agrupados por progresión.</li>
+<li>Penalización.</li>
+<li>Exclusión de arcos raros.</li>
+<li>Diferentes escalas.</li>
+</ul>
+</section>
+<section id="selección-del-modelo" class="level2">
+<h2 data-anchor-id="selección-del-modelo">Selección del modelo</h2>
+<p>Debe equilibrar:</p>
+<ul>
+<li>Plausibilidad clínica.</li>
+<li>Parsimonia.</li>
+<li>Eventos disponibles.</li>
+<li>Rendimiento.</li>
+<li>Interpretabilidad.</li>
+<li>Estabilidad.</li>
+</ul>
+</section>
+<section id="aplicación-a-cardiotoxicidad" class="level2">
+<h2 data-anchor-id="aplicación-a-cardiotoxicidad">Aplicación a cardiotoxicidad</h2>
+<p>Covariables candidatas:</p>
+<ul>
+<li>Edad.</li>
+<li>Sexo.</li>
+<li>Diagnóstico.</li>
+<li>Dosis acumulada de antraciclinas.</li>
+<li>FEVI.</li>
+<li>GLS.</li>
+<li>Troponina.</li>
+<li>NT-proBNP.</li>
+<li>Tratamiento cardioprotector.</li>
+<li>Centro.</li>
+<li>Estado previo.</li>
+</ul>
+</section>
+<section id="hipótesis-clínicas" class="level2">
+<h2 data-anchor-id="hipótesis-clínicas">Hipótesis clínicas</h2>
+<pre class="text"><code>Dosis acumulada
+→ mayor efecto en progresión
+
+Tratamiento cardioprotector
+→ mayor efecto en recuperación
+
+FEVI basal
+→ mayor efecto en transiciones iniciales</code></pre>
+</section>
+<section id="estrategia-razonable" class="level2">
+<h2 data-anchor-id="estrategia-razonable">Estrategia razonable</h2>
+<pre class="text"><code>Baselines específicos por transición
+
+Edad y sexo
+→ efectos comunes inicialmente
+
+Dosis y biomarcadores
+→ efectos específicos de progresión
+
+Estado previo
+→ específico de recuperación</code></pre>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>Asumir efectos comunes sin comprobar.</li>
+<li>Ajustar efectos específicos para todo.</li>
+<li>Ignorar eventos por arco.</li>
+<li>Usar covariables futuras.</li>
+<li>No escalar clínicamente.</li>
+<li>Interpretar HR como probabilidad.</li>
+<li>No considerar historia previa.</li>
+<li>No ajustar incertidumbre por paciente.</li>
+<li>Seleccionar por p-value.</li>
+<li>No controlar multiplicidad.</li>
+<li>No validar por transición.</li>
+<li>Confundir asociación y causalidad.</li>
+</ul>
+</section>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Definir covariables.</li>
+<li>Definir hipótesis por transición.</li>
+<li>Contar eventos.</li>
+<li>Ajustar modelo común.</li>
+<li>Ajustar efectos específicos.</li>
+<li>Comparar modelos.</li>
+<li>Regularizar si procede.</li>
+<li>Revisar supuestos.</li>
+<li>Evaluar por arco.</li>
+<li>Validar externamente.</li>
+<li>Construir (Q(X)).</li>
+<li>Comunicar resultados.</li>
+</ol>
+</section>
+<section id="checklist" class="level2">
+<h2 data-anchor-id="checklist">Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">He definido covariables basales.</label></li>
+<li><label><input type="checkbox">He definido covariables temporales.</label></li>
+<li><label><input type="checkbox">He evitado leakage.</label></li>
+<li><label><input type="checkbox">He contado eventos por transición.</label></li>
+<li><label><input type="checkbox">He ajustado un modelo común.</label></li>
+<li><label><input type="checkbox">He considerado efectos específicos.</label></li>
+<li><label><input type="checkbox">He considerado grupos de transiciones.</label></li>
+<li><label><input type="checkbox">He evaluado interacciones.</label></li>
+<li><label><input type="checkbox">He escalado variables clínicamente.</label></li>
+<li><label><input type="checkbox">He revisado no linealidad.</label></li>
+<li><label><input type="checkbox">He considerado regularización.</label></li>
+<li><label><input type="checkbox">He agrupado incertidumbre por paciente.</label></li>
+<li><label><input type="checkbox">He validado por transición.</label></li>
+<li><label><input type="checkbox">He comparado modelos.</label></li>
+<li><label><input type="checkbox">He documentado hipótesis.</label></li>
+</ul>
+</section>
+<section id="recursos" class="level2">
+<h2 data-anchor-id="recursos">Recursos</h2>
+<section id="conceptos" class="level3">
+<h3 data-anchor-id="conceptos">Conceptos</h3>
+<ul>
+<li>Transition-specific effects.</li>
+<li>Shared effects.</li>
+<li>Stratified Cox.</li>
+<li>Interaction by transition.</li>
+<li>Partial pooling.</li>
+<li>Penalized multi-state models.</li>
+<li>Frailty.</li>
+<li>Time-varying covariates.</li>
+<li>Transition-specific prediction.</li>
+</ul>
+</section>
+<section id="herramientas" class="level3">
+<h3 data-anchor-id="herramientas">Herramientas</h3>
+<ul>
+<li><code>lifelines.CoxPHFitter</code>.</li>
+<li><code>pandas</code>.</li>
+<li><code>numpy</code>.</li>
+<li><code>mstate</code> en R.</li>
+<li><code>coxme</code> en R.</li>
+<li>Modelos bayesianos jerárquicos.</li>
+</ul>
+</section>
+<section id="material-del-proyecto" class="level3">
+<h3 data-anchor-id="material-del-proyecto">Material del proyecto</h3>
+<p>Añadir aquí:</p>
+<ul>
+<li>Hipótesis por transición.</li>
+<li>Tabla de eventos.</li>
+<li>Covariables candidatas.</li>
+<li>Modelos comunes y específicos.</li>
+<li>Resultados de sensibilidad.</li>
+<li>Forest plots.</li>
+</ul>
+</section>
+</section>
+<section id="notas-personales" class="level2">
+<h2 data-anchor-id="notas-personales">Notas personales</h2>
+<p>Añade aquí tus coeficientes, hipótesis, interacciones, regularización y decisiones clínicas.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/pablolongan\.github\.io\/health-data-science-handbook\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
