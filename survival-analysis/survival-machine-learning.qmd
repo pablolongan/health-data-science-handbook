@@ -1,0 +1,1179 @@
+---
+title: "Machine learning para Survival Analysis"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+El machine learning de supervivencia adapta modelos predictivos al tiempo hasta evento y a la censura.
+
+Modelos frecuentes:
+
+- Cox penalizado.
+- Random Survival Forest.
+- Gradient Boosting Survival.
+- Survival SVM.
+- Redes neuronales de supervivencia.
+
+No deben evaluarse con métricas de regresión estándar. Se utilizan C-index, AUC dependiente del tiempo, Brier score y calibración temporal.
+:::
+
+## ¿Por qué machine learning de supervivencia?
+
+Los modelos clásicos pueden ser insuficientes cuando existen:
+
+- Muchas variables.
+- Relaciones no lineales.
+- Interacciones.
+- Efectos complejos.
+- Alta dimensionalidad.
+- Heterogeneidad entre pacientes.
+
+::: {.callout-note}
+## Idea clave
+
+El modelo debe aprender el riesgo respetando que algunos tiempos están censurados.
+:::
+
+## Problema supervisado
+
+En regresión convencional:
+
+```text
+X
+→ tiempo observado
+```
+
+Esto sería incorrecto si algunos tiempos son censurados.
+
+En supervivencia:
+
+```text
+X
+→ evento + tiempo
+```
+
+El target debe contener ambos elementos.
+
+## Preparar el target
+
+```python
+from sksurv.util import Surv
+
+y = Surv.from_dataframe(
+    event="event",
+    time="follow_up_days",
+    data=survival_df
+)
+```
+
+## Preparar features
+
+```python
+feature_columns = [
+    "age",
+    "baseline_lvef",
+    "troponin",
+    "cumulative_dose",
+    "treatment"
+]
+
+X = survival_df[
+    feature_columns
+].copy()
+```
+
+## Separar train y test
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.25,
+    random_state=42
+)
+```
+
+En cohortes temporales o multicéntricas debe preferirse un split temporal o externo.
+
+## Pipeline de preprocesamiento
+
+```python
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+```
+
+## Cox penalizado
+
+Coxnet combina Cox con regularización.
+
+Puede utilizar:
+
+- Lasso.
+- Ridge.
+- Elastic Net.
+
+## Elastic Net Cox
+
+```python
+from sksurv.linear_model import CoxnetSurvivalAnalysis
+
+coxnet_pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median",
+                add_indicator=True
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            CoxnetSurvivalAnalysis(
+                l1_ratio=0.5,
+                alpha_min_ratio=0.01,
+                n_alphas=100
+            )
+        )
+    ]
+)
+```
+
+## Ajustar
+
+```python
+coxnet_pipeline.fit(
+    X_train,
+    y_train
+)
+```
+
+## Interpretación de l1_ratio
+
+```text
+l1_ratio = 1
+→ Lasso
+
+l1_ratio = 0
+→ Ridge
+
+0 < l1_ratio < 1
+→ Elastic Net
+```
+
+## Ventajas de Coxnet
+
+- Selección de variables.
+- Estabilidad.
+- Alta dimensionalidad.
+- Manejo de colinealidad.
+- Mantiene estructura tipo Cox.
+
+## Limitaciones
+
+- Relaciones lineales en log-hazard.
+- Supuesto PH.
+- Interpretación dependiente de penalización.
+- Selección inestable con pocos eventos.
+
+## Random Survival Forest
+
+Es una adaptación de random forest para datos censurados.
+
+Construye múltiples árboles usando criterios de separación orientados a supervivencia.
+
+## Ajustar RSF
+
+```python
+from sksurv.ensemble import RandomSurvivalForest
+
+rsf_pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median",
+                add_indicator=True
+            )
+        ),
+        (
+            "model",
+            RandomSurvivalForest(
+                n_estimators=500,
+                min_samples_split=10,
+                min_samples_leaf=5,
+                max_features="sqrt",
+                n_jobs=-1,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Entrenar
+
+```python
+rsf_pipeline.fit(
+    X_train,
+    y_train
+)
+```
+
+## Predicción de riesgo
+
+```python
+risk_score = (
+    rsf_pipeline
+    .predict(
+        X_test
+    )
+)
+```
+
+## Curvas de supervivencia
+
+```python
+survival_functions = (
+    rsf_pipeline
+    .predict_survival_function(
+        X_test.iloc[
+            [
+                0,
+                1,
+                2
+            ]
+        ]
+    )
+)
+```
+
+## Visualizar curvas individuales
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(
+    figsize=(
+        9,
+        6
+    )
+)
+
+for index, survival_function in enumerate(
+    survival_functions
+):
+
+    plt.step(
+        survival_function.x,
+        survival_function.y,
+        where="post",
+        label=f"Paciente {index + 1}"
+    )
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Supervivencia predicha"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## Ventajas de RSF
+
+- Captura no linealidad.
+- Modela interacciones.
+- No exige PH.
+- Produce curvas individuales.
+- Tolera relaciones complejas.
+
+## Limitaciones de RSF
+
+- Menor interpretabilidad.
+- Requiere tuning.
+- Puede sobreajustar.
+- No extrapola bien fuera del rango observado.
+- Puede necesitar muchos datos.
+
+## Gradient Boosting Survival
+
+Construye árboles secuencialmente para mejorar el error residual.
+
+## Ajustar boosting
+
+```python
+from sksurv.ensemble import (
+    GradientBoostingSurvivalAnalysis
+)
+
+gbsa_pipeline = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median",
+                add_indicator=True
+            )
+        ),
+        (
+            "model",
+            GradientBoostingSurvivalAnalysis(
+                loss="coxph",
+                learning_rate=0.05,
+                n_estimators=300,
+                max_depth=2,
+                min_samples_leaf=10,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Entrenar
+
+```python
+gbsa_pipeline.fit(
+    X_train,
+    y_train
+)
+```
+
+## Predicción
+
+```python
+gbsa_risk_score = (
+    gbsa_pipeline
+    .predict(
+        X_test
+    )
+)
+```
+
+## Curvas de supervivencia
+
+Con `loss="coxph"`:
+
+```python
+gbsa_survival_functions = (
+    gbsa_pipeline
+    .predict_survival_function(
+        X_test.iloc[
+            [
+                0,
+                1
+            ]
+        ]
+    )
+)
+```
+
+## Ventajas de boosting
+
+- Buen rendimiento tabular.
+- Captura interacciones.
+- Puede ser más preciso que Cox.
+- Permite regularización.
+- Modela no linealidad.
+
+## Limitaciones
+
+- Sensible a hiperparámetros.
+- Riesgo de sobreajuste.
+- Menor interpretabilidad.
+- Puede requerir muestras más grandes.
+
+## Componentwise boosting
+
+```python
+from sksurv.ensemble import (
+    ComponentwiseGradientBoostingSurvivalAnalysis
+)
+```
+
+Puede ser útil cuando interesa una selección progresiva y más parsimoniosa.
+
+## Survival SVM
+
+```python
+from sksurv.svm import FastSurvivalSVM
+```
+
+```python
+survival_svm = Pipeline(
+    steps=[
+        (
+            "imputer",
+            SimpleImputer(
+                strategy="median"
+            )
+        ),
+        (
+            "scaler",
+            StandardScaler()
+        ),
+        (
+            "model",
+            FastSurvivalSVM(
+                alpha=1.0,
+                rank_ratio=1.0,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Enfoque de ranking
+
+Survival SVM se centra en ordenar pacientes según riesgo.
+
+Puede ser útil para discriminación, pero no siempre produce directamente probabilidades de supervivencia calibradas.
+
+## Comparar modelos
+
+```python
+models = {
+    "coxnet": coxnet_pipeline,
+    "random_survival_forest": rsf_pipeline,
+    "gradient_boosting": gbsa_pipeline,
+    "survival_svm": survival_svm
+}
+```
+
+## C-index censurado
+
+```python
+from sksurv.metrics import (
+    concordance_index_censored
+)
+```
+
+```python
+rows = []
+
+for name, model in models.items():
+
+    model.fit(
+        X_train,
+        y_train
+    )
+
+    risk_score = model.predict(
+        X_test
+    )
+
+    c_index = concordance_index_censored(
+        y_test["event"],
+        y_test["follow_up_days"],
+        risk_score
+    )[0]
+
+    rows.append(
+        {
+            "model": name,
+            "c_index": c_index
+        }
+    )
+```
+
+## Interpretar C-index
+
+```text
+0.5
+→ orden similar al azar
+
+1.0
+→ orden perfecto
+```
+
+## Limitaciones de Harrell C-index
+
+Puede ser optimista cuando hay mucha censura.
+
+Puede preferirse IPCW C-index.
+
+## IPCW C-index
+
+```python
+from sksurv.metrics import concordance_index_ipcw
+
+ipcw_cindex = concordance_index_ipcw(
+    survival_train=y_train,
+    survival_test=y_test,
+    estimate=risk_score
+)[0]
+```
+
+## AUC dependiente del tiempo
+
+```python
+from sksurv.metrics import cumulative_dynamic_auc
+```
+
+```python
+times = [
+    180,
+    365,
+    730
+]
+```
+
+```python
+auc_values, mean_auc = cumulative_dynamic_auc(
+    survival_train=y_train,
+    survival_test=y_test,
+    estimate=risk_score,
+    times=times
+)
+```
+
+## Interpretación
+
+```text
+AUC(t)
+→ discriminación en el horizonte t
+```
+
+Debe revisarse en varios horizontes.
+
+## Brier score
+
+El Brier score temporal evalúa el error de probabilidades de supervivencia.
+
+```python
+from sksurv.metrics import brier_score
+```
+
+## Matriz de probabilidades de supervivencia
+
+```python
+survival_functions = (
+    rsf_pipeline
+    .predict_survival_function(
+        X_test
+    )
+)
+```
+
+```python
+import numpy as np
+
+survival_probabilities = np.asarray(
+    [
+        survival_function(
+            times
+        )
+        for survival_function
+        in survival_functions
+    ]
+)
+```
+
+## Calcular Brier score
+
+```python
+time_points, brier_scores = brier_score(
+    survival_train=y_train,
+    survival_test=y_test,
+    estimate=survival_probabilities,
+    times=times
+)
+```
+
+## Integrated Brier Score
+
+```python
+from sksurv.metrics import integrated_brier_score
+```
+
+```python
+ibs = integrated_brier_score(
+    survival_train=y_train,
+    survival_test=y_test,
+    estimate=survival_probabilities,
+    times=times
+)
+```
+
+```text
+IBS menor
+→ mejor
+```
+
+## C-index no basta
+
+Un modelo puede ordenar bien a los pacientes y estar mal calibrado.
+
+Debe combinarse:
+
+- C-index.
+- AUC temporal.
+- Brier score.
+- Calibración.
+- Utilidad clínica.
+
+## Tuning con GridSearchCV
+
+```python
+from sklearn.model_selection import GridSearchCV
+from sksurv.metrics import (
+    as_concordance_index_ipcw_scorer
+)
+```
+
+## Envolver estimador
+
+```python
+scored_rsf = as_concordance_index_ipcw_scorer(
+    rsf_pipeline
+)
+```
+
+## Grid de parámetros
+
+```python
+parameter_grid = {
+    "estimator__model__n_estimators": [
+        200,
+        500
+    ],
+    "estimator__model__min_samples_leaf": [
+        3,
+        5,
+        10
+    ],
+    "estimator__model__max_features": [
+        "sqrt",
+        0.5
+    ]
+}
+```
+
+```python
+search = GridSearchCV(
+    estimator=scored_rsf,
+    param_grid=parameter_grid,
+    cv=5,
+    n_jobs=-1
+)
+```
+
+## Precaución con CV aleatoria
+
+En supervivencia clínica puede ser mejor:
+
+- Split temporal.
+- Split por centro.
+- Split por paciente.
+- Validación externa.
+
+## Eventos por fold
+
+Cada fold debe contener suficientes eventos.
+
+## Estratificación
+
+La estratificación estándar no siempre maneja adecuadamente censura y tiempo.
+
+Debe revisarse:
+
+- Número de eventos.
+- Seguimiento.
+- Distribución temporal.
+- Centro.
+- Grupos clínicos.
+
+## Validación temporal
+
+```text
+Cohorte antigua
+→ train
+
+Cohorte posterior
+→ test
+```
+
+## Validación multicentro
+
+```text
+Centros A y B
+→ desarrollo
+
+Centro C
+→ validación externa
+```
+
+## Nested cross-validation
+
+Puede utilizarse para:
+
+- Tuning interno.
+- Evaluación externa.
+- Reducir optimismo.
+
+## Feature importance en RSF
+
+La importancia integrada del árbol puede ser problemática.
+
+Es preferible utilizar permutation importance.
+
+## Permutation importance
+
+```python
+from sklearn.inspection import permutation_importance
+
+result = permutation_importance(
+    estimator=rsf_pipeline,
+    X=X_test,
+    y=y_test,
+    n_repeats=20,
+    random_state=42,
+    n_jobs=-1
+)
+```
+
+## Limitación
+
+La función `score()` del estimador puede utilizar C-index de Harrell.
+
+Para otros objetivos debe envolverse con un scorer adecuado.
+
+## Tabla de importancia
+
+```python
+importance_table = pd.DataFrame(
+    {
+        "feature": feature_columns,
+        "importance": result.importances_mean
+    }
+).sort_values(
+    "importance",
+    ascending=False
+)
+```
+
+## Correlación entre variables
+
+Con variables correlacionadas, la importancia se reparte o puede parecer baja.
+
+## Partial dependence
+
+Puede utilizarse con cautela para estudiar la relación entre una variable y el score de riesgo.
+
+No demuestra causalidad.
+
+## SHAP
+
+El soporte depende del modelo y la librería.
+
+Puede utilizarse para:
+
+- Explicación local.
+- Importancia global.
+- Interacciones.
+
+Debe comprobarse:
+
+- Qué output se explica.
+- Riesgo relativo.
+- Log-risk.
+- Supervivencia a tiempo fijo.
+
+## Explicación a tiempo fijo
+
+Una forma más interpretable es explicar:
+
+```text
+Riesgo a 1 año
+```
+
+en lugar de un score abstracto.
+
+## Ablation study
+
+```text
+Modelo 1
+→ variables basales
+
+Modelo 2
+→ basales + biomarcadores
+
+Modelo 3
+→ basales + tratamiento
+
+Modelo 4
+→ todas
+```
+
+Esto ayuda a cuantificar el valor añadido de cada familia.
+
+## Selección de features
+
+Opciones:
+
+- Cox Lasso.
+- Cox Elastic Net.
+- Permutation importance.
+- Selección clínica.
+- Stability selection.
+- Ablation.
+
+## Fuga de información
+
+Ejemplos:
+
+- Dosis acumulada final.
+- Resultado posterior al evento.
+- Duración total.
+- Estado adjudicado retrospectivamente.
+- Fecha de alta.
+- Variables de seguimiento completo.
+
+## Imputación
+
+El imputador debe ajustarse solo con train.
+
+```python
+pipeline.fit(
+    X_train,
+    y_train
+)
+```
+
+Nunca:
+
+```text
+Imputar con todo el dataset
+→ después dividir
+```
+
+## Variables categóricas
+
+```python
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
+```
+
+```python
+numeric_features = [
+    "age",
+    "baseline_lvef",
+    "troponin"
+]
+
+categorical_features = [
+    "sex",
+    "diagnosis",
+    "center"
+]
+```
+
+```python
+preprocessor = ColumnTransformer(
+    transformers=[
+        (
+            "numeric",
+            Pipeline(
+                steps=[
+                    (
+                        "imputer",
+                        SimpleImputer(
+                            strategy="median",
+                            add_indicator=True
+                        )
+                    ),
+                    (
+                        "scaler",
+                        StandardScaler()
+                    )
+                ]
+            ),
+            numeric_features
+        ),
+        (
+            "categorical",
+            Pipeline(
+                steps=[
+                    (
+                        "imputer",
+                        SimpleImputer(
+                            strategy="most_frequent"
+                        )
+                    ),
+                    (
+                        "encoder",
+                        OneHotEncoder(
+                            handle_unknown="ignore"
+                        )
+                    )
+                ]
+            ),
+            categorical_features
+        )
+    ]
+)
+```
+
+## Pipeline completo
+
+```python
+rsf_pipeline = Pipeline(
+    steps=[
+        (
+            "preprocessor",
+            preprocessor
+        ),
+        (
+            "model",
+            RandomSurvivalForest(
+                n_estimators=500,
+                min_samples_leaf=5,
+                max_features="sqrt",
+                n_jobs=-1,
+                random_state=42
+            )
+        )
+    ]
+)
+```
+
+## Predicciones a tiempo fijo
+
+```python
+survival_functions = (
+    rsf_pipeline
+    .predict_survival_function(
+        X_test
+    )
+)
+```
+
+```python
+risk_at_365 = np.asarray(
+    [
+        1
+        -
+        survival_function(
+            365
+        )
+        for survival_function
+        in survival_functions
+    ]
+)
+```
+
+## Clasificar riesgo
+
+```python
+risk_group = pd.cut(
+    risk_at_365,
+    bins=[
+        0,
+        0.10,
+        0.25,
+        1.00
+    ],
+    labels=[
+        "Bajo",
+        "Intermedio",
+        "Alto"
+    ]
+)
+```
+
+Los puntos de corte deben validarse y justificarse.
+
+## Calibración temporal
+
+Puede agruparse a pacientes por riesgo predicho y comparar con Kaplan-Meier observada.
+
+Ejemplo:
+
+```text
+Riesgo predicho a 1 año
+vs
+incidencia observada a 1 año
+```
+
+## Recalibración
+
+Puede ser necesaria en:
+
+- Otro centro.
+- Otro periodo.
+- Nueva población.
+- Cambio de protocolo.
+
+## Predicción en competing risks
+
+Los modelos estándar de supervivencia con un único evento no modelan correctamente competing risks.
+
+Se necesitan modelos específicos:
+
+- Cause-specific ML.
+- Random survival forest por causa.
+- Modelos de CIF.
+- Multi-state models.
+
+## Deep survival
+
+Ejemplos:
+
+- DeepSurv.
+- DeepHit.
+- Cox-Time.
+- Logistic Hazard.
+- Piecewise Constant Hazard.
+
+## Cuándo usar deep learning
+
+Puede ser útil con:
+
+- Imágenes.
+- Señales.
+- Texto.
+- Secuencias largas.
+- Datos multimodales.
+- Muestras grandes.
+
+No debe asumirse que superará modelos tabulares clásicos.
+
+## Comparación final
+
+| Modelo | Linealidad | PH | No linealidad | Curvas |
+|---|---|---|---|---|
+| Cox | Sí | Sí | Limitada | Sí |
+| Coxnet | Sí | Sí | Limitada | Sí |
+| RSF | No | No | Alta | Sí |
+| Boosting Cox | No | Habitualmente sí | Alta | Sí |
+| Survival SVM | Variable | No necesariamente | Variable | No siempre |
+
+## Reproducibilidad
+
+Guardar:
+
+- Split.
+- Features.
+- Pipeline.
+- Hiperparámetros.
+- Versión de datos.
+- Horizonte.
+- Métricas.
+- Semilla.
+- Modelo final.
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Un modelo complejo solo aporta valor si mejora la predicción, la calibración o la utilidad clínica frente a modelos simples.
+:::
+
+Debe revisarse:
+
+- Número de eventos.
+- Validación externa.
+- Calibración.
+- Interpretabilidad.
+- Drift.
+- Variables disponibles.
+- Facilidad de implantación.
+
+## Errores frecuentes
+
+- Ignorar censura.
+- Usar regresión estándar sobre el tiempo.
+- Evaluar solo C-index.
+- Hacer split aleatorio sin pensar.
+- Ajustar preprocesamiento con todo el dataset.
+- Usar variables futuras.
+- No comparar con Cox.
+- No calibrar.
+- No validar externamente.
+- Interpretar importancia como causalidad.
+- Aplicar deep learning con pocos eventos.
+- No documentar horizonte.
+
+## Flujo recomendado
+
+1. Definir outcome y horizonte.
+2. Preparar target censurado.
+3. Crear split correcto.
+4. Construir baseline de Cox.
+5. Probar Coxnet.
+6. Probar RSF.
+7. Probar boosting.
+8. Aplicar tuning.
+9. Evaluar discriminación.
+10. Evaluar Brier score.
+11. Evaluar calibración.
+12. Validar externamente.
+
+## Checklist para proyectos
+
+- [ ] He creado el target con evento y tiempo.
+- [ ] He definido un split adecuado.
+- [ ] He creado un baseline de Cox.
+- [ ] He probado Cox penalizado.
+- [ ] He probado RSF.
+- [ ] He probado boosting.
+- [ ] He realizado tuning sin usar test.
+- [ ] He calculado C-index.
+- [ ] He calculado IPCW C-index.
+- [ ] He calculado AUC temporal.
+- [ ] He calculado Brier score.
+- [ ] He evaluado calibración.
+- [ ] He revisado importancia.
+- [ ] He evitado leakage.
+- [ ] He planificado validación externa.
+
+## Recursos
+
+### Conceptos
+
+- Penalized Cox.
+- Random Survival Forest.
+- Survival Gradient Boosting.
+- Survival SVM.
+- Deep survival.
+- Time-dependent AUC.
+- IPCW.
+- Integrated Brier Score.
+
+### Librerías de Python
+
+- `sksurv.util.Surv`.
+- `CoxnetSurvivalAnalysis`.
+- `RandomSurvivalForest`.
+- `GradientBoostingSurvivalAnalysis`.
+- `FastSurvivalSVM`.
+- `concordance_index_ipcw`.
+- `cumulative_dynamic_auc`.
+- `integrated_brier_score`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus modelos, features, métricas, tuning, calibración y decisiones clínicas.

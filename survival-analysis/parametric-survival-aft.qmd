@@ -1,0 +1,719 @@
+---
+title: "Modelos paramétricos y Accelerated Failure Time"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Los modelos paramétricos de supervivencia asumen una distribución para el tiempo hasta el evento.
+
+Los más habituales son:
+
+- Exponencial.
+- Weibull.
+- Log-normal.
+- Log-logístico.
+- Gamma generalizada.
+
+Los modelos Accelerated Failure Time, o AFT, describen cómo las covariables aceleran o retrasan el tiempo hasta el evento. Su medida principal suele ser el **time ratio**.
+:::
+
+## ¿Por qué usar modelos paramétricos?
+
+A diferencia de Cox, estos modelos especifican una forma para la distribución del tiempo.
+
+Esto permite:
+
+- Obtener curvas suaves.
+- Estimar medianas y otros cuantiles.
+- Predecir supervivencia individual.
+- Extrapolar más allá del seguimiento observado.
+- Interpretar efectos directamente sobre el tiempo.
+
+::: {.callout-warning}
+## Importante
+
+La extrapolación depende fuertemente de que la distribución elegida sea razonable.
+:::
+
+## Modelo exponencial
+
+Asume hazard constante:
+
+$$
+h(t)=\lambda
+$$
+
+y:
+
+$$
+S(t)=\exp(-\lambda t)
+$$
+
+```python
+from lifelines import ExponentialFitter
+
+exponential_model = ExponentialFitter()
+
+exponential_model.fit(
+    durations=survival_df["follow_up_days"],
+    event_observed=survival_df["event"],
+    label="Exponencial"
+)
+```
+
+## Modelo Weibull
+
+La supervivencia Weibull es:
+
+$$
+S(t)
+=
+\exp
+\left[
+-
+\left(
+\frac{t}{\lambda}
+\right)^\rho
+\right]
+$$
+
+Interpretación de \(\rho\):
+
+```text
+rho = 1
+→ hazard constante
+
+rho > 1
+→ hazard creciente
+
+rho < 1
+→ hazard decreciente
+```
+
+```python
+from lifelines import WeibullFitter
+
+weibull_model = WeibullFitter()
+
+weibull_model.fit(
+    durations=survival_df["follow_up_days"],
+    event_observed=survival_df["event"],
+    label="Weibull"
+)
+```
+
+```python
+print(
+    weibull_model.lambda_
+)
+
+print(
+    weibull_model.rho_
+)
+```
+
+## Modelo log-normal
+
+Asume:
+
+$$
+\log(T)
+\sim
+N(\mu,\sigma^2)
+$$
+
+Puede representar un hazard que aumenta y después disminuye.
+
+```python
+from lifelines import LogNormalFitter
+
+lognormal_model = LogNormalFitter()
+
+lognormal_model.fit(
+    durations=survival_df["follow_up_days"],
+    event_observed=survival_df["event"],
+    label="Log-normal"
+)
+```
+
+## Modelo log-logístico
+
+También permite hazards no monótonos y colas relativamente largas.
+
+```python
+from lifelines import LogLogisticFitter
+
+loglogistic_model = LogLogisticFitter()
+
+loglogistic_model.fit(
+    durations=survival_df["follow_up_days"],
+    event_observed=survival_df["event"],
+    label="Log-logístico"
+)
+```
+
+## Gamma generalizada
+
+La gamma generalizada incluye varias distribuciones como casos particulares.
+
+```python
+from lifelines import GeneralizedGammaFitter
+
+generalized_gamma = GeneralizedGammaFitter()
+
+generalized_gamma.fit(
+    durations=survival_df["follow_up_days"],
+    event_observed=survival_df["event"],
+    label="Gamma generalizada"
+)
+```
+
+## Comparar modelos
+
+```python
+import pandas as pd
+
+models = {
+    "exponential": exponential_model,
+    "weibull": weibull_model,
+    "lognormal": lognormal_model,
+    "loglogistic": loglogistic_model,
+    "generalized_gamma": generalized_gamma
+}
+
+comparison_table = pd.DataFrame(
+    [
+        {
+            "model": name,
+            "aic": model.AIC_,
+            "log_likelihood": model.log_likelihood_
+        }
+        for name, model in models.items()
+    ]
+).sort_values(
+    "aic"
+)
+```
+
+## Comparar con Kaplan-Meier
+
+```python
+from lifelines import KaplanMeierFitter
+import matplotlib.pyplot as plt
+
+kmf = KaplanMeierFitter()
+
+kmf.fit(
+    survival_df["follow_up_days"],
+    survival_df["event"],
+    label="Kaplan-Meier"
+)
+
+ax = kmf.plot_survival_function(
+    figsize=(9, 6)
+)
+
+weibull_model.plot_survival_function(
+    ax=ax
+)
+
+lognormal_model.plot_survival_function(
+    ax=ax
+)
+
+loglogistic_model.plot_survival_function(
+    ax=ax
+)
+
+plt.show()
+```
+
+Debe revisarse:
+
+- Ajuste temprano.
+- Ajuste intermedio.
+- Ajuste en la cola.
+- Forma del hazard.
+- Diferencias sistemáticas.
+
+## Accelerated Failure Time
+
+Los modelos AFT modelan:
+
+$$
+\log(T)
+=
+\beta_0
++
+\beta^\top X
++
+\varepsilon
+$$
+
+Interpretación:
+
+```text
+Una covariable puede acelerar
+o retrasar el reloj del evento
+```
+
+## Time ratio
+
+$$
+TR
+=
+e^\beta
+$$
+
+```text
+TR > 1
+→ tiempo hasta evento más largo
+
+TR < 1
+→ tiempo hasta evento más corto
+
+TR = 1
+→ sin cambio
+```
+
+::: {.callout-note}
+## Ejemplo
+
+Un `TR = 1.30` indica un tiempo hasta evento aproximadamente un 30 % más largo, manteniendo constantes las demás variables.
+:::
+
+## Weibull AFT
+
+```python
+from lifelines import WeibullAFTFitter
+
+aft_df = survival_df[
+    [
+        "follow_up_days",
+        "event",
+        "age",
+        "baseline_lvef",
+        "treatment"
+    ]
+].copy()
+
+weibull_aft = WeibullAFTFitter()
+
+weibull_aft.fit(
+    aft_df,
+    duration_col="follow_up_days",
+    event_col="event"
+)
+```
+
+## Resumen
+
+```python
+weibull_aft.print_summary()
+```
+
+## Obtener time ratios
+
+```python
+import numpy as np
+
+results = (
+    weibull_aft.summary
+    .reset_index()
+)
+
+lambda_results = results.loc[
+    results["param"]
+    ==
+    "lambda_"
+].copy()
+
+lambda_results[
+    "time_ratio"
+] = np.exp(
+    lambda_results["coef"]
+)
+```
+
+## Log-normal AFT
+
+```python
+from lifelines import LogNormalAFTFitter
+
+lognormal_aft = LogNormalAFTFitter()
+
+lognormal_aft.fit(
+    aft_df,
+    duration_col="follow_up_days",
+    event_col="event"
+)
+```
+
+## Log-logístico AFT
+
+```python
+from lifelines import LogLogisticAFTFitter
+
+loglogistic_aft = LogLogisticAFTFitter()
+
+loglogistic_aft.fit(
+    aft_df,
+    duration_col="follow_up_days",
+    event_col="event"
+)
+```
+
+## Comparar modelos AFT
+
+```python
+aft_models = {
+    "weibull_aft": weibull_aft,
+    "lognormal_aft": lognormal_aft,
+    "loglogistic_aft": loglogistic_aft
+}
+
+aft_comparison = pd.DataFrame(
+    [
+        {
+            "model": name,
+            "aic": model.AIC_,
+            "log_likelihood": model.log_likelihood_
+        }
+        for name, model in aft_models.items()
+    ]
+).sort_values(
+    "aic"
+)
+```
+
+## Predicción individual
+
+```python
+patient_profiles = aft_df.drop(
+    columns=[
+        "follow_up_days",
+        "event"
+    ]
+).iloc[
+    [
+        0,
+        1,
+        2
+    ]
+]
+```
+
+## Mediana predicha
+
+```python
+predicted_median = (
+    weibull_aft
+    .predict_median(
+        patient_profiles
+    )
+)
+```
+
+## Esperanza predicha
+
+```python
+predicted_expectation = (
+    weibull_aft
+    .predict_expectation(
+        patient_profiles
+    )
+)
+```
+
+## Curvas individuales
+
+```python
+predicted_survival = (
+    weibull_aft
+    .predict_survival_function(
+        patient_profiles
+    )
+)
+
+predicted_survival.plot(
+    figsize=(9, 6)
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Supervivencia predicha"
+)
+
+plt.show()
+```
+
+## Supervivencia a un tiempo concreto
+
+```python
+survival_at_365 = (
+    weibull_aft
+    .predict_survival_function(
+        patient_profiles,
+        times=[
+            365
+        ]
+    )
+)
+```
+
+## Cox frente a AFT
+
+| Aspecto | Cox | AFT |
+|---|---|---|
+| Medida principal | Hazard ratio | Time ratio |
+| Hazard basal | No especificado | Paramétrico |
+| Supuesto principal | Riesgos proporcionales | Distribución del tiempo |
+| Extrapolación | Limitada | Posible |
+| Interpretación | Riesgo instantáneo | Tiempo hasta evento |
+
+## Cuándo preferir Cox
+
+- Interesa el hazard ratio.
+- No se desea fijar una distribución.
+- La proporcionalidad es razonable.
+- No se necesita extrapolar.
+
+## Cuándo preferir AFT
+
+- Interesa interpretar el tiempo.
+- El supuesto PH falla.
+- Se necesitan medianas o cuantiles.
+- Se requiere extrapolación.
+- Existe buen ajuste paramétrico.
+
+## Piecewise exponential
+
+Permite hazards constantes por intervalos.
+
+```python
+from lifelines import PiecewiseExponentialFitter
+
+piecewise_model = PiecewiseExponentialFitter(
+    breakpoints=[
+        30,
+        180
+    ]
+)
+
+piecewise_model.fit(
+    survival_df["follow_up_days"],
+    survival_df["event"]
+)
+```
+
+Ejemplo:
+
+```text
+0 a 30 días
+→ hazard 1
+
+30 a 180 días
+→ hazard 2
+
+Más de 180 días
+→ hazard 3
+```
+
+Los puntos de corte deben justificarse clínicamente.
+
+## Penalización
+
+```python
+weibull_aft_penalized = WeibullAFTFitter(
+    penalizer=0.1,
+    l1_ratio=0.5
+)
+```
+
+Puede ayudar cuando:
+
+- Hay muchas covariables.
+- Existe colinealidad.
+- Hay pocos eventos.
+- Se necesita mayor estabilidad.
+
+## Modelar parámetro ancillary
+
+```python
+weibull_aft_flexible = WeibullAFTFitter(
+    model_ancillary=True
+)
+```
+
+Esto añade flexibilidad, pero complica la interpretación y requiere más datos.
+
+## No linealidad
+
+```python
+weibull_aft.fit(
+    aft_df,
+    duration_col="follow_up_days",
+    event_col="event",
+    formula=(
+        "bs(age, df=4)"
+        " + baseline_lvef"
+        " + treatment"
+    )
+)
+```
+
+## Evaluación
+
+Debe incluir:
+
+- AIC.
+- Ajuste frente a Kaplan-Meier.
+- Forma del hazard.
+- Discriminación.
+- Calibración.
+- Validación temporal.
+- Validación externa.
+- Estabilidad de extrapolación.
+
+## AIC no basta
+
+Un modelo con AIC bajo puede:
+
+- Calibrar mal.
+- Extrapolar mal.
+- Ser inestable.
+- Fallar en otra cohorte.
+
+## Extrapolación
+
+Fuera del rango observado, la distribución asumida domina la predicción.
+
+Debe revisarse:
+
+- Plausibilidad clínica.
+- Historia natural.
+- Cambios de tratamiento.
+- Mortalidad de fondo.
+- Número de pacientes tardíos.
+- Eventos competidores.
+
+## Reporting
+
+Debe incluir:
+
+- Distribución elegida.
+- Justificación.
+- Time ratios.
+- Intervalos de confianza.
+- AIC.
+- Ajuste gráfico.
+- Calibración.
+- Validación.
+- Horizonte de extrapolación.
+
+## Ejemplo de redacción
+
+```text
+Se ajustó un modelo Weibull AFT.
+
+El tratamiento presentó un time ratio de 1.28
+(IC 95 %: 1.08 a 1.51),
+compatible con un tiempo hasta el evento
+aproximadamente un 28 % más largo.
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Los modelos AFT suelen ser intuitivos cuando interesa cuánto se adelanta o retrasa un evento.
+:::
+
+## Errores frecuentes
+
+- Elegir distribución solo por AIC.
+- Confundir time ratio con hazard ratio.
+- No revisar la parametrización.
+- Extrapolar demasiado.
+- No comparar con Kaplan-Meier.
+- Ignorar la forma del hazard.
+- Sobreajustar modelos flexibles.
+- No evaluar calibración.
+- No validar externamente.
+- Usar covariables futuras.
+
+## Flujo recomendado
+
+1. Explorar Kaplan-Meier.
+2. Examinar forma del hazard.
+3. Ajustar modelos simples.
+4. Comparar AIC.
+5. Revisar ajuste gráfico.
+6. Ajustar modelos AFT.
+7. Interpretar time ratios.
+8. Evaluar predicciones.
+9. Evaluar calibración.
+10. Validar temporalmente.
+11. Comparar extrapolaciones.
+12. Documentar supuestos.
+
+## Checklist para proyectos
+
+- [ ] He revisado Kaplan-Meier.
+- [ ] He considerado la forma del hazard.
+- [ ] He probado exponencial.
+- [ ] He probado Weibull.
+- [ ] He probado log-normal.
+- [ ] He probado log-logístico.
+- [ ] He comparado AIC.
+- [ ] He revisado ajuste visual.
+- [ ] He ajustado un modelo AFT.
+- [ ] He interpretado time ratios.
+- [ ] He evitado confundirlos con HR.
+- [ ] He evaluado calibración.
+- [ ] He validado temporalmente.
+- [ ] He justificado extrapolación.
+- [ ] He documentado la distribución.
+
+## Recursos
+
+### Conceptos
+
+- Parametric survival models.
+- Weibull distribution.
+- Log-normal distribution.
+- Log-logistic distribution.
+- Accelerated Failure Time.
+- Time ratio.
+- Piecewise exponential models.
+- Survival extrapolation.
+
+### Librerías de Python
+
+- `ExponentialFitter`.
+- `WeibullFitter`.
+- `LogNormalFitter`.
+- `LogLogisticFitter`.
+- `GeneralizedGammaFitter`.
+- `WeibullAFTFitter`.
+- `LogNormalAFTFitter`.
+- `LogLogisticAFTFitter`.
+- `PiecewiseExponentialFitter`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus distribuciones, time ratios, curvas, validación y decisiones de extrapolación.

@@ -1,0 +1,1019 @@
+---
+title: "Competing risks"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Existe un competing risk cuando otro evento impide que ocurra el evento principal.
+
+Ejemplo:
+
+```text
+Evento principal
+→ cardiotoxicidad
+
+Evento competidor
+→ fallecimiento sin cardiotoxicidad
+```
+
+En este contexto:
+
+- Kaplan-Meier puede sobreestimar la incidencia.
+- Debe utilizarse la función de incidencia acumulada.
+- Aalen-Johansen permite estimarla de forma no paramétrica.
+- Cause-specific Cox y Fine-Gray responden preguntas distintas.
+:::
+
+## ¿Qué es un evento competidor?
+
+Un evento competidor modifica o elimina la posibilidad de observar el evento principal.
+
+Ejemplos:
+
+- Fallecimiento antes de recaída.
+- Fallecimiento antes de cardiotoxicidad.
+- Trasplante antes de recaída espontánea.
+- Alta antes de una complicación intrahospitalaria.
+- Cambio a otro estado terminal.
+
+::: {.callout-note}
+## Idea clave
+
+Un evento competidor no es una simple pérdida de seguimiento.
+:::
+
+## Ejemplo clínico
+
+Supongamos que estudiamos:
+
+```text
+Tiempo hasta cardiotoxicidad moderada o grave
+```
+
+Posibles resultados:
+
+```text
+0
+→ censura
+
+1
+→ cardiotoxicidad
+
+2
+→ fallecimiento sin cardiotoxicidad
+```
+
+## Codificación
+
+```python
+competing_df = df[
+    [
+        "patient_id",
+        "follow_up_days",
+        "event_type"
+    ]
+].copy()
+```
+
+```text
+event_type = 0
+→ censura
+
+event_type = 1
+→ evento principal
+
+event_type = 2
+→ evento competidor
+```
+
+## Diferencia entre censura y competing risk
+
+### Censura
+
+El paciente deja de observarse, pero podría experimentar el evento posteriormente.
+
+### Evento competidor
+
+El evento principal ya no puede ocurrir del mismo modo.
+
+```text
+Pérdida de seguimiento
+→ censura
+
+Fallecimiento
+→ evento competidor
+```
+
+## Por qué Kaplan-Meier no basta
+
+Para estimar la incidencia del evento principal con Kaplan-Meier se suele censurar el evento competidor.
+
+Esto supone implícitamente que quienes presentan el evento competidor podrían continuar bajo riesgo.
+
+Pero eso no es cierto.
+
+## Sobreestimación
+
+```text
+Kaplan-Meier con competidores censurados
+→ riesgo estimado demasiado alto
+```
+
+La incidencia acumulada correcta debe reconocer que parte de la población deja de poder experimentar el evento principal.
+
+## Función de incidencia acumulada
+
+Para la causa \(k\):
+
+$$
+F_k(t)
+=
+P(T\leq t, J=k)
+$$
+
+Representa la probabilidad de experimentar el evento \(k\) antes o en \(t\), en presencia de los demás eventos.
+
+## Relación entre incidencias
+
+Con varios tipos de evento:
+
+$$
+\sum_k F_k(t)
++
+S(t)
+=
+1
+$$
+
+donde \(S(t)\) representa permanecer libre de cualquier evento.
+
+## Cause-specific hazard
+
+Para la causa \(k\):
+
+$$
+h_k(t)
+=
+\lim_{\Delta t\to0}
+\frac{
+P(t\leq T<t+\Delta t,J=k\mid T\geq t)
+}{
+\Delta t
+}
+$$
+
+Describe la tasa instantánea del evento \(k\) entre quienes todavía no han presentado ningún evento.
+
+## Hazard total
+
+$$
+h(t)
+=
+\sum_k h_k(t)
+$$
+
+## CIF y hazards
+
+La incidencia acumulada depende de:
+
+- El hazard de la causa principal.
+- El hazard de todas las causas competidoras.
+- La supervivencia libre de cualquier evento.
+
+Por eso no puede interpretarse observando solo el hazard principal.
+
+## Ejemplo conceptual
+
+Un tratamiento puede:
+
+- No cambiar el hazard de cardiotoxicidad.
+- Reducir mucho la mortalidad.
+
+Como más pacientes sobreviven, más permanecen disponibles para presentar cardiotoxicidad.
+
+La CIF de cardiotoxicidad podría aumentar aunque su cause-specific hazard no cambie.
+
+## Aalen-Johansen
+
+Aalen-Johansen es una extensión de Kaplan-Meier para procesos multiestado y competing risks.
+
+Permite estimar la incidencia acumulada de cada tipo de evento.
+
+## Ajustar con lifelines
+
+```python
+from lifelines import AalenJohansenFitter
+
+ajf = AalenJohansenFitter(
+    alpha=0.05
+)
+```
+
+```python
+ajf.fit(
+    durations=competing_df[
+        "follow_up_days"
+    ],
+    event_observed=competing_df[
+        "event_type"
+    ],
+    event_of_interest=1
+)
+```
+
+## Curva de incidencia acumulada
+
+```python
+import matplotlib.pyplot as plt
+
+ajf.plot(
+    figsize=(
+        9,
+        6
+    )
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Incidencia acumulada"
+)
+
+plt.title(
+    "Incidencia acumulada del evento principal"
+)
+
+plt.show()
+```
+
+## Evento competidor
+
+```python
+ajf_competing = AalenJohansenFitter()
+
+ajf_competing.fit(
+    durations=competing_df[
+        "follow_up_days"
+    ],
+    event_observed=competing_df[
+        "event_type"
+    ],
+    event_of_interest=2
+)
+```
+
+## Superponer ambas causas
+
+```python
+ax = ajf.plot(
+    figsize=(
+        9,
+        6
+    )
+)
+
+ajf_competing.plot(
+    ax=ax
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Incidencia acumulada"
+)
+
+plt.title(
+    "Incidencias acumuladas por causa"
+)
+
+plt.show()
+```
+
+## Estimar con scikit-survival
+
+```python
+from sksurv.nonparametric import (
+    cumulative_incidence_competing_risks
+)
+```
+
+```python
+time, cumulative_incidence = (
+    cumulative_incidence_competing_risks(
+        event=competing_df[
+            "event_type"
+        ].to_numpy(),
+        time_exit=competing_df[
+            "follow_up_days"
+        ].to_numpy()
+    )
+)
+```
+
+## Interpretar salida
+
+Conceptualmente:
+
+```text
+cumulative_incidence[0]
+→ incidencia acumulada total
+
+cumulative_incidence[1]
+→ causa 1
+
+cumulative_incidence[2]
+→ causa 2
+```
+
+## Visualizar
+
+```python
+plt.figure(
+    figsize=(
+        9,
+        6
+    )
+)
+
+plt.step(
+    time,
+    cumulative_incidence[
+        1
+    ],
+    where="post",
+    label="Evento principal"
+)
+
+plt.step(
+    time,
+    cumulative_incidence[
+        2
+    ],
+    where="post",
+    label="Evento competidor"
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Incidencia acumulada"
+)
+
+plt.legend()
+
+plt.show()
+```
+
+## CIF en tiempos concretos
+
+Ejemplo:
+
+```text
+Incidencia de cardiotoxicidad a 1 año
+Incidencia de muerte sin cardiotoxicidad a 1 año
+```
+
+Debe elegirse un horizonte clínicamente relevante.
+
+## Comparar grupos
+
+Puede compararse la CIF por:
+
+- Tratamiento.
+- Diagnóstico.
+- Centro.
+- Sexo.
+- Grupo de riesgo.
+
+## Ajustar por grupo
+
+```python
+groups = (
+    competing_df[
+        "group"
+    ]
+    .dropna()
+    .unique()
+)
+```
+
+```python
+plt.figure(
+    figsize=(
+        9,
+        6
+    )
+)
+
+for group in groups:
+
+    subset = competing_df.loc[
+        competing_df[
+            "group"
+        ]
+        ==
+        group
+    ]
+
+    fitter = AalenJohansenFitter()
+
+    fitter.fit(
+        durations=subset[
+            "follow_up_days"
+        ],
+        event_observed=subset[
+            "event_type"
+        ],
+        event_of_interest=1,
+        label=str(
+            group
+        )
+    )
+
+    fitter.plot()
+
+plt.show()
+```
+
+## Gray test
+
+Gray test compara funciones de incidencia acumulada entre grupos.
+
+Pregunta:
+
+```text
+¿Difiere la CIF del evento principal entre grupos?
+```
+
+No es equivalente al log-rank cause-specific.
+
+## Disponibilidad en Python
+
+El soporte para Gray test y Fine-Gray ha sido tradicionalmente más completo en R.
+
+En Python puede ser necesario:
+
+- Utilizar una librería específica.
+- Conectar con R.
+- Implementar un workflow validado.
+- Comprobar cuidadosamente la versión.
+
+## Cause-specific Cox
+
+Para estudiar el hazard específico de una causa:
+
+- Evento principal se codifica como evento.
+- Otras causas se censuran en su tiempo.
+
+## Preparar outcome cause-specific
+
+```python
+cause_specific_df = competing_df.copy()
+
+cause_specific_df[
+    "event_cause_1"
+] = (
+    cause_specific_df[
+        "event_type"
+    ]
+    ==
+    1
+).astype(int)
+```
+
+## Ajustar Cox
+
+```python
+from lifelines import CoxPHFitter
+
+cause_specific_model = CoxPHFitter()
+
+cause_specific_model.fit(
+    cause_specific_df[
+        [
+            "follow_up_days",
+            "event_cause_1",
+            "age",
+            "treatment",
+            "baseline_lvef"
+        ]
+    ],
+    duration_col="follow_up_days",
+    event_col="event_cause_1"
+)
+```
+
+## Interpretación
+
+El cause-specific hazard ratio compara la tasa instantánea del evento principal entre quienes continúan libres de cualquier evento.
+
+```text
+CSHR > 1
+→ mayor hazard específico
+
+CSHR < 1
+→ menor hazard específico
+```
+
+## Qué pregunta responde
+
+```text
+Entre pacientes todavía libres de eventos,
+¿cómo cambia la tasa instantánea
+del evento principal?
+```
+
+## Modelo para cada causa
+
+Puede ajustarse un modelo independiente para cada causa.
+
+```python
+cause_specific_df[
+    "event_cause_2"
+] = (
+    cause_specific_df[
+        "event_type"
+    ]
+    ==
+    2
+).astype(int)
+```
+
+Esto permite estudiar cómo las covariables afectan:
+
+- Evento principal.
+- Evento competidor.
+
+## Predicción de CIF desde modelos cause-specific
+
+Para predecir incidencia absoluta debe combinarse:
+
+- Hazard específico de cada causa.
+- Supervivencia libre de todos los eventos.
+
+No basta con un único modelo de Cox.
+
+## Fine-Gray
+
+Fine-Gray modela el subdistribution hazard.
+
+Su objetivo está directamente relacionado con la CIF.
+
+## Subdistribution hazard
+
+Mantiene conceptualmente en el risk set a quienes ya presentaron un evento competidor mediante una construcción ponderada.
+
+Esto permite relacionar covariables con la incidencia acumulada.
+
+## Subdistribution hazard ratio
+
+```text
+SHR > 1
+→ mayor incidencia acumulada del evento
+
+SHR < 1
+→ menor incidencia acumulada
+```
+
+Pero no debe interpretarse como un hazard clínico instantáneo entre quienes siguen libres de eventos.
+
+## Cause-specific Cox frente a Fine-Gray
+
+| Aspecto | Cause-specific Cox | Fine-Gray |
+|---|---|---|
+| Objetivo | Hazard específico | CIF |
+| Risk set | Libres de cualquier evento | Risk set de subdistribución |
+| Medida | CSHR | SHR |
+| Uso típico | Etiología y dinámica | Predicción de incidencia |
+| Interpretación clínica | Más directa | Más ligada a riesgo absoluto |
+
+## Elección según pregunta
+
+### Pregunta etiológica
+
+```text
+¿Qué variables se asocian
+con la ocurrencia instantánea del evento?
+```
+
+Puede favorecer cause-specific Cox.
+
+### Pregunta pronóstica
+
+```text
+¿Cuál es la probabilidad acumulada
+del evento a 1 año?
+```
+
+Puede favorecer Fine-Gray o modelos directos de CIF.
+
+## No elegir solo uno por costumbre
+
+En muchos estudios conviene reportar:
+
+- CIF no ajustada.
+- Cause-specific Cox.
+- Fine-Gray.
+- Riesgos absolutos.
+
+## Interpretaciones diferentes
+
+Una covariable puede mostrar:
+
+```text
+CSHR cercano a 1
+SHR distinto de 1
+```
+
+porque modifica el evento competidor.
+
+Esto no es necesariamente una contradicción.
+
+## Ejemplo clínico
+
+```text
+Edad avanzada
+→ aumenta mortalidad sin cardiotoxicidad
+```
+
+Puede reducir la CIF observada de cardiotoxicidad, porque menos pacientes sobreviven el tiempo suficiente para desarrollarla.
+
+## Censura administrativa
+
+Sigue tratándose como censura.
+
+Ejemplo:
+
+- Fin del estudio.
+- Pérdida de seguimiento.
+- Retirada.
+
+## Eventos múltiples
+
+Si un paciente puede pasar por varios estados, el enfoque multiestado puede ser más apropiado.
+
+Ejemplo:
+
+```text
+S0 → S1 → S2 → S3
+```
+
+Reducirlo a competing risks solo estudia la primera transición desde el estado inicial.
+
+## Competing risks como modelo multiestado simple
+
+```text
+Estado 0
+→ sin evento
+
+Estado 1
+→ evento principal
+
+Estado 2
+→ evento competidor
+```
+
+Los estados 1 y 2 suelen considerarse absorbentes.
+
+## Supuestos
+
+Debe revisarse:
+
+- Censura independiente.
+- Definición exhaustiva de causas.
+- Clasificación correcta.
+- Tiempo cero común.
+- Disponibilidad de covariables.
+- Riesgos proporcionales para modelos de regresión.
+
+## Eventos de causa desconocida
+
+Opciones:
+
+- Crear categoría desconocida.
+- Adjudicar clínicamente.
+- Análisis de sensibilidad.
+- Excluir justificadamente.
+- Métodos específicos.
+
+No conviene reasignarlos arbitrariamente.
+
+## Endpoint compuesto
+
+Puede combinarse:
+
+```text
+Cardiotoxicidad o muerte
+```
+
+pero responde a una pregunta diferente.
+
+Ventaja:
+
+- Evita competing risk entre componentes.
+
+Limitación:
+
+- Pierde interpretación específica.
+- El componente más frecuente domina.
+
+## Riesgo absoluto
+
+La CIF proporciona directamente una probabilidad acumulada.
+
+Ejemplo:
+
+```text
+CIF(365) = 0.12
+```
+
+significa una probabilidad estimada del 12 % de experimentar el evento principal antes de un año, considerando los eventos competidores.
+
+## Diferencia absoluta de riesgo
+
+```text
+Grupo A
+→ CIF a 1 año = 12 %
+
+Grupo B
+→ CIF a 1 año = 7 %
+```
+
+Diferencia:
+
+```text
+5 puntos porcentuales
+```
+
+Suele ser más interpretable que un SHR aislado.
+
+## Número necesario para tratar
+
+En contextos causales y bajo supuestos adecuados puede derivarse de diferencias absolutas.
+
+Pero un análisis observacional no permite interpretarlo causalmente de forma automática.
+
+## Evaluación predictiva
+
+Los modelos de competing risks deben evaluarse por causa y horizonte.
+
+Métricas:
+
+- Brier score por causa.
+- AUC dependiente del tiempo.
+- Calibración de CIF.
+- Error de predicción.
+- Discriminación cause-specific.
+
+## Calibración
+
+Ejemplo:
+
+```text
+CIF predicha a 1 año = 20 %
+```
+
+Entre pacientes con predicciones similares, aproximadamente un 20 % debería experimentar esa causa antes de un año.
+
+## Calibración por causa
+
+Debe evaluarse por separado para:
+
+- Evento principal.
+- Evento competidor.
+- Horizonte.
+
+## Validación externa
+
+Es especialmente importante porque las tasas de eventos competidores pueden cambiar entre centros.
+
+Ejemplo:
+
+```text
+Hospital A
+→ menor mortalidad
+
+Hospital B
+→ mayor mortalidad
+```
+
+La CIF del evento principal puede cambiar aunque su hazard específico sea similar.
+
+## Drift
+
+Debe monitorizarse:
+
+- Incidencia por causa.
+- Distribución de follow-up.
+- Censura.
+- Cambios terapéuticos.
+- Mortalidad.
+- Calibración.
+
+## Preparación de datos
+
+```python
+competing_df[
+    [
+        "follow_up_days",
+        "event_type"
+    ]
+].isna().sum()
+```
+
+## Validar códigos
+
+```python
+valid_codes = {
+    0,
+    1,
+    2
+}
+
+invalid_rows = competing_df.loc[
+    ~competing_df[
+        "event_type"
+    ]
+    .isin(
+        valid_codes
+    )
+]
+```
+
+## Resumen de causas
+
+```python
+event_summary = (
+    competing_df[
+        "event_type"
+    ]
+    .value_counts()
+    .sort_index()
+)
+```
+
+## Seguimiento por causa
+
+```python
+follow_up_summary = (
+    competing_df
+    .groupby(
+        "event_type"
+    )[
+        "follow_up_days"
+    ]
+    .describe()
+)
+```
+
+## Tabla descriptiva
+
+```python
+event_labels = {
+    0: "Censura",
+    1: "Cardiotoxicidad",
+    2: "Muerte sin cardiotoxicidad"
+}
+
+competing_df[
+    "event_label"
+] = (
+    competing_df[
+        "event_type"
+    ]
+    .map(
+        event_labels
+    )
+)
+```
+
+## Reportar resultados
+
+Debe incluir:
+
+- Número de pacientes.
+- Número de eventos por causa.
+- Seguimiento.
+- CIF en tiempos relevantes.
+- Intervalos de confianza.
+- Comparaciones por grupo.
+- Modelos ajustados.
+- Interpretación de CSHR y SHR.
+
+## Ejemplo de redacción
+
+```text
+La incidencia acumulada de cardiotoxicidad
+a 2 años fue del 14 %,
+considerando el fallecimiento sin cardiotoxicidad
+como evento competidor.
+
+En el modelo cause-specific Cox,
+la exposición acumulada se asoció
+con un hazard específico mayor.
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+Los eventos competidores deben definirse según la pregunta clínica, no únicamente según disponibilidad de datos.
+:::
+
+Debe consensuarse:
+
+- Evento principal.
+- Eventos competidores.
+- Causas desconocidas.
+- Tiempo cero.
+- Primera ocurrencia.
+- Horizonte.
+- Interpretación deseada.
+
+## Errores frecuentes
+
+- Censurar competidores y usar `1 - Kaplan-Meier`.
+- Confundir CSHR y SHR.
+- Interpretar SHR como hazard clínico.
+- No modelar todas las causas.
+- Ignorar causas desconocidas.
+- Reportar solo ratios.
+- No presentar riesgos absolutos.
+- Utilizar endpoint compuesto sin justificar.
+- No evaluar calibración por causa.
+- Ignorar cambios entre centros.
+- Interpretar asociación como causalidad.
+- Confundir competing risks con eventos recurrentes.
+
+## Flujo recomendado
+
+1. Definir evento principal.
+2. Definir eventos competidores.
+3. Codificar causas.
+4. Validar tiempos y códigos.
+5. Estimar CIF con Aalen-Johansen.
+6. Comparar grupos.
+7. Ajustar modelos cause-specific.
+8. Considerar Fine-Gray.
+9. Estimar riesgos absolutos.
+10. Evaluar calibración.
+11. Validar externamente.
+12. Documentar interpretaciones.
+
+## Checklist para proyectos
+
+- [ ] He definido el evento principal.
+- [ ] He definido los competidores.
+- [ ] He diferenciado censura y competencia.
+- [ ] He validado códigos.
+- [ ] He estimado CIF.
+- [ ] He evitado `1 - Kaplan-Meier`.
+- [ ] He comparado grupos.
+- [ ] He ajustado cause-specific Cox.
+- [ ] He considerado Fine-Gray.
+- [ ] He interpretado CSHR correctamente.
+- [ ] He interpretado SHR correctamente.
+- [ ] He reportado riesgos absolutos.
+- [ ] He evaluado por horizonte.
+- [ ] He evaluado calibración.
+- [ ] He planificado validación externa.
+
+## Recursos
+
+### Conceptos
+
+- Competing risks.
+- Cumulative Incidence Function.
+- Aalen-Johansen estimator.
+- Cause-specific hazard.
+- Subdistribution hazard.
+- Fine-Gray model.
+- Gray test.
+- Absolute risk.
+
+### Librerías de Python
+
+- `lifelines.AalenJohansenFitter`.
+- `sksurv.nonparametric.cumulative_incidence_competing_risks`.
+- `lifelines.CoxPHFitter`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus causas, incidencias acumuladas, modelos, horizontes y decisiones clínicas.

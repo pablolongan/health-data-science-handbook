@@ -1,0 +1,1302 @@
+---
+title: "Evaluación y calibración en Survival Analysis"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Un modelo de supervivencia debe evaluarse en varias dimensiones:
+
+- Discriminación.
+- Calibración.
+- Error de predicción.
+- Rendimiento por horizonte.
+- Estabilidad temporal.
+- Validación externa.
+- Utilidad clínica.
+
+No basta con reportar un único C-index.
+:::
+
+## ¿Qué debe hacer bien un modelo?
+
+Un modelo útil debe:
+
+1. Ordenar correctamente a los pacientes según riesgo.
+2. Estimar probabilidades cercanas a las observadas.
+3. Mantener rendimiento en distintos horizontes.
+4. Generalizar a nuevos periodos y centros.
+5. Proporcionar información clínicamente accionable.
+
+::: {.callout-note}
+## Idea clave
+
+Discriminación y calibración son propiedades diferentes.
+:::
+
+## Discriminación
+
+Evalúa si el modelo asigna mayor riesgo a quienes presentan antes el evento.
+
+## Calibración
+
+Evalúa si las probabilidades predichas coinciden con las frecuencias observadas.
+
+## Ejemplo
+
+Dos modelos pueden ordenar igual a los pacientes:
+
+```text
+Paciente A
+→ mayor riesgo
+
+Paciente B
+→ riesgo intermedio
+
+Paciente C
+→ menor riesgo
+```
+
+pero producir probabilidades distintas:
+
+```text
+Modelo 1
+→ 70 %, 40 %, 10 %
+
+Modelo 2
+→ 30 %, 20 %, 10 %
+```
+
+Ambos pueden discriminar igual, pero no estar igualmente calibrados.
+
+## Preparar train y test
+
+```python
+from sksurv.util import Surv
+
+y_train = Surv.from_dataframe(
+    event="event",
+    time="follow_up_days",
+    data=train_df
+)
+
+y_test = Surv.from_dataframe(
+    event="event",
+    time="follow_up_days",
+    data=test_df
+)
+```
+
+## Score de riesgo
+
+```python
+risk_score = model.predict(
+    X_test
+)
+```
+
+Un score mayor debe representar mayor riesgo.
+
+## C-index de Harrell
+
+El C-index evalúa pares comparables.
+
+Conceptualmente:
+
+```text
+Paciente con evento antes
+→ debería tener mayor riesgo predicho
+```
+
+## Calcularlo
+
+```python
+from sksurv.metrics import (
+    concordance_index_censored
+)
+
+harrell_c = concordance_index_censored(
+    y_test["event"],
+    y_test["follow_up_days"],
+    risk_score
+)[0]
+```
+
+## Interpretación
+
+```text
+0.5
+→ discriminación similar al azar
+
+1.0
+→ orden perfecto
+
+< 0.5
+→ orden invertido o modelo deficiente
+```
+
+## Limitaciones de Harrell
+
+- Puede ser optimista con mucha censura.
+- No depende de un horizonte concreto.
+- No mide calibración.
+- Puede ocultar fallos tempranos o tardíos.
+- No comunica riesgo absoluto.
+
+## C-index de Uno
+
+Utiliza inverse probability of censoring weighting.
+
+```python
+from sksurv.metrics import (
+    concordance_index_ipcw
+)
+
+uno_c = concordance_index_ipcw(
+    survival_train=y_train,
+    survival_test=y_test,
+    estimate=risk_score
+)[0]
+```
+
+## Cuándo preferir Uno
+
+Puede ser más robusto cuando existe censura considerable.
+
+Requiere que los tiempos de evaluación del test estén dentro del rango respaldado por train.
+
+## Tau
+
+Puede limitarse la evaluación a un horizonte:
+
+```python
+uno_c = concordance_index_ipcw(
+    survival_train=y_train,
+    survival_test=y_test,
+    estimate=risk_score,
+    tau=730
+)[0]
+```
+
+Esto evalúa concordancia hasta dos años si la unidad son días.
+
+## AUC dependiente del tiempo
+
+La discriminación puede cambiar con el horizonte.
+
+```text
+AUC a 6 meses
+AUC a 1 año
+AUC a 2 años
+```
+
+## Cumulative/dynamic AUC
+
+Considera como casos a quienes presentan el evento antes de \(t\) y como controles a quienes sobreviven más allá de \(t\).
+
+## Calcular AUC temporal
+
+```python
+from sksurv.metrics import (
+    cumulative_dynamic_auc
+)
+
+times = [
+    180,
+    365,
+    730
+]
+
+auc_values, mean_auc = cumulative_dynamic_auc(
+    survival_train=y_train,
+    survival_test=y_test,
+    estimate=risk_score,
+    times=times
+)
+```
+
+## Tabla de resultados
+
+```python
+import pandas as pd
+
+auc_table = pd.DataFrame(
+    {
+        "time": times,
+        "auc": auc_values
+    }
+)
+```
+
+## Visualizar
+
+```python
+import matplotlib.pyplot as plt
+
+plt.figure(
+    figsize=(9, 5)
+)
+
+plt.plot(
+    times,
+    auc_values,
+    marker="o"
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "AUC dependiente del tiempo"
+)
+
+plt.ylim(
+    0.5,
+    1.0
+)
+
+plt.show()
+```
+
+## Interpretar AUC temporal
+
+```text
+AUC alta temprana
++
+AUC baja tardía
+```
+
+puede indicar que el modelo predice bien eventos próximos, pero pierde capacidad a largo plazo.
+
+## Predicciones temporales
+
+Algunos modelos producen un score fijo.
+
+Otros pueden producir riesgo dependiente del tiempo.
+
+La forma del argumento `estimate` debe adaptarse a la función y al modelo utilizado.
+
+## Brier score
+
+El Brier score temporal mide el error cuadrático de la probabilidad predicha, ajustando por censura.
+
+Para supervivencia predicha:
+
+$$
+\hat{S}(t\mid X)
+$$
+
+compara la predicción con el estado observado en \(t\).
+
+## Interpretación
+
+```text
+Brier score menor
+→ mejor
+```
+
+Un valor bajo requiere tanto:
+
+- Buena discriminación.
+- Buena calibración.
+
+## Obtener funciones de supervivencia
+
+```python
+survival_functions = (
+    model
+    .predict_survival_function(
+        X_test
+    )
+)
+```
+
+## Convertir a matriz
+
+```python
+import numpy as np
+
+survival_probabilities = np.asarray(
+    [
+        survival_function(
+            times
+        )
+        for survival_function
+        in survival_functions
+    ]
+)
+```
+
+Estructura:
+
+```text
+filas
+→ pacientes
+
+columnas
+→ tiempos
+```
+
+## Calcular Brier score
+
+```python
+from sksurv.metrics import brier_score
+
+evaluated_times, brier_scores = brier_score(
+    survival_train=y_train,
+    survival_test=y_test,
+    estimate=survival_probabilities,
+    times=times
+)
+```
+
+## Visualizar Brier score
+
+```python
+plt.figure(
+    figsize=(9, 5)
+)
+
+plt.plot(
+    evaluated_times,
+    brier_scores,
+    marker="o"
+)
+
+plt.xlabel(
+    "Tiempo"
+)
+
+plt.ylabel(
+    "Brier score"
+)
+
+plt.show()
+```
+
+## Integrated Brier Score
+
+Resume el Brier score a lo largo de un intervalo temporal.
+
+```python
+from sksurv.metrics import (
+    integrated_brier_score
+)
+
+ibs = integrated_brier_score(
+    survival_train=y_train,
+    survival_test=y_test,
+    estimate=survival_probabilities,
+    times=times
+)
+```
+
+```text
+IBS menor
+→ mejor rendimiento global
+```
+
+## Elegir el intervalo temporal
+
+Los tiempos deben:
+
+- Estar dentro del soporte de train.
+- Evitar la cola extrema.
+- Ser clínicamente relevantes.
+- Contener suficientes sujetos en riesgo.
+
+## Comparar con un baseline
+
+Un modelo debe compararse con:
+
+- Kaplan-Meier marginal.
+- Cox simple.
+- Modelo clínico existente.
+- Score de referencia.
+
+## Predicción marginal
+
+Puede utilizarse la misma supervivencia Kaplan-Meier para todos los pacientes como baseline.
+
+## Brier score de referencia
+
+La mejora puede resumirse mediante:
+
+```text
+Brier Skill Score
+```
+
+conceptualmente:
+
+$$
+1
+-
+\frac{
+BS_{modelo}
+}{
+BS_{referencia}
+}
+$$
+
+## Calibración a tiempo fijo
+
+Ejemplo:
+
+```text
+Predicción de supervivencia a 1 año
+```
+
+Para cada paciente:
+
+```python
+survival_at_365 = np.asarray(
+    [
+        survival_function(
+            365
+        )
+        for survival_function
+        in survival_functions
+    ]
+)
+```
+
+## Riesgo acumulado a un año
+
+```python
+risk_at_365 = (
+    1
+    -
+    survival_at_365
+)
+```
+
+## Curva de calibración
+
+Se comparan:
+
+- Riesgo medio predicho.
+- Riesgo observado.
+
+## Agrupar por cuantiles
+
+```python
+calibration_df = test_df[
+    [
+        "follow_up_days",
+        "event"
+    ]
+].copy()
+
+calibration_df[
+    "predicted_risk"
+] = risk_at_365
+```
+
+```python
+calibration_df[
+    "risk_group"
+] = pd.qcut(
+    calibration_df[
+        "predicted_risk"
+    ],
+    q=5,
+    duplicates="drop"
+)
+```
+
+## Riesgo medio predicho
+
+```python
+mean_predicted = (
+    calibration_df
+    .groupby(
+        "risk_group",
+        observed=True
+    )[
+        "predicted_risk"
+    ]
+    .mean()
+)
+```
+
+## Riesgo observado con Kaplan-Meier
+
+No debe calcularse simplemente como proporción de eventos, porque existe censura.
+
+Para cada grupo se estima:
+
+$$
+1-\hat{S}(t)
+$$
+
+## Función auxiliar
+
+```python
+from lifelines import KaplanMeierFitter
+
+def observed_risk_at_time(
+    group,
+    time_point
+):
+
+    kmf = KaplanMeierFitter()
+
+    kmf.fit(
+        durations=group[
+            "follow_up_days"
+        ],
+        event_observed=group[
+            "event"
+        ]
+    )
+
+    survival = kmf.predict(
+        time_point
+    )
+
+    return (
+        1
+        -
+        survival
+    )
+```
+
+## Riesgo observado por grupo
+
+```python
+observed_risk = (
+    calibration_df
+    .groupby(
+        "risk_group",
+        observed=True
+    )
+    .apply(
+        lambda group:
+        observed_risk_at_time(
+            group,
+            365
+        )
+    )
+)
+```
+
+## Tabla de calibración
+
+```python
+calibration_table = pd.DataFrame(
+    {
+        "predicted": mean_predicted,
+        "observed": observed_risk
+    }
+).reset_index()
+```
+
+## Visualizar calibración
+
+```python
+plt.figure(
+    figsize=(6, 6)
+)
+
+plt.plot(
+    calibration_table[
+        "predicted"
+    ],
+    calibration_table[
+        "observed"
+    ],
+    marker="o"
+)
+
+plt.plot(
+    [
+        0,
+        1
+    ],
+    [
+        0,
+        1
+    ],
+    linestyle="--"
+)
+
+plt.xlabel(
+    "Riesgo predicho"
+)
+
+plt.ylabel(
+    "Riesgo observado"
+)
+
+plt.title(
+    "Calibración a 1 año"
+)
+
+plt.show()
+```
+
+## Interpretación
+
+```text
+Puntos sobre la diagonal
+→ el modelo infrapredice riesgo
+
+Puntos bajo la diagonal
+→ el modelo sobrepredice riesgo
+```
+
+## Calibración continua
+
+Agrupar puede ocultar patrones y depender de los cortes.
+
+Puede preferirse:
+
+- Suavizado.
+- Modelos flexibles.
+- Bootstrap.
+- Herramientas específicas de calibración.
+
+## Calibración con lifelines
+
+```python
+from lifelines.calibration import (
+    survival_probability_calibration
+)
+```
+
+```python
+ax, ici, e50 = (
+    survival_probability_calibration(
+        model=cph,
+        df=test_df,
+        t0=365
+    )
+)
+```
+
+Esta función está diseñada para modelos de regresión compatibles de `lifelines`.
+
+## ICI
+
+Integrated Calibration Index resume la distancia media entre calibración estimada y diagonal ideal.
+
+```text
+ICI menor
+→ mejor calibración
+```
+
+## E50
+
+Representa una medida mediana del error absoluto de calibración.
+
+## Calibration-in-the-large
+
+Evalúa si el riesgo medio predicho coincide con el observado.
+
+Ejemplo:
+
+```text
+Riesgo medio predicho
+→ 20 %
+
+Riesgo observado
+→ 12 %
+```
+
+El modelo sobrepredice globalmente.
+
+## Calibration slope
+
+Evalúa si las predicciones son demasiado extremas o demasiado moderadas.
+
+```text
+Slope < 1
+→ predicciones demasiado extremas
+→ posible overfitting
+
+Slope > 1
+→ predicciones demasiado moderadas
+```
+
+## Recalibración
+
+Puede ser necesaria cuando el modelo se aplica a:
+
+- Otro hospital.
+- Otro periodo.
+- Otra prevalencia.
+- Otro protocolo.
+- Otra población.
+
+## Recalibración del baseline
+
+Un modelo puede conservar buenos efectos relativos, pero tener un hazard basal desactualizado.
+
+Esto produce:
+
+- Discriminación aceptable.
+- Mala calibración absoluta.
+
+## Evaluación por horizontes
+
+Debe repetirse para:
+
+```text
+6 meses
+1 año
+2 años
+5 años
+```
+
+según el soporte disponible.
+
+## Matriz de evaluación
+
+| Dimensión | Métrica |
+|---|---|
+| Ranking global | C-index |
+| Ranking con censura | Uno C-index |
+| Discriminación temporal | AUC(t) |
+| Error probabilístico | Brier score |
+| Rendimiento integrado | IBS |
+| Riesgo absoluto | Calibración |
+| Utilidad | Decision curves |
+
+## Bootstrap
+
+Puede utilizarse para:
+
+- Intervalos de métricas.
+- Optimismo.
+- Estabilidad.
+- Curvas de calibración.
+
+## Bootstrap por paciente
+
+```python
+rng = np.random.default_rng(
+    42
+)
+
+patient_ids = test_df[
+    "patient_id"
+].unique()
+```
+
+```python
+bootstrap_results = []
+
+for iteration in range(
+    1000
+):
+
+    sampled_ids = rng.choice(
+        patient_ids,
+        size=len(
+            patient_ids
+        ),
+        replace=True
+    )
+
+    sampled_df = pd.concat(
+        [
+            test_df.loc[
+                test_df[
+                    "patient_id"
+                ]
+                ==
+                patient_id
+            ]
+            for patient_id
+            in sampled_ids
+        ],
+        ignore_index=True
+    )
+
+    bootstrap_results.append(
+        evaluate_model(
+            sampled_df
+        )
+    )
+```
+
+## Por qué por paciente
+
+Si existen varias filas por paciente, no deben re-muestrearse como observaciones independientes.
+
+## Intervalo percentil
+
+```python
+lower = np.percentile(
+    bootstrap_values,
+    2.5
+)
+
+upper = np.percentile(
+    bootstrap_values,
+    97.5
+)
+```
+
+## Optimismo interno
+
+Evaluar en los mismos datos de entrenamiento produce optimismo.
+
+El bootstrap puede estimar:
+
+```text
+Rendimiento aparente
+-
+rendimiento en bootstrap test
+```
+
+## Cross-validation
+
+Puede utilizarse para comparar modelos y seleccionar hiperparámetros.
+
+Pero la evaluación final debe reservar:
+
+- Test temporal.
+- Centro externo.
+- Cohorte prospectiva.
+
+## Scorers para GridSearchCV
+
+```python
+from sksurv.metrics import (
+    as_concordance_index_ipcw_scorer
+)
+```
+
+```python
+scored_model = (
+    as_concordance_index_ipcw_scorer(
+        model
+    )
+)
+```
+
+## Scorer de AUC temporal
+
+```python
+from sksurv.metrics import (
+    as_cumulative_dynamic_auc_scorer
+)
+```
+
+```python
+scored_model = (
+    as_cumulative_dynamic_auc_scorer(
+        model,
+        times=[
+            180,
+            365,
+            730
+        ]
+    )
+)
+```
+
+## Scorer de IBS
+
+```python
+from sksurv.metrics import (
+    as_integrated_brier_score_scorer
+)
+```
+
+```python
+scored_model = (
+    as_integrated_brier_score_scorer(
+        model,
+        times=[
+            180,
+            365,
+            730
+        ]
+    )
+)
+```
+
+El estimador debe proporcionar `predict_survival_function`.
+
+## Validación temporal
+
+```text
+Train
+→ 2018 a 2023
+
+Validation
+→ 2024
+
+Test
+→ 2025
+```
+
+Ventajas:
+
+- Simula despliegue.
+- Detecta cambios temporales.
+- Reduce optimismo por mezcla de periodos.
+
+## Validación externa
+
+```text
+Desarrollo
+→ Hospital A
+
+Validación
+→ Hospital B
+```
+
+Debe evaluarse:
+
+- Discriminación.
+- Calibración.
+- Censura.
+- Incidencia.
+- Distribución de covariables.
+- Práctica clínica.
+
+## Validación multicentro leave-one-center-out
+
+```text
+Fold 1
+→ entrenar en B, C y D
+→ validar en A
+
+Fold 2
+→ entrenar en A, C y D
+→ validar en B
+```
+
+## Rendimiento por centro
+
+```python
+center_results = (
+    prediction_df
+    .groupby(
+        "center"
+    )
+    .apply(
+        evaluate_survival_predictions
+    )
+)
+```
+
+## Rendimiento por subgrupo
+
+Debe analizarse por:
+
+- Edad.
+- Sexo.
+- Diagnóstico.
+- Centro.
+- Riesgo basal.
+- Tratamiento.
+- Periodo.
+
+## Precaución
+
+Los análisis de subgrupos pueden ser inestables con pocos eventos.
+
+Debe reportarse incertidumbre.
+
+## Curvas de decisión
+
+Decision Curve Analysis evalúa el beneficio neto para diferentes thresholds.
+
+## Net benefit
+
+Conceptualmente:
+
+$$
+NB
+=
+\frac{TP}{n}
+-
+\frac{FP}{n}
+\frac{p_t}{1-p_t}
+$$
+
+donde \(p_t\) es el threshold de decisión.
+
+## En supervivencia
+
+Debe definirse:
+
+- Horizonte.
+- Riesgo predicho.
+- Evento antes del horizonte.
+- Ajuste por censura.
+
+## Comparadores
+
+- Tratar a todos.
+- Tratar a ninguno.
+- Modelo.
+- Regla clínica existente.
+
+## Utilidad clínica
+
+Un modelo con alta AUC puede ser inútil si:
+
+- Genera demasiadas alertas.
+- No está calibrado.
+- Predice demasiado tarde.
+- No cambia decisiones.
+- Usa variables no disponibles.
+
+## Threshold clínico
+
+Ejemplo:
+
+```text
+Riesgo a 1 año ≥ 20 %
+→ intensificar seguimiento
+```
+
+Debe seleccionarse considerando:
+
+- Beneficio.
+- Daño.
+- Capacidad.
+- Coste.
+- Preferencias.
+- Prevalencia.
+
+## Lead time
+
+Para alertas dinámicas debe medirse cuánto antes se identifica el riesgo.
+
+```python
+prediction_df[
+    "lead_time_days"
+] = (
+    prediction_df[
+        "event_date"
+    ]
+    -
+    prediction_df[
+        "first_alert_date"
+    ]
+).dt.days
+```
+
+## Alertas por paciente
+
+```python
+alerts_per_patient = (
+    prediction_df
+    .groupby(
+        "patient_id"
+    )[
+        "alert"
+    ]
+    .sum()
+)
+```
+
+## Predicciones repetidas
+
+En dynamic prediction, las observaciones del mismo paciente están correlacionadas.
+
+Debe evaluarse:
+
+- Primer aviso.
+- Tiempo bajo alerta.
+- Alertas redundantes.
+- Episodios.
+- Ventana de silencio.
+
+## Evaluación en competing risks
+
+No debe evaluarse un riesgo cause-specific como si fuera riesgo absoluto.
+
+Se necesitan:
+
+- CIF predicha.
+- Brier score por causa.
+- AUC por causa.
+- Calibración por causa.
+
+## Evaluación multiestado
+
+Puede incluir:
+
+- Probabilidad de ocupación de estado.
+- Probabilidad de transición.
+- Brier score multiestado.
+- Calibración de transición.
+- Predicción del siguiente estado.
+
+## Censura y soporte temporal
+
+Las métricas IPCW dependen de estimar la distribución de censura.
+
+Problemas:
+
+- Pocos sujetos tardíos.
+- Pesos extremos.
+- Test más largo que train.
+- Censura diferencial.
+
+## Truncar evaluación
+
+Puede restringirse a un tiempo donde todavía exista soporte suficiente.
+
+## No comparar métricas en intervalos diferentes
+
+Un IBS calculado entre 0 y 2 años no es directamente comparable con otro entre 0 y 5 años.
+
+## Reportar intervalos
+
+Ejemplo:
+
+```text
+Uno C-index:
+0.71
+IC 95 %: 0.66 a 0.76
+
+AUC a 1 año:
+0.74
+
+IBS entre 6 meses y 2 años:
+0.13
+```
+
+## Tabla final
+
+| Modelo | Uno C | AUC 1 año | IBS | ICI 1 año |
+|---|---:|---:|---:|---:|
+| Cox | 0.68 | 0.70 | 0.16 | 0.04 |
+| Coxnet | 0.69 | 0.72 | 0.15 | 0.04 |
+| RSF | 0.72 | 0.76 | 0.13 | 0.06 |
+| Boosting | 0.71 | 0.75 | 0.14 | 0.05 |
+
+## Elegir modelo final
+
+No debe elegirse solo por el mayor C-index.
+
+Debe equilibrarse:
+
+- Discriminación.
+- Calibración.
+- IBS.
+- Estabilidad.
+- Interpretabilidad.
+- Coste.
+- Validación externa.
+- Utilidad.
+
+::: {.callout-important}
+## Regla práctica
+
+Un modelo ligeramente menos discriminativo, pero bien calibrado y estable, puede ser clínicamente superior.
+:::
+
+## Reporting recomendado
+
+Debe especificarse:
+
+- Split.
+- Cohorte de entrenamiento.
+- Cohorte de validación.
+- Censura.
+- Horizontes.
+- Métricas.
+- Intervalos.
+- Baseline.
+- Calibración.
+- Subgrupos.
+- Validación externa.
+
+## Errores frecuentes
+
+- Reportar solo Harrell C-index.
+- No evaluar calibración.
+- Evaluar fuera del soporte temporal.
+- Usar proporciones brutas con censura.
+- No comparar con baseline.
+- Elegir hiperparámetros con test.
+- No estimar incertidumbre.
+- Mezclar pacientes entre conjuntos.
+- No evaluar por horizonte.
+- Comparar IBS en intervalos diferentes.
+- No revisar centros.
+- Confundir discriminación y utilidad.
+
+## Flujo recomendado
+
+1. Definir horizontes.
+2. Crear train, validation y test.
+3. Obtener scores y supervivencias.
+4. Calcular Harrell C-index.
+5. Calcular Uno C-index.
+6. Calcular AUC temporal.
+7. Calcular Brier e IBS.
+8. Evaluar calibración.
+9. Aplicar bootstrap.
+10. Analizar subgrupos.
+11. Validar externamente.
+12. Evaluar utilidad clínica.
+
+## Checklist para proyectos
+
+- [ ] He definido horizontes clínicos.
+- [ ] He creado un split válido.
+- [ ] He calculado Harrell C-index.
+- [ ] He calculado Uno C-index.
+- [ ] He calculado AUC temporal.
+- [ ] He calculado Brier score.
+- [ ] He calculado IBS.
+- [ ] He evaluado calibración.
+- [ ] He evaluado calibration-in-the-large.
+- [ ] He considerado calibration slope.
+- [ ] He comparado con baseline.
+- [ ] He calculado intervalos.
+- [ ] He evaluado por subgrupo.
+- [ ] He realizado validación temporal.
+- [ ] He planificado validación externa.
+- [ ] He considerado utilidad clínica.
+
+## Recursos
+
+### Conceptos
+
+- Harrell C-index.
+- Uno C-index.
+- IPCW.
+- Time-dependent AUC.
+- Brier score.
+- Integrated Brier Score.
+- Survival calibration.
+- Calibration slope.
+- Decision Curve Analysis.
+- Net benefit.
+
+### Librerías de Python
+
+- `concordance_index_censored`.
+- `concordance_index_ipcw`.
+- `cumulative_dynamic_auc`.
+- `brier_score`.
+- `integrated_brier_score`.
+- `as_concordance_index_ipcw_scorer`.
+- `as_cumulative_dynamic_auc_scorer`.
+- `as_integrated_brier_score_scorer`.
+- `survival_probability_calibration`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus horizontes, métricas, curvas de calibración, validación y criterios de selección.

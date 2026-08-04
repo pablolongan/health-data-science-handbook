@@ -1,0 +1,1085 @@
+---
+title: "Variables dependientes del tiempo"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Una covariable dependiente del tiempo cambia durante el seguimiento.
+
+Ejemplos:
+
+- Tratamiento activo.
+- Dosis acumulada.
+- Troponina.
+- FEVI.
+- Estado clínico.
+- Hospitalización.
+- Exposición farmacológica.
+
+Para analizarlas con Cox se utiliza formato long o start-stop, con una fila por intervalo temporal homogéneo.
+:::
+
+## Covariable basal frente a temporal
+
+## Basal
+
+Se mide en tiempo cero y permanece fija en el modelo.
+
+```text
+Edad basal
+Sexo
+Diagnóstico
+FEVI basal
+```
+
+## Dependiente del tiempo
+
+Puede cambiar durante el seguimiento.
+
+```text
+Tratamiento activo
+Biomarcador reciente
+Dosis acumulada
+Estado de cardiotoxicidad
+```
+
+::: {.callout-note}
+## Idea clave
+
+Cada intervalo debe contener el valor de la covariable que estaba disponible durante ese periodo.
+:::
+
+## Ejemplo clínico
+
+```text
+Día 0 a 30
+→ sin tratamiento cardioprotector
+
+Día 30 a 90
+→ tratamiento activo
+
+Día 90 a 120
+→ tratamiento activo y troponina elevada
+```
+
+## Formato start-stop
+
+```text
+patient_id | start | stop | event | treatment
+------------------------------------------------
+1          | 0     | 30   | 0     | 0
+1          | 30    | 90   | 0     | 1
+1          | 90    | 120  | 1     | 1
+```
+
+## Significado
+
+- `start`: inicio del intervalo.
+- `stop`: final del intervalo.
+- `event`: 1 solo en el intervalo del evento.
+- Covariables: valor vigente durante el intervalo.
+
+## Reglas fundamentales
+
+Cada paciente debe tener:
+
+- Intervalos ordenados.
+- Intervalos sin solapamiento.
+- Duraciones positivas.
+- Una única fila con evento, como máximo para primera ocurrencia.
+- Valores causales y disponibles.
+
+## Crear base long
+
+```python
+from lifelines.utils import to_long_format
+
+base_df = patient_df[
+    [
+        "patient_id",
+        "follow_up_days",
+        "event"
+    ]
+].copy()
+```
+
+```python
+long_df = to_long_format(
+    base_df,
+    duration_col="follow_up_days"
+)
+```
+
+Resultado conceptual:
+
+```text
+patient_id | start | stop | event
+---------------------------------
+1          | 0     | 120  | 1
+2          | 0     | 300  | 0
+```
+
+## Tabla de cambios
+
+```python
+treatment_changes = pd.DataFrame(
+    {
+        "patient_id": [
+            1,
+            1,
+            2
+        ],
+        "time": [
+            0,
+            30,
+            0
+        ],
+        "treatment": [
+            0,
+            1,
+            0
+        ]
+    }
+)
+```
+
+## Añadir covariable a la timeline
+
+```python
+from lifelines.utils import add_covariate_to_timeline
+
+long_df = add_covariate_to_timeline(
+    long_form_df=long_df,
+    cv=treatment_changes,
+    id_col="patient_id",
+    duration_col="time",
+    event_col="event",
+    start_col="start",
+    stop_col="stop",
+    overwrite=True
+)
+```
+
+## Resultado esperado
+
+```text
+patient_id | start | stop | event | treatment
+------------------------------------------------
+1          | 0     | 30   | 0     | 0
+1          | 30    | 120  | 1     | 1
+2          | 0     | 300  | 0     | 0
+```
+
+## Varios cambios
+
+```python
+biomarker_changes = pd.DataFrame(
+    {
+        "patient_id": [
+            1,
+            1,
+            1
+        ],
+        "time": [
+            0,
+            45,
+            90
+        ],
+        "troponin": [
+            0.01,
+            0.03,
+            0.08
+        ]
+    }
+)
+```
+
+```python
+long_df = add_covariate_to_timeline(
+    long_form_df=long_df,
+    cv=biomarker_changes,
+    id_col="patient_id",
+    duration_col="time",
+    event_col="event",
+    overwrite=True
+)
+```
+
+## Forward fill conceptual
+
+El valor medido en un instante suele considerarse vigente hasta el siguiente cambio.
+
+```text
+Troponina 0.01 en día 0
+→ vigente hasta nueva medición
+
+Troponina 0.03 en día 45
+→ vigente desde día 45
+```
+
+Esto debe ser clínicamente razonable.
+
+## Recencia
+
+Una medición antigua puede perder validez.
+
+Puede añadirse:
+
+```python
+long_df[
+    "time_since_troponin"
+] = (
+    long_df[
+        "start"
+    ]
+    -
+    long_df[
+        "troponin_measurement_time"
+    ]
+)
+```
+
+## Indicador de medición reciente
+
+```python
+long_df[
+    "troponin_recent"
+] = (
+    long_df[
+        "time_since_troponin"
+    ]
+    <=
+    30
+).astype(int)
+```
+
+## Exposición acumulada
+
+```python
+dose_changes = pd.DataFrame(
+    {
+        "patient_id": [
+            1,
+            1,
+            1
+        ],
+        "time": [
+            0,
+            30,
+            60
+        ],
+        "dose": [
+            20,
+            25,
+            30
+        ]
+    }
+)
+```
+
+## Añadir acumulado
+
+```python
+long_df = add_covariate_to_timeline(
+    long_form_df=long_df,
+    cv=dose_changes,
+    id_col="patient_id",
+    duration_col="time",
+    event_col="event",
+    cumulative_sum=True,
+    cumulative_sum_prefix="cumulative_"
+)
+```
+
+Resultado conceptual:
+
+```text
+time 0
+→ dosis acumulada 20
+
+time 30
+→ dosis acumulada 45
+
+time 60
+→ dosis acumulada 75
+```
+
+## Exposición puntual frente a acumulada
+
+```text
+Dosis actual
+→ efecto reciente
+
+Dosis acumulada
+→ exposición histórica
+```
+
+Ambas pueden ser clínicamente relevantes.
+
+## Delay
+
+A veces una exposición no tiene efecto inmediato.
+
+```python
+long_df = add_covariate_to_timeline(
+    long_form_df=long_df,
+    cv=treatment_changes,
+    id_col="patient_id",
+    duration_col="time",
+    event_col="event",
+    delay=7
+)
+```
+
+Esto desplaza el efecto siete unidades temporales.
+
+Debe justificarse clínicamente.
+
+## Immortal time bias
+
+Aparece al clasificar como expuesto desde tiempo cero a quien recibe tratamiento más tarde.
+
+Incorrecto:
+
+```text
+Paciente recibe tratamiento en día 30
+→ se clasifica como tratado desde día 0
+```
+
+Los primeros 30 días se convierten artificialmente en tiempo sin evento atribuido al tratamiento.
+
+## Solución
+
+Representar el tratamiento como covariable dependiente del tiempo:
+
+```text
+0 a 30
+→ no tratado
+
+30 en adelante
+→ tratado
+```
+
+## Confounding by indication
+
+Los pacientes de mayor riesgo pueden recibir más tratamiento.
+
+```text
+Mayor gravedad
+→ tratamiento
+→ mayor riesgo de evento
+```
+
+Un coeficiente asociado al tratamiento no debe interpretarse automáticamente como causal.
+
+## Ajustar Cox temporal
+
+```python
+from lifelines import CoxTimeVaryingFitter
+
+ctv = CoxTimeVaryingFitter()
+```
+
+```python
+ctv.fit(
+    long_df,
+    id_col="patient_id",
+    start_col="start",
+    stop_col="stop",
+    event_col="event"
+)
+```
+
+## Resumen
+
+```python
+ctv.print_summary()
+```
+
+## Penalización
+
+```python
+ctv = CoxTimeVaryingFitter(
+    penalizer=0.1,
+    l1_ratio=0.0
+)
+```
+
+Puede mejorar estabilidad con:
+
+- Muchas variables.
+- Colinealidad.
+- Pocos eventos.
+- Variables altamente correlacionadas.
+
+## Interpretación
+
+El hazard ratio de una covariable temporal compara intervalos con valores distintos, condicionado al resto de variables.
+
+Ejemplo:
+
+```text
+Troponina elevada
+HR = 1.80
+```
+
+Se interpreta como mayor hazard durante periodos con troponina elevada, manteniendo constantes las demás covariables.
+
+## Asociación no causal
+
+El valor puede estar afectado por:
+
+- Gravedad.
+- Decisiones médicas.
+- Frecuencia de medición.
+- Tratamientos simultáneos.
+- Confusión no medida.
+
+## Variable temporal frente a coeficiente temporal
+
+No son lo mismo.
+
+### Variable temporal
+
+```text
+Tratamiento cambia de 0 a 1
+```
+
+### Coeficiente temporal
+
+```text
+El efecto del tratamiento cambia con el tiempo
+```
+
+Una covariable puede variar y aun asumir un HR constante por unidad de valor.
+
+## Interacciones con tiempo
+
+```python
+import numpy as np
+
+long_df[
+    "treatment_log_time"
+] = (
+    long_df[
+        "treatment"
+    ]
+    *
+    np.log1p(
+        long_df[
+            "stop"
+        ]
+    )
+)
+```
+
+Esto permite explorar un efecto que cambia con el tiempo.
+
+## Cambios simultáneos
+
+Si varias covariables cambian en el mismo instante, deben generarse intervalos comunes.
+
+Ejemplo:
+
+```text
+Día 45:
+- cambia tratamiento
+- cambia troponina
+- cambia estado clínico
+```
+
+Debe existir una nueva fila desde ese tiempo.
+
+## Empates y orden
+
+Las fechas deben ordenarse por:
+
+```python
+long_df = long_df.sort_values(
+    [
+        "patient_id",
+        "start",
+        "stop"
+    ]
+)
+```
+
+## Validar duración
+
+```python
+invalid_duration = long_df.loc[
+    long_df[
+        "stop"
+    ]
+    <=
+    long_df[
+        "start"
+    ]
+]
+```
+
+## Validar solapamientos
+
+```python
+long_df[
+    "previous_stop"
+] = (
+    long_df
+    .groupby("patient_id")[
+        "stop"
+    ]
+    .shift()
+)
+```
+
+```python
+overlaps = long_df.loc[
+    long_df[
+        "start"
+    ]
+    <
+    long_df[
+        "previous_stop"
+    ]
+]
+```
+
+## Validar eventos
+
+```python
+events_per_patient = (
+    long_df
+    .groupby("patient_id")[
+        "event"
+    ]
+    .sum()
+)
+```
+
+```python
+invalid_events = events_per_patient.loc[
+    events_per_patient
+    >
+    1
+]
+```
+
+Para primera ocurrencia no debería haber más de un evento.
+
+## Intervalo final
+
+La fila final debe terminar en:
+
+- Fecha del evento.
+- Fecha de censura.
+- Fin del estudio.
+- Evento competidor, según diseño.
+
+## Variables actualizadas después del evento
+
+Deben excluirse.
+
+```text
+Evento en día 120
+Medición en día 130
+→ no pertenece al risk set previo
+```
+
+## Disponibilidad real
+
+Debe distinguirse:
+
+- Fecha de toma.
+- Fecha de validación.
+- Fecha de registro.
+- Fecha de disponibilidad para el modelo.
+
+## Ejemplo analítico
+
+```text
+Muestra tomada
+→ día 30
+
+Resultado validado
+→ día 32
+```
+
+El valor no debería estar activo desde el día 30 si solo estuvo disponible el día 32.
+
+## Lag de disponibilidad
+
+```python
+biomarker_changes[
+    "available_time"
+] = (
+    biomarker_changes[
+        "measurement_time"
+    ]
+    +
+    biomarker_changes[
+        "validation_delay"
+    ]
+)
+```
+
+## Medición irregular
+
+Las covariables clínicas no se actualizan con frecuencia fija.
+
+Esto puede generar:
+
+- Valores arrastrados demasiado tiempo.
+- Informatividad de la frecuencia.
+- Sesgo por intensidad de observación.
+
+## Intensidad de medición
+
+Puede añadirse:
+
+- Número de pruebas previas.
+- Tiempo desde la última prueba.
+- Indicador de medición reciente.
+- Centro o protocolo de seguimiento.
+
+## Missingness informativa
+
+```python
+long_df[
+    "troponin_missing"
+] = (
+    long_df[
+        "troponin"
+    ]
+    .isna()
+    .astype(int)
+)
+```
+
+No siempre conviene imputar sin conservar información sobre ausencia y recencia.
+
+## Covariable binaria de estado
+
+```python
+long_df[
+    "troponin_high"
+] = (
+    long_df[
+        "troponin"
+    ]
+    >
+    0.02
+).astype(int)
+```
+
+## Variable continua
+
+Mantener el valor continuo suele conservar más información.
+
+Puede requerir:
+
+- Log-transformación.
+- Splines.
+- Estandarización.
+- Winsorization justificada.
+
+## Log-transformación
+
+```python
+long_df[
+    "log_troponin"
+] = np.log1p(
+    long_df[
+        "troponin"
+    ]
+)
+```
+
+## No linealidad
+
+```python
+ctv.fit(
+    long_df,
+    id_col="patient_id",
+    start_col="start",
+    stop_col="stop",
+    event_col="event",
+    formula=(
+        "bs(log_troponin, df=4)"
+        " + treatment"
+        " + age"
+    )
+)
+```
+
+## Baseline y cambio
+
+```python
+long_df[
+    "lvef_change"
+] = (
+    long_df[
+        "lvef"
+    ]
+    -
+    long_df[
+        "baseline_lvef"
+    ]
+)
+```
+
+## Cambio relativo
+
+```python
+long_df[
+    "gls_relative_change"
+] = (
+    long_df[
+        "gls"
+    ]
+    -
+    long_df[
+        "baseline_gls"
+    ]
+) / (
+    long_df[
+        "baseline_gls"
+    ].abs()
+)
+```
+
+## Estado clínico temporal
+
+```text
+S0
+→ normal
+
+S1
+→ leve
+
+S2
+→ moderado
+
+S3
+→ grave
+```
+
+Puede codificarse como categórica temporal.
+
+## Cuidado con outcome y predictor
+
+No debe utilizarse como predictor una variable que define simultáneamente el evento.
+
+Ejemplo:
+
+```text
+Evento
+→ primera transición a S2
+
+Predictor
+→ estado S2 en el mismo instante
+```
+
+Esto sería leakage.
+
+## Lag del estado
+
+Puede utilizarse el estado previo:
+
+```python
+long_df[
+    "previous_state"
+] = (
+    long_df
+    .groupby("patient_id")[
+        "state"
+    ]
+    .shift()
+)
+```
+
+## Landmark como alternativa
+
+Si la estructura temporal es difícil, puede realizarse un landmark analysis.
+
+Ejemplo:
+
+```text
+Landmark a 6 meses
+→ usar información acumulada hasta 6 meses
+→ predecir evento posterior
+```
+
+Ventajas:
+
+- Más sencillo.
+- Menor complejidad.
+
+Limitaciones:
+
+- Excluye eventos previos.
+- Depende del landmark.
+- Pierde actualización continua.
+
+## Joint models
+
+Cuando interesa relacionar una trayectoria longitudinal medida con error y un evento, puede ser preferible un joint model.
+
+Ejemplo:
+
+```text
+Trayectoria real de FEVI
++
+tiempo hasta cardiotoxicidad
+```
+
+El simple last observation carried forward no modela el error de medición ni la trayectoria latente.
+
+## Dynamic prediction
+
+Permite actualizar supervivencia o riesgo al recibir nuevos datos.
+
+```text
+Baseline
+→ predicción inicial
+
+Nueva troponina
+→ predicción actualizada
+
+Nueva ecocardiografía
+→ nueva actualización
+```
+
+## Predicción con Cox temporal
+
+La predicción individual futura requiere conocer o asumir trayectorias futuras de covariables.
+
+Esto dificulta:
+
+- Forecast largo.
+- Tratamientos futuros.
+- Biomarcadores aún no medidos.
+- Cambios de estado futuros.
+
+## Escenarios
+
+Puede predecirse bajo escenarios:
+
+```text
+Tratamiento continúa
+
+Tratamiento se suspende
+
+Biomarcador permanece estable
+```
+
+Pero deben declararse como supuestos.
+
+## Evaluación
+
+Debe respetar:
+
+- Tiempo.
+- Paciente.
+- Disponibilidad.
+- Actualización.
+- Censura.
+
+## Split por paciente
+
+Un paciente no debe aparecer simultáneamente en train y test cuando se evalúan sujetos nuevos.
+
+## Split temporal
+
+Puede utilizarse una cohorte posterior para validación.
+
+## Métricas
+
+- C-index.
+- AUC dependiente del tiempo.
+- Brier score temporal.
+- Calibración.
+- Dynamic AUC.
+- Predicción a landmarks.
+
+## Error estándar robusto
+
+Las múltiples filas por paciente no son independientes.
+
+Debe utilizarse una formulación que tenga en cuenta el identificador y, cuando proceda, errores robustos.
+
+## Diagnóstico
+
+Revisar:
+
+- Convergencia.
+- Coeficientes extremos.
+- Intervalos.
+- Colinealidad.
+- Separación.
+- Pocos eventos.
+- Intervalos muy cortos.
+
+## Convergencia
+
+```python
+ctv.fit(
+    long_df,
+    id_col="patient_id",
+    start_col="start",
+    stop_col="stop",
+    event_col="event",
+    show_progress=True
+)
+```
+
+## Centrado y escalado
+
+Puede ayudar con variables de escalas muy distintas.
+
+```python
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+
+long_df[
+    [
+        "troponin",
+        "cumulative_dose"
+    ]
+] = scaler.fit_transform(
+    long_df[
+        [
+            "troponin",
+            "cumulative_dose"
+        ]
+    ]
+)
+```
+
+El scaler debe ajustarse solo con train.
+
+## Reporting
+
+Debe documentarse:
+
+- Escala temporal.
+- Unidad de intervalo.
+- Fuente de cambios.
+- Regla de vigencia.
+- Delay de disponibilidad.
+- Exposición acumulada.
+- Número de intervalos.
+- Número de pacientes.
+- Número de eventos.
+- HR e intervalos.
+
+## Ejemplo de redacción
+
+```text
+Las covariables dependientes del tiempo
+se representaron en formato start-stop.
+
+Los valores de laboratorio se consideraron
+disponibles desde su fecha de validación
+y vigentes hasta la siguiente medición,
+con un máximo de 30 días.
+```
+
+## Consideraciones clínicas
+
+::: {.callout-note}
+## Aplicación clínica
+
+El formato temporal debe reproducir lo que un profesional conocía en cada momento.
+:::
+
+Debe consensuarse:
+
+- Cuándo comienza una exposición.
+- Cuándo termina.
+- Cuánto dura la validez de una prueba.
+- Cómo tratar cambios simultáneos.
+- Qué variables definen el evento.
+- Qué latencia existe.
+
+## Errores frecuentes
+
+- Clasificar exposiciones futuras como basales.
+- Crear immortal time bias.
+- Usar fecha de toma en lugar de disponibilidad.
+- Arrastrar valores indefinidamente.
+- Crear intervalos solapados.
+- Marcar el evento en varias filas.
+- Confundir covariable temporal y efecto temporal.
+- Usar el outcome como predictor.
+- Ignorar medición informativa.
+- Interpretar tratamiento causalmente.
+- No validar por paciente.
+- No documentar reglas.
+
+## Flujo recomendado
+
+1. Definir tiempo cero.
+2. Identificar covariables temporales.
+3. Crear dataset base.
+4. Convertir a formato long.
+5. Añadir cambios.
+6. Añadir acumulados.
+7. Incorporar latencias.
+8. Validar intervalos.
+9. Ajustar Cox temporal.
+10. Revisar convergencia.
+11. Evaluar y validar.
+12. Documentar timeline.
+
+## Checklist para proyectos
+
+- [ ] He definido tiempo cero.
+- [ ] He separado variables basales y temporales.
+- [ ] He creado formato start-stop.
+- [ ] He ordenado intervalos.
+- [ ] He comprobado solapamientos.
+- [ ] He comprobado duraciones positivas.
+- [ ] He marcado un único intervalo de evento.
+- [ ] He usado disponibilidad real.
+- [ ] He definido vigencia de mediciones.
+- [ ] He evitado immortal time bias.
+- [ ] He considerado dosis acumulada.
+- [ ] He revisado confounding by indication.
+- [ ] He evitado usar el outcome como predictor.
+- [ ] He utilizado split por paciente.
+- [ ] He documentado todas las reglas.
+
+## Recursos
+
+### Conceptos
+
+- Time-varying covariates.
+- Counting process format.
+- Start-stop data.
+- Immortal time bias.
+- Cumulative exposure.
+- Landmark analysis.
+- Joint models.
+- Dynamic prediction.
+
+### Librerías de Python
+
+- `lifelines.CoxTimeVaryingFitter`.
+- `lifelines.utils.to_long_format`.
+- `lifelines.utils.add_covariate_to_timeline`.
+- `lifelines.utils.covariates_from_event_matrix`.
+
+### Material del máster
+
+Añadir aquí:
+
+- Presentación correspondiente.
+- Diapositivas relevantes.
+- Ejercicios realizados.
+- Apuntes de Notion.
+
+## Notas personales
+
+Añade aquí tus covariables temporales, reglas de vigencia, acumulados, delays y decisiones clínicas.
