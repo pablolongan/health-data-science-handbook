@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Modelo de riesgos proporcionales de Cox – Health Data Science Handbook</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-2aa33e8751edae3f9b77d048c1294c38.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../styles.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Health Data Science Handbook</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../about.html"> <i class="bi bi-info-circle" role="img" aria-label="Sobre el proyecto">
+</i> 
+<span class="menu-text">Sobre el proyecto</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/pablolongan/health-data-science-handbook"> <i class="bi bi-github" role="img" aria-label="GitHub">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../survival-analysis/index.html">Survival Analysis</a></li><li class="breadcrumb-item"><a href="../survival-analysis/cox-proportional-hazards.html">Modelo de Cox</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false">
+ <span class="menu-text">Fundamentos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/data-exploration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exploratory data analysis (EDA)</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/model-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación de modelos</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/classification-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métricas de clasificación</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/regression-metrics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métricas de regresión</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../foundations/cross-validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Validación cruzada</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false">
+ <span class="menu-text">Preprocesamiento</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/train-test-split.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Train, validation and test</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/data-leakage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data leakage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/missing-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Valores ausentes</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/scaling-normalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Escalado y normalización</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/categorical-encoding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Variables categóricas y encoding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/outliers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Outliers</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../preprocessing/pipelines-columntransformer.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pipelines y ColumnTransformer</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false">
+ <span class="menu-text">Reducción de dimensionalidad</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../dimensionality-reduction/pca.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">PCA</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false">
+ <span class="menu-text">Selección de variables</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/filter-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos filter</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/wrapper-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos wrapper</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/embedded-methods.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Métodos embedded</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../feature-selection/regularization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regularización</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/linear-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión lineal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/logistic-regression.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Regresión logística</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/decision-trees.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Árboles de decisión</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/random-forest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Random forest</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/gradient-boosting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gradient boosting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/support-vector-machines.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Support Vector Machines</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../supervised-learning/model-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparación de modelos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false">
+ <span class="menu-text">Aprendizaje no supervisado</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/k-means.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">K-means</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/hierarchical-clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Clustering jerárquico</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/dbscan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">DBSCAN y clustering por densidad</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/gaussian-mixture-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Gaussian Mixture Models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/clustering-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Evaluación del clustering</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/anomaly-detection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Detección de anomalías</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../unsupervised-learning/method-comparison.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Comparación de métodos</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false">
+ <span class="menu-text">Series temporales</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/time-series-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fundamentos y preparación temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/decomposition-stationarity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Descomposición y estacionariedad</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/exponential-smoothing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Exponential smoothing</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/arima-sarima.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">ARIMA y SARIMA</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/temporal-feature-engineering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Feature engineering temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/machine-learning-forecasting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Machine learning para forecasting</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/backtesting-and-evaluation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Backtesting y evaluación temporal</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../time-series/clinical-time-series.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Series temporales clínicas</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+ <span class="menu-text">Deep learning</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true">
+ <span class="menu-text">Survival Analysis</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/survival-fundamentals.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Fundamentos, tiempos y censura</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/kaplan-meier-log-rank.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Kaplan-Meier y log-rank</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/cox-proportional-hazards.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Modelo de Cox</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../survival-analysis/proportional-hazards-assumption.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Supuesto de riesgos proporcionales</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false">
+ <span class="menu-text">Guías de proyectos</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../project-guides/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false">
+ <span class="menu-text">Recetario de código</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth1 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introducción</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#qué-modela-cox" id="toc-qué-modela-cox" class="nav-link active" data-scroll-target="#qué-modela-cox">¿Qué modela Cox?</a></li>
+  <li><a href="#modelo-semiparamétrico" id="toc-modelo-semiparamétrico" class="nav-link" data-scroll-target="#modelo-semiparamétrico">Modelo semiparamétrico</a></li>
+  <li><a href="#interpretación-del-coeficiente" id="toc-interpretación-del-coeficiente" class="nav-link" data-scroll-target="#interpretación-del-coeficiente">Interpretación del coeficiente</a></li>
+  <li><a href="#hazard-ratio" id="toc-hazard-ratio" class="nav-link" data-scroll-target="#hazard-ratio">Hazard ratio</a></li>
+  <li><a href="#ejemplo" id="toc-ejemplo" class="nav-link" data-scroll-target="#ejemplo">Ejemplo</a></li>
+  <li><a href="#variable-continua" id="toc-variable-continua" class="nav-link" data-scroll-target="#variable-continua">Variable continua</a></li>
+  <li><a href="#calcular-hr-para-varias-unidades" id="toc-calcular-hr-para-varias-unidades" class="nav-link" data-scroll-target="#calcular-hr-para-varias-unidades">Calcular HR para varias unidades</a></li>
+  <li><a href="#variable-binaria" id="toc-variable-binaria" class="nav-link" data-scroll-target="#variable-binaria">Variable binaria</a></li>
+  <li><a href="#variable-categórica" id="toc-variable-categórica" class="nav-link" data-scroll-target="#variable-categórica">Variable categórica</a></li>
+  <li><a href="#preparar-datos" id="toc-preparar-datos" class="nav-link" data-scroll-target="#preparar-datos">Preparar datos</a></li>
+  <li><a href="#revisar-missing" id="toc-revisar-missing" class="nav-link" data-scroll-target="#revisar-missing">Revisar missing</a></li>
+  <li><a href="#codificar-categóricas" id="toc-codificar-categóricas" class="nav-link" data-scroll-target="#codificar-categóricas">Codificar categóricas</a></li>
+  <li><a href="#ajustar-modelo-con-lifelines" id="toc-ajustar-modelo-con-lifelines" class="nav-link" data-scroll-target="#ajustar-modelo-con-lifelines">Ajustar modelo con lifelines</a></li>
+  <li><a href="#resumen" id="toc-resumen" class="nav-link" data-scroll-target="#resumen">Resumen</a></li>
+  <li><a href="#resultados-principales" id="toc-resultados-principales" class="nav-link" data-scroll-target="#resultados-principales">Resultados principales</a></li>
+  <li><a href="#tabla-de-resultados" id="toc-tabla-de-resultados" class="nav-link" data-scroll-target="#tabla-de-resultados">Tabla de resultados</a></li>
+  <li><a href="#interpretar-intervalo-de-confianza" id="toc-interpretar-intervalo-de-confianza" class="nav-link" data-scroll-target="#interpretar-intervalo-de-confianza">Interpretar intervalo de confianza</a></li>
+  <li><a href="#no-interpretar-solo-p-value" id="toc-no-interpretar-solo-p-value" class="nav-link" data-scroll-target="#no-interpretar-solo-p-value">No interpretar solo p-value</a></li>
+  <li><a href="#función-de-hazard-basal" id="toc-función-de-hazard-basal" class="nav-link" data-scroll-target="#función-de-hazard-basal">Función de hazard basal</a></li>
+  <li><a href="#hazard-acumulado-basal" id="toc-hazard-acumulado-basal" class="nav-link" data-scroll-target="#hazard-acumulado-basal">Hazard acumulado basal</a></li>
+  <li><a href="#supervivencia-basal" id="toc-supervivencia-basal" class="nav-link" data-scroll-target="#supervivencia-basal">Supervivencia basal</a></li>
+  <li><a href="#score-de-riesgo-relativo" id="toc-score-de-riesgo-relativo" class="nav-link" data-scroll-target="#score-de-riesgo-relativo">Score de riesgo relativo</a></li>
+  <li><a href="#predicción-de-supervivencia" id="toc-predicción-de-supervivencia" class="nav-link" data-scroll-target="#predicción-de-supervivencia">Predicción de supervivencia</a></li>
+  <li><a href="#predicción-para-varios-pacientes" id="toc-predicción-para-varios-pacientes" class="nav-link" data-scroll-target="#predicción-para-varios-pacientes">Predicción para varios pacientes</a></li>
+  <li><a href="#visualizar-supervivencia-individual" id="toc-visualizar-supervivencia-individual" class="nav-link" data-scroll-target="#visualizar-supervivencia-individual">Visualizar supervivencia individual</a></li>
+  <li><a href="#predicción-en-tiempos-concretos" id="toc-predicción-en-tiempos-concretos" class="nav-link" data-scroll-target="#predicción-en-tiempos-concretos">Predicción en tiempos concretos</a></li>
+  <li><a href="#riesgo-acumulado" id="toc-riesgo-acumulado" class="nav-link" data-scroll-target="#riesgo-acumulado">Riesgo acumulado</a></li>
+  <li><a href="#selección-de-covariables" id="toc-selección-de-covariables" class="nav-link" data-scroll-target="#selección-de-covariables">Selección de covariables</a></li>
+  <li><a href="#no-seleccionar-solo-por-p-value-univariable" id="toc-no-seleccionar-solo-por-p-value-univariable" class="nav-link" data-scroll-target="#no-seleccionar-solo-por-p-value-univariable">No seleccionar solo por p-value univariable</a></li>
+  <li><a href="#modelo-univariable" id="toc-modelo-univariable" class="nav-link" data-scroll-target="#modelo-univariable">Modelo univariable</a></li>
+  <li><a href="#modelo-multivariable" id="toc-modelo-multivariable" class="nav-link" data-scroll-target="#modelo-multivariable">Modelo multivariable</a></li>
+  <li><a href="#confusión" id="toc-confusión" class="nav-link" data-scroll-target="#confusión">Confusión</a></li>
+  <li><a href="#ajuste-excesivo" id="toc-ajuste-excesivo" class="nav-link" data-scroll-target="#ajuste-excesivo">Ajuste excesivo</a></li>
+  <li><a href="#eventos-por-variable" id="toc-eventos-por-variable" class="nav-link" data-scroll-target="#eventos-por-variable">Eventos por variable</a></li>
+  <li><a href="#colinealidad" id="toc-colinealidad" class="nav-link" data-scroll-target="#colinealidad">Colinealidad</a></li>
+  <li><a href="#revisar-correlaciones" id="toc-revisar-correlaciones" class="nav-link" data-scroll-target="#revisar-correlaciones">Revisar correlaciones</a></li>
+  <li><a href="#vif" id="toc-vif" class="nav-link" data-scroll-target="#vif">VIF</a></li>
+  <li><a href="#escalado-de-variables" id="toc-escalado-de-variables" class="nav-link" data-scroll-target="#escalado-de-variables">Escalado de variables</a></li>
+  <li><a href="#estandarizar" id="toc-estandarizar" class="nav-link" data-scroll-target="#estandarizar">Estandarizar</a></li>
+  <li><a href="#interpretación-tras-estandarizar" id="toc-interpretación-tras-estandarizar" class="nav-link" data-scroll-target="#interpretación-tras-estandarizar">Interpretación tras estandarizar</a></li>
+  <li><a href="#no-linealidad" id="toc-no-linealidad" class="nav-link" data-scroll-target="#no-linealidad">No linealidad</a></li>
+  <li><a href="#categorizar-continuas" id="toc-categorizar-continuas" class="nav-link" data-scroll-target="#categorizar-continuas">Categorizar continuas</a></li>
+  <li><a href="#splines" id="toc-splines" class="nav-link" data-scroll-target="#splines">Splines</a></li>
+  <li><a href="#interacciones" id="toc-interacciones" class="nav-link" data-scroll-target="#interacciones">Interacciones</a></li>
+  <li><a href="#interacción-clínica" id="toc-interacción-clínica" class="nav-link" data-scroll-target="#interacción-clínica">Interacción clínica</a></li>
+  <li><a href="#interpretar-interacciones" id="toc-interpretar-interacciones" class="nav-link" data-scroll-target="#interpretar-interacciones">Interpretar interacciones</a></li>
+  <li><a href="#estratificación" id="toc-estratificación" class="nav-link" data-scroll-target="#estratificación">Estratificación</a></li>
+  <li><a href="#qué-hace-la-estratificación" id="toc-qué-hace-la-estratificación" class="nav-link" data-scroll-target="#qué-hace-la-estratificación">Qué hace la estratificación</a></li>
+  <li><a href="#ejemplo-por-centro" id="toc-ejemplo-por-centro" class="nav-link" data-scroll-target="#ejemplo-por-centro">Ejemplo por centro</a></li>
+  <li><a href="#penalización" id="toc-penalización" class="nav-link" data-scroll-target="#penalización">Penalización</a></li>
+  <li><a href="#ridge-en-cox" id="toc-ridge-en-cox" class="nav-link" data-scroll-target="#ridge-en-cox">Ridge en Cox</a></li>
+  <li><a href="#lasso-en-cox" id="toc-lasso-en-cox" class="nav-link" data-scroll-target="#lasso-en-cox">Lasso en Cox</a></li>
+  <li><a href="#elastic-net" id="toc-elastic-net" class="nav-link" data-scroll-target="#elastic-net">Elastic Net</a></li>
+  <li><a href="#elegir-penalización" id="toc-elegir-penalización" class="nav-link" data-scroll-target="#elegir-penalización">Elegir penalización</a></li>
+  <li><a href="#cluster-robust-standard-errors" id="toc-cluster-robust-standard-errors" class="nav-link" data-scroll-target="#cluster-robust-standard-errors">Cluster robust standard errors</a></li>
+  <li><a href="#frailty" id="toc-frailty" class="nav-link" data-scroll-target="#frailty">Frailty</a></li>
+  <li><a href="#cox-y-tiempo-dependiente" id="toc-cox-y-tiempo-dependiente" class="nav-link" data-scroll-target="#cox-y-tiempo-dependiente">Cox y tiempo dependiente</a></li>
+  <li><a href="#ajustar-modelo-temporal" id="toc-ajustar-modelo-temporal" class="nav-link" data-scroll-target="#ajustar-modelo-temporal">Ajustar modelo temporal</a></li>
+  <li><a href="#supuesto-de-riesgos-proporcionales" id="toc-supuesto-de-riesgos-proporcionales" class="nav-link" data-scroll-target="#supuesto-de-riesgos-proporcionales">Supuesto de riesgos proporcionales</a></li>
+  <li><a href="#violación-del-supuesto" id="toc-violación-del-supuesto" class="nav-link" data-scroll-target="#violación-del-supuesto">Violación del supuesto</a></li>
+  <li><a href="#revisar-supuesto" id="toc-revisar-supuesto" class="nav-link" data-scroll-target="#revisar-supuesto">Revisar supuesto</a></li>
+  <li><a href="#residuos-de-schoenfeld" id="toc-residuos-de-schoenfeld" class="nav-link" data-scroll-target="#residuos-de-schoenfeld">Residuos de Schoenfeld</a></li>
+  <li><a href="#soluciones-ante-incumplimiento" id="toc-soluciones-ante-incumplimiento" class="nav-link" data-scroll-target="#soluciones-ante-incumplimiento">Soluciones ante incumplimiento</a></li>
+  <li><a href="#interacción-con-tiempo" id="toc-interacción-con-tiempo" class="nav-link" data-scroll-target="#interacción-con-tiempo">Interacción con tiempo</a></li>
+  <li><a href="#ties" id="toc-ties" class="nav-link" data-scroll-target="#ties">Ties</a></li>
+  <li><a href="#predicción-absoluta" id="toc-predicción-absoluta" class="nav-link" data-scroll-target="#predicción-absoluta">Predicción absoluta</a></li>
+  <li><a href="#supervivencia-individual" id="toc-supervivencia-individual" class="nav-link" data-scroll-target="#supervivencia-individual">Supervivencia individual</a></li>
+  <li><a href="#curvas-ajustadas-por-perfiles" id="toc-curvas-ajustadas-por-perfiles" class="nav-link" data-scroll-target="#curvas-ajustadas-por-perfiles">Curvas ajustadas por perfiles</a></li>
+  <li><a href="#curvas-estandarizadas" id="toc-curvas-estandarizadas" class="nav-link" data-scroll-target="#curvas-estandarizadas">Curvas estandarizadas</a></li>
+  <li><a href="#evaluación-del-modelo" id="toc-evaluación-del-modelo" class="nav-link" data-scroll-target="#evaluación-del-modelo">Evaluación del modelo</a></li>
+  <li><a href="#concordance-index" id="toc-concordance-index" class="nav-link" data-scroll-target="#concordance-index">Concordance index</a></li>
+  <li><a href="#limitaciones-del-c-index" id="toc-limitaciones-del-c-index" class="nav-link" data-scroll-target="#limitaciones-del-c-index">Limitaciones del C-index</a></li>
+  <li><a href="#validación-interna" id="toc-validación-interna" class="nav-link" data-scroll-target="#validación-interna">Validación interna</a></li>
+  <li><a href="#cross-validation" id="toc-cross-validation" class="nav-link" data-scroll-target="#cross-validation">Cross-validation</a></li>
+  <li><a href="#limitación-del-k-fold-aleatorio" id="toc-limitación-del-k-fold-aleatorio" class="nav-link" data-scroll-target="#limitación-del-k-fold-aleatorio">Limitación del k-fold aleatorio</a></li>
+  <li><a href="#validación-temporal" id="toc-validación-temporal" class="nav-link" data-scroll-target="#validación-temporal">Validación temporal</a></li>
+  <li><a href="#validación-externa" id="toc-validación-externa" class="nav-link" data-scroll-target="#validación-externa">Validación externa</a></li>
+  <li><a href="#bootstrap" id="toc-bootstrap" class="nav-link" data-scroll-target="#bootstrap">Bootstrap</a></li>
+  <li><a href="#calibration-curve" id="toc-calibration-curve" class="nav-link" data-scroll-target="#calibration-curve">Calibration curve</a></li>
+  <li><a href="#modelos-explicativos-y-predictivos" id="toc-modelos-explicativos-y-predictivos" class="nav-link" data-scroll-target="#modelos-explicativos-y-predictivos">Modelos explicativos y predictivos</a>
+  <ul class="collapse">
+  <li><a href="#explicativo" id="toc-explicativo" class="nav-link" data-scroll-target="#explicativo">Explicativo</a></li>
+  <li><a href="#predictivo" id="toc-predictivo" class="nav-link" data-scroll-target="#predictivo">Predictivo</a></li>
+  </ul></li>
+  <li><a href="#causalidad" id="toc-causalidad" class="nav-link" data-scroll-target="#causalidad">Causalidad</a></li>
+  <li><a href="#reporting" id="toc-reporting" class="nav-link" data-scroll-target="#reporting">Reporting</a></li>
+  <li><a href="#forest-plot" id="toc-forest-plot" class="nav-link" data-scroll-target="#forest-plot">Forest plot</a></li>
+  <li><a href="#tabla-para-forest-plot" id="toc-tabla-para-forest-plot" class="nav-link" data-scroll-target="#tabla-para-forest-plot">Tabla para forest plot</a></li>
+  <li><a href="#consideraciones-clínicas" id="toc-consideraciones-clínicas" class="nav-link" data-scroll-target="#consideraciones-clínicas">Consideraciones clínicas</a></li>
+  <li><a href="#errores-frecuentes" id="toc-errores-frecuentes" class="nav-link" data-scroll-target="#errores-frecuentes">Errores frecuentes</a></li>
+  <li><a href="#flujo-recomendado" id="toc-flujo-recomendado" class="nav-link" data-scroll-target="#flujo-recomendado">Flujo recomendado</a></li>
+  <li><a href="#checklist-para-proyectos" id="toc-checklist-para-proyectos" class="nav-link" data-scroll-target="#checklist-para-proyectos">Checklist para proyectos</a></li>
+  <li><a href="#recursos" id="toc-recursos" class="nav-link" data-scroll-target="#recursos">Recursos</a>
+  <ul class="collapse">
+  <li><a href="#conceptos" id="toc-conceptos" class="nav-link" data-scroll-target="#conceptos">Conceptos</a></li>
+  <li><a href="#librerías-de-python" id="toc-librerías-de-python" class="nav-link" data-scroll-target="#librerías-de-python">Librerías de Python</a></li>
+  <li><a href="#material-del-máster" id="toc-material-del-máster" class="nav-link" data-scroll-target="#material-del-máster">Material del máster</a></li>
+  </ul></li>
+  <li><a href="#notas-personales" id="toc-notas-personales" class="nav-link" data-scroll-target="#notas-personales">Notas personales</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../survival-analysis/index.html">Survival Analysis</a></li><li class="breadcrumb-item"><a href="../survival-analysis/cox-proportional-hazards.html">Modelo de Cox</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Modelo de riesgos proporcionales de Cox</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Resumen en 30 segundos
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El modelo de Cox estudia la asociación entre covariables y el tiempo hasta un evento.</p>
+<p>Su forma básica es:</p>
+<p><span class="math display">\[
+h(t\mid X)
+=
+h_0(t)
+\exp(
+\beta_1X_1+\cdots+\beta_pX_p
+)
+\]</span></p>
+<p>Permite:</p>
+<ul>
+<li>Ajustar por varias variables.</li>
+<li>Estimar hazard ratios.</li>
+<li>Generar curvas de supervivencia ajustadas.</li>
+<li>Predecir riesgo relativo.</li>
+<li>Incorporar variables dependientes del tiempo.</li>
+</ul>
+<p>Su supuesto principal es la proporcionalidad de riesgos.</p>
+</div>
+</div>
+<section id="qué-modela-cox" class="level2">
+<h2 data-anchor-id="qué-modela-cox">¿Qué modela Cox?</h2>
+<p>El modelo de Cox relaciona las covariables con el hazard.</p>
+<p><span class="math display">\[
+h(t\mid X)
+=
+h_0(t)
+\exp(
+\beta^\top X
+)
+\]</span></p>
+<p>donde:</p>
+<ul>
+<li>(h(tX)): hazard individual.</li>
+<li>(h_0(t)): hazard basal.</li>
+<li>(X): vector de covariables.</li>
+<li>(): coeficientes.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Idea clave
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Cox no necesita especificar una forma paramétrica concreta para el hazard basal.</p>
+</div>
+</div>
+</section>
+<section id="modelo-semiparamétrico" class="level2">
+<h2 data-anchor-id="modelo-semiparamétrico">Modelo semiparamétrico</h2>
+<p>Se considera semiparamétrico porque:</p>
+<ul>
+<li>La parte de covariables es paramétrica.</li>
+<li>El hazard basal queda sin especificar.</li>
+</ul>
+</section>
+<section id="interpretación-del-coeficiente" class="level2">
+<h2 data-anchor-id="interpretación-del-coeficiente">Interpretación del coeficiente</h2>
+<p>Para una variable (X_j):</p>
+<p><span class="math display">\[
+HR_j
+=
+e^{\beta_j}
+\]</span></p>
+</section>
+<section id="hazard-ratio" class="level2">
+<h2 data-anchor-id="hazard-ratio">Hazard ratio</h2>
+<pre class="text"><code>HR &gt; 1
+→ mayor hazard
+
+HR &lt; 1
+→ menor hazard
+
+HR = 1
+→ ausencia de asociación</code></pre>
+</section>
+<section id="ejemplo" class="level2">
+<h2 data-anchor-id="ejemplo">Ejemplo</h2>
+<pre class="text"><code>HR = 1.40</code></pre>
+<p>Puede interpretarse como un hazard instantáneo aproximadamente un 40 % mayor por cada unidad de incremento, manteniendo constantes las demás variables.</p>
+</section>
+<section id="variable-continua" class="level2">
+<h2 data-anchor-id="variable-continua">Variable continua</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>Edad
+HR = 1.03 por año</code></pre>
+<p>Un incremento de 10 años se interpreta como:</p>
+<p><span class="math display">\[
+HR_{10}
+=
+1.03^{10}
+\]</span></p>
+</section>
+<section id="calcular-hr-para-varias-unidades" class="level2">
+<h2 data-anchor-id="calcular-hr-para-varias-unidades">Calcular HR para varias unidades</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>hr_per_year <span class="op">=</span> <span class="fl">1.03</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>hr_per_10_years <span class="op">=</span> (</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    hr_per_year</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dv">10</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="variable-binaria" class="level2">
+<h2 data-anchor-id="variable-binaria">Variable binaria</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>Tratamiento
+0 = no
+1 = sí</code></pre>
+<p>Un HR de 0.75 compara tratados frente a no tratados, condicionado al resto de covariables.</p>
+</section>
+<section id="variable-categórica" class="level2">
+<h2 data-anchor-id="variable-categórica">Variable categórica</h2>
+<p>Debe definirse una categoría de referencia.</p>
+<pre class="text"><code>Diagnóstico A
+→ referencia
+
+Diagnóstico B
+→ HR respecto a A
+
+Diagnóstico C
+→ HR respecto a A</code></pre>
+</section>
+<section id="preparar-datos" class="level2">
+<h2 data-anchor-id="preparar-datos">Preparar datos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>cox_df <span class="op">=</span> df[</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"follow_up_days"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"event"</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sex"</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"baseline_lvef"</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"treatment"</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>].copy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="revisar-missing" class="level2">
+<h2 data-anchor-id="revisar-missing">Revisar missing</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cox_df.isna().mean()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="codificar-categóricas" class="level2">
+<h2 data-anchor-id="codificar-categóricas">Codificar categóricas</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cox_df <span class="op">=</span> pd.get_dummies(</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    cox_df,</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"sex"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"treatment"</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    drop_first<span class="op">=</span><span class="va">True</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="ajustar-modelo-con-lifelines" class="level2">
+<h2 data-anchor-id="ajustar-modelo-con-lifelines">Ajustar modelo con lifelines</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lifelines <span class="im">import</span> CoxPHFitter</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>cph <span class="op">=</span> CoxPHFitter()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>cph.fit(</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    cox_df,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"follow_up_days"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="resumen" class="level2">
+<h2 data-anchor-id="resumen">Resumen</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>cph.print_summary()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="resultados-principales" class="level2">
+<h2 data-anchor-id="resultados-principales">Resultados principales</h2>
+<p>El resumen incluye:</p>
+<ul>
+<li>Coeficiente.</li>
+<li>Hazard ratio.</li>
+<li>Error estándar.</li>
+<li>Intervalo de confianza.</li>
+<li>Estadístico.</li>
+<li>p-value.</li>
+</ul>
+</section>
+<section id="tabla-de-resultados" class="level2">
+<h2 data-anchor-id="tabla-de-resultados">Tabla de resultados</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>results <span class="op">=</span> (</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    cph.summary[</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"coef"</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"exp(coef)"</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"se(coef)"</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"p"</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>            <span class="st">"exp(coef) lower 95%"</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>            <span class="st">"exp(coef) upper 95%"</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretar-intervalo-de-confianza" class="level2">
+<h2 data-anchor-id="interpretar-intervalo-de-confianza">Interpretar intervalo de confianza</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>HR = 1.40
+IC 95 %: 1.10 a 1.78</code></pre>
+<p>El intervalo no incluye 1, por lo que existe evidencia estadística de asociación bajo el modelo.</p>
+</section>
+<section id="no-interpretar-solo-p-value" class="level2">
+<h2 data-anchor-id="no-interpretar-solo-p-value">No interpretar solo p-value</h2>
+<p>Debe considerarse:</p>
+<ul>
+<li>Magnitud.</li>
+<li>Intervalo.</li>
+<li>Plausibilidad.</li>
+<li>Confusión.</li>
+<li>Calidad de datos.</li>
+<li>Supuestos.</li>
+<li>Relevancia clínica.</li>
+</ul>
+</section>
+<section id="función-de-hazard-basal" class="level2">
+<h2 data-anchor-id="función-de-hazard-basal">Función de hazard basal</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>baseline_hazard <span class="op">=</span> (</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    cph.baseline_hazard_</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="hazard-acumulado-basal" class="level2">
+<h2 data-anchor-id="hazard-acumulado-basal">Hazard acumulado basal</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>baseline_cumulative_hazard <span class="op">=</span> (</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>    cph.baseline_cumulative_hazard_</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="supervivencia-basal" class="level2">
+<h2 data-anchor-id="supervivencia-basal">Supervivencia basal</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>baseline_survival <span class="op">=</span> (</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    cph.baseline_survival_</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="score-de-riesgo-relativo" class="level2">
+<h2 data-anchor-id="score-de-riesgo-relativo">Score de riesgo relativo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>partial_hazard <span class="op">=</span> (</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    cph.predict_partial_hazard(</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        cox_df</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Valores mayores indican mayor riesgo relativo.</p>
+</section>
+<section id="predicción-de-supervivencia" class="level2">
+<h2 data-anchor-id="predicción-de-supervivencia">Predicción de supervivencia</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>survival_function <span class="op">=</span> (</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    cph.predict_survival_function(</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        cox_df.iloc[</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>            [</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                <span class="dv">0</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>            ]</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="predicción-para-varios-pacientes" class="level2">
+<h2 data-anchor-id="predicción-para-varios-pacientes">Predicción para varios pacientes</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>patient_profiles <span class="op">=</span> cox_df.iloc[</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        <span class="dv">0</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        <span class="dv">1</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        <span class="dv">2</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>predicted_survival <span class="op">=</span> (</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    cph.predict_survival_function(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>        patient_profiles</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="visualizar-supervivencia-individual" class="level2">
+<h2 data-anchor-id="visualizar-supervivencia-individual">Visualizar supervivencia individual</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>predicted_survival.plot(</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span>(</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        <span class="dv">9</span>,</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        <span class="dv">6</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>plt.xlabel(</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Tiempo"</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>plt.ylabel(</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Supervivencia predicha"</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>plt.title(</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Curvas individuales ajustadas"</span></span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="predicción-en-tiempos-concretos" class="level2">
+<h2 data-anchor-id="predicción-en-tiempos-concretos">Predicción en tiempos concretos</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>survival_at_365 <span class="op">=</span> (</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    cph</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    .predict_survival_function(</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>        patient_profiles,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>        times<span class="op">=</span>[</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>            <span class="dv">365</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="riesgo-acumulado" class="level2">
+<h2 data-anchor-id="riesgo-acumulado">Riesgo acumulado</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>cumulative_hazard <span class="op">=</span> (</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    cph.predict_cumulative_hazard(</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>        patient_profiles</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="selección-de-covariables" class="level2">
+<h2 data-anchor-id="selección-de-covariables">Selección de covariables</h2>
+<p>La selección debe basarse en:</p>
+<ul>
+<li>Pregunta clínica.</li>
+<li>Confusores conocidos.</li>
+<li>Evidencia previa.</li>
+<li>Disponibilidad.</li>
+<li>Número de eventos.</li>
+<li>Riesgo de colinealidad.</li>
+<li>Parsimonia.</li>
+</ul>
+</section>
+<section id="no-seleccionar-solo-por-p-value-univariable" class="level2">
+<h2 data-anchor-id="no-seleccionar-solo-por-p-value-univariable">No seleccionar solo por p-value univariable</h2>
+<p>Una variable no significativa de forma univariable puede ser un confusor importante.</p>
+</section>
+<section id="modelo-univariable" class="level2">
+<h2 data-anchor-id="modelo-univariable">Modelo univariable</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>univariable_df <span class="op">=</span> cox_df[</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"follow_up_days"</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"event"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>univariable_model <span class="op">=</span> CoxPHFitter()</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>univariable_model.fit(</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    univariable_df,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"follow_up_days"</span>,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="modelo-multivariable" class="level2">
+<h2 data-anchor-id="modelo-multivariable">Modelo multivariable</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>multivariable_model <span class="op">=</span> CoxPHFitter()</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>multivariable_model.fit(</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    cox_df,</span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"follow_up_days"</span>,</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="confusión" class="level2">
+<h2 data-anchor-id="confusión">Confusión</h2>
+<p>Una covariable es confusora cuando se relaciona con:</p>
+<ul>
+<li>Exposición.</li>
+<li>Outcome.</li>
+<li>No es consecuencia de la exposición.</li>
+</ul>
+</section>
+<section id="ajuste-excesivo" class="level2">
+<h2 data-anchor-id="ajuste-excesivo">Ajuste excesivo</h2>
+<p>Puede ocurrir al incluir:</p>
+<ul>
+<li>Mediadores.</li>
+<li>Variables posteriores.</li>
+<li>Variables casi duplicadas.</li>
+<li>Demasiadas covariables para pocos eventos.</li>
+</ul>
+</section>
+<section id="eventos-por-variable" class="level2">
+<h2 data-anchor-id="eventos-por-variable">Eventos por variable</h2>
+<p>Reglas simples como 10 eventos por parámetro se usan como orientación, no como ley universal.</p>
+<p>Debe considerarse:</p>
+<ul>
+<li>Complejidad.</li>
+<li>Penalización.</li>
+<li>Colinealidad.</li>
+<li>Distribución.</li>
+<li>Validación.</li>
+</ul>
+</section>
+<section id="colinealidad" class="level2">
+<h2 data-anchor-id="colinealidad">Colinealidad</h2>
+<p>Ejemplos:</p>
+<ul>
+<li>Edad y edad al diagnóstico.</li>
+<li>FEVI Simpson y FEVI modo M.</li>
+<li>Peso y superficie corporal.</li>
+<li>Troponina y daño miocárdico derivado.</li>
+</ul>
+</section>
+<section id="revisar-correlaciones" class="level2">
+<h2 data-anchor-id="revisar-correlaciones">Revisar correlaciones</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="op">=</span> (</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    cox_df</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    .drop(</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>        columns<span class="op">=</span>[</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"follow_up_days"</span>,</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"event"</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    .corr()</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="vif" class="level2">
+<h2 data-anchor-id="vif">VIF</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statsmodels.stats.outliers_influence <span class="im">import</span> variance_inflation_factor</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> cox_df.drop(</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    columns<span class="op">=</span>[</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"follow_up_days"</span>,</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"event"</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>vif_table <span class="op">=</span> pd.DataFrame(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    {</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"feature"</span>: X.columns,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>        <span class="st">"vif"</span>: [</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>            variance_inflation_factor(</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>                X.values,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>                index</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> index <span class="kw">in</span> <span class="bu">range</span>(</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>                X.shape[</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>                    <span class="dv">1</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>                ]</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="escalado-de-variables" class="level2">
+<h2 data-anchor-id="escalado-de-variables">Escalado de variables</h2>
+<p>No es obligatorio para Cox clásico, pero puede facilitar:</p>
+<ul>
+<li>Comparabilidad.</li>
+<li>Penalización.</li>
+<li>Convergencia.</li>
+<li>Interpretación por desviación estándar.</li>
+</ul>
+</section>
+<section id="estandarizar" class="level2">
+<h2 data-anchor-id="estandarizar">Estandarizar</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>scaler <span class="op">=</span> StandardScaler()</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>cox_df[</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>    [</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span>,</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"baseline_lvef"</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> scaler.fit_transform(</span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>    cox_df[</span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"age"</span>,</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"baseline_lvef"</span></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación-tras-estandarizar" class="level2">
+<h2 data-anchor-id="interpretación-tras-estandarizar">Interpretación tras estandarizar</h2>
+<p>El HR corresponde a un incremento de una desviación estándar.</p>
+</section>
+<section id="no-linealidad" class="level2">
+<h2 data-anchor-id="no-linealidad">No linealidad</h2>
+<p>Cox asume linealidad de las covariables continuas en el log-hazard.</p>
+<pre class="text"><code>Edad
+→ efecto lineal sobre log-hazard</code></pre>
+<p>Esto puede ser incorrecto.</p>
+</section>
+<section id="categorizar-continuas" class="level2">
+<h2 data-anchor-id="categorizar-continuas">Categorizar continuas</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>cox_df[</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"age_group"</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> pd.cut(</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    cox_df[</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span>[</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>        <span class="dv">0</span>,</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>        <span class="dv">40</span>,</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>        <span class="dv">60</span>,</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>        <span class="dv">80</span>,</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">float</span>(</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"inf"</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Categorizar pierde información y crea puntos de corte artificiales.</p>
+</section>
+<section id="splines" class="level2">
+<h2 data-anchor-id="splines">Splines</h2>
+<p>Los splines permiten relaciones no lineales.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>cph <span class="op">=</span> CoxPHFitter()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>cph.fit(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    cox_df,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"follow_up_days"</span>,</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    formula<span class="op">=</span>(</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"bs(age, df=4)"</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">" + baseline_lvef"</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">" + treatment"</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interacciones" class="level2">
+<h2 data-anchor-id="interacciones">Interacciones</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>cox_df[</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"age_x_treatment"</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    cox_df[</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"age"</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    cox_df[</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"treatment_yes"</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interacción-clínica" class="level2">
+<h2 data-anchor-id="interacción-clínica">Interacción clínica</h2>
+<p>Puede representar que el efecto de una variable cambia según otra.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Efecto del tratamiento
+→ diferente según edad</code></pre>
+</section>
+<section id="interpretar-interacciones" class="level2">
+<h2 data-anchor-id="interpretar-interacciones">Interpretar interacciones</h2>
+<p>Con interacción, los efectos principales no deben interpretarse de forma aislada.</p>
+</section>
+<section id="estratificación" class="level2">
+<h2 data-anchor-id="estratificación">Estratificación</h2>
+<p>Si una variable incumple proporcionalidad, puede utilizarse como estrato.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>cph.fit(</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>    cox_df,</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"follow_up_days"</span>,</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    strata<span class="op">=</span>[</span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>        <span class="st">"center"</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="qué-hace-la-estratificación" class="level2">
+<h2 data-anchor-id="qué-hace-la-estratificación">Qué hace la estratificación</h2>
+<p>Permite que cada estrato tenga su propio hazard basal.</p>
+<p>Pero no estima un HR para la variable estratificada.</p>
+</section>
+<section id="ejemplo-por-centro" class="level2">
+<h2 data-anchor-id="ejemplo-por-centro">Ejemplo por centro</h2>
+<pre class="text"><code>Centro A
+→ hazard basal propio
+
+Centro B
+→ hazard basal propio</code></pre>
+</section>
+<section id="penalización" class="level2">
+<h2 data-anchor-id="penalización">Penalización</h2>
+<p>Puede utilizarse cuando:</p>
+<ul>
+<li>Hay muchas covariables.</li>
+<li>Hay colinealidad.</li>
+<li>Hay pocos eventos.</li>
+<li>Se necesita estabilidad.</li>
+</ul>
+</section>
+<section id="ridge-en-cox" class="level2">
+<h2 data-anchor-id="ridge-en-cox">Ridge en Cox</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>cph <span class="op">=</span> CoxPHFitter(</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    penalizer<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    l1_ratio<span class="op">=</span><span class="fl">0.0</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="lasso-en-cox" class="level2">
+<h2 data-anchor-id="lasso-en-cox">Lasso en Cox</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>cph <span class="op">=</span> CoxPHFitter(</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    penalizer<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    l1_ratio<span class="op">=</span><span class="fl">1.0</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="elastic-net" class="level2">
+<h2 data-anchor-id="elastic-net">Elastic Net</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>cph <span class="op">=</span> CoxPHFitter(</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>    penalizer<span class="op">=</span><span class="fl">0.1</span>,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>    l1_ratio<span class="op">=</span><span class="fl">0.5</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="elegir-penalización" class="level2">
+<h2 data-anchor-id="elegir-penalización">Elegir penalización</h2>
+<p>Debe seleccionarse mediante validación interna adecuada.</p>
+</section>
+<section id="cluster-robust-standard-errors" class="level2">
+<h2 data-anchor-id="cluster-robust-standard-errors">Cluster robust standard errors</h2>
+<p>Cuando existen observaciones agrupadas:</p>
+<ul>
+<li>Paciente.</li>
+<li>Hospital.</li>
+<li>Familia.</li>
+<li>Centro.</li>
+</ul>
+<p>pueden utilizarse errores robustos.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>cph.fit(</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    cox_df,</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"follow_up_days"</span>,</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    cluster_col<span class="op">=</span><span class="st">"center_id"</span>,</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>    robust<span class="op">=</span><span class="va">True</span></span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="frailty" class="level2">
+<h2 data-anchor-id="frailty">Frailty</h2>
+<p>Los modelos de frailty incorporan heterogeneidad no observada compartida.</p>
+<p>Ejemplos:</p>
+<ul>
+<li>Centro.</li>
+<li>Familia.</li>
+<li>Paciente con eventos recurrentes.</li>
+</ul>
+</section>
+<section id="cox-y-tiempo-dependiente" class="level2">
+<h2 data-anchor-id="cox-y-tiempo-dependiente">Cox y tiempo dependiente</h2>
+<p>Para covariables temporales se utiliza formato start-stop.</p>
+<pre class="text"><code>patient_id | start | stop | event | treatment</code></pre>
+</section>
+<section id="ajustar-modelo-temporal" class="level2">
+<h2 data-anchor-id="ajustar-modelo-temporal">Ajustar modelo temporal</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lifelines <span class="im">import</span> CoxTimeVaryingFitter</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>ctv <span class="op">=</span> CoxTimeVaryingFitter()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>ctv.fit(</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    interval_df,</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    id_col<span class="op">=</span><span class="st">"patient_id"</span>,</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    start_col<span class="op">=</span><span class="st">"start"</span>,</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    stop_col<span class="op">=</span><span class="st">"stop"</span>,</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span></span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="supuesto-de-riesgos-proporcionales" class="level2">
+<h2 data-anchor-id="supuesto-de-riesgos-proporcionales">Supuesto de riesgos proporcionales</h2>
+<p>El modelo asume:</p>
+<p><span class="math display">\[
+\frac{
+h(t\mid X_a)
+}{
+h(t\mid X_b)
+}
+=
+\text{constante en }t
+\]</span></p>
+</section>
+<section id="violación-del-supuesto" class="level2">
+<h2 data-anchor-id="violación-del-supuesto">Violación del supuesto</h2>
+<p>Ejemplo:</p>
+<pre class="text"><code>Tratamiento beneficioso al inicio
+→ efecto desaparece después</code></pre>
+<p>En ese caso, un único HR puede ser engañoso.</p>
+</section>
+<section id="revisar-supuesto" class="level2">
+<h2 data-anchor-id="revisar-supuesto">Revisar supuesto</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>cph.check_assumptions(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    cox_df,</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    p_value_threshold<span class="op">=</span><span class="fl">0.05</span>,</span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    show_plots<span class="op">=</span><span class="va">True</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="residuos-de-schoenfeld" class="level2">
+<h2 data-anchor-id="residuos-de-schoenfeld">Residuos de Schoenfeld</h2>
+<p>Se utilizan para evaluar si el efecto de una covariable cambia con el tiempo.</p>
+</section>
+<section id="soluciones-ante-incumplimiento" class="level2">
+<h2 data-anchor-id="soluciones-ante-incumplimiento">Soluciones ante incumplimiento</h2>
+<ul>
+<li>Estratificación.</li>
+<li>Interacción con tiempo.</li>
+<li>Coeficientes dependientes del tiempo.</li>
+<li>Dividir periodo.</li>
+<li>Modelos paramétricos flexibles.</li>
+<li>RMST.</li>
+<li>Modelos AFT.</li>
+</ul>
+</section>
+<section id="interacción-con-tiempo" class="level2">
+<h2 data-anchor-id="interacción-con-tiempo">Interacción con tiempo</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>cox_df[</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"treatment_log_time"</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>] <span class="op">=</span> (</span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    cox_df[</span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>        <span class="st">"treatment_yes"</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>    np.log1p(</span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>        cox_df[</span>
+<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>            <span class="st">"follow_up_days"</span></span>
+<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb49-12"><a href="#cb49-12" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb49-13"><a href="#cb49-13" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Debe implementarse con una estructura y formulación adecuadas, evitando usar tiempo final como covariable basal de forma ingenua.</p>
+</section>
+<section id="ties" class="level2">
+<h2 data-anchor-id="ties">Ties</h2>
+<p>Los empates ocurren cuando varios eventos tienen el mismo tiempo.</p>
+<p>Son frecuentes con fechas registradas por día.</p>
+<p>Los métodos de aproximación incluyen:</p>
+<ul>
+<li>Breslow.</li>
+<li>Efron.</li>
+<li>Exacto.</li>
+</ul>
+</section>
+<section id="predicción-absoluta" class="level2">
+<h2 data-anchor-id="predicción-absoluta">Predicción absoluta</h2>
+<p>El HR es relativo.</p>
+<p>Para obtener riesgo absoluto se necesita:</p>
+<ul>
+<li>Hazard basal.</li>
+<li>Horizonte.</li>
+<li>Perfil de covariables.</li>
+</ul>
+</section>
+<section id="supervivencia-individual" class="level2">
+<h2 data-anchor-id="supervivencia-individual">Supervivencia individual</h2>
+<p><span class="math display">\[
+S(t\mid X)
+=
+S_0(t)^{
+\exp(
+\beta^\top X
+)
+}
+\]</span></p>
+</section>
+<section id="curvas-ajustadas-por-perfiles" class="level2">
+<h2 data-anchor-id="curvas-ajustadas-por-perfiles">Curvas ajustadas por perfiles</h2>
+<p>Puede compararse:</p>
+<pre class="text"><code>Paciente de bajo riesgo
+Paciente de riesgo medio
+Paciente de alto riesgo</code></pre>
+<p>manteniendo definidos los perfiles.</p>
+</section>
+<section id="curvas-estandarizadas" class="level2">
+<h2 data-anchor-id="curvas-estandarizadas">Curvas estandarizadas</h2>
+<p>Para comparar grupos ajustados puede promediarse la supervivencia predicha sobre una población común.</p>
+</section>
+<section id="evaluación-del-modelo" class="level2">
+<h2 data-anchor-id="evaluación-del-modelo">Evaluación del modelo</h2>
+<p>Debe incluir:</p>
+<ul>
+<li>Discriminación.</li>
+<li>Calibración.</li>
+<li>Rendimiento temporal.</li>
+<li>Validación externa.</li>
+<li>Supuestos.</li>
+<li>Estabilidad.</li>
+</ul>
+</section>
+<section id="concordance-index" class="level2">
+<h2 data-anchor-id="concordance-index">Concordance index</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>concordance <span class="op">=</span> (</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    cph.concordance_index_</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="limitaciones-del-c-index" class="level2">
+<h2 data-anchor-id="limitaciones-del-c-index">Limitaciones del C-index</h2>
+<ul>
+<li>No mide calibración.</li>
+<li>Puede ser optimista.</li>
+<li>No refleja horizontes concretos.</li>
+<li>No indica utilidad clínica.</li>
+</ul>
+</section>
+<section id="validación-interna" class="level2">
+<h2 data-anchor-id="validación-interna">Validación interna</h2>
+<p>Opciones:</p>
+<ul>
+<li>Bootstrap.</li>
+<li>Cross-validation.</li>
+<li>Penalización.</li>
+<li>Corrección de optimismo.</li>
+</ul>
+</section>
+<section id="cross-validation" class="level2">
+<h2 data-anchor-id="cross-validation">Cross-validation</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> lifelines.utils <span class="im">import</span> k_fold_cross_validation</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>scores <span class="op">=</span> k_fold_cross_validation(</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    cph,</span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    cox_df,</span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    duration_col<span class="op">=</span><span class="st">"follow_up_days"</span>,</span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    event_col<span class="op">=</span><span class="st">"event"</span>,</span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    k<span class="op">=</span><span class="dv">5</span>,</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>    scoring_method<span class="op">=</span><span class="st">"concordance_index"</span></span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="limitación-del-k-fold-aleatorio" class="level2">
+<h2 data-anchor-id="limitación-del-k-fold-aleatorio">Limitación del k-fold aleatorio</h2>
+<p>Si existe estructura temporal o multicentro, el split debe reflejarla.</p>
+</section>
+<section id="validación-temporal" class="level2">
+<h2 data-anchor-id="validación-temporal">Validación temporal</h2>
+<pre class="text"><code>Periodo antiguo
+→ desarrollo
+
+Periodo posterior
+→ validación</code></pre>
+</section>
+<section id="validación-externa" class="level2">
+<h2 data-anchor-id="validación-externa">Validación externa</h2>
+<pre class="text"><code>Centro A
+→ desarrollo
+
+Centro B
+→ validación</code></pre>
+</section>
+<section id="bootstrap" class="level2">
+<h2 data-anchor-id="bootstrap">Bootstrap</h2>
+<p>Puede utilizarse para:</p>
+<ul>
+<li>Optimismo.</li>
+<li>Estabilidad de coeficientes.</li>
+<li>Intervalos.</li>
+<li>Selección de variables.</li>
+</ul>
+</section>
+<section id="calibration-curve" class="level2">
+<h2 data-anchor-id="calibration-curve">Calibration curve</h2>
+<p>Debe compararse supervivencia predicha y observada en tiempos concretos.</p>
+<p>Ejemplo:</p>
+<pre class="text"><code>Supervivencia predicha a 1 año
+vs
+Kaplan-Meier observada a 1 año</code></pre>
+</section>
+<section id="modelos-explicativos-y-predictivos" class="level2">
+<h2 data-anchor-id="modelos-explicativos-y-predictivos">Modelos explicativos y predictivos</h2>
+<section id="explicativo" class="level3">
+<h3 data-anchor-id="explicativo">Explicativo</h3>
+<p>Objetivo:</p>
+<ul>
+<li>Estimar asociaciones.</li>
+<li>Controlar confusión.</li>
+<li>Interpretar HR.</li>
+</ul>
+</section>
+<section id="predictivo" class="level3">
+<h3 data-anchor-id="predictivo">Predictivo</h3>
+<p>Objetivo:</p>
+<ul>
+<li>Predecir riesgo individual.</li>
+<li>Maximizar rendimiento.</li>
+<li>Evaluar calibración y validación.</li>
+</ul>
+<p>Las decisiones metodológicas pueden diferir.</p>
+</section>
+</section>
+<section id="causalidad" class="level2">
+<h2 data-anchor-id="causalidad">Causalidad</h2>
+<p>Un HR ajustado no demuestra causalidad.</p>
+<p>Puede persistir:</p>
+<ul>
+<li>Confusión residual.</li>
+<li>Sesgo de selección.</li>
+<li>Confounding by indication.</li>
+<li>Medición imperfecta.</li>
+<li>Variables no observadas.</li>
+</ul>
+</section>
+<section id="reporting" class="level2">
+<h2 data-anchor-id="reporting">Reporting</h2>
+<p>Debe incluir:</p>
+<ul>
+<li>Población.</li>
+<li>Tiempo cero.</li>
+<li>Evento.</li>
+<li>Censura.</li>
+<li>Número de eventos.</li>
+<li>Covariables.</li>
+<li>Missing.</li>
+<li>HR e intervalos.</li>
+<li>Supuestos.</li>
+<li>Validación.</li>
+<li>Métricas.</li>
+</ul>
+</section>
+<section id="forest-plot" class="level2">
+<h2 data-anchor-id="forest-plot">Forest plot</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>cph.plot()</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>plt.title(</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Hazard ratios del modelo de Cox"</span></span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="tabla-para-forest-plot" class="level2">
+<h2 data-anchor-id="tabla-para-forest-plot">Tabla para forest plot</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>forest_table <span class="op">=</span> (</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>    cph.summary[</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>        [</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">"exp(coef)"</span>,</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">"exp(coef) lower 95%"</span>,</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">"exp(coef) upper 95%"</span>,</span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">"p"</span></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>        ]</span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>    .rename(</span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>        columns<span class="op">=</span>{</span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">"exp(coef)"</span>:</span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>            <span class="st">"hazard_ratio"</span>,</span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>            <span class="st">"exp(coef) lower 95%"</span>:</span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>            <span class="st">"ci_lower"</span>,</span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>            <span class="st">"exp(coef) upper 95%"</span>:</span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">"ci_upper"</span></span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="consideraciones-clínicas" class="level2">
+<h2 data-anchor-id="consideraciones-clínicas">Consideraciones clínicas</h2>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Aplicación clínica
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>El modelo de Cox es adecuado para estudiar asociaciones ajustadas y estimar supervivencia individual cuando sus supuestos son razonables.</p>
+</div>
+</div>
+<p>Debe revisarse:</p>
+<ul>
+<li>Tiempo cero.</li>
+<li>Confusores.</li>
+<li>Forma funcional.</li>
+<li>Proporcionalidad.</li>
+<li>Eventos por parámetro.</li>
+<li>Calibración.</li>
+<li>Validación externa.</li>
+</ul>
+</section>
+<section id="errores-frecuentes" class="level2">
+<h2 data-anchor-id="errores-frecuentes">Errores frecuentes</h2>
+<ul>
+<li>Interpretar HR como riesgo absoluto.</li>
+<li>Seleccionar variables solo por p-value.</li>
+<li>No comprobar proporcionalidad.</li>
+<li>Categorizar continuas sin necesidad.</li>
+<li>Incluir mediadores.</li>
+<li>Usar variables futuras.</li>
+<li>Ignorar colinealidad.</li>
+<li>Sobreajustar con pocos eventos.</li>
+<li>Reportar solo C-index.</li>
+<li>No evaluar calibración.</li>
+<li>Interpretar asociación como causalidad.</li>
+<li>No validar externamente.</li>
+</ul>
+</section>
+<section id="flujo-recomendado" class="level2">
+<h2 data-anchor-id="flujo-recomendado">Flujo recomendado</h2>
+<ol type="1">
+<li>Definir pregunta.</li>
+<li>Seleccionar covariables.</li>
+<li>Revisar missing.</li>
+<li>Revisar colinealidad.</li>
+<li>Ajustar modelo.</li>
+<li>Interpretar HR.</li>
+<li>Revisar forma funcional.</li>
+<li>Comprobar proporcionalidad.</li>
+<li>Revisar residuos.</li>
+<li>Evaluar discriminación.</li>
+<li>Evaluar calibración.</li>
+<li>Validar externamente.</li>
+</ol>
+</section>
+<section id="checklist-para-proyectos" class="level2">
+<h2 data-anchor-id="checklist-para-proyectos">Checklist para proyectos</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">He definido el objetivo explicativo o predictivo.</label></li>
+<li><label><input type="checkbox">He definido covariables a priori.</label></li>
+<li><label><input type="checkbox">He revisado missing.</label></li>
+<li><label><input type="checkbox">He codificado categóricas.</label></li>
+<li><label><input type="checkbox">He revisado colinealidad.</label></li>
+<li><label><input type="checkbox">He ajustado el modelo.</label></li>
+<li><label><input type="checkbox">He reportado HR e IC.</label></li>
+<li><label><input type="checkbox">He revisado linealidad.</label></li>
+<li><label><input type="checkbox">He comprobado riesgos proporcionales.</label></li>
+<li><label><input type="checkbox">He considerado interacciones.</label></li>
+<li><label><input type="checkbox">He considerado penalización.</label></li>
+<li><label><input type="checkbox">He evaluado C-index.</label></li>
+<li><label><input type="checkbox">He evaluado calibración.</label></li>
+<li><label><input type="checkbox">He realizado validación interna.</label></li>
+<li><label><input type="checkbox">He planificado validación externa.</label></li>
+</ul>
+</section>
+<section id="recursos" class="level2">
+<h2 data-anchor-id="recursos">Recursos</h2>
+<section id="conceptos" class="level3">
+<h3 data-anchor-id="conceptos">Conceptos</h3>
+<ul>
+<li>Cox proportional hazards.</li>
+<li>Partial likelihood.</li>
+<li>Hazard ratio.</li>
+<li>Baseline hazard.</li>
+<li>Proportional hazards.</li>
+<li>Schoenfeld residuals.</li>
+<li>Penalized Cox.</li>
+<li>Stratified Cox.</li>
+<li>Time-varying Cox.</li>
+</ul>
+</section>
+<section id="librerías-de-python" class="level3">
+<h3 data-anchor-id="librerías-de-python">Librerías de Python</h3>
+<ul>
+<li><code>lifelines.CoxPHFitter</code>.</li>
+<li><code>lifelines.CoxTimeVaryingFitter</code>.</li>
+<li><code>scikit-survival</code>.</li>
+<li><code>statsmodels</code>.</li>
+</ul>
+</section>
+<section id="material-del-máster" class="level3">
+<h3 data-anchor-id="material-del-máster">Material del máster</h3>
+<p>Añadir aquí:</p>
+<ul>
+<li>Presentación correspondiente.</li>
+<li>Diapositivas relevantes.</li>
+<li>Ejercicios realizados.</li>
+<li>Apuntes de Notion.</li>
+</ul>
+</section>
+</section>
+<section id="notas-personales" class="level2">
+<h2 data-anchor-id="notas-personales">Notas personales</h2>
+<p>Añade aquí tus covariables, hazard ratios, supuestos, penalización, validación y decisiones clínicas.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/pablolongan\.github\.io\/health-data-science-handbook\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
