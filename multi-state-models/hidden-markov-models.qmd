@@ -1,0 +1,1717 @@
+---
+title: "Hidden Markov Models"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+Un Hidden Markov Model, o HMM, distingue entre:
+
+- **Estado clínico real**, que permanece oculto.
+- **Observación registrada**, que puede contener error.
+
+Ejemplo:
+
+```text
+Estado real
+→ S1
+
+Observación ecocardiográfica
+→ clasificada como S0
+```
+
+Los HMM permiten estimar:
+
+- Probabilidad de cada estado latente.
+- Probabilidad de error de clasificación.
+- Secuencia más probable de estados.
+- Intensidades o probabilidades de transición.
+- Predicción del siguiente estado.
+:::
+
+## ¿Por qué estados ocultos?
+
+En muchos procesos clínicos el estado real no se observa directamente.
+
+Se infiere mediante:
+
+- Biomarcadores.
+- Pruebas de imagen.
+- Escalas.
+- Diagnósticos.
+- Evaluación profesional.
+
+::: {.callout-note}
+## Idea clave
+
+La observación es una señal imperfecta del estado clínico subyacente.
+:::
+
+## Ejemplo clínico
+
+```text
+Estado latente
+→ cardiotoxicidad leve
+
+Observaciones:
+- FEVI normal
+- GLS alterado
+- troponina elevada
+```
+
+La combinación de observaciones aporta evidencia sobre el estado real, pero no lo determina con certeza absoluta.
+
+## HMM básico
+
+Un HMM contiene:
+
+1. Estados ocultos.
+2. Observaciones.
+3. Probabilidades de transición.
+4. Probabilidades de emisión.
+5. Distribución inicial.
+
+## Estados ocultos
+
+```text
+Z_t ∈ {S0, S1, S2, S3}
+```
+
+## Observación
+
+```text
+Y_t
+```
+
+puede ser:
+
+- Estado registrado.
+- Resultado de prueba.
+- Vector de biomarcadores.
+- Categoría clínica.
+- Señal continua.
+
+## Estructura probabilística
+
+```text
+Z₁ → Z₂ → Z₃ → Z₄
+↓    ↓    ↓    ↓
+Y₁   Y₂   Y₃   Y₄
+```
+
+## Supuesto de Markov latente
+
+$$
+P(
+Z_t
+\mid
+Z_{1:t-1}
+)
+=
+P(
+Z_t
+\mid
+Z_{t-1}
+)
+$$
+
+## Independencia condicional de observaciones
+
+$$
+P(
+Y_t
+\mid
+Z_{1:t},Y_{1:t-1}
+)
+=
+P(
+Y_t
+\mid
+Z_t
+)
+$$
+
+## Matriz de transición
+
+Para un HMM discreto:
+
+$$
+A_{rs}
+=
+P(
+Z_{t+1}=s
+\mid
+Z_t=r
+)
+$$
+
+## Ejemplo
+
+```python
+import numpy as np
+
+A = np.array(
+    [
+        [
+            0.85,
+            0.13,
+            0.02,
+            0.00
+        ],
+        [
+            0.15,
+            0.65,
+            0.18,
+            0.02
+        ],
+        [
+            0.00,
+            0.15,
+            0.70,
+            0.15
+        ],
+        [
+            0.00,
+            0.00,
+            0.00,
+            1.00
+        ]
+    ]
+)
+```
+
+## Validar filas
+
+```python
+np.allclose(
+    A.sum(
+        axis=1
+    ),
+    1
+)
+```
+
+## Interpretación
+
+```python
+A[
+    1,
+    2
+]
+```
+
+es la probabilidad de pasar de S1 a S2 entre dos tiempos de observación consecutivos.
+
+## Estado absorbente
+
+```text
+S3
+```
+
+puede representarse con:
+
+```python
+A[
+    3,
+    :
+] = [
+    0,
+    0,
+    0,
+    1
+]
+```
+
+## Matriz de emisión
+
+La matriz de emisión describe:
+
+$$
+B_{sk}
+=
+P(
+Y_t=k
+\mid
+Z_t=s
+)
+$$
+
+## Ejemplo de clasificación observada
+
+Estados reales:
+
+```text
+S0, S1, S2, S3
+```
+
+Estados observados:
+
+```text
+S0, S1, S2, S3
+```
+
+## Matriz casi diagonal
+
+```python
+B = np.array(
+    [
+        [
+            0.90,
+            0.08,
+            0.02,
+            0.00
+        ],
+        [
+            0.10,
+            0.75,
+            0.13,
+            0.02
+        ],
+        [
+            0.01,
+            0.14,
+            0.75,
+            0.10
+        ],
+        [
+            0.00,
+            0.02,
+            0.08,
+            0.90
+        ]
+    ]
+)
+```
+
+## Interpretación
+
+```python
+B[
+    1,
+    0
+]
+```
+
+es la probabilidad de observar S0 cuando el estado latente real es S1.
+
+## Sensibilidad y especificidad
+
+La diagonal representa clasificación correcta.
+
+Los elementos fuera de la diagonal representan error.
+
+## Distribución inicial
+
+```python
+pi = np.array(
+    [
+        0.80,
+        0.15,
+        0.05,
+        0.00
+    ]
+)
+```
+
+## Validar
+
+```python
+np.isclose(
+    pi.sum(),
+    1
+)
+```
+
+## Los tres problemas clásicos
+
+Un HMM suele resolver tres tareas:
+
+1. Evaluación de probabilidad.
+2. Decodificación.
+3. Aprendizaje de parámetros.
+
+## Problema 1. Evaluación
+
+```text
+¿Cuál es la probabilidad
+de la secuencia observada?
+```
+
+Se resuelve con el algoritmo forward.
+
+## Forward probabilities
+
+$$
+\alpha_t(s)
+=
+P(
+Y_1,\ldots,Y_t,
+Z_t=s
+)
+$$
+
+## Inicialización
+
+$$
+\alpha_1(s)
+=
+\pi_s
+B_s(Y_1)
+$$
+
+## Recursión
+
+$$
+\alpha_t(s)
+=
+B_s(Y_t)
+\sum_r
+\alpha_{t-1}(r)
+A_{rs}
+$$
+
+## Implementación didáctica
+
+```python
+def forward_algorithm(
+    observations,
+    initial_probabilities,
+    transition_matrix,
+    emission_matrix
+):
+
+    n_states = (
+        transition_matrix.shape[
+            0
+        ]
+    )
+
+    n_times = len(
+        observations
+    )
+
+    alpha = np.zeros(
+        (
+            n_times,
+            n_states
+        )
+    )
+
+    first_observation = observations[
+        0
+    ]
+
+    alpha[
+        0,
+        :
+    ] = (
+        initial_probabilities
+        *
+        emission_matrix[
+            :,
+            first_observation
+        ]
+    )
+
+    for time_index in range(
+        1,
+        n_times
+    ):
+
+        observation = observations[
+            time_index
+        ]
+
+        alpha[
+            time_index,
+            :
+        ] = (
+            alpha[
+                time_index
+                -
+                1,
+                :
+            ]
+            @
+            transition_matrix
+        ) * emission_matrix[
+            :,
+            observation
+        ]
+
+    sequence_probability = (
+        alpha[
+            -1,
+            :
+        ]
+        .sum()
+    )
+
+    return (
+        alpha,
+        sequence_probability
+    )
+```
+
+## Problema numérico
+
+Con secuencias largas, las probabilidades pueden hacerse extremadamente pequeñas.
+
+Soluciones:
+
+- Escalado.
+- Log-probabilidades.
+- Log-sum-exp.
+
+## Forward en log-space
+
+```python
+from scipy.special import logsumexp
+```
+
+## Problema 2. Decodificación
+
+```text
+¿Cuál es la secuencia de estados
+más probable?
+```
+
+Se utiliza Viterbi.
+
+## Viterbi
+
+$$
+\delta_t(s)
+=
+\max_r
+[
+\delta_{t-1}(r)
+A_{rs}
+]
+B_s(Y_t)
+$$
+
+## Implementación conceptual
+
+```python
+def viterbi(
+    observations,
+    initial_probabilities,
+    transition_matrix,
+    emission_matrix
+):
+
+    log_pi = np.log(
+        initial_probabilities
+    )
+
+    log_a = np.log(
+        transition_matrix
+    )
+
+    log_b = np.log(
+        emission_matrix
+    )
+
+    n_states = (
+        transition_matrix.shape[
+            0
+        ]
+    )
+
+    n_times = len(
+        observations
+    )
+
+    delta = np.full(
+        (
+            n_times,
+            n_states
+        ),
+        -np.inf
+    )
+
+    psi = np.zeros(
+        (
+            n_times,
+            n_states
+        ),
+        dtype=int
+    )
+
+    delta[
+        0,
+        :
+    ] = (
+        log_pi
+        +
+        log_b[
+            :,
+            observations[
+                0
+            ]
+        ]
+    )
+
+    for time_index in range(
+        1,
+        n_times
+    ):
+
+        for state in range(
+            n_states
+        ):
+
+            candidates = (
+                delta[
+                    time_index
+                    -
+                    1,
+                    :
+                ]
+                +
+                log_a[
+                    :,
+                    state
+                ]
+            )
+
+            psi[
+                time_index,
+                state
+            ] = np.argmax(
+                candidates
+            )
+
+            delta[
+                time_index,
+                state
+            ] = (
+                candidates[
+                    psi[
+                        time_index,
+                        state
+                    ]
+                ]
+                +
+                log_b[
+                    state,
+                    observations[
+                        time_index
+                    ]
+                ]
+            )
+
+    path = np.zeros(
+        n_times,
+        dtype=int
+    )
+
+    path[
+        -1
+    ] = np.argmax(
+        delta[
+            -1,
+            :
+        ]
+    )
+
+    for time_index in range(
+        n_times
+        -
+        2,
+        -1,
+        -1
+    ):
+
+        path[
+            time_index
+        ] = psi[
+            time_index
+            +
+            1,
+            path[
+                time_index
+                +
+                1
+            ]
+        ]
+
+    return path
+```
+
+## Viterbi no es posterior marginal
+
+La secuencia Viterbi es la trayectoria conjunta más probable.
+
+No coincide necesariamente con elegir en cada tiempo el estado posterior más probable.
+
+## Problema 3. Aprendizaje
+
+```text
+¿Cómo estimar A, B y pi
+a partir de los datos?
+```
+
+Puede utilizarse:
+
+- Máxima verosimilitud.
+- Baum-Welch.
+- Expectation-Maximization.
+- Métodos bayesianos.
+
+## Backward probabilities
+
+$$
+\beta_t(r)
+=
+P(
+Y_{t+1:T}
+\mid
+Z_t=r
+)
+$$
+
+## Recursión backward
+
+$$
+\beta_t(r)
+=
+\sum_s
+A_{rs}
+B_s(Y_{t+1})
+\beta_{t+1}(s)
+$$
+
+## Posterior de estado
+
+$$
+\gamma_t(s)
+=
+P(
+Z_t=s
+\mid
+Y_{1:T}
+)
+$$
+
+Se obtiene combinando forward y backward.
+
+## Interpretación
+
+```text
+En visita t:
+P(S0) = 0.10
+P(S1) = 0.65
+P(S2) = 0.24
+P(S3) = 0.01
+```
+
+## Smoothing
+
+Utiliza toda la secuencia, incluyendo observaciones posteriores.
+
+Útil para:
+
+- Análisis retrospectivo.
+- Adjudicación.
+- Reconstrucción de trayectorias.
+
+## Filtering
+
+Utiliza solo información hasta el tiempo actual.
+
+$$
+P(
+Z_t
+\mid
+Y_{1:t}
+)
+$$
+
+Útil para:
+
+- Predicción online.
+- Alertas.
+- Apoyo clínico en tiempo real.
+
+## Prediction
+
+$$
+P(
+Z_{t+1}
+\mid
+Y_{1:t}
+)
+$$
+
+Se obtiene propagando la distribución filtrada mediante la matriz de transición.
+
+## Ejemplo
+
+```python
+filtered_state_probability = np.array(
+    [
+        0.10,
+        0.70,
+        0.19,
+        0.01
+    ]
+)
+```
+
+```python
+next_state_probability = (
+    filtered_state_probability
+    @
+    A
+)
+```
+
+## Observaciones categóricas
+
+Ejemplo:
+
+```text
+Estado clínico registrado
+```
+
+La matriz de emisión es categórica.
+
+## Observaciones continuas
+
+Ejemplos:
+
+- FEVI.
+- GLS.
+- Troponina.
+- NT-proBNP.
+
+Puede asumirse una distribución por estado.
+
+## Emisión gaussiana
+
+$$
+Y_t
+\mid
+Z_t=s
+\sim
+N(
+\mu_s,
+\Sigma_s
+)
+$$
+
+## Ejemplo univariante
+
+```python
+state_means = np.array(
+    [
+        60,
+        55,
+        45,
+        35
+    ]
+)
+
+state_standard_deviations = np.array(
+    [
+        4,
+        5,
+        6,
+        7
+    ]
+)
+```
+
+## Likelihood de emisión
+
+```python
+from scipy.stats import norm
+
+def gaussian_emission_probability(
+    value,
+    state
+):
+
+    return norm.pdf(
+        value,
+        loc=state_means[
+            state
+        ],
+        scale=state_standard_deviations[
+            state
+        ]
+    )
+```
+
+## Emisión multivariante
+
+```python
+from scipy.stats import multivariate_normal
+```
+
+```python
+observation = np.array(
+    [
+        lvef,
+        gls,
+        troponin
+    ]
+)
+```
+
+Cada estado puede tener:
+
+- Vector de medias.
+- Matriz de covarianza.
+
+## Covarianza
+
+Puede asumirse:
+
+- Diagonal.
+- Completa.
+- Compartida.
+- Específica por estado.
+
+## Problemas con pocas observaciones
+
+Una matriz de covarianza completa requiere muchos datos.
+
+Puede preferirse:
+
+- Diagonal.
+- Regularización.
+- Selección de variables.
+- Priors.
+
+## Distribuciones no gaussianas
+
+Ejemplos:
+
+- Log-normal para biomarcadores.
+- Poisson para recuentos.
+- Bernoulli para flags.
+- Multinomial para categorías.
+- Distribuciones mixtas.
+
+## Biomarcadores sesgados
+
+```python
+log_troponin = np.log1p(
+    troponin
+)
+```
+
+Puede ser más compatible con una emisión gaussiana.
+
+## Observaciones mixtas
+
+Un estado puede emitir simultáneamente:
+
+- FEVI continua.
+- Troponina continua.
+- ECG anormal binario.
+- Calidad categórica.
+
+Se necesita una función de emisión conjunta o una aproximación condicional.
+
+## Missing en observaciones
+
+Una ventaja de los HMM es que pueden integrar información parcial.
+
+Ejemplo:
+
+```text
+FEVI disponible
+GLS missing
+Troponina disponible
+```
+
+La likelihood puede calcularse solo con las variables observadas, si el modelo lo permite.
+
+## No confundir missing con normal
+
+```text
+GLS no medido
+≠
+GLS normal
+```
+
+## Observaciones irregulares
+
+El HMM discreto estándar supone pasos equivalentes.
+
+Pero en salud:
+
+```text
+Visita 1 → día 0
+Visita 2 → día 30
+Visita 3 → día 200
+```
+
+Los intervalos son distintos.
+
+## Problema
+
+Usar la misma matriz \(A\) para 30 y 170 días no es coherente.
+
+## Continuous-time HMM
+
+Utiliza una matriz generadora \(Q\).
+
+Para un intervalo \(\Delta t\):
+
+$$
+P(\Delta t)
+=
+\exp(
+Q\Delta t
+)
+$$
+
+## Ejemplo
+
+```python
+from scipy.linalg import expm
+
+delta_t = 170
+
+P_delta = expm(
+    Q
+    *
+    delta_t
+)
+```
+
+## Ventaja
+
+Permite:
+
+- Visitas irregulares.
+- Intensidades continuas.
+- Transiciones ocultas entre visitas.
+- Relación con modelos multiestado.
+
+## Emisiones en continuous-time HMM
+
+En cada visita se observa una señal condicionada al estado latente de ese momento.
+
+## Panel data
+
+El estado puede cambiar varias veces entre visitas.
+
+Un continuous-time HMM integra sobre esas trayectorias posibles.
+
+## Hidden Markov frente a Markov observado
+
+| Aspecto | Markov observado | Hidden Markov |
+|---|---|---|
+| Estado | Observado | Latente |
+| Error de clasificación | No | Sí |
+| Emisiones | No | Sí |
+| Trayectorias ocultas | Limitadas | Integradas |
+| Complejidad | Menor | Mayor |
+
+## Hidden semi-Markov
+
+Un HMM estándar implica una distribución geométrica de duración en tiempo discreto.
+
+Un Hidden Semi-Markov Model permite distribuciones de permanencia más flexibles.
+
+## Cuándo usarlo
+
+- Duración en estado importante.
+- Estados latentes.
+- Transiciones no observadas.
+- Observación irregular.
+- Error de clasificación.
+
+## Label switching
+
+En modelos latentes, los nombres de estados pueden intercambiarse sin cambiar la likelihood.
+
+## Solución
+
+Imponer restricciones clínicas:
+
+```text
+Media FEVI S0 > S1 > S2 > S3
+```
+
+o inicializar parámetros con conocimiento experto.
+
+## Identificabilidad
+
+Puede ser difícil distinguir estados si:
+
+- Emisiones muy similares.
+- Pocas visitas.
+- Pocas transiciones.
+- Mucho missing.
+- Demasiados estados.
+
+## Número de estados
+
+Puede elegirse mediante:
+
+- Conocimiento clínico.
+- AIC.
+- BIC.
+- Validación.
+- Interpretabilidad.
+- Estabilidad.
+
+## No elegir solo por AIC
+
+Un modelo con más estados puede ajustar mejor, pero producir estados clínicamente indistinguibles.
+
+## Inicialización
+
+La optimización puede converger a máximos locales.
+
+Debe probarse:
+
+- Varias semillas.
+- Inicialización clínica.
+- Inicialización por clustering.
+- Restricciones.
+
+## Inicialización por clasificación observada
+
+```python
+initial_state_labels = (
+    observed_state
+)
+```
+
+Puede utilizarse para estimar matrices iniciales.
+
+## Inicialización por clustering
+
+```python
+from sklearn.cluster import KMeans
+
+kmeans = KMeans(
+    n_clusters=4,
+    random_state=42
+)
+
+initial_clusters = kmeans.fit_predict(
+    biomarker_matrix
+)
+```
+
+Los clusters no deben interpretarse automáticamente como estados clínicos.
+
+## Regularización
+
+Puede aplicarse a:
+
+- Transiciones.
+- Covarianzas.
+- Emisiones.
+- Efectos de covariables.
+
+## Priors clínicos
+
+Ejemplo:
+
+```text
+S0 → S3
+→ transición directa poco probable
+```
+
+Puede imponerse:
+
+- Probabilidad 0.
+- Prior bajo.
+- Restricción estructural.
+
+## Transiciones permitidas
+
+```python
+allowed = np.array(
+    [
+        [1, 1, 1, 0],
+        [1, 1, 1, 0],
+        [0, 1, 1, 1],
+        [0, 0, 0, 1]
+    ]
+)
+```
+
+## Aplicar máscara
+
+```python
+A_masked = (
+    A
+    *
+    allowed
+)
+```
+
+Después debe normalizarse cada fila.
+
+## Autotransición
+
+En un HMM discreto, la diagonal representa permanecer en el estado entre dos observaciones.
+
+## Duración implícita
+
+Con probabilidad de permanencia \(a_{ss}\), la duración discreta tiene distribución geométrica.
+
+## Duración esperada
+
+$$
+E(D_s)
+=
+\frac{
+1
+}{
+1-a_{ss}
+}
+$$
+
+## Ejemplo
+
+```python
+expected_duration_s1 = (
+    1
+    /
+    (
+        1
+        -
+        A[
+            1,
+            1
+        ]
+    )
+)
+```
+
+Esto se expresa en número de pasos, no necesariamente en días.
+
+## Covariables en transiciones
+
+La probabilidad de transición puede depender de covariables.
+
+$$
+P(
+Z_{t+1}=s
+\mid
+Z_t=r,X_t
+)
+$$
+
+Puede modelarse con una función multinomial.
+
+## Ejemplo conceptual
+
+```text
+Mayor dosis acumulada
+→ aumenta probabilidad S1 → S2
+```
+
+## Covariables en emisiones
+
+La observación también puede depender de:
+
+- Estado.
+- Edad.
+- Centro.
+- Técnica.
+- Calidad.
+
+## Efecto de centro
+
+```text
+Misma FEVI real
+→ diferencias sistemáticas por equipo o centro
+```
+
+Puede modelarse en la emisión.
+
+## Error diferencial
+
+La precisión de una prueba puede cambiar según:
+
+- Centro.
+- Edad.
+- Calidad.
+- Observador.
+- Técnica.
+
+## Interpretación clínica de estados latentes
+
+Cada estado debe describirse mediante:
+
+- Distribución de biomarcadores.
+- Probabilidad de observaciones.
+- Transiciones.
+- Duración.
+- Outcomes posteriores.
+
+## Tabla de emisiones
+
+| Estado latente | FEVI media | GLS medio | Troponina alta |
+|---|---:|---:|---:|
+| S0 | 62 | -20 | 5 % |
+| S1 | 57 | -17 | 35 % |
+| S2 | 46 | -15 | 60 % |
+| S3 | 34 | -12 | 80 % |
+
+## Posterior de estado
+
+Debe reportarse incertidumbre.
+
+Incorrecto:
+
+```text
+Paciente = S1
+```
+
+Más correcto:
+
+```text
+P(S1) = 0.65
+P(S2) = 0.30
+```
+
+## Decisión clínica
+
+Puede establecerse un threshold:
+
+```text
+Alertar si
+P(S2 o S3) ≥ 0.50
+```
+
+Debe validarse.
+
+## Entropía
+
+Mide incertidumbre del posterior.
+
+$$
+H_t
+=
+-
+\sum_s
+p_{ts}
+\log(
+p_{ts}
+)
+$$
+
+## Calcularla
+
+```python
+def state_entropy(
+    probabilities
+):
+
+    probabilities = np.asarray(
+        probabilities
+    )
+
+    valid = (
+        probabilities
+        >
+        0
+    )
+
+    return (
+        -
+        np.sum(
+            probabilities[
+                valid
+            ]
+            *
+            np.log(
+                probabilities[
+                    valid
+                ]
+            )
+        )
+    )
+```
+
+## Interpretación
+
+```text
+Entropía baja
+→ estado claro
+
+Entropía alta
+→ estado incierto
+```
+
+## Validación interna
+
+Debe revisar:
+
+- Log-likelihood.
+- AIC/BIC.
+- Estabilidad.
+- Matriz de transición.
+- Emisiones.
+- Clasificación.
+- Predicción.
+
+## Validación externa
+
+Comprobar en otra cohorte:
+
+- Emisiones.
+- Frecuencia de estados.
+- Transiciones.
+- Calibración posterior.
+- Predicción del siguiente estado.
+
+## Posterior predictive checks
+
+Simular datos desde el modelo y comparar:
+
+- Distribución de observaciones.
+- Duración en estados.
+- Número de transiciones.
+- Secuencias.
+- Missing.
+- Estados graves.
+
+## Simulación conceptual
+
+```python
+rng = np.random.default_rng(
+    42
+)
+
+current_state = rng.choice(
+    4,
+    p=pi
+)
+
+simulated_states = [
+    current_state
+]
+
+simulated_observations = []
+```
+
+```python
+for time_index in range(
+    20
+):
+
+    observation = rng.choice(
+        4,
+        p=B[
+            current_state,
+            :
+        ]
+    )
+
+    simulated_observations.append(
+        observation
+    )
+
+    current_state = rng.choice(
+        4,
+        p=A[
+            current_state,
+            :
+        ]
+    )
+
+    simulated_states.append(
+        current_state
+    )
+```
+
+## Comparación con clasificación determinista
+
+### Clasificación determinista
+
+```text
+Regla fija
+→ un estado
+```
+
+### HMM
+
+```text
+Modelo probabilístico
+→ distribución sobre estados
+```
+
+## Ventajas del HMM
+
+- Maneja error.
+- Suaviza secuencias.
+- Integra varias pruebas.
+- Tolera observaciones parciales.
+- Detecta transiciones latentes.
+- Produce incertidumbre.
+
+## Limitaciones
+
+- Complejidad.
+- Identificabilidad.
+- Sensibilidad a inicialización.
+- Supuestos fuertes.
+- Difícil comunicación.
+- Mayor necesidad de datos.
+
+## Leakage retrospectivo
+
+El smoothing usa observaciones futuras.
+
+No debe presentarse como predicción disponible en tiempo real.
+
+## Para tiempo real
+
+Usar filtering:
+
+```text
+P(Z_t | Y_1:t)
+```
+
+no smoothing:
+
+```text
+P(Z_t | Y_1:T)
+```
+
+## Evaluación online
+
+En cada visita:
+
+1. Usar solo datos previos.
+2. Actualizar posterior.
+3. Predecir siguiente estado.
+4. Comparar con futuro observado.
+
+## Métricas
+
+- Log-loss.
+- Brier score multiclase.
+- Accuracy del estado observado, con cautela.
+- Calibration.
+- AUC para estados graves.
+- Tiempo de anticipación.
+- Probabilidad de transición.
+
+## Brier multiclase
+
+$$
+BS
+=
+\frac{1}{n}
+\sum_i
+\sum_s
+(
+p_{is}
+-
+y_{is}
+)^2
+$$
+
+## Evaluación con estado real desconocido
+
+Es difícil porque el target latente no está disponible.
+
+Opciones:
+
+- Gold standard parcial.
+- Adjudicación experta.
+- Simulación.
+- Outcomes posteriores.
+- Consistencia interna.
+
+## Gold standard
+
+Puede existir en un subconjunto:
+
+- Revisión central.
+- Prueba de alta precisión.
+- Adjudicación por comité.
+
+## Aplicación a cardiotoxicidad
+
+Observaciones posibles:
+
+- FEVI Simpson.
+- FEVI modo M.
+- GLS.
+- Troponina.
+- NT-proBNP.
+- ECG.
+- Calidad de prueba.
+
+Estados latentes:
+
+```text
+S0
+S1
+S2
+S3
+```
+
+## Preguntas clínicas
+
+- ¿Cuál es el estado más probable hoy?
+- ¿Existe evidencia de progresión antes de cumplir una regla rígida?
+- ¿Qué probabilidad hay de S2 en la próxima evaluación?
+- ¿Qué pacientes tienen estado incierto?
+- ¿Qué pruebas reducirían más la incertidumbre?
+
+## Modelo continuous-time recomendado
+
+Por visitas irregulares:
+
+```text
+Q
+→ intensidades latentes
+
+exp(Q Δt)
+→ transición entre visitas
+```
+
+Emisiones:
+
+```text
+P(observaciones | estado latente)
+```
+
+## Decisiones pendientes
+
+- Número de estados.
+- Restricciones de transición.
+- S3 absorbente o reversible.
+- Distribuciones de emisión.
+- Missing.
+- Centro.
+- Calidad.
+- Escala temporal.
+- Filtrado frente a smoothing.
+
+## Reporting
+
+Debe incluir:
+
+- Estados latentes.
+- Observaciones.
+- Matriz de transición o \(Q\).
+- Emisiones.
+- Inicialización.
+- Restricciones.
+- Algoritmo.
+- Incertidumbre.
+- Validación.
+- Uso online o retrospectivo.
+
+## Ejemplo de redacción
+
+```text
+Se ajustó un continuous-time Hidden Markov Model
+con cuatro estados latentes.
+
+Las mediciones ecocardiográficas y los biomarcadores
+se modelaron como emisiones dependientes del estado.
+
+Las probabilidades clínicas en tiempo real
+se calcularon mediante filtrado,
+sin utilizar observaciones posteriores.
+```
+
+## Errores frecuentes
+
+- Tratar el estado observado como verdad.
+- Usar una matriz discreta con intervalos irregulares.
+- Ignorar label switching.
+- Elegir demasiados estados.
+- Interpretar clusters como estados clínicos.
+- No probar varias inicializaciones.
+- Usar smoothing como predicción online.
+- Ignorar missing.
+- No restringir transiciones imposibles.
+- No revisar identifiabilidad.
+- Reportar solo Viterbi.
+- No validar incertidumbre.
+
+## Flujo recomendado
+
+1. Definir estados latentes.
+2. Definir observaciones.
+3. Elegir tiempo discreto o continuo.
+4. Especificar transiciones.
+5. Especificar emisiones.
+6. Inicializar parámetros.
+7. Ajustar modelo.
+8. Calcular posterior.
+9. Decodificar trayectorias.
+10. Evaluar estabilidad.
+11. Validar externamente.
+12. Diseñar uso online.
+
+## Checklist
+
+- [ ] He distinguido estado real y observado.
+- [ ] He definido emisiones.
+- [ ] He definido transiciones.
+- [ ] He considerado intervalos irregulares.
+- [ ] He elegido HMM o continuous-time HMM.
+- [ ] He restringido transiciones imposibles.
+- [ ] He revisado label switching.
+- [ ] He probado varias inicializaciones.
+- [ ] He evaluado identificabilidad.
+- [ ] He calculado posteriors.
+- [ ] He distinguido filtering y smoothing.
+- [ ] He evaluado Viterbi con cautela.
+- [ ] He realizado posterior predictive checks.
+- [ ] He planificado validación externa.
+- [ ] He documentado incertidumbre.
+
+## Recursos
+
+### Conceptos
+
+- Hidden Markov Model.
+- Latent state.
+- Emission probability.
+- Forward-backward.
+- Viterbi.
+- Baum-Welch.
+- Continuous-time HMM.
+- Hidden semi-Markov model.
+- Filtering.
+- Smoothing.
+- Label switching.
+
+### Herramientas
+
+- `numpy`.
+- `scipy`.
+- `hmmlearn`.
+- `pomegranate`.
+- `statsmodels`.
+- `msm` en R.
+- `depmixS4` en R.
+
+### Material del proyecto
+
+Añadir aquí:
+
+- Estados latentes.
+- Variables de emisión.
+- Restricciones.
+- Matriz \(Q\).
+- Posteriores.
+- Trayectorias Viterbi.
+- Validación con cardiólogos.
+
+## Notas personales
+
+Añade aquí tus emisiones, estados latentes, restricciones, posteriors y decisiones clínicas.

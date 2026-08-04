@@ -1,0 +1,1359 @@
+---
+title: "Predicción y evaluación en modelos multiestado"
+---
+
+::: {.callout-tip}
+## Resumen en 30 segundos
+
+La evaluación de un modelo multiestado debe ir más allá de un único C-index.
+
+Debe comprobar:
+
+- Probabilidades de transición.
+- Probabilidades de ocupación.
+- Riesgo de alcanzar estados concretos.
+- Tiempo esperado en cada estado.
+- Calibración por horizonte.
+- Discriminación por transición.
+- Predicción dinámica.
+- Validación temporal y externa.
+:::
+
+## ¿Qué puede predecir un modelo multiestado?
+
+Un modelo multiestado puede responder preguntas como:
+
+```text
+¿En qué estado estará el paciente
+dentro de 6 meses?
+```
+
+```text
+¿Cuál es la probabilidad
+de progresar de S1 a S2?
+```
+
+```text
+¿Cuál es la probabilidad
+de alcanzar S3 antes de 2 años?
+```
+
+```text
+¿Cuánto tiempo se espera
+que permanezca en S1?
+```
+
+::: {.callout-note}
+## Idea clave
+
+La métrica debe corresponder exactamente a la pregunta clínica.
+:::
+
+## Tipos de predicción
+
+## 1. Probabilidad de transición
+
+$$
+P_{rs}(u,t)
+=
+P[
+X(t)=s
+\mid
+X(u)=r
+]
+$$
+
+## 2. Probabilidad de ocupación
+
+$$
+P[
+X(t)=s
+]
+$$
+
+## 3. First-passage probability
+
+Probabilidad de alcanzar por primera vez un estado antes de un horizonte.
+
+## 4. Tiempo esperado en estado
+
+$$
+E[
+T_s(0,\tau)
+]
+=
+\int_0^\tau
+P[
+X(t)=s
+]dt
+$$
+
+## 5. Predicción del siguiente estado
+
+```text
+Desde S1:
+P(S0 próximo) = ...
+P(S2 próximo) = ...
+```
+
+## 6. Predicción dinámica
+
+La predicción se actualiza cuando llegan nuevos datos.
+
+```text
+Baseline
+→ predicción inicial
+
+Nueva ecocardiografía
+→ actualización
+
+Nuevo biomarcador
+→ nueva actualización
+```
+
+## Estado actual como condición inicial
+
+Si el paciente está en S1 en el tiempo \(u\):
+
+```python
+current_state_distribution = {
+    "S0": 0.0,
+    "S1": 1.0,
+    "S2": 0.0,
+    "S3": 0.0
+}
+```
+
+## Estado incierto
+
+En un HMM:
+
+```python
+current_state_distribution = {
+    "S0": 0.10,
+    "S1": 0.65,
+    "S2": 0.24,
+    "S3": 0.01
+}
+```
+
+La predicción debe propagar toda la distribución, no solo el estado más probable.
+
+## Probabilidad de transición con Q
+
+En un modelo homogéneo:
+
+```python
+from scipy.linalg import expm
+
+P_horizon = expm(
+    Q_patient
+    *
+    horizon
+)
+```
+
+## Propagar distribución
+
+```python
+initial_vector = np.array(
+    [
+        0.0,
+        1.0,
+        0.0,
+        0.0
+    ]
+)
+
+future_distribution = (
+    initial_vector
+    @
+    P_horizon
+)
+```
+
+## Predicción con estado incierto
+
+```python
+initial_vector = np.array(
+    [
+        0.10,
+        0.65,
+        0.24,
+        0.01
+    ]
+)
+
+future_distribution = (
+    initial_vector
+    @
+    P_horizon
+)
+```
+
+## Matriz individual
+
+Cada paciente puede tener una matriz:
+
+```text
+Q(X)
+```
+
+dependiente de:
+
+- Edad.
+- Dosis.
+- FEVI.
+- Biomarcadores.
+- Estado previo.
+- Centro.
+
+## Ejemplo conceptual
+
+```python
+def build_patient_q(
+    age,
+    cumulative_dose,
+    lvef
+):
+
+    q01 = (
+        0.02
+        *
+        np.exp(
+            0.01
+            *
+            age
+        )
+    )
+
+    q12 = (
+        0.03
+        *
+        np.exp(
+            0.20
+            *
+            cumulative_dose
+            -
+            0.05
+            *
+            lvef
+        )
+    )
+
+    q10 = 0.04
+    q21 = 0.02
+    q23 = 0.01
+
+    Q = np.array(
+        [
+            [
+                -q01,
+                q01,
+                0.00,
+                0.00
+            ],
+            [
+                q10,
+                -(q10 + q12),
+                q12,
+                0.00
+            ],
+            [
+                0.00,
+                q21,
+                -(q21 + q23),
+                q23
+            ],
+            [
+                0.00,
+                0.00,
+                0.00,
+                0.00
+            ]
+        ]
+    )
+
+    return Q
+```
+
+## Horizontes clínicos
+
+Ejemplos:
+
+```text
+30 días
+6 meses
+1 año
+2 años
+```
+
+No deben elegirse solo por conveniencia estadística.
+
+## Predicciones por horizonte
+
+```python
+horizons = [
+    30,
+    180,
+    365,
+    730
+]
+```
+
+```python
+predictions = {
+    horizon:
+    (
+        initial_vector
+        @
+        expm(
+            Q_patient
+            *
+            horizon
+        )
+    )
+    for horizon
+    in horizons
+}
+```
+
+## Tabla de predicción
+
+| Horizonte | S0 | S1 | S2 | S3 |
+|---|---:|---:|---:|---:|
+| 6 meses | ... | ... | ... | ... |
+| 1 año | ... | ... | ... | ... |
+| 2 años | ... | ... | ... | ... |
+
+## First-passage
+
+Pregunta:
+
+```text
+¿Cuál es la probabilidad
+de alcanzar S2 o S3 antes de 1 año?
+```
+
+No es igual a:
+
+```text
+Probabilidad de estar en S2 o S3 a 1 año
+```
+
+porque un paciente podría haber alcanzado S2 y después recuperarse.
+
+## Transformar estado en absorbente
+
+Para estudiar first-passage a S2:
+
+```text
+S2
+→ se convierte temporalmente en absorbente
+```
+
+## Matriz modificada
+
+```python
+Q_first_passage = Q.copy()
+
+Q_first_passage[
+    2,
+    :
+] = 0.0
+```
+
+## Probabilidad de haber alcanzado S2
+
+```python
+P_first_passage = expm(
+    Q_first_passage
+    *
+    horizon
+)
+
+probability_reached_s2 = (
+    initial_vector
+    @
+    P_first_passage
+)[
+    2
+]
+```
+
+## Estado compuesto absorbente
+
+Para:
+
+```text
+S2 o S3
+```
+
+puede construirse un estado auxiliar:
+
+```text
+Severe
+```
+
+## Tiempo esperado en estado
+
+```python
+timeline = np.linspace(
+    0,
+    730,
+    300
+)
+```
+
+```python
+occupancy = np.asarray(
+    [
+        initial_vector
+        @
+        expm(
+            Q_patient
+            *
+            time
+        )
+        for time in timeline
+    ]
+)
+```
+
+## Integrar ocupación
+
+```python
+from numpy import trapezoid
+
+expected_time_s1 = trapezoid(
+    y=occupancy[
+        :,
+        1
+    ],
+    x=timeline
+)
+```
+
+## Interpretación
+
+```text
+Tiempo esperado en S1
+durante los próximos 2 años
+```
+
+## Restricted mean time in state
+
+Es una extensión de RMST a múltiples estados.
+
+## Predicción dinámica con covariables
+
+Si cambian las covariables:
+
+```text
+Q₁
+→ periodo 1
+
+Q₂
+→ periodo 2
+```
+
+## Composición
+
+```python
+P_total = (
+    expm(
+        Q_period_1
+        *
+        duration_1
+    )
+    @
+    expm(
+        Q_period_2
+        *
+        duration_2
+    )
+)
+```
+
+## Escenarios futuros
+
+Puede ser necesario asumir:
+
+- Tratamiento estable.
+- Dosis prevista.
+- Biomarcador constante.
+- Sin nuevas intervenciones.
+
+## Declarar escenarios
+
+```text
+Predicción bajo continuidad
+del tratamiento actual
+```
+
+no es igual a una predicción sin supuestos.
+
+## Evaluación de discriminación
+
+La discriminación puede evaluarse por transición.
+
+Ejemplo:
+
+```text
+S1 → S2
+```
+
+## C-index por transición
+
+Puede utilizarse un C-index cause-specific sobre el risk set de esa transición.
+
+```python
+from sksurv.metrics import (
+    concordance_index_censored
+)
+```
+
+```python
+c_index = concordance_index_censored(
+    transition_test[
+        "event"
+    ].astype(bool),
+    transition_test[
+        "stop"
+    ],
+    risk_score
+)[0]
+```
+
+## Limitación
+
+Un C-index por transición:
+
+- No evalúa ocupación.
+- No mide calibración.
+- No resume el proceso completo.
+- Puede ser inestable con pocos eventos.
+
+## AUC por transición
+
+Puede calcularse para una transición concreta y horizonte.
+
+```text
+AUC S1 → S2 a 6 meses
+```
+
+## Brier score por transición
+
+Evalúa error de probabilidad para:
+
+```text
+Transición concreta antes de t
+```
+
+Debe manejar correctamente:
+
+- Censura.
+- Salidas competidoras.
+- Entrada al estado.
+
+## Brier multiestado
+
+Una extensión evalúa la diferencia entre:
+
+- Vector de probabilidades predichas.
+- Estado observado.
+
+## Fórmula conceptual
+
+$$
+BS(t)
+=
+\frac{1}{n}
+\sum_i
+\sum_s
+[
+I(
+X_i(t)=s
+)
+-
+\hat{P}_{is}(t)
+]^2
+$$
+
+## Ejemplo simple sin censura
+
+```python
+def multistate_brier_score(
+    observed_states,
+    predicted_probabilities,
+    state_names
+):
+
+    state_to_index = {
+        state:
+        index
+        for index, state
+        in enumerate(
+            state_names
+        )
+    }
+
+    one_hot = np.zeros_like(
+        predicted_probabilities
+    )
+
+    for row_index, state in enumerate(
+        observed_states
+    ):
+
+        one_hot[
+            row_index,
+            state_to_index[
+                state
+            ]
+        ] = 1.0
+
+    squared_error = (
+        one_hot
+        -
+        predicted_probabilities
+    ) ** 2
+
+    return squared_error.sum(
+        axis=1
+    ).mean()
+```
+
+## Precaución
+
+Con censura se necesita:
+
+- IPCW.
+- Pseudo-observations.
+- Métodos específicos multiestado.
+
+El ejemplo anterior es solo didáctico.
+
+## Integrated Brier Score multiestado
+
+Integra el error a lo largo del tiempo.
+
+$$
+IBS
+=
+\frac{1}{\tau_2-\tau_1}
+\int_{\tau_1}^{\tau_2}
+BS(t)dt
+$$
+
+## Evaluación por estado
+
+Puede descomponerse:
+
+```text
+Error en S0
+Error en S1
+Error en S2
+Error en S3
+```
+
+## Calibración de ocupación
+
+A un horizonte \(t\), comparar:
+
+```text
+Probabilidad predicha de estar en S2
+vs
+proporción o probabilidad observada en S2
+```
+
+## Agrupar por riesgo predicho
+
+```python
+prediction_df[
+    "s2_risk_group"
+] = pd.qcut(
+    prediction_df[
+        "predicted_s2_probability"
+    ],
+    q=5,
+    duplicates="drop"
+)
+```
+
+## Promedio predicho
+
+```python
+mean_predicted = (
+    prediction_df
+    .groupby(
+        "s2_risk_group",
+        observed=True
+    )[
+        "predicted_s2_probability"
+    ]
+    .mean()
+)
+```
+
+## Observación correcta
+
+Con censura, la ocupación observada debe estimarse mediante:
+
+- Aalen-Johansen.
+- IPCW.
+- Pseudo-observations.
+
+No mediante proporción bruta sin más.
+
+## Curva de calibración
+
+```text
+Eje X
+→ probabilidad predicha
+
+Eje Y
+→ probabilidad observada
+```
+
+## Interpretación
+
+```text
+Sobre diagonal
+→ infrapredicción
+
+Bajo diagonal
+→ sobrepredicción
+```
+
+## Calibración por transición
+
+Ejemplo:
+
+```text
+Predicción S1 → S2 a 6 meses
+```
+
+Debe evaluarse solo entre pacientes que:
+
+- Están en S1 en el landmark.
+- Siguen bajo seguimiento.
+- No han realizado ya la transición.
+
+## Landmark analysis
+
+```text
+Landmark = 6 meses
+```
+
+Pregunta:
+
+```text
+Entre quienes están en S1 a los 6 meses,
+¿qué probabilidad tienen de estar en S2
+a los 12 meses?
+```
+
+## Crear cohorte landmark
+
+```python
+landmark_df = trajectories_at_landmark(
+    data=interval_data,
+    landmark_time=180
+)
+```
+
+## Condicionar al estado
+
+```python
+s1_landmark = landmark_df.loc[
+    landmark_df[
+        "state_at_landmark"
+    ]
+    ==
+    "S1"
+]
+```
+
+## Predicción desde landmark
+
+```python
+future_probability = (
+    initial_s1_vector
+    @
+    P_180_365
+)
+```
+
+## Predicción dinámica repetida
+
+Puede generarse una predicción en cada visita.
+
+```text
+Paciente 1:
+día 0
+día 90
+día 180
+```
+
+## Dataset de predicciones
+
+```text
+patient_id
+prediction_time
+current_state
+horizon
+predicted_S0
+predicted_S1
+predicted_S2
+predicted_S3
+```
+
+## Evaluación sin leakage
+
+La predicción en tiempo \(u\) solo puede utilizar información disponible hasta \(u\).
+
+## Smoothing no válido para predicción online
+
+En HMM:
+
+```text
+Filtering
+→ válido en tiempo real
+
+Smoothing
+→ utiliza futuro
+```
+
+## Tiempo de anticipación
+
+```python
+prediction_df[
+    "lead_time"
+] = (
+    prediction_df[
+        "transition_time"
+    ]
+    -
+    prediction_df[
+        "first_high_risk_time"
+    ]
+)
+```
+
+## Alertas
+
+Ejemplo:
+
+```text
+Alertar si
+P(S2 o S3 en 6 meses) ≥ 0.30
+```
+
+## Métricas de alerta
+
+- Sensibilidad.
+- Especificidad.
+- PPV.
+- NPV.
+- Alertas por paciente.
+- Tiempo de anticipación.
+- Tiempo bajo alerta.
+- Falsas alertas persistentes.
+
+## Primera alerta
+
+```python
+first_alert = (
+    prediction_df
+    .loc[
+        prediction_df[
+            "alert"
+        ]
+        ==
+        1
+    ]
+    .groupby("patient_id")[
+        "prediction_time"
+    ]
+    .min()
+)
+```
+
+## Alertas repetidas
+
+Debe decidirse:
+
+- Una alerta por episodio.
+- Ventana de silencio.
+- Realerta tras cambio.
+- Cancelación al recuperarse.
+
+## Utilidad clínica
+
+Un modelo puede predecir bien y ser poco útil si:
+
+- Alerta demasiado tarde.
+- Genera demasiadas alertas.
+- Usa datos no disponibles.
+- No cambia seguimiento.
+- No está calibrado.
+
+## Decision Curve Analysis
+
+Puede adaptarse a una pregunta concreta:
+
+```text
+Riesgo de alcanzar S2/S3
+antes de 1 año
+```
+
+## Net benefit
+
+$$
+NB
+=
+\frac{TP}{n}
+-
+\frac{FP}{n}
+\frac{p_t}{1-p_t}
+$$
+
+## Requisito
+
+Definir claramente:
+
+- Horizonte.
+- Evento.
+- Threshold.
+- Acción clínica.
+- Consecuencia del falso positivo.
+
+## Validación interna
+
+Opciones:
+
+- Bootstrap.
+- Cross-validation por paciente.
+- Nested cross-validation.
+- Validación temporal interna.
+
+## Bootstrap por paciente
+
+```python
+patient_ids = interval_data[
+    "patient_id"
+].unique()
+
+rng = np.random.default_rng(
+    42
+)
+```
+
+```python
+sampled_ids = rng.choice(
+    patient_ids,
+    size=len(
+        patient_ids
+    ),
+    replace=True
+)
+```
+
+Debe re-muestrearse la trayectoria completa.
+
+## Cross-validation
+
+Toda la secuencia de un paciente debe permanecer en el mismo fold.
+
+## Split temporal
+
+```text
+Cohorte antigua
+→ desarrollo
+
+Cohorte posterior
+→ validación
+```
+
+## Split por centro
+
+```text
+Centros A y B
+→ desarrollo
+
+Centro C
+→ test externo
+```
+
+## Leave-one-center-out
+
+Útil para evaluar transportabilidad.
+
+## Validación por transición
+
+Debe reportarse:
+
+- Número de eventos.
+- Métrica.
+- Intervalo.
+- Horizonte.
+- Centro.
+
+## Transiciones raras
+
+Puede ser imposible evaluar correctamente:
+
+```text
+S2 → S3
+```
+
+si existen pocos eventos.
+
+## Soluciones
+
+- Intervalos amplios.
+- Métricas descriptivas.
+- Combinar estados.
+- Compartir parámetros.
+- Recoger más datos.
+- No afirmar rendimiento estable.
+
+## Calibración temporal
+
+La calibración puede degradarse con el horizonte.
+
+```text
+Bien calibrado a 6 meses
+
+Sobrepredice a 2 años
+```
+
+## Calibración por centro
+
+```text
+Centro A
+→ correcta
+
+Centro B
+→ sobrepredicción
+```
+
+Puede requerir recalibración de intensidades basales.
+
+## Drift
+
+Monitorizar:
+
+- Distribución de estados.
+- Recuentos de transición.
+- Tiempo en estado.
+- Intensidades.
+- Censura.
+- Frecuencia de visitas.
+- Calibración.
+
+## Evaluación del estado actual
+
+En HMM puede evaluarse:
+
+- Log-loss.
+- Brier multiclase.
+- Entropía.
+- Concordancia con adjudicación.
+- Matriz de confusión, con cautela.
+
+## Log-loss
+
+$$
+-\log(
+p_{\text{estado real}}
+)
+$$
+
+## Brier multiclase
+
+Evalúa toda la distribución, no solo la clase máxima.
+
+## Matriz de confusión
+
+Puede ocultar incertidumbre probabilística.
+
+## Viterbi
+
+La secuencia Viterbi no debe ser la única salida evaluada.
+
+## Posterior predictive checks
+
+Simular trayectorias y comparar:
+
+- Ocupación.
+- Transiciones.
+- Tiempo en estado.
+- Secuencias.
+- Estados absorbentes.
+- Gaps.
+
+## Comparación observada-predicha
+
+```text
+Número observado S1 → S2
+vs
+número esperado S1 → S2
+```
+
+## Recuentos esperados
+
+Conceptualmente:
+
+```python
+expected_events = (
+    predicted_transition_probability
+    .sum()
+)
+```
+
+## Calibration-in-the-large
+
+```text
+Eventos predichos totales
+vs
+eventos observados
+```
+
+## Evaluación del tiempo en estado
+
+Comparar:
+
+- Mediana observada.
+- Mediana predicha.
+- Distribución.
+- Restricted mean time.
+
+## Error en tiempo esperado
+
+```python
+absolute_error = abs(
+    predicted_time_in_state
+    -
+    observed_time_in_state
+)
+```
+
+La censura complica esta comparación.
+
+## Evaluación de first-passage
+
+Para un estado absorbente o transformado:
+
+- AUC a horizonte.
+- Brier score.
+- Calibración.
+- Curva de incidencia.
+- Tiempo de anticipación.
+
+## Multi-state Brier decomposition
+
+Puede analizarse por:
+
+- Estado.
+- Tiempo.
+- Subgrupo.
+- Centro.
+- Estado inicial.
+
+## Estado inicial
+
+El rendimiento puede variar según:
+
+```text
+Predicción desde S0
+
+Predicción desde S1
+
+Predicción desde S2
+```
+
+## Evaluación condicional
+
+Debe evaluarse el modelo entre pacientes realmente en riesgo de cada transición.
+
+## Error frecuente
+
+Calcular una métrica global sin considerar que diferentes pacientes están en risk sets distintos.
+
+## Uncertainty
+
+Debe acompañarse con:
+
+- Bootstrap.
+- Intervalos.
+- Curvas.
+- Distribución de métricas.
+- Número de eventos.
+
+## Comparar modelos
+
+| Modelo | Brier multiestado | Calibración S2 | First-passage AUC | Interpretabilidad |
+|---|---:|---:|---:|---|
+| Markov | ... | ... | ... | Alta |
+| Semi-Markov | ... | ... | ... | Media |
+| HMM | ... | ... | ... | Media |
+| Modelo penalizado | ... | ... | ... | Media |
+
+## Elegir modelo final
+
+No elegir solo por la mejor métrica.
+
+Debe considerar:
+
+- Plausibilidad.
+- Calibración.
+- Estabilidad.
+- Interpretabilidad.
+- Datos requeridos.
+- Facilidad de actualización.
+- Utilidad clínica.
+
+## Aplicación a cardiotoxicidad
+
+Predicciones relevantes:
+
+```text
+P(S2 o S3 en 1 año)
+
+P(recuperación a S0 desde S1)
+
+P(progresión S1 → S2 en 6 meses)
+
+Tiempo esperado en S1
+
+Probabilidad de S3 a 2 años
+```
+
+## Evaluación propuesta
+
+1. Brier multiestado a 6, 12 y 24 meses.
+2. Calibración de ocupación S2/S3.
+3. First-passage a S2/S3.
+4. Evaluación por centro.
+5. Bootstrap por paciente.
+6. Validación temporal.
+7. Tiempo de anticipación de alertas.
+
+## Reporting
+
+Debe incluir:
+
+- Estado inicial.
+- Horizonte.
+- Tipo de predicción.
+- Métrica.
+- Censura.
+- Número de eventos.
+- Intervalo.
+- Validación.
+- Subgrupos.
+- Uso clínico.
+
+## Ejemplo de redacción
+
+```text
+La probabilidad de ocupación de S2
+a 12 meses se evaluó mediante
+un Brier score multiestado ponderado
+por censura.
+
+La calibración se estimó comparando
+probabilidades predichas y ocupación observada
+mediante Aalen-Johansen.
+```
+
+## Errores frecuentes
+
+- Evaluar solo C-index.
+- Confundir ocupación y first-passage.
+- Evaluar fuera del risk set.
+- Ignorar censura.
+- Usar proporciones brutas.
+- Mezclar pacientes entre train y test.
+- Usar smoothing para predicción online.
+- No evaluar por estado inicial.
+- No reportar horizontes.
+- Ignorar transiciones raras.
+- No evaluar calibración.
+- Elegir el modelo solo por discriminación.
+
+## Flujo recomendado
+
+1. Definir pregunta predictiva.
+2. Definir estado inicial.
+3. Elegir horizonte.
+4. Generar probabilidades.
+5. Evaluar discriminación.
+6. Evaluar Brier.
+7. Evaluar calibración.
+8. Evaluar first-passage.
+9. Analizar alertas.
+10. Aplicar bootstrap.
+11. Validar temporalmente.
+12. Validar externamente.
+
+## Checklist
+
+- [ ] He definido el tipo de predicción.
+- [ ] He definido el estado inicial.
+- [ ] He definido horizontes.
+- [ ] He calculado ocupación.
+- [ ] He calculado first-passage.
+- [ ] He evaluado por transición.
+- [ ] He considerado censura.
+- [ ] He calculado Brier multiestado.
+- [ ] He evaluado calibración.
+- [ ] He evaluado tiempo en estado.
+- [ ] He usado filtering para online.
+- [ ] He calculado incertidumbre.
+- [ ] He validado por paciente.
+- [ ] He realizado validación temporal.
+- [ ] He planificado validación externa.
+
+## Recursos
+
+### Conceptos
+
+- Dynamic prediction.
+- Transition probability.
+- State occupation.
+- First-passage probability.
+- Multi-state Brier score.
+- Transition-specific calibration.
+- Landmark prediction.
+- Restricted mean time in state.
+- Decision Curve Analysis.
+- Lead time.
+
+### Herramientas
+
+- `numpy`.
+- `scipy.linalg.expm`.
+- `lifelines`.
+- `scikit-survival`.
+- `mstate` en R.
+- `msm` en R.
+- `pec` en R.
+- `riskRegression` en R.
+
+### Material del proyecto
+
+Añadir aquí:
+
+- Horizontes clínicos.
+- Métricas por transición.
+- Curvas de calibración.
+- Validación por centro.
+- First-passage a S2/S3.
+- Tiempo de anticipación.
+
+## Notas personales
+
+Añade aquí tus predicciones, métricas, validación, calibración y decisiones clínicas.
