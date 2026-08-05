@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Recetario de código – Health Data Science Handbook</title>
+<title>Evaluación y validación – Health Data Science Handbook</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -115,7 +115,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../code-recipes/index.html">Recetario de código</a></li><li class="breadcrumb-item"><a href="../code-recipes/index.html">Introducción</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deep-learning/index.html">Deep learning</a></li><li class="breadcrumb-item"><a href="../deep-learning/deep-learning-evaluation.html">Evaluación y validación</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -490,13 +490,13 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
  <span class="menu-text">Deep learning</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
@@ -559,7 +559,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../deep-learning/deep-learning-evaluation.html" class="sidebar-item-text sidebar-link">
+  <a href="../deep-learning/deep-learning-evaluation.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Evaluación y validación</span></a>
   </div>
 </li>
@@ -750,16 +750,16 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
  <span class="menu-text">Recetario de código</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link active">
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -775,16 +775,23 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#contenidos-previstos" id="toc-contenidos-previstos" class="nav-link active" data-scroll-target="#contenidos-previstos">Contenidos previstos</a></li>
+  <li><a href="#particiones" id="toc-particiones" class="nav-link active" data-scroll-target="#particiones">Particiones</a></li>
+  <li><a href="#clasificación" id="toc-clasificación" class="nav-link" data-scroll-target="#clasificación">Clasificación</a></li>
+  <li><a href="#regresión" id="toc-regresión" class="nav-link" data-scroll-target="#regresión">Regresión</a></li>
+  <li><a href="#desbalanceo" id="toc-desbalanceo" class="nav-link" data-scroll-target="#desbalanceo">Desbalanceo</a></li>
+  <li><a href="#selección-del-umbral" id="toc-selección-del-umbral" class="nav-link" data-scroll-target="#selección-del-umbral">Selección del umbral</a></li>
+  <li><a href="#validación-externa" id="toc-validación-externa" class="nav-link" data-scroll-target="#validación-externa">Validación externa</a></li>
+  <li><a href="#incertidumbre" id="toc-incertidumbre" class="nav-link" data-scroll-target="#incertidumbre">Incertidumbre</a></li>
+  <li><a href="#checklist" id="toc-checklist" class="nav-link" data-scroll-target="#checklist">Checklist</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../code-recipes/index.html">Recetario de código</a></li><li class="breadcrumb-item"><a href="../code-recipes/index.html">Introducción</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deep-learning/index.html">Deep learning</a></li><li class="breadcrumb-item"><a href="../deep-learning/deep-learning-evaluation.html">Evaluación y validación</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Recetario de código</h1>
+<h1 class="title">Evaluación y validación</h1>
 </div>
 
 
@@ -801,17 +808,72 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.</p>
-<section id="contenidos-previstos" class="level2">
-<h2 data-anchor-id="contenidos-previstos">Contenidos previstos</h2>
-<p>Esta sección se irá ampliando progresivamente con:</p>
+<section id="particiones" class="level2">
+<h2 data-anchor-id="particiones">Particiones</h2>
 <ul>
-<li>Fundamentos teóricos.</li>
-<li>Cuándo utilizar cada técnica.</li>
-<li>Código listo para adaptar.</li>
-<li>Interpretación de resultados.</li>
-<li>Errores frecuentes.</li>
-<li>Consideraciones específicas en datos clínicos.</li>
+<li><strong>Train:</strong> ajuste de pesos.</li>
+<li><strong>Validation:</strong> selección de arquitectura e hiperparámetros.</li>
+<li><strong>Test:</strong> estimación final del rendimiento.</li>
+</ul>
+<p>En salud, la partición debe realizarse normalmente por paciente y respetar la estructura temporal y multicéntrica.</p>
+</section>
+<section id="clasificación" class="level2">
+<h2 data-anchor-id="clasificación">Clasificación</h2>
+<p>Métricas útiles:</p>
+<ul>
+<li>Sensibilidad y especificidad.</li>
+<li>Precision y recall.</li>
+<li>F1-score.</li>
+<li>ROC AUC.</li>
+<li>PR AUC.</li>
+<li>Brier score.</li>
+<li>Curvas de calibración.</li>
+</ul>
+</section>
+<section id="regresión" class="level2">
+<h2 data-anchor-id="regresión">Regresión</h2>
+<ul>
+<li>MAE.</li>
+<li>RMSE.</li>
+<li>R².</li>
+<li>Error por subgrupos.</li>
+<li>Calibración entre valores observados y predichos.</li>
+</ul>
+</section>
+<section id="desbalanceo" class="level2">
+<h2 data-anchor-id="desbalanceo">Desbalanceo</h2>
+<p>La accuracy puede ser engañosa cuando el evento es infrecuente. Conviene revisar PR AUC, sensibilidad a umbrales clínicamente relevantes y matrices de confusión.</p>
+</section>
+<section id="selección-del-umbral" class="level2">
+<h2 data-anchor-id="selección-del-umbral">Selección del umbral</h2>
+<p>El umbral no debe elegirse automáticamente como 0,5. Debe relacionarse con:</p>
+<ul>
+<li>Coste de falsos positivos.</li>
+<li>Coste de falsos negativos.</li>
+<li>Capacidad asistencial.</li>
+<li>Objetivo clínico.</li>
+</ul>
+</section>
+<section id="validación-externa" class="level2">
+<h2 data-anchor-id="validación-externa">Validación externa</h2>
+<p>Evalúa el modelo en otro centro, periodo o población. Permite detectar pérdida de rendimiento por cambios de distribución.</p>
+</section>
+<section id="incertidumbre" class="level2">
+<h2 data-anchor-id="incertidumbre">Incertidumbre</h2>
+<p>Siempre que sea posible, presentar intervalos de confianza mediante procedimientos adecuados, por ejemplo bootstrap por paciente.</p>
+</section>
+<section id="checklist" class="level2">
+<h2 data-anchor-id="checklist">Checklist</h2>
+<ul class="task-list">
+<li><label><input type="checkbox">Partición por paciente.</label></li>
+<li><label><input type="checkbox">Ausencia de leakage temporal.</label></li>
+<li><label><input type="checkbox">Baseline definido.</label></li>
+<li><label><input type="checkbox">Métricas alineadas con el problema.</label></li>
+<li><label><input type="checkbox">Calibración evaluada.</label></li>
+<li><label><input type="checkbox">Subgrupos clínicos revisados.</label></li>
+<li><label><input type="checkbox">Validación externa considerada.</label></li>
+<li><label><input type="checkbox">Umbral justificado.</label></li>
+<li><label><input type="checkbox">Modelo y preprocesamiento versionados.</label></li>
 </ul>
 
 

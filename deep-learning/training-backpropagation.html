@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Recetario de código – Health Data Science Handbook</title>
+<title>Entrenamiento y backpropagation – Health Data Science Handbook</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +25,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -73,6 +108,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 </head>
@@ -115,7 +179,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../code-recipes/index.html">Recetario de código</a></li><li class="breadcrumb-item"><a href="../code-recipes/index.html">Introducción</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deep-learning/index.html">Deep learning</a></li><li class="breadcrumb-item"><a href="../deep-learning/training-backpropagation.html">Entrenamiento y backpropagation</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -490,13 +554,13 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
  <span class="menu-text">Deep learning</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
@@ -517,7 +581,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../deep-learning/training-backpropagation.html" class="sidebar-item-text sidebar-link">
+  <a href="../deep-learning/training-backpropagation.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Entrenamiento y backpropagation</span></a>
   </div>
 </li>
@@ -750,16 +814,16 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
  <span class="menu-text">Recetario de código</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link active">
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -775,16 +839,24 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#contenidos-previstos" id="toc-contenidos-previstos" class="nav-link active" data-scroll-target="#contenidos-previstos">Contenidos previstos</a></li>
+  <li><a href="#objetivo-del-entrenamiento" id="toc-objetivo-del-entrenamiento" class="nav-link active" data-scroll-target="#objetivo-del-entrenamiento">Objetivo del entrenamiento</a></li>
+  <li><a href="#forward-pass" id="toc-forward-pass" class="nav-link" data-scroll-target="#forward-pass">Forward pass</a></li>
+  <li><a href="#backpropagation" id="toc-backpropagation" class="nav-link" data-scroll-target="#backpropagation">Backpropagation</a></li>
+  <li><a href="#gradient-descent" id="toc-gradient-descent" class="nav-link" data-scroll-target="#gradient-descent">Gradient descent</a></li>
+  <li><a href="#hiperparámetros-principales" id="toc-hiperparámetros-principales" class="nav-link" data-scroll-target="#hiperparámetros-principales">Hiperparámetros principales</a></li>
+  <li><a href="#learning-rate" id="toc-learning-rate" class="nav-link" data-scroll-target="#learning-rate">Learning rate</a></li>
+  <li><a href="#mini-batches" id="toc-mini-batches" class="nav-link" data-scroll-target="#mini-batches">Mini-batches</a></li>
+  <li><a href="#curvas-de-aprendizaje" id="toc-curvas-de-aprendizaje" class="nav-link" data-scroll-target="#curvas-de-aprendizaje">Curvas de aprendizaje</a></li>
+  <li><a href="#interpretación" id="toc-interpretación" class="nav-link" data-scroll-target="#interpretación">Interpretación</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../code-recipes/index.html">Recetario de código</a></li><li class="breadcrumb-item"><a href="../code-recipes/index.html">Introducción</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deep-learning/index.html">Deep learning</a></li><li class="breadcrumb-item"><a href="../deep-learning/training-backpropagation.html">Entrenamiento y backpropagation</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Recetario de código</h1>
+<h1 class="title">Entrenamiento y backpropagation</h1>
 </div>
 
 
@@ -801,18 +873,85 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.</p>
-<section id="contenidos-previstos" class="level2">
-<h2 data-anchor-id="contenidos-previstos">Contenidos previstos</h2>
-<p>Esta sección se irá ampliando progresivamente con:</p>
+<section id="objetivo-del-entrenamiento" class="level2">
+<h2 data-anchor-id="objetivo-del-entrenamiento">Objetivo del entrenamiento</h2>
+<p>El entrenamiento busca los parámetros <span class="math inline">\(\theta\)</span> que minimizan una función de pérdida:</p>
+<p><span class="math display">\[
+\theta^*=\arg\min_{\theta}\mathcal{L}(y,\hat{y})
+\]</span></p>
+</section>
+<section id="forward-pass" class="level2">
+<h2 data-anchor-id="forward-pass">Forward pass</h2>
+<p>Los datos atraviesan la red desde la entrada hasta la salida. Se obtiene una predicción y se calcula la pérdida.</p>
+</section>
+<section id="backpropagation" class="level2">
+<h2 data-anchor-id="backpropagation">Backpropagation</h2>
+<p>Backpropagation aplica la regla de la cadena para calcular cómo cambia la pérdida respecto a cada parámetro:</p>
+<p><span class="math display">\[
+\frac{\partial \mathcal{L}}{\partial w}
+\]</span></p>
+<p>El optimizador utiliza esos gradientes para actualizar los pesos.</p>
+</section>
+<section id="gradient-descent" class="level2">
+<h2 data-anchor-id="gradient-descent">Gradient descent</h2>
+<p>Una actualización simplificada es:</p>
+<p><span class="math display">\[
+w_{t+1}=w_t-\eta\frac{\partial\mathcal{L}}{\partial w_t}
+\]</span></p>
+<p>Donde <span class="math inline">\(\eta\)</span> es el <strong>learning rate</strong>.</p>
+</section>
+<section id="hiperparámetros-principales" class="level2">
+<h2 data-anchor-id="hiperparámetros-principales">Hiperparámetros principales</h2>
 <ul>
-<li>Fundamentos teóricos.</li>
-<li>Cuándo utilizar cada técnica.</li>
-<li>Código listo para adaptar.</li>
-<li>Interpretación de resultados.</li>
-<li>Errores frecuentes.</li>
-<li>Consideraciones específicas en datos clínicos.</li>
+<li><strong>Learning rate:</strong> tamaño del paso de actualización.</li>
+<li><strong>Batch size:</strong> número de observaciones por actualización.</li>
+<li><strong>Epochs:</strong> pasadas completas por el conjunto de entrenamiento.</li>
+<li><strong>Optimizador:</strong> estrategia de actualización.</li>
 </ul>
+</section>
+<section id="learning-rate" class="level2">
+<h2 data-anchor-id="learning-rate">Learning rate</h2>
+<ul>
+<li>Demasiado alto: entrenamiento inestable o divergente.</li>
+<li>Demasiado bajo: convergencia muy lenta o estancamiento.</li>
+</ul>
+</section>
+<section id="mini-batches" class="level2">
+<h2 data-anchor-id="mini-batches">Mini-batches</h2>
+<p>El entrenamiento por mini-batches permite estimar el gradiente con subconjuntos de datos y aprovechar mejor la computación vectorizada.</p>
+</section>
+<section id="curvas-de-aprendizaje" class="level2">
+<h2 data-anchor-id="curvas-de-aprendizaje">Curvas de aprendizaje</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>history_df <span class="op">=</span> pd.DataFrame(history.history)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>history_df[[<span class="st">"loss"</span>, <span class="st">"val_loss"</span>]].plot()</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Epoch"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Loss"</span>)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="interpretación" class="level2">
+<h2 data-anchor-id="interpretación">Interpretación</h2>
+<ul>
+<li>Train y validation mejoran: el aprendizaje progresa.</li>
+<li>Train mejora y validation empeora: probable sobreajuste.</li>
+<li>Ambas pérdidas permanecen altas: posible infraajuste.</li>
+<li>Oscilaciones fuertes: revisar learning rate, batch size o calidad de datos.</li>
+</ul>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Validación
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Las decisiones sobre epochs, arquitectura y learning rate deben basarse en validación, nunca en test.</p>
+</div>
+</div>
 
 
 </section>

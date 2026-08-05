@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Recetario de código – Health Data Science Handbook</title>
+<title>Deep learning aplicado a datos clínicos – Health Data Science Handbook</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -115,7 +115,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../code-recipes/index.html">Recetario de código</a></li><li class="breadcrumb-item"><a href="../code-recipes/index.html">Introducción</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deep-learning/index.html">Deep learning</a></li><li class="breadcrumb-item"><a href="../deep-learning/clinical-deep-learning.html">Aplicaciones clínicas</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -490,13 +490,13 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
  <span class="menu-text">Deep learning</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
@@ -565,7 +565,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../deep-learning/clinical-deep-learning.html" class="sidebar-item-text sidebar-link">
+  <a href="../deep-learning/clinical-deep-learning.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Aplicaciones clínicas</span></a>
   </div>
 </li>
@@ -750,16 +750,16 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
  <span class="menu-text">Recetario de código</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link active">
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -775,16 +775,28 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#contenidos-previstos" id="toc-contenidos-previstos" class="nav-link active" data-scroll-target="#contenidos-previstos">Contenidos previstos</a></li>
+  <li><a href="#tipos-de-datos" id="toc-tipos-de-datos" class="nav-link active" data-scroll-target="#tipos-de-datos">Tipos de datos</a>
+  <ul class="collapse">
+  <li><a href="#datos-tabulares" id="toc-datos-tabulares" class="nav-link" data-scroll-target="#datos-tabulares">Datos tabulares</a></li>
+  <li><a href="#imágenes" id="toc-imágenes" class="nav-link" data-scroll-target="#imágenes">Imágenes</a></li>
+  <li><a href="#señales" id="toc-señales" class="nav-link" data-scroll-target="#señales">Señales</a></li>
+  <li><a href="#texto-clínico" id="toc-texto-clínico" class="nav-link" data-scroll-target="#texto-clínico">Texto clínico</a></li>
+  <li><a href="#datos-longitudinales" id="toc-datos-longitudinales" class="nav-link" data-scroll-target="#datos-longitudinales">Datos longitudinales</a></li>
+  </ul></li>
+  <li><a href="#pregunta-clínica" id="toc-pregunta-clínica" class="nav-link" data-scroll-target="#pregunta-clínica">Pregunta clínica</a></li>
+  <li><a href="#leakage-clínico" id="toc-leakage-clínico" class="nav-link" data-scroll-target="#leakage-clínico">Leakage clínico</a></li>
+  <li><a href="#sesgos" id="toc-sesgos" class="nav-link" data-scroll-target="#sesgos">Sesgos</a></li>
+  <li><a href="#reproducibilidad" id="toc-reproducibilidad" class="nav-link" data-scroll-target="#reproducibilidad">Reproducibilidad</a></li>
+  <li><a href="#de-predicción-a-utilidad" id="toc-de-predicción-a-utilidad" class="nav-link" data-scroll-target="#de-predicción-a-utilidad">De predicción a utilidad</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../code-recipes/index.html">Recetario de código</a></li><li class="breadcrumb-item"><a href="../code-recipes/index.html">Introducción</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deep-learning/index.html">Deep learning</a></li><li class="breadcrumb-item"><a href="../deep-learning/clinical-deep-learning.html">Aplicaciones clínicas</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Recetario de código</h1>
+<h1 class="title">Deep learning aplicado a datos clínicos</h1>
 </div>
 
 
@@ -801,18 +813,79 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.</p>
-<section id="contenidos-previstos" class="level2">
-<h2 data-anchor-id="contenidos-previstos">Contenidos previstos</h2>
-<p>Esta sección se irá ampliando progresivamente con:</p>
+<section id="tipos-de-datos" class="level2">
+<h2 data-anchor-id="tipos-de-datos">Tipos de datos</h2>
+<section id="datos-tabulares" class="level3">
+<h3 data-anchor-id="datos-tabulares">Datos tabulares</h3>
+<p>Analíticas, diagnósticos, antecedentes y tratamientos. Una red densa puede utilizarse, pero debe compararse con modelos tabulares más sencillos.</p>
+</section>
+<section id="imágenes" class="level3">
+<h3 data-anchor-id="imágenes">Imágenes</h3>
+<p>Radiología, dermatología, anatomía patológica y ecografía. Requieren control estricto de calidad, procedencia y partición por paciente.</p>
+</section>
+<section id="señales" class="level3">
+<h3 data-anchor-id="señales">Señales</h3>
+<p>ECG, EEG, pulsioximetría y monitorización continua. Pueden modelarse con CNN 1D, RNN o transformers.</p>
+</section>
+<section id="texto-clínico" class="level3">
+<h3 data-anchor-id="texto-clínico">Texto clínico</h3>
+<p>Informes, evolutivos y antecedentes. Requiere protección de datos, evaluación de sesgos y control de información temporal.</p>
+</section>
+<section id="datos-longitudinales" class="level3">
+<h3 data-anchor-id="datos-longitudinales">Datos longitudinales</h3>
+<p>Secuencias de visitas, tratamientos y resultados. Debe definirse con precisión qué información estaba disponible en el momento de la predicción.</p>
+</section>
+</section>
+<section id="pregunta-clínica" class="level2">
+<h2 data-anchor-id="pregunta-clínica">Pregunta clínica</h2>
+<p>Antes de entrenar, definir:</p>
 <ul>
-<li>Fundamentos teóricos.</li>
-<li>Cuándo utilizar cada técnica.</li>
-<li>Código listo para adaptar.</li>
-<li>Interpretación de resultados.</li>
-<li>Errores frecuentes.</li>
-<li>Consideraciones específicas en datos clínicos.</li>
+<li>Población objetivo.</li>
+<li>Momento de predicción.</li>
+<li>Resultado a predecir.</li>
+<li>Horizonte temporal.</li>
+<li>Acción clínica asociada.</li>
 </ul>
+</section>
+<section id="leakage-clínico" class="level2">
+<h2 data-anchor-id="leakage-clínico">Leakage clínico</h2>
+<p>Ejemplos:</p>
+<ul>
+<li>Utilizar una prueba solicitada después de sospechar el diagnóstico.</li>
+<li>Incluir tratamientos administrados después del evento.</li>
+<li>Mezclar exploraciones del mismo paciente entre train y test.</li>
+<li>Imputar utilizando toda la base de datos.</li>
+</ul>
+</section>
+<section id="sesgos" class="level2">
+<h2 data-anchor-id="sesgos">Sesgos</h2>
+<p>Evaluar rendimiento por:</p>
+<ul>
+<li>Edad.</li>
+<li>Sexo.</li>
+<li>Centro.</li>
+<li>Dispositivo.</li>
+<li>Periodo temporal.</li>
+<li>Grupos diagnósticos.</li>
+</ul>
+</section>
+<section id="reproducibilidad" class="level2">
+<h2 data-anchor-id="reproducibilidad">Reproducibilidad</h2>
+<p>Documentar:</p>
+<ul>
+<li>Cohorte y criterios de inclusión.</li>
+<li>Diccionario de variables.</li>
+<li>Preprocesamiento.</li>
+<li>Arquitectura.</li>
+<li>Hiperparámetros.</li>
+<li>Semillas.</li>
+<li>Hardware y tiempo de entrenamiento.</li>
+<li>Versión del modelo final.</li>
+</ul>
+</section>
+<section id="de-predicción-a-utilidad" class="level2">
+<h2 data-anchor-id="de-predicción-a-utilidad">De predicción a utilidad</h2>
+<p>Un modelo clínico debe integrarse en un flujo asistencial. Es necesario evaluar impacto, aceptabilidad, seguridad y mantenimiento después del despliegue.</p>
 
 
 </section>

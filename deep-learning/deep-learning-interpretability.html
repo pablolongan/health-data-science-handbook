@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Recetario de código – Health Data Science Handbook</title>
+<title>Interpretabilidad en deep learning – Health Data Science Handbook</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -115,7 +115,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../code-recipes/index.html">Recetario de código</a></li><li class="breadcrumb-item"><a href="../code-recipes/index.html">Introducción</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deep-learning/index.html">Deep learning</a></li><li class="breadcrumb-item"><a href="../deep-learning/deep-learning-interpretability.html">Interpretabilidad</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -490,13 +490,13 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
  <span class="menu-text">Deep learning</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
@@ -553,7 +553,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../deep-learning/deep-learning-interpretability.html" class="sidebar-item-text sidebar-link">
+  <a href="../deep-learning/deep-learning-interpretability.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Interpretabilidad</span></a>
   </div>
 </li>
@@ -750,16 +750,16 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
  <span class="menu-text">Recetario de código</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link active">
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -775,16 +775,26 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#contenidos-previstos" id="toc-contenidos-previstos" class="nav-link active" data-scroll-target="#contenidos-previstos">Contenidos previstos</a></li>
+  <li><a href="#interpretabilidad-y-explicabilidad" id="toc-interpretabilidad-y-explicabilidad" class="nav-link active" data-scroll-target="#interpretabilidad-y-explicabilidad">Interpretabilidad y explicabilidad</a></li>
+  <li><a href="#métodos-habituales" id="toc-métodos-habituales" class="nav-link" data-scroll-target="#métodos-habituales">Métodos habituales</a>
+  <ul class="collapse">
+  <li><a href="#importancia-por-permutación" id="toc-importancia-por-permutación" class="nav-link" data-scroll-target="#importancia-por-permutación">Importancia por permutación</a></li>
+  <li><a href="#shap" id="toc-shap" class="nav-link" data-scroll-target="#shap">SHAP</a></li>
+  <li><a href="#integrated-gradients" id="toc-integrated-gradients" class="nav-link" data-scroll-target="#integrated-gradients">Integrated gradients</a></li>
+  <li><a href="#saliency-maps" id="toc-saliency-maps" class="nav-link" data-scroll-target="#saliency-maps">Saliency maps</a></li>
+  <li><a href="#grad-cam" id="toc-grad-cam" class="nav-link" data-scroll-target="#grad-cam">Grad-CAM</a></li>
+  </ul></li>
+  <li><a href="#qué-comprobar" id="toc-qué-comprobar" class="nav-link" data-scroll-target="#qué-comprobar">Qué comprobar</a></li>
+  <li><a href="#comunicación-clínica" id="toc-comunicación-clínica" class="nav-link" data-scroll-target="#comunicación-clínica">Comunicación clínica</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../code-recipes/index.html">Recetario de código</a></li><li class="breadcrumb-item"><a href="../code-recipes/index.html">Introducción</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deep-learning/index.html">Deep learning</a></li><li class="breadcrumb-item"><a href="../deep-learning/deep-learning-interpretability.html">Interpretabilidad</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Recetario de código</h1>
+<h1 class="title">Interpretabilidad en deep learning</h1>
 </div>
 
 
@@ -801,17 +811,73 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.</p>
-<section id="contenidos-previstos" class="level2">
-<h2 data-anchor-id="contenidos-previstos">Contenidos previstos</h2>
-<p>Esta sección se irá ampliando progresivamente con:</p>
+<section id="interpretabilidad-y-explicabilidad" class="level2">
+<h2 data-anchor-id="interpretabilidad-y-explicabilidad">Interpretabilidad y explicabilidad</h2>
+<p>La interpretabilidad busca comprender cómo utiliza el modelo la información para producir una predicción.</p>
+<p>En salud puede ayudar a:</p>
 <ul>
-<li>Fundamentos teóricos.</li>
-<li>Cuándo utilizar cada técnica.</li>
-<li>Código listo para adaptar.</li>
-<li>Interpretación de resultados.</li>
-<li>Errores frecuentes.</li>
-<li>Consideraciones específicas en datos clínicos.</li>
+<li>Detectar errores y atajos espurios.</li>
+<li>Revisar coherencia clínica.</li>
+<li>Comunicar resultados.</li>
+<li>Generar hipótesis.</li>
+</ul>
+<p>No convierte automáticamente una asociación en una relación causal.</p>
+</section>
+<section id="métodos-habituales" class="level2">
+<h2 data-anchor-id="métodos-habituales">Métodos habituales</h2>
+<section id="importancia-por-permutación" class="level3">
+<h3 data-anchor-id="importancia-por-permutación">Importancia por permutación</h3>
+<p>Mide cuánto empeora el rendimiento al alterar una variable. Debe calcularse sobre datos no usados para entrenar.</p>
+</section>
+<section id="shap" class="level3">
+<h3 data-anchor-id="shap">SHAP</h3>
+<p>Atribuye contribuciones a cada variable respecto a una predicción de referencia. Las variables correlacionadas pueden dificultar la interpretación.</p>
+</section>
+<section id="integrated-gradients" class="level3">
+<h3 data-anchor-id="integrated-gradients">Integrated gradients</h3>
+<p>Atribuye la predicción comparando la entrada con una referencia a lo largo de un camino interpolado.</p>
+</section>
+<section id="saliency-maps" class="level3">
+<h3 data-anchor-id="saliency-maps">Saliency maps</h3>
+<p>Utilizan gradientes para destacar regiones de una imagen asociadas a la salida.</p>
+</section>
+<section id="grad-cam" class="level3">
+<h3 data-anchor-id="grad-cam">Grad-CAM</h3>
+<p>Genera mapas sobre regiones espaciales relevantes de una CNN.</p>
+</section>
+</section>
+<section id="qué-comprobar" class="level2">
+<h2 data-anchor-id="qué-comprobar">Qué comprobar</h2>
+<ul>
+<li>¿El modelo se centra en regiones plausibles?</li>
+<li>¿Las atribuciones son estables ante pequeñas perturbaciones?</li>
+<li>¿Se mantienen en otros centros?</li>
+<li>¿Existen artefactos, texto o bordes que dominen la predicción?</li>
+<li>¿La explicación cambia con el baseline utilizado?</li>
+</ul>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Important</span>Explicación no es validación
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Una explicación visual convincente no sustituye la evaluación cuantitativa, la validación externa ni el análisis de sesgos.</p>
+</div>
+</div>
+</section>
+<section id="comunicación-clínica" class="level2">
+<h2 data-anchor-id="comunicación-clínica">Comunicación clínica</h2>
+<p>Presentar conjuntamente:</p>
+<ul>
+<li>Predicción y probabilidad.</li>
+<li>Incertidumbre.</li>
+<li>Variables o regiones influyentes.</li>
+<li>Limitaciones.</li>
+<li>Población en la que se validó.</li>
 </ul>
 
 

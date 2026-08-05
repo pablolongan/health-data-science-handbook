@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Recetario de código – Health Data Science Handbook</title>
+<title>Proyecto práctico de deep learning – Health Data Science Handbook</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,6 +25,41 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -115,7 +150,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../code-recipes/index.html">Recetario de código</a></li><li class="breadcrumb-item"><a href="../code-recipes/index.html">Introducción</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deep-learning/index.html">Deep learning</a></li><li class="breadcrumb-item"><a href="../deep-learning/deep-learning-project.html">Proyecto práctico</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -490,13 +525,13 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false">
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true">
  <span class="menu-text">Deep learning</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="false" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 ">  
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../deep-learning/index.html" class="sidebar-item-text sidebar-link">
@@ -571,7 +606,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../deep-learning/deep-learning-project.html" class="sidebar-item-text sidebar-link">
+  <a href="../deep-learning/deep-learning-project.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Proyecto práctico</span></a>
   </div>
 </li>
@@ -750,16 +785,16 @@ ul.task-list li input[type="checkbox"] {
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true">
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false">
  <span class="menu-text">Recetario de código</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="true" aria-label="Toggle section">
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
-      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link active">
+  <a href="../code-recipes/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Introducción</span></a>
   </div>
 </li>
@@ -775,16 +810,28 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#contenidos-previstos" id="toc-contenidos-previstos" class="nav-link active" data-scroll-target="#contenidos-previstos">Contenidos previstos</a></li>
+  <li><a href="#objetivo" id="toc-objetivo" class="nav-link active" data-scroll-target="#objetivo">Objetivo</a></li>
+  <li><a href="#definir-la-pregunta" id="toc-definir-la-pregunta" class="nav-link" data-scroll-target="#definir-la-pregunta">1. Definir la pregunta</a></li>
+  <li><a href="#preparar-la-cohorte" id="toc-preparar-la-cohorte" class="nav-link" data-scroll-target="#preparar-la-cohorte">2. Preparar la cohorte</a></li>
+  <li><a href="#crear-particiones" id="toc-crear-particiones" class="nav-link" data-scroll-target="#crear-particiones">3. Crear particiones</a></li>
+  <li><a href="#preprocesamiento" id="toc-preprocesamiento" class="nav-link" data-scroll-target="#preprocesamiento">4. Preprocesamiento</a></li>
+  <li><a href="#baseline" id="toc-baseline" class="nav-link" data-scroll-target="#baseline">5. Baseline</a></li>
+  <li><a href="#red-neuronal" id="toc-red-neuronal" class="nav-link" data-scroll-target="#red-neuronal">6. Red neuronal</a></li>
+  <li><a href="#entrenamiento" id="toc-entrenamiento" class="nav-link" data-scroll-target="#entrenamiento">7. Entrenamiento</a></li>
+  <li><a href="#evaluación" id="toc-evaluación" class="nav-link" data-scroll-target="#evaluación">8. Evaluación</a></li>
+  <li><a href="#interpretación" id="toc-interpretación" class="nav-link" data-scroll-target="#interpretación">9. Interpretación</a></li>
+  <li><a href="#test-final" id="toc-test-final" class="nav-link" data-scroll-target="#test-final">10. Test final</a></li>
+  <li><a href="#documentación" id="toc-documentación" class="nav-link" data-scroll-target="#documentación">11. Documentación</a></li>
+  <li><a href="#entregables" id="toc-entregables" class="nav-link" data-scroll-target="#entregables">Entregables</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../code-recipes/index.html">Recetario de código</a></li><li class="breadcrumb-item"><a href="../code-recipes/index.html">Introducción</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../deep-learning/index.html">Deep learning</a></li><li class="breadcrumb-item"><a href="../deep-learning/deep-learning-project.html">Proyecto práctico</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Recetario de código</h1>
+<h1 class="title">Proyecto práctico de deep learning</h1>
 </div>
 
 
@@ -801,17 +848,135 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Esta sección contiene fragmentos de código reutilizables para tareas frecuentes de análisis y modelado.</p>
-<section id="contenidos-previstos" class="level2">
-<h2 data-anchor-id="contenidos-previstos">Contenidos previstos</h2>
-<p>Esta sección se irá ampliando progresivamente con:</p>
+<section id="objetivo" class="level2">
+<h2 data-anchor-id="objetivo">Objetivo</h2>
+<p>Construir un proyecto reproducible de clasificación binaria con datos clínicos tabulares y una red neuronal densa.</p>
+<p>El mismo esquema puede adaptarse posteriormente a imágenes o series temporales.</p>
+</section>
+<section id="definir-la-pregunta" class="level2">
+<h2 data-anchor-id="definir-la-pregunta">1. Definir la pregunta</h2>
+<p>Ejemplo:</p>
+<blockquote class="blockquote">
+<p>Predecir durante las primeras 24 horas qué pacientes presentarán un evento clínico antes del alta.</p>
+</blockquote>
+<p>Especificar población, tiempo cero, horizonte y acción asociada.</p>
+</section>
+<section id="preparar-la-cohorte" class="level2">
+<h2 data-anchor-id="preparar-la-cohorte">2. Preparar la cohorte</h2>
 <ul>
-<li>Fundamentos teóricos.</li>
-<li>Cuándo utilizar cada técnica.</li>
-<li>Código listo para adaptar.</li>
-<li>Interpretación de resultados.</li>
-<li>Errores frecuentes.</li>
-<li>Consideraciones específicas en datos clínicos.</li>
+<li>Una fila por unidad de análisis.</li>
+<li>Identificador de paciente separado.</li>
+<li>Variables disponibles antes del momento de predicción.</li>
+<li>Resultado definido sin ambigüedad.</li>
+</ul>
+</section>
+<section id="crear-particiones" class="level2">
+<h2 data-anchor-id="crear-particiones">3. Crear particiones</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>patient_ids <span class="op">=</span> df[<span class="st">"patient_id"</span>].drop_duplicates()</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>train_ids, test_ids <span class="op">=</span> train_test_split(</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    patient_ids,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    test_size<span class="op">=</span><span class="fl">0.20</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    random_state<span class="op">=</span><span class="dv">42</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>train_df <span class="op">=</span> df[df[<span class="st">"patient_id"</span>].isin(train_ids)].copy()</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>test_df <span class="op">=</span> df[df[<span class="st">"patient_id"</span>].isin(test_ids)].copy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Cuando existan múltiples filas por paciente, utilizar métodos de partición por grupos.</p>
+</section>
+<section id="preprocesamiento" class="level2">
+<h2 data-anchor-id="preprocesamiento">4. Preprocesamiento</h2>
+<ul>
+<li>Imputar utilizando train.</li>
+<li>Escalar variables numéricas.</li>
+<li>Codificar categorías.</li>
+<li>Guardar el pipeline.</li>
+</ul>
+</section>
+<section id="baseline" class="level2">
+<h2 data-anchor-id="baseline">5. Baseline</h2>
+<p>Entrenar primero una regresión logística o un modelo equivalente.</p>
+</section>
+<section id="red-neuronal" class="level2">
+<h2 data-anchor-id="red-neuronal">6. Red neuronal</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> keras</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> keras <span class="im">import</span> layers</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> keras.Sequential([</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    keras.Input(shape<span class="op">=</span>(X_train.shape[<span class="dv">1</span>],)),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    layers.Dense(<span class="dv">64</span>, activation<span class="op">=</span><span class="st">"relu"</span>),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    layers.Dropout(<span class="fl">0.25</span>),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    layers.Dense(<span class="dv">32</span>, activation<span class="op">=</span><span class="st">"relu"</span>),</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    layers.Dense(<span class="dv">1</span>, activation<span class="op">=</span><span class="st">"sigmoid"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>model.<span class="bu">compile</span>(</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="op">=</span>keras.optimizers.Adam(learning_rate<span class="op">=</span><span class="fl">1e-3</span>),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    loss<span class="op">=</span><span class="st">"binary_crossentropy"</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    metrics<span class="op">=</span>[keras.metrics.AUC(name<span class="op">=</span><span class="st">"roc_auc"</span>)]</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="entrenamiento" class="level2">
+<h2 data-anchor-id="entrenamiento">7. Entrenamiento</h2>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>callbacks <span class="op">=</span> [</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    keras.callbacks.EarlyStopping(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        monitor<span class="op">=</span><span class="st">"val_loss"</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        patience<span class="op">=</span><span class="dv">10</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        restore_best_weights<span class="op">=</span><span class="va">True</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>history <span class="op">=</span> model.fit(</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    X_train,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    y_train,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    validation_data<span class="op">=</span>(X_val, y_val),</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">200</span>,</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    batch_size<span class="op">=</span><span class="dv">32</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    callbacks<span class="op">=</span>callbacks</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="evaluación" class="level2">
+<h2 data-anchor-id="evaluación">8. Evaluación</h2>
+<p>Comparar baseline y red neuronal mediante:</p>
+<ul>
+<li>ROC AUC y PR AUC.</li>
+<li>Sensibilidad y especificidad.</li>
+<li>Calibración.</li>
+<li>Brier score.</li>
+<li>Rendimiento por subgrupos.</li>
+</ul>
+</section>
+<section id="interpretación" class="level2">
+<h2 data-anchor-id="interpretación">9. Interpretación</h2>
+<p>Aplicar un método adecuado y comprobar que el modelo no dependa de variables espurias.</p>
+</section>
+<section id="test-final" class="level2">
+<h2 data-anchor-id="test-final">10. Test final</h2>
+<p>Evaluar el test una única vez después de fijar todo el pipeline.</p>
+</section>
+<section id="documentación" class="level2">
+<h2 data-anchor-id="documentación">11. Documentación</h2>
+<p>Registrar:</p>
+<ul>
+<li>Diagrama de flujo de la cohorte.</li>
+<li>Definición de variables.</li>
+<li>Arquitectura final.</li>
+<li>Hiperparámetros.</li>
+<li>Curvas de entrenamiento.</li>
+<li>Métricas con intervalos de confianza.</li>
+<li>Limitaciones y población de aplicación.</li>
+</ul>
+</section>
+<section id="entregables" class="level2">
+<h2 data-anchor-id="entregables">Entregables</h2>
+<ul>
+<li>Notebook reproducible.</li>
+<li>Pipeline de preprocesamiento.</li>
+<li>Modelo guardado.</li>
+<li>Tabla de resultados.</li>
+<li>Gráficos de calibración y discriminación.</li>
+<li>Ficha del modelo.</li>
 </ul>
 
 
