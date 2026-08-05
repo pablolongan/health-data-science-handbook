@@ -1,0 +1,62 @@
+---
+title: "Interpretabilidad en deep learning"
+---
+
+## Interpretabilidad y explicabilidad
+
+La interpretabilidad busca comprender cómo utiliza el modelo la información para producir una predicción.
+
+En salud puede ayudar a:
+
+- Detectar errores y atajos espurios.
+- Revisar coherencia clínica.
+- Comunicar resultados.
+- Generar hipótesis.
+
+No convierte automáticamente una asociación en una relación causal.
+
+## Métodos habituales
+
+### Importancia por permutación
+
+Mide cuánto empeora el rendimiento al alterar una variable. Debe calcularse sobre datos no usados para entrenar.
+
+### SHAP
+
+Atribuye contribuciones a cada variable respecto a una predicción de referencia. Las variables correlacionadas pueden dificultar la interpretación.
+
+### Integrated gradients
+
+Atribuye la predicción comparando la entrada con una referencia a lo largo de un camino interpolado.
+
+### Saliency maps
+
+Utilizan gradientes para destacar regiones de una imagen asociadas a la salida.
+
+### Grad-CAM
+
+Genera mapas sobre regiones espaciales relevantes de una CNN.
+
+## Qué comprobar
+
+- ¿El modelo se centra en regiones plausibles?
+- ¿Las atribuciones son estables ante pequeñas perturbaciones?
+- ¿Se mantienen en otros centros?
+- ¿Existen artefactos, texto o bordes que dominen la predicción?
+- ¿La explicación cambia con el baseline utilizado?
+
+::: {.callout-important}
+## Explicación no es validación
+
+Una explicación visual convincente no sustituye la evaluación cuantitativa, la validación externa ni el análisis de sesgos.
+:::
+
+## Comunicación clínica
+
+Presentar conjuntamente:
+
+- Predicción y probabilidad.
+- Incertidumbre.
+- Variables o regiones influyentes.
+- Limitaciones.
+- Población en la que se validó.

@@ -1,0 +1,67 @@
+---
+title: "RNN, LSTM y GRU"
+execute:
+  enabled: false
+---
+
+## Datos secuenciales
+
+Las redes recurrentes procesan secuencias manteniendo un estado que resume información previa.
+
+Una secuencia clínica puede representar:
+
+- Mediciones repetidas.
+- ECG o señales fisiológicas.
+- Eventos asistenciales.
+- Tratamientos administrados.
+- Texto tokenizado.
+
+## RNN clásica
+
+Las RNN simples pueden tener dificultades para aprender dependencias largas debido a gradientes que desaparecen o explotan.
+
+## LSTM
+
+Las LSTM incorporan compuertas que controlan qué información se conserva, se actualiza o se descarta.
+
+## GRU
+
+Las GRU simplifican parte de la estructura de las LSTM y suelen requerir menos parámetros.
+
+## Ejemplo LSTM
+
+```python
+import keras
+from keras import layers
+
+model = keras.Sequential([
+    keras.Input(shape=(n_steps, n_features)),
+    layers.Masking(mask_value=0.0),
+    layers.LSTM(64, dropout=0.2),
+    layers.Dense(1, activation="sigmoid")
+])
+```
+
+## Padding y masking
+
+Cuando las secuencias tienen longitudes distintas pueden rellenarse hasta una longitud común. El masking indica qué posiciones no contienen información real.
+
+## Muchos-a-uno y muchos-a-muchos
+
+- **Muchos-a-uno:** una secuencia produce una predicción, por ejemplo mortalidad.
+- **Muchos-a-muchos:** se genera una salida por instante, por ejemplo detección de eventos.
+
+## Preparación clínica
+
+- Definir claramente el tiempo cero.
+- Respetar el orden temporal.
+- Evitar utilizar mediciones posteriores al momento de predicción.
+- Tratar ausencias y frecuencias irregulares.
+- Separar pacientes, no filas.
+
+## Limitaciones
+
+- Entrenamiento secuencial menos paralelizable.
+- Sensibilidad a secuencias muy largas.
+- Difícil interpretación.
+- Riesgo de confundir ausencia de medición con valor normal.

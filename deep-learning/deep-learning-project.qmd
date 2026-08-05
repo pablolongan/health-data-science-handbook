@@ -1,0 +1,136 @@
+---
+title: "Proyecto práctico de deep learning"
+execute:
+  enabled: false
+---
+
+## Objetivo
+
+Construir un proyecto reproducible de clasificación binaria con datos clínicos tabulares y una red neuronal densa.
+
+El mismo esquema puede adaptarse posteriormente a imágenes o series temporales.
+
+## 1. Definir la pregunta
+
+Ejemplo:
+
+> Predecir durante las primeras 24 horas qué pacientes presentarán un evento clínico antes del alta.
+
+Especificar población, tiempo cero, horizonte y acción asociada.
+
+## 2. Preparar la cohorte
+
+- Una fila por unidad de análisis.
+- Identificador de paciente separado.
+- Variables disponibles antes del momento de predicción.
+- Resultado definido sin ambigüedad.
+
+## 3. Crear particiones
+
+```python
+from sklearn.model_selection import train_test_split
+
+patient_ids = df["patient_id"].drop_duplicates()
+train_ids, test_ids = train_test_split(
+    patient_ids,
+    test_size=0.20,
+    random_state=42
+)
+
+train_df = df[df["patient_id"].isin(train_ids)].copy()
+test_df = df[df["patient_id"].isin(test_ids)].copy()
+```
+
+Cuando existan múltiples filas por paciente, utilizar métodos de partición por grupos.
+
+## 4. Preprocesamiento
+
+- Imputar utilizando train.
+- Escalar variables numéricas.
+- Codificar categorías.
+- Guardar el pipeline.
+
+## 5. Baseline
+
+Entrenar primero una regresión logística o un modelo equivalente.
+
+## 6. Red neuronal
+
+```python
+import keras
+from keras import layers
+
+model = keras.Sequential([
+    keras.Input(shape=(X_train.shape[1],)),
+    layers.Dense(64, activation="relu"),
+    layers.Dropout(0.25),
+    layers.Dense(32, activation="relu"),
+    layers.Dense(1, activation="sigmoid")
+])
+
+model.compile(
+    optimizer=keras.optimizers.Adam(learning_rate=1e-3),
+    loss="binary_crossentropy",
+    metrics=[keras.metrics.AUC(name="roc_auc")]
+)
+```
+
+## 7. Entrenamiento
+
+```python
+callbacks = [
+    keras.callbacks.EarlyStopping(
+        monitor="val_loss",
+        patience=10,
+        restore_best_weights=True
+    )
+]
+
+history = model.fit(
+    X_train,
+    y_train,
+    validation_data=(X_val, y_val),
+    epochs=200,
+    batch_size=32,
+    callbacks=callbacks
+)
+```
+
+## 8. Evaluación
+
+Comparar baseline y red neuronal mediante:
+
+- ROC AUC y PR AUC.
+- Sensibilidad y especificidad.
+- Calibración.
+- Brier score.
+- Rendimiento por subgrupos.
+
+## 9. Interpretación
+
+Aplicar un método adecuado y comprobar que el modelo no dependa de variables espurias.
+
+## 10. Test final
+
+Evaluar el test una única vez después de fijar todo el pipeline.
+
+## 11. Documentación
+
+Registrar:
+
+- Diagrama de flujo de la cohorte.
+- Definición de variables.
+- Arquitectura final.
+- Hiperparámetros.
+- Curvas de entrenamiento.
+- Métricas con intervalos de confianza.
+- Limitaciones y población de aplicación.
+
+## Entregables
+
+- Notebook reproducible.
+- Pipeline de preprocesamiento.
+- Modelo guardado.
+- Tabla de resultados.
+- Gráficos de calibración y discriminación.
+- Ficha del modelo.

@@ -1,0 +1,64 @@
+---
+title: "Evaluación y validación"
+---
+
+## Particiones
+
+- **Train:** ajuste de pesos.
+- **Validation:** selección de arquitectura e hiperparámetros.
+- **Test:** estimación final del rendimiento.
+
+En salud, la partición debe realizarse normalmente por paciente y respetar la estructura temporal y multicéntrica.
+
+## Clasificación
+
+Métricas útiles:
+
+- Sensibilidad y especificidad.
+- Precision y recall.
+- F1-score.
+- ROC AUC.
+- PR AUC.
+- Brier score.
+- Curvas de calibración.
+
+## Regresión
+
+- MAE.
+- RMSE.
+- R².
+- Error por subgrupos.
+- Calibración entre valores observados y predichos.
+
+## Desbalanceo
+
+La accuracy puede ser engañosa cuando el evento es infrecuente. Conviene revisar PR AUC, sensibilidad a umbrales clínicamente relevantes y matrices de confusión.
+
+## Selección del umbral
+
+El umbral no debe elegirse automáticamente como 0,5. Debe relacionarse con:
+
+- Coste de falsos positivos.
+- Coste de falsos negativos.
+- Capacidad asistencial.
+- Objetivo clínico.
+
+## Validación externa
+
+Evalúa el modelo en otro centro, periodo o población. Permite detectar pérdida de rendimiento por cambios de distribución.
+
+## Incertidumbre
+
+Siempre que sea posible, presentar intervalos de confianza mediante procedimientos adecuados, por ejemplo bootstrap por paciente.
+
+## Checklist
+
+- [ ] Partición por paciente.
+- [ ] Ausencia de leakage temporal.
+- [ ] Baseline definido.
+- [ ] Métricas alineadas con el problema.
+- [ ] Calibración evaluada.
+- [ ] Subgrupos clínicos revisados.
+- [ ] Validación externa considerada.
+- [ ] Umbral justificado.
+- [ ] Modelo y preprocesamiento versionados.

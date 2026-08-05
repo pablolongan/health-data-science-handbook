@@ -1,0 +1,82 @@
+---
+title: "Regularización y prevención del sobreajuste"
+execute:
+  enabled: false
+---
+
+## Sobreajuste
+
+Existe sobreajuste cuando el modelo aprende patrones específicos del entrenamiento que no se reproducen en datos nuevos.
+
+Se sospecha cuando la pérdida de entrenamiento sigue mejorando mientras la de validación empeora.
+
+## Early stopping
+
+```python
+import keras
+
+callbacks = [
+    keras.callbacks.EarlyStopping(
+        monitor="val_loss",
+        patience=10,
+        restore_best_weights=True
+    )
+]
+```
+
+## Dropout
+
+Durante el entrenamiento, dropout desactiva aleatoriamente una proporción de unidades.
+
+```python
+model = keras.Sequential([
+    keras.Input(shape=(n_features,)),
+    keras.layers.Dense(64, activation="relu"),
+    keras.layers.Dropout(0.30),
+    keras.layers.Dense(32, activation="relu"),
+    keras.layers.Dense(1, activation="sigmoid")
+])
+```
+
+## Regularización L2
+
+```python
+keras.layers.Dense(
+    64,
+    activation="relu",
+    kernel_regularizer=keras.regularizers.l2(1e-4)
+)
+```
+
+## Batch normalization
+
+Normaliza activaciones dentro de la red. Puede estabilizar el entrenamiento, aunque no sustituye una validación adecuada.
+
+## Data augmentation
+
+En imágenes puede generar transformaciones plausibles durante el entrenamiento. Deben preservar el significado clínico.
+
+Ejemplos potenciales:
+
+- Rotaciones pequeñas.
+- Traslaciones.
+- Recortes.
+- Cambios moderados de contraste.
+
+No todas las transformaciones son clínicamente válidas.
+
+## Reducir complejidad
+
+- Menos capas.
+- Menos neuronas.
+- Menor resolución de entrada.
+- Menos parámetros entrenables.
+
+## Estrategia recomendada
+
+1. Crear un baseline pequeño.
+2. Revisar curvas de aprendizaje.
+3. Aplicar early stopping.
+4. Añadir regularización solo cuando sea necesaria.
+5. Comparar en validación.
+6. Evaluar una única vez en test.

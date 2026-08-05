@@ -1,0 +1,71 @@
+---
+title: "Autoencoders"
+execute:
+  enabled: false
+---
+
+## Idea general
+
+Un autoencoder aprende a reconstruir la entrada después de comprimirla en una representación latente.
+
+```text
+Entrada → Encoder → Espacio latente → Decoder → Reconstrucción
+```
+
+## Objetivo
+
+Minimizar la diferencia entre la entrada $x$ y su reconstrucción $\hat{x}$:
+
+$$
+\mathcal{L}(x,\hat{x})
+$$
+
+## Ejemplo básico
+
+```python
+import keras
+from keras import layers
+
+inputs = keras.Input(shape=(n_features,))
+x = layers.Dense(64, activation="relu")(inputs)
+latent = layers.Dense(16, activation="relu", name="latent")(x)
+x = layers.Dense(64, activation="relu")(latent)
+outputs = layers.Dense(n_features)(x)
+
+autoencoder = keras.Model(inputs, outputs)
+autoencoder.compile(optimizer="adam", loss="mse")
+```
+
+## Usos
+
+- Reducción de dimensionalidad no lineal.
+- Eliminación de ruido.
+- Aprendizaje de representaciones.
+- Detección de anomalías.
+- Preentrenamiento.
+
+## Detección de anomalías
+
+Una estrategia consiste en entrenar con observaciones consideradas normales y utilizar el error de reconstrucción como puntuación de anomalía.
+
+::: {.callout-warning}
+## Precaución
+
+Un error de reconstrucción elevado no demuestra que exista una anomalía clínica. El umbral debe validarse y puede verse afectado por cambios de centro, dispositivo o población.
+:::
+
+## Variantes
+
+- Denoising autoencoder.
+- Sparse autoencoder.
+- Convolutional autoencoder.
+- Variational autoencoder.
+
+## Evaluación
+
+Además del error de reconstrucción, conviene evaluar:
+
+- Separación entre casos normales y anómalos.
+- Estabilidad del espacio latente.
+- Utilidad para tareas posteriores.
+- Robustez frente a cambios de distribución.

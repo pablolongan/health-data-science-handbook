@@ -1,0 +1,83 @@
+---
+title: "Perceptrón y redes densas"
+execute:
+  enabled: false
+---
+
+## Perceptrón
+
+El perceptrón es una unidad lineal seguida de una función de activación. Por sí solo solo puede separar clases linealmente separables.
+
+Una **multilayer perceptron** (MLP) combina varias capas densas y permite modelar relaciones no lineales.
+
+## Arquitectura básica
+
+```python
+import keras
+from keras import layers
+
+model = keras.Sequential([
+    keras.Input(shape=(n_features,)),
+    layers.Dense(64, activation="relu"),
+    layers.Dense(32, activation="relu"),
+    layers.Dense(1, activation="sigmoid")
+])
+```
+
+## Compilación
+
+```python
+model.compile(
+    optimizer=keras.optimizers.Adam(learning_rate=1e-3),
+    loss="binary_crossentropy",
+    metrics=[
+        keras.metrics.AUC(name="roc_auc"),
+        keras.metrics.Precision(name="precision"),
+        keras.metrics.Recall(name="recall")
+    ]
+)
+```
+
+## Entrenamiento
+
+```python
+history = model.fit(
+    X_train,
+    y_train,
+    validation_data=(X_val, y_val),
+    epochs=100,
+    batch_size=32,
+    verbose=1
+)
+```
+
+## Decisiones de arquitectura
+
+### Número de capas
+
+Empieza con una arquitectura pequeña. Aumenta la complejidad solo cuando las curvas de aprendizaje indiquen infraajuste.
+
+### Número de neuronas
+
+No existe una regla universal. Valores como 32, 64 o 128 son puntos de partida, no estándares clínicos.
+
+### Activación
+
+ReLU es una opción habitual en capas ocultas. La capa de salida depende del problema.
+
+## Datos tabulares
+
+En datos clínicos tabulares:
+
+- Compara con regresión logística y gradient boosting.
+- Trata ausentes y categorías dentro de un pipeline reproducible.
+- Ajusta el preprocesamiento solo con train.
+- No presupongas que una MLP superará a modelos basados en árboles.
+
+## Errores frecuentes
+
+- Usar la muestra de test para elegir arquitectura.
+- No escalar variables con magnitudes muy diferentes.
+- Crear una red demasiado grande para la muestra disponible.
+- Evaluar solo accuracy en clases desbalanceadas.
+- Mezclar episodios del mismo paciente entre particiones.

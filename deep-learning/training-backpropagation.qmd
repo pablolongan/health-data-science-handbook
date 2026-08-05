@@ -1,0 +1,79 @@
+---
+title: "Entrenamiento y backpropagation"
+execute:
+  enabled: false
+---
+
+## Objetivo del entrenamiento
+
+El entrenamiento busca los parámetros $\theta$ que minimizan una función de pérdida:
+
+$$
+\theta^*=\arg\min_{\theta}\mathcal{L}(y,\hat{y})
+$$
+
+## Forward pass
+
+Los datos atraviesan la red desde la entrada hasta la salida. Se obtiene una predicción y se calcula la pérdida.
+
+## Backpropagation
+
+Backpropagation aplica la regla de la cadena para calcular cómo cambia la pérdida respecto a cada parámetro:
+
+$$
+\frac{\partial \mathcal{L}}{\partial w}
+$$
+
+El optimizador utiliza esos gradientes para actualizar los pesos.
+
+## Gradient descent
+
+Una actualización simplificada es:
+
+$$
+w_{t+1}=w_t-\eta\frac{\partial\mathcal{L}}{\partial w_t}
+$$
+
+Donde $\eta$ es el **learning rate**.
+
+## Hiperparámetros principales
+
+- **Learning rate:** tamaño del paso de actualización.
+- **Batch size:** número de observaciones por actualización.
+- **Epochs:** pasadas completas por el conjunto de entrenamiento.
+- **Optimizador:** estrategia de actualización.
+
+## Learning rate
+
+- Demasiado alto: entrenamiento inestable o divergente.
+- Demasiado bajo: convergencia muy lenta o estancamiento.
+
+## Mini-batches
+
+El entrenamiento por mini-batches permite estimar el gradiente con subconjuntos de datos y aprovechar mejor la computación vectorizada.
+
+## Curvas de aprendizaje
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+history_df = pd.DataFrame(history.history)
+history_df[["loss", "val_loss"]].plot()
+plt.xlabel("Epoch")
+plt.ylabel("Loss")
+plt.show()
+```
+
+## Interpretación
+
+- Train y validation mejoran: el aprendizaje progresa.
+- Train mejora y validation empeora: probable sobreajuste.
+- Ambas pérdidas permanecen altas: posible infraajuste.
+- Oscilaciones fuertes: revisar learning rate, batch size o calidad de datos.
+
+::: {.callout-warning}
+## Validación
+
+Las decisiones sobre epochs, arquitectura y learning rate deben basarse en validación, nunca en test.
+:::

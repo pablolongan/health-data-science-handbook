@@ -1,0 +1,72 @@
+---
+title: "Redes neuronales convolucionales"
+execute:
+  enabled: false
+---
+
+## Idea general
+
+Las CNN están diseñadas para datos con estructura espacial, especialmente imágenes. Utilizan filtros compartidos para detectar patrones locales.
+
+## Convolución
+
+Un filtro se desplaza sobre la imagen y genera un mapa de características. Las primeras capas suelen detectar patrones simples; las posteriores combinan esos patrones en representaciones más complejas.
+
+## Componentes
+
+- **Conv2D:** extrae características locales.
+- **Pooling:** reduce la resolución espacial.
+- **Flatten o GlobalAveragePooling:** transforma mapas en una representación final.
+- **Dense:** produce la predicción.
+
+## Ejemplo básico
+
+```python
+import keras
+from keras import layers
+
+model = keras.Sequential([
+    keras.Input(shape=(224, 224, 3)),
+    layers.Rescaling(1.0 / 255),
+    layers.Conv2D(32, 3, activation="relu"),
+    layers.MaxPooling2D(),
+    layers.Conv2D(64, 3, activation="relu"),
+    layers.MaxPooling2D(),
+    layers.Conv2D(128, 3, activation="relu"),
+    layers.GlobalAveragePooling2D(),
+    layers.Dense(1, activation="sigmoid")
+])
+```
+
+## Transfer learning
+
+Permite reutilizar una red preentrenada como extractor de características.
+
+Flujo habitual:
+
+1. Cargar un backbone preentrenado.
+2. Congelar inicialmente sus pesos.
+3. Entrenar una nueva cabeza de clasificación.
+4. Realizar fine-tuning de algunas capas con learning rate bajo.
+
+## Aplicaciones clínicas
+
+- Clasificación de radiografías.
+- Segmentación de órganos o lesiones.
+- Análisis histopatológico.
+- Dermatología.
+- Ecografía y resonancia.
+
+## Riesgos específicos
+
+- Aprender marcas, textos o artefactos del dispositivo.
+- Duplicar imágenes del mismo paciente entre particiones.
+- Diferencias de adquisición entre centros.
+- Etiquetas clínicas imperfectas.
+- Atajos espurios no relacionados con la enfermedad.
+
+::: {.callout-important}
+## Partición por paciente
+
+Todas las imágenes de un mismo paciente deben permanecer en una única partición para evitar leakage.
+:::

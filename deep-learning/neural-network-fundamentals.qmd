@@ -1,0 +1,82 @@
+---
+title: "Fundamentos de redes neuronales"
+---
+
+## Idea general
+
+Una red neuronal transforma unas variables de entrada en una predicción mediante capas sucesivas. Cada capa aplica una transformación lineal y, normalmente, una función de activación no lineal.
+
+Para una neurona:
+
+$$
+z = \sum_{j=1}^{p} w_jx_j + b
+$$
+
+$$
+a = g(z)
+$$
+
+Donde $x_j$ son las entradas, $w_j$ los pesos, $b$ el sesgo y $g$ la función de activación.
+
+## Componentes
+
+- **Capa de entrada:** recibe las variables.
+- **Capas ocultas:** aprenden representaciones intermedias.
+- **Capa de salida:** genera la predicción.
+- **Pesos y sesgos:** parámetros aprendidos.
+- **Función de pérdida:** cuantifica el error.
+- **Optimizador:** actualiza los parámetros.
+
+## Funciones de activación
+
+### ReLU
+
+$$
+\operatorname{ReLU}(z)=\max(0,z)
+$$
+
+Es habitual en capas ocultas porque introduce no linealidad y es sencilla de optimizar.
+
+### Sigmoid
+
+$$
+\sigma(z)=\frac{1}{1+e^{-z}}
+$$
+
+Se usa con frecuencia en la salida de una clasificación binaria.
+
+### Softmax
+
+Convierte un vector de puntuaciones en probabilidades que suman uno y se utiliza en clasificación multiclase.
+
+## Elección de la capa de salida
+
+| Problema | Salida | Activación | Pérdida habitual |
+|---|---:|---|---|
+| Regresión | 1 o más valores | Lineal | MSE o MAE |
+| Clasificación binaria | 1 | Sigmoid | Binary cross-entropy |
+| Multiclase exclusiva | Número de clases | Softmax | Categorical cross-entropy |
+| Multietiqueta | Número de etiquetas | Sigmoid | Binary cross-entropy |
+
+## Capacidad del modelo
+
+Una red con más capas o neuronas puede representar relaciones más complejas, pero también aumenta:
+
+- El riesgo de sobreajuste.
+- El coste computacional.
+- La dificultad de interpretación.
+- La necesidad de datos.
+
+::: {.callout-important}
+## Idea clave
+
+Más profundidad no garantiza mejor rendimiento. La arquitectura debe justificarse y compararse con alternativas más simples.
+:::
+
+## Comprobaciones prácticas
+
+- Verificar la forma de las entradas y salidas.
+- Escalar las variables numéricas cuando corresponda.
+- Codificar correctamente las variables categóricas.
+- Elegir una pérdida coherente con el objetivo.
+- Revisar que las probabilidades y etiquetas tengan formatos compatibles.

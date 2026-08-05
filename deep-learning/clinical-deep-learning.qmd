@@ -1,0 +1,72 @@
+---
+title: "Deep learning aplicado a datos clínicos"
+---
+
+## Tipos de datos
+
+### Datos tabulares
+
+Analíticas, diagnósticos, antecedentes y tratamientos. Una red densa puede utilizarse, pero debe compararse con modelos tabulares más sencillos.
+
+### Imágenes
+
+Radiología, dermatología, anatomía patológica y ecografía. Requieren control estricto de calidad, procedencia y partición por paciente.
+
+### Señales
+
+ECG, EEG, pulsioximetría y monitorización continua. Pueden modelarse con CNN 1D, RNN o transformers.
+
+### Texto clínico
+
+Informes, evolutivos y antecedentes. Requiere protección de datos, evaluación de sesgos y control de información temporal.
+
+### Datos longitudinales
+
+Secuencias de visitas, tratamientos y resultados. Debe definirse con precisión qué información estaba disponible en el momento de la predicción.
+
+## Pregunta clínica
+
+Antes de entrenar, definir:
+
+- Población objetivo.
+- Momento de predicción.
+- Resultado a predecir.
+- Horizonte temporal.
+- Acción clínica asociada.
+
+## Leakage clínico
+
+Ejemplos:
+
+- Utilizar una prueba solicitada después de sospechar el diagnóstico.
+- Incluir tratamientos administrados después del evento.
+- Mezclar exploraciones del mismo paciente entre train y test.
+- Imputar utilizando toda la base de datos.
+
+## Sesgos
+
+Evaluar rendimiento por:
+
+- Edad.
+- Sexo.
+- Centro.
+- Dispositivo.
+- Periodo temporal.
+- Grupos diagnósticos.
+
+## Reproducibilidad
+
+Documentar:
+
+- Cohorte y criterios de inclusión.
+- Diccionario de variables.
+- Preprocesamiento.
+- Arquitectura.
+- Hiperparámetros.
+- Semillas.
+- Hardware y tiempo de entrenamiento.
+- Versión del modelo final.
+
+## De predicción a utilidad
+
+Un modelo clínico debe integrarse en un flujo asistencial. Es necesario evaluar impacto, aceptabilidad, seguridad y mantenimiento después del despliegue.
